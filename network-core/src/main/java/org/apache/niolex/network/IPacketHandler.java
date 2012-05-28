@@ -1,7 +1,7 @@
 /**
- * Hello.java
+ * IPacketHandler.java
  *
- * Copyright 2012 Niolex, Inc.
+ * Copyright 2011 Niolex, Inc.
  *
  * Niolex licenses this file to you under the Apache License, version 2.0
  * (the "License"); you may not use this file except in compliance with the
@@ -17,18 +17,24 @@
  */
 package org.apache.niolex.network;
 
+
 /**
- * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
- * @version 1.0.0
- * @Date: 2012-5-27
+ * The Packet Handler Interface.
+ * @author Xie, Jiyun
+ *
  */
-public class HelloTest {
+public interface IPacketHandler {
 
-	/**
-	 * @param args
-	 */
-	public static void main(String[] args) {
-		System.out.println("Hello world!");
-	}
+    /**
+     * Handle the Packet, and write results to IPacketWriter if you want.
+     * @param sc The Packet need Handle
+     * @param wt Write results
+     */
+    public void handleRead(PacketData sc, IPacketWriter wt);
 
+    /**
+     * The remote peer identified by this IPacketWriter is broken.
+     * @param wt
+     */
+    public void handleError(IPacketWriter wt);
 }

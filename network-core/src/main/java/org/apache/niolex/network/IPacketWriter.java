@@ -1,7 +1,7 @@
 /**
- * Hello.java
+ * IPacketWriter.java
  *
- * Copyright 2012 Niolex, Inc.
+ * Copyright 2011 Niolex, Inc.
  *
  * Niolex licenses this file to you under the Apache License, version 2.0
  * (the "License"); you may not use this file except in compliance with the
@@ -18,17 +18,23 @@
 package org.apache.niolex.network;
 
 /**
- * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
- * @version 1.0.0
- * @Date: 2012-5-27
+ * The Packet Writer Interface.
+ * @author Xie, Jiyun
+ *
  */
-public class Hello {
+public interface IPacketWriter {
 
-	/**
-	 * @param args
-	 */
-	public static void main(String[] args) {
-		System.out.println("Hello world!");
-	}
+    /**
+     * The string representation of the remote peer. i.e. The IP address.
+     * @return
+     */
+    public String getRemoteName();
+
+    /**
+     * Write Packet to the remote peer.
+     * You can write as many packets as you want.
+     * @param sc The Packet to write
+     */
+    public void handleWrite(PacketData sc);
 
 }
