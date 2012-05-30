@@ -25,9 +25,6 @@ import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,10 +34,9 @@ import org.slf4j.LoggerFactory;
  * @author Xie, Jiyun
  *
  */
-public class PacketClient implements IPacketWriter {
+public class PacketClient extends BasePacketWriter {
 	private static final Logger LOG = LoggerFactory.getLogger(PacketClient.class);
 
-    private List<PacketData> sendPacketList = Collections.synchronizedList(new LinkedList<PacketData>());
     private InetSocketAddress serverAddress;
     private IPacketHandler packetHandler;
     private Socket socket;

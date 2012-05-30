@@ -45,4 +45,19 @@ public interface IPacketWriter {
      */
     public Collection<PacketData> getRemainPackets();
 
+    /**
+     * Attach some data to this object, please use your unique key, all system internal data key
+     * will start will SYS_, please keep away from them.
+     * @param key
+     * @param value
+     * @return The current stored object
+     */
+    public Object attachData(String key, Object value);
+
+    /**
+     * Get the attached data from this Writer.
+     * @param key
+     * @return
+     */
+    public Object getAttached(String key);
 }

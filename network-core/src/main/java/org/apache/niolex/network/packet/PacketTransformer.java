@@ -36,8 +36,17 @@ import org.apache.niolex.network.PacketData;
  * @Date: 2012-5-30
  */
 public class PacketTransformer {
+	private static PacketTransformer INSTANCE = new PacketTransformer();
 
 	private Map<Short, ISerializer<?>> serMap = new HashMap<Short, ISerializer<?>>();
+
+	/**
+	 * Get the global instance of this class.
+	 * @return
+	 */
+	public static PacketTransformer getInstance() {
+		return INSTANCE;
+	}
 
 	/**
 	 * Add a Serializer to the PacketTransformer.
@@ -45,6 +54,15 @@ public class PacketTransformer {
 	 */
 	public void addSerializer(ISerializer<?> ser) {
 		serMap.put(ser.getCode(), ser);
+	}
+
+	/**
+	 * Whether this code can be handled.
+	 * @param code
+	 * @return
+	 */
+	public boolean canHandle(Short code) {
+		return serMap.containsKey(code);
 	}
 
 	/**

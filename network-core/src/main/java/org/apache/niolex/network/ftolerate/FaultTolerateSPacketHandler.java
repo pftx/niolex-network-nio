@@ -17,8 +17,16 @@
  */
 package org.apache.niolex.network.ftolerate;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.niolex.network.IPacketWriter;
+import org.apache.niolex.network.PacketData;
 import org.apache.niolex.network.handler.SessionPacketHandler;
+import org.apache.niolex.network.packet.PacketTransformer;
+import org.apache.niolex.network.packet.SYSPacketCodeMap;
+import org.apache.niolex.network.packet.StringSerializer;
 
 /**
  * This is the fault tolerate session packet handler.
@@ -29,7 +37,32 @@ import org.apache.niolex.network.handler.SessionPacketHandler;
  * @Date: 2012-5-30
  */
 public class FaultTolerateSPacketHandler extends SessionPacketHandler {
+	private PacketTransformer transformer;
+	private Map<IPacketWriter, String> sessMap = new HashMap<IPacketWriter, String>();
+	private Map<String, Collection<PacketData>> dataMap =
+			new HashMap<String, Collection<PacketData>>();
 
+	public FaultTolerateSPacketHandler() {
+		transformer = PacketTransformer.getInstance();
+		transformer.addSerializer(new StringSerializer(SYSPacketCodeMap.SESSN_REGR));
+	}
+
+	@Override
+    public void handleRead(PacketData sc, IPacketWriter wt) {
+		if (sc.getCode() != SYSPacketCodeMap.SESSN_REGR) {
+			super.handleRead(sc, wt);
+		} else {
+			String ssid = transformer.getDataObject(sc);
+			Collection<PacketData> data = dataMap.get(ssid);
+			if (data != null) {
+				for (PacketData pc : data) {
+					wt.handleWrite(pc);
+				}
+				dataMap.remove(ssid);
+			}
+			sessMap.put(wt, ssid);
+		}
+	}
 
 	@Override
     public void handleError(IPacketWriter wt) {

@@ -26,10 +26,7 @@ import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -100,7 +97,6 @@ public class NioServer implements Runnable {
         isListening = true;
         while (isListening) {
             long startMil = System.nanoTime();
-            // 选择�?��键，其相应的通道已为 I/O 操作准备就绪
             // Setting the timeout for accept method. Avoid can not be shut
             // down since blocking thread when waiting accept.
             selector.select(acceptTimeOut);
@@ -224,20 +220,19 @@ public class NioServer implements Runnable {
      * @author Xie, Jiyun
      *
      */
-    public class ClientHandler implements IPacketWriter {
+    public class ClientHandler extends BasePacketWriter {
 
-        /* 缓冲区大�?*/
+        /* 缓冲区大小*/
         private static final int BLOCK = 4096;
 
-        /* 发�?数据缓冲�?*/
+        /* 发送数据缓冲区*/
         private ByteBuffer sendBuffer = ByteBuffer.allocate(BLOCK);
         private Status sendStatus;
         private PacketData sendPacket;
         private int sendPos;
-        private List<PacketData> sendPacketList = Collections.synchronizedList(new LinkedList<PacketData>());
         private long lastSentTime;
 
-        /* 接收数据缓冲�?*/
+        /* 接收数据缓冲区*/
         private ByteBuffer receiveBuffer = ByteBuffer.allocate(BLOCK);
         private Status receiveStatus;
         private PacketData receivePacket;
@@ -314,12 +309,10 @@ public class NioServer implements Runnable {
         }
 
         @Override
-        public void handleWrite(PacketData sc) {
-            sendPacketList.add(sc);
-        }
-
-        @Override
         public Collection<PacketData> getRemainPackets() {
+        	if (sendStatus != Status.NONE && !client.isConnected()) {
+        		sendPacketList.add(0, sendPacket);
+        	}
         	return sendPacketList;
         }
 
