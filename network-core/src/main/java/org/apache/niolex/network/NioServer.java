@@ -25,6 +25,7 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -315,6 +316,11 @@ public class NioServer implements Runnable {
         @Override
         public void handleWrite(PacketData sc) {
             sendPacketList.add(sc);
+        }
+
+        @Override
+        public Collection<PacketData> getRemainPackets() {
+        	return sendPacketList;
         }
 
         /**

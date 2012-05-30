@@ -1,5 +1,5 @@
 /**
- * IPacketWriter.java
+ * SYSPacketCodeMap.java
  *
  * Copyright 2011 Niolex, Inc.
  *
@@ -15,34 +15,22 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.niolex.network;
-
-import java.util.Collection;
+package org.apache.niolex.network.packet;
 
 /**
- * The Packet Writer Interface.
- * @author Xie, Jiyun
+ * The packet code is a 2-bytes short int. The system will use some this code, according to the following map:
  *
+ * CODE		USAGE
+ * 0		Heart Beat
+ * 1-65500	User Range
+ * 65500-~	System Reserved
+ *
+ * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
+ * @version 1.0.0
+ * @Date: 2012-5-30
  */
-public interface IPacketWriter {
+public interface SYSPacketCodeMap {
+	short HEART_BEAT = 0;
 
-    /**
-     * The string representation of the remote peer. i.e. The IP address.
-     * @return
-     */
-    public String getRemoteName();
-
-    /**
-     * Write Packet to the remote peer.
-     * You can write as many packets as you want.
-     * @param sc The Packet to write
-     */
-    public void handleWrite(PacketData sc);
-
-    /**
-     * Get the remained not sent packets.
-     * @return
-     */
-    public Collection<PacketData> getRemainPackets();
-
+	short SESSN_REGR = (short)65501;
 }

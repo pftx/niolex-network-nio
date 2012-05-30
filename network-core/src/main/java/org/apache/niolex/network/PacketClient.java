@@ -24,6 +24,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -104,6 +105,11 @@ public class PacketClient implements IPacketWriter {
         if (writeThread != null) {
             writeThread.interrupt();
         }
+    }
+
+    @Override
+    public Collection<PacketData> getRemainPackets() {
+    	return sendPacketList;
     }
 
     /**

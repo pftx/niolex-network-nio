@@ -1,5 +1,5 @@
 /**
- * IPacketWriter.java
+ * ISerializer.java
  *
  * Copyright 2011 Niolex, Inc.
  *
@@ -15,34 +15,37 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.niolex.network;
+package org.apache.niolex.network.packet;
 
-import java.util.Collection;
+import org.apache.niolex.network.PacketData;
 
 /**
- * The Packet Writer Interface.
- * @author Xie, Jiyun
+ * Handle the Packet serialization and deserialization.
  *
+ * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
+ * @version 1.0.0
+ * @Date: 2012-5-30
  */
-public interface IPacketWriter {
+public interface ISerializer<T> {
 
-    /**
-     * The string representation of the remote peer. i.e. The IP address.
-     * @return
-     */
-    public String getRemoteName();
+	/**
+	 * Get the code this Serializer is capable of.
+	 * @return
+	 */
+	public short getCode();
 
-    /**
-     * Write Packet to the remote peer.
-     * You can write as many packets as you want.
-     * @param sc The Packet to write
-     */
-    public void handleWrite(PacketData sc);
+	/**
+	 * Translate object to byte array.
+	 * @param o
+	 * @return
+	 */
+	public PacketData obj2Data(short code, Object o);
 
-    /**
-     * Get the remained not sent packets.
-     * @return
-     */
-    public Collection<PacketData> getRemainPackets();
+	/**
+	 * Translate byte array to object.
+	 * @param data
+	 * @return
+	 */
+	public T data2Obj(PacketData sc);
 
 }

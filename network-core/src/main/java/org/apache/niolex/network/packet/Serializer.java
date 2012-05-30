@@ -1,5 +1,5 @@
 /**
- * IPacketWriter.java
+ * Serializer.java
  *
  * Copyright 2011 Niolex, Inc.
  *
@@ -15,34 +15,25 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.niolex.network;
+package org.apache.niolex.network.packet;
 
-import java.util.Collection;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * The Packet Writer Interface.
- * @author Xie, Jiyun
- *
+ * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
+ * @version 1.0.0
+ * @Date: 2012-5-30
  */
-public interface IPacketWriter {
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface Serializer {
 
-    /**
-     * The string representation of the remote peer. i.e. The IP address.
-     * @return
-     */
-    public String getRemoteName();
-
-    /**
-     * Write Packet to the remote peer.
-     * You can write as many packets as you want.
-     * @param sc The Packet to write
-     */
-    public void handleWrite(PacketData sc);
-
-    /**
-     * Get the remained not sent packets.
-     * @return
-     */
-    public Collection<PacketData> getRemainPackets();
-
+	/**
+	 * The Serializer class of this annotated class.
+	 * @return
+	 */
+	Class<?> value();
 }

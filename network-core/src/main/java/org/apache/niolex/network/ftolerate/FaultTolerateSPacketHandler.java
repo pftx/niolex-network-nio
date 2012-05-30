@@ -1,5 +1,5 @@
 /**
- * IPacketWriter.java
+ * FaultTolerateSPacketHandler.java
  *
  * Copyright 2011 Niolex, Inc.
  *
@@ -15,34 +15,25 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.niolex.network;
+package org.apache.niolex.network.ftolerate;
 
-import java.util.Collection;
+import org.apache.niolex.network.IPacketWriter;
+import org.apache.niolex.network.handler.SessionPacketHandler;
 
 /**
- * The Packet Writer Interface.
- * @author Xie, Jiyun
- *
+ * This is the fault tolerate session packet handler.
+ * In this handler, the first connect packet need to be FTSPacket, otherwise it can not handle the
+ * fault toleration.
+ * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
+ * @version 1.0.0
+ * @Date: 2012-5-30
  */
-public interface IPacketWriter {
+public class FaultTolerateSPacketHandler extends SessionPacketHandler {
 
-    /**
-     * The string representation of the remote peer. i.e. The IP address.
-     * @return
-     */
-    public String getRemoteName();
 
-    /**
-     * Write Packet to the remote peer.
-     * You can write as many packets as you want.
-     * @param sc The Packet to write
-     */
-    public void handleWrite(PacketData sc);
+	@Override
+    public void handleError(IPacketWriter wt) {
 
-    /**
-     * Get the remained not sent packets.
-     * @return
-     */
-    public Collection<PacketData> getRemainPackets();
+	}
 
 }
