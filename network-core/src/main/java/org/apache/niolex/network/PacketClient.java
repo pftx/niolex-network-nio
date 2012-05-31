@@ -26,6 +26,7 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.Collection;
 
+import org.apache.niolex.commons.util.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,6 +41,7 @@ public class PacketClient extends BasePacketWriter {
     private InetSocketAddress serverAddress;
     private IPacketHandler packetHandler;
     private Socket socket;
+    private PacketData sendPacket;
     private Thread writeThread;
     private boolean isWorking;
 
@@ -105,7 +107,11 @@ public class PacketClient extends BasePacketWriter {
 
     @Override
     public Collection<PacketData> getRemainPackets() {
-    	return sendPacketList;
+    	if (sendPacket != null) {
+    		return CollectionUtils.concat(sendPacket.makeCopy(), this.sendPacketList);
+    	} else {
+    		return sendPacketList;
+    	}
     }
 
     /**
@@ -194,7 +200,7 @@ public class PacketClient extends BasePacketWriter {
          * @throws IOException
          */
         public void sendNewPacket() throws IOException {
-            PacketData sendPacket = sendPacketList.get(0);
+            sendPacket = sendPacketList.get(0);
             sendPacketList.remove(0);
             sendPacket.generateData(out);
         }

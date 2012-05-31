@@ -56,7 +56,7 @@ public class DemoClient {
         while (true) {
             System.out.print("Please enter a Packet code(-1 for exit): ");
             short code = sc.nextShort();
-            if (code < 0) {
+            if (code == -1) {
                 break;
             }
             PacketData pk = new PacketData();

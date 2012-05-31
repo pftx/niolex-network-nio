@@ -65,8 +65,7 @@ public class StringSerializerTest {
 	@Test
 	public void testSerObj() {
 		String q = "iolex.network.packet.StringSerializer#serObj(java.l";
-		byte[] arr = stringSerializer.serObj(q);
-		PacketData sc = stringSerializer.obj2Data((short)4, arr);
+		PacketData sc = stringSerializer.obj2Data((short)4, q);
 		String s = stringSerializer.data2Obj(sc);
 		assertEquals(q, s);
 	}

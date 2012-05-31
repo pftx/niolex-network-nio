@@ -22,6 +22,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -29,6 +30,7 @@ import static org.mockito.Mockito.when;
 import org.apache.niolex.network.IPacketHandler;
 import org.apache.niolex.network.IPacketWriter;
 import org.apache.niolex.network.PacketData;
+import org.apache.niolex.network.TBasePacketWriter;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -55,9 +57,9 @@ public class SessionPacketHandlerTest {
 	public void testHandleError() {
 		PacketData sc = mock(PacketData.class);
 		when(sc.getCode()).thenReturn((short)3, (short)3, (short)4);
-		IPacketWriter ip = mock(IPacketWriter.class);
-		IPacketWriter wt = mock(IPacketWriter.class);
-		IPacketWriter qt = mock(IPacketWriter.class);
+		IPacketWriter ip = spy(new TBasePacketWriter());
+		IPacketWriter wt = spy(new TBasePacketWriter());
+		IPacketWriter qt = spy(new TBasePacketWriter());
 		sessionPacketHandler.handleRead(sc, wt);
 		sessionPacketHandler.handleRead(sc, ip);
 		sessionPacketHandler.handleRead(sc, wt);
@@ -72,9 +74,9 @@ public class SessionPacketHandlerTest {
 	public void testHandleRead() {
 		PacketData sc = mock(PacketData.class);
 		when(sc.getCode()).thenReturn((short)3, (short)3, (short)4);
-		IPacketWriter ip = mock(IPacketWriter.class);
-		IPacketWriter wt = mock(IPacketWriter.class);
-		IPacketWriter qt = mock(IPacketWriter.class);
+		IPacketWriter ip = spy(new TBasePacketWriter());
+		IPacketWriter wt = spy(new TBasePacketWriter());
+		IPacketWriter qt = spy(new TBasePacketWriter());
 		sessionPacketHandler.handleRead(sc, wt);
 		sessionPacketHandler.handleRead(sc, qt);
 		sessionPacketHandler.handleRead(sc, ip);

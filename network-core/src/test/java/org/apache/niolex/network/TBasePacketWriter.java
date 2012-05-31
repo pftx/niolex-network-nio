@@ -1,5 +1,5 @@
 /**
- * BasePacketWriterTest.java
+ * TBasePacketWriter.java
  *
  * Copyright 2012 Niolex, Inc.
  *
@@ -17,39 +17,36 @@
  */
 package org.apache.niolex.network;
 
-import static org.junit.Assert.assertEquals;
-
-import org.junit.Before;
-import org.junit.Test;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
- * @Date: 2012-5-30
+ * @Date: 2012-5-31
  */
-public class BasePacketWriterTest {
-	BasePacketWriter bpw;
+public class TBasePacketWriter extends BasePacketWriter {
 
-	@Before
-	public void setup() {
-		bpw = new TBasePacketWriter ();
+	/**
+	 * Override super method
+	 * @see org.apache.niolex.network.IPacketWriter#getRemoteName()
+	 */
+	@Override
+	public String getRemoteName() {
+		return "Mock";
 	}
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.BasePacketWriter#handleWrite(org.apache.niolex.network.PacketData)}.
+	 * Override super method
+	 * @see org.apache.niolex.network.IPacketWriter#getRemainPackets()
 	 */
-	@Test
-	public void testHandleWrite() {
-		bpw.handleWrite(null);
-	}
-
-	/**
-	 * Test method for {@link org.apache.niolex.network.BasePacketWriter#attachData(java.lang.String, java.lang.Object)}.
-	 */
-	@Test
-	public void testAttachData() {
-		bpw.attachData("IDIJF", "Not yet implemented");
-		assertEquals("Not yet implemented", bpw.getAttached("IDIJF"));
+	@Override
+	public Collection<PacketData> getRemainPackets() {
+		List<PacketData> dest = new ArrayList<PacketData>();
+		Collections.copy(dest, this.sendPacketList);
+		return dest;
 	}
 
 }

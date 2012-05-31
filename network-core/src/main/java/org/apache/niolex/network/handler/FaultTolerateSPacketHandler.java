@@ -26,6 +26,8 @@ import org.apache.niolex.network.IPacketWriter;
 import org.apache.niolex.network.PacketData;
 import org.apache.niolex.network.packet.PacketTransformer;
 import org.apache.niolex.network.packet.StringSerializer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This is the fault tolerate session packet handler.
@@ -36,15 +38,34 @@ import org.apache.niolex.network.packet.StringSerializer;
  * @Date: 2012-5-30
  */
 public class FaultTolerateSPacketHandler extends SessionPacketHandler {
+	private static final Logger LOG = LoggerFactory.getLogger(FaultTolerateSPacketHandler.class);
+
 	private static final String KEY = Config.ATTACH_KEY_SESS_SESSID;
-	private PacketTransformer transformer;
 	private Map<String, Collection<PacketData>> dataMap =
 			new LRUHashMap<String, Collection<PacketData>>(Config.SERVER_FAULT_TOLERATE_SIZE);
 
+	private PacketTransformer transformer;
+
+	/**
+	 * Decode Session ID with StringSerializer.
+	 */
 	public FaultTolerateSPacketHandler() {
 		transformer = PacketTransformer.getInstance();
 		transformer.addSerializer(new StringSerializer(Config.CODE_SESSN_REGR));
 	}
+
+	/**
+	 * Implements super constructor.
+	 *
+	 * @param factory
+	 */
+	public FaultTolerateSPacketHandler(IHandlerFactory factory) {
+		super(factory);
+		transformer = PacketTransformer.getInstance();
+		transformer.addSerializer(new StringSerializer(Config.CODE_SESSN_REGR));
+	}
+
+
 
 	@Override
     public void handleRead(PacketData sc, IPacketWriter wt) {
@@ -57,6 +78,7 @@ public class FaultTolerateSPacketHandler extends SessionPacketHandler {
 				for (PacketData pc : data) {
 					wt.handleWrite(pc);
 				}
+				LOG.info("Data recoverd for client [{}] list size {}.", ssid, data.size());
 				dataMap.remove(ssid);
 			}
 			wt.attachData(KEY, ssid);
@@ -65,9 +87,12 @@ public class FaultTolerateSPacketHandler extends SessionPacketHandler {
 
 	@Override
     public void handleError(IPacketWriter wt) {
+		super.handleError(wt);
 		String ssid = wt.getAttached(KEY);
+		Collection<PacketData> els = wt.getRemainPackets();
 		if (ssid != null) {
-			dataMap.put(ssid, wt.getRemainPackets());
+			dataMap.put(ssid, els);
+			LOG.info("Fault tolerate for client [{}] remain size {}.", ssid, els.size());
 		}
 	}
 

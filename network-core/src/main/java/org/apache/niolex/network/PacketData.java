@@ -67,6 +67,11 @@ public class PacketData extends Packet {
         this.dataPos = 0;
     }
 
+    public PacketData makeCopy() {
+    	PacketData other = new PacketData(this.code, this.data);
+    	return other;
+    }
+
 
     /**
      * Generate Data from this Packet into the ByteBuffer.

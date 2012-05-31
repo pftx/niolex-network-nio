@@ -30,6 +30,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.niolex.commons.util.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -310,10 +311,11 @@ public class NioServer implements Runnable {
 
         @Override
         public Collection<PacketData> getRemainPackets() {
-        	if (sendStatus != Status.NONE && !client.isConnected()) {
-        		sendPacketList.add(0, sendPacket);
+        	if (sendPacket != null) {
+        		return CollectionUtils.concat(sendPacket.makeCopy(), this.sendPacketList);
+        	} else {
+        		return sendPacketList;
         	}
-        	return sendPacketList;
         }
 
         /**
