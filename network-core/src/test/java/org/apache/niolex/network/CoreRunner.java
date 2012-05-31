@@ -1,5 +1,5 @@
 /**
- * BasePacketWriter.java
+ * CoreRunner.java
  *
  * Copyright 2012 Niolex, Inc.
  *
@@ -17,38 +17,42 @@
  */
 package org.apache.niolex.network;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import org.apache.niolex.network.handler.EchoPacketHandler;
 
 /**
- * The base BasePacketWriter, handle attach and PacketData storage.
- *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
  * @Date: 2012-5-30
  */
-public abstract class BasePacketWriter implements IPacketWriter {
+public class CoreRunner {
 
-	protected Map<String, Object> attachMap = new HashMap<String, Object>();
-    protected List<PacketData> sendPacketList = Collections.synchronizedList(new LinkedList<PacketData>());
+	public static NioServer nioServer;
+	public static Thread thread;
+	public static boolean isOn;
 
-	@Override
-	public void handleWrite(PacketData sc) {
-		sendPacketList.add(sc);
+	public static void createServer() throws Exception {
+		if (isOn) {
+			return;
+		}
+		nioServer = new NioServer();
+		nioServer.setPacketHandler(new EchoPacketHandler());
+		nioServer.setPort(8809);
+		nioServer.start();
+		thread = new Thread(nioServer);
+		thread.start();
+		isOn = true;
 	}
 
-	@Override
-	public Object attachData(String key, Object value) {
-		return attachMap.put(key, value);
+	public static void shutdown() throws Exception {
+		nioServer.stop();
+		thread.join();
+		isOn = false;
 	}
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public <T> T getAttached(String key) {
-		return (T)attachMap.get(key);
+	public static void main(String[] args) {
+		String c = null;
+		Object a = c;
+		Integer b = (Integer)a;
+		System.out.println(b);
 	}
-
 }

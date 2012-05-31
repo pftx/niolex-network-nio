@@ -223,7 +223,7 @@ public class NioServer implements Runnable {
     public class ClientHandler extends BasePacketWriter {
 
         /* 缓冲区大小*/
-        private static final int BLOCK = 4096;
+        private static final int BLOCK = Config.SERVER_NIO_BUFFER_SIZE;
 
         /* 发送数据缓冲区*/
         private ByteBuffer sendBuffer = ByteBuffer.allocate(BLOCK);

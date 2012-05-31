@@ -171,7 +171,7 @@ public class PacketDataTest {
 		while (i-- > 0) {
 			if (received.size() == 24)
 				break;
-			Thread.sleep(3000);
+			Thread.sleep(1000);
 		}
 		packetClient1.stop();
 		packetClient2.stop();

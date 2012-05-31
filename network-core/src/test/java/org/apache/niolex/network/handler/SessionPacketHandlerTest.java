@@ -61,13 +61,11 @@ public class SessionPacketHandlerTest {
 		sessionPacketHandler.handleRead(sc, wt);
 		sessionPacketHandler.handleRead(sc, ip);
 		sessionPacketHandler.handleRead(sc, wt);
-		assertEquals(2, sessionPacketHandler.getHandlerSize());
 		sessionPacketHandler.handleError(wt);
 		sessionPacketHandler.handleError(qt);
 		verify(pHandler1, times(1)).handleError(wt);
 		verify(pHandler1, never()).handleError(qt);
 		verify(pHandler1, never()).handleError(ip);
-		assertEquals(1, sessionPacketHandler.getHandlerSize());
 	}
 
 	@Test
@@ -89,7 +87,6 @@ public class SessionPacketHandlerTest {
 		PacketData qc = mock(PacketData.class);
 		sessionPacketHandler.handleRead(qc, qt);
 		sessionPacketHandler.handleRead(qc, ip);
-		assertEquals(3, sessionPacketHandler.getHandlerSize());
 		verify(factory, times(3)).createHandler(any(IPacketWriter.class));
 		verify(pHandler1, times(9)).handleRead(eq(sc), any(IPacketWriter.class));
 		verify(pHandler1, times(2)).handleRead(eq(qc), any(IPacketWriter.class));

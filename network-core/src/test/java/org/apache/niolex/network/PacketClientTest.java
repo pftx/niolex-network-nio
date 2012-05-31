@@ -199,11 +199,11 @@ public class PacketClientTest {
 			sc.setData(generateRandom(len, r));
 			packetClient.handleWrite(sc);
 		}
-		int i = 8;
+		int i = 25;
 		while (i-- > 0) {
 			if (received == 6)
 				break;
-			Thread.sleep(3000);
+			Thread.sleep(1000);
 		}
 		packetClient.stop();
 		assertEquals(6, received);

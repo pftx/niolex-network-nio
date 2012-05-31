@@ -59,5 +59,5 @@ public interface IPacketWriter {
      * @param key
      * @return
      */
-    public Object getAttached(String key);
+    public <T> T getAttached(String key);
 }

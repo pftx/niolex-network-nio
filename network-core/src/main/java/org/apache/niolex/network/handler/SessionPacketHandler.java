@@ -17,9 +17,7 @@
  */
 package org.apache.niolex.network.handler;
 
-import java.util.HashMap;
-import java.util.Map;
-
+import org.apache.niolex.network.Config;
 import org.apache.niolex.network.IPacketHandler;
 import org.apache.niolex.network.IPacketWriter;
 import org.apache.niolex.network.PacketData;
@@ -35,7 +33,7 @@ import org.slf4j.LoggerFactory;
 public class SessionPacketHandler implements IPacketHandler {
 	private static final Logger LOG = LoggerFactory.getLogger(SessionPacketHandler.class);
 
-    private Map<IPacketWriter, IPacketHandler> handlerMap = new HashMap<IPacketWriter, IPacketHandler>();
+    private static final String KEY = Config.ATTACH_KEY_SESS_HANDLER;
 
     private IHandlerFactory factory;
 
@@ -60,9 +58,8 @@ public class SessionPacketHandler implements IPacketHandler {
      */
     @Override
     public void handleError(IPacketWriter wt) {
-        IPacketHandler h = handlerMap.get(wt);
+        IPacketHandler h = wt.getAttached(KEY);
         if (h != null) {
-            handlerMap.remove(wt);
             h.handleError(wt);
             LOG.info("Session removed for remote: {}", wt.getRemoteName());
         }
@@ -73,10 +70,10 @@ public class SessionPacketHandler implements IPacketHandler {
      */
     @Override
     public void handleRead(PacketData sc, IPacketWriter wt) {
-        IPacketHandler h = handlerMap.get(wt);
+        IPacketHandler h = wt.getAttached(KEY);
         if (h == null) {
             h = factory.createHandler(wt);
-            handlerMap.put(wt, h);
+            wt.attachData(KEY, h);
             LOG.info("Session created for remote: {}", wt.getRemoteName());
         }
         h.handleRead(sc, wt);
@@ -96,11 +93,4 @@ public class SessionPacketHandler implements IPacketHandler {
         this.factory = factory;
     }
 
-    /**
-     * Return the internal handler size, for unit test.
-     * @return
-     */
-    protected int getHandlerSize() {
-    	return handlerMap.size();
-    }
 }
