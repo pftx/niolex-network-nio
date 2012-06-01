@@ -17,14 +17,17 @@
  */
 package org.apache.niolex.network;
 
-import java.util.Iterator;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.lang.reflect.Method;
 
+import org.apache.niolex.commons.reflect.MethodUtil;
+import org.apache.niolex.commons.test.ObjToStringUtil;
 import org.apache.niolex.network.adapter.FaultTolerateAdapter;
+import org.apache.niolex.network.demo.RpcService;
 import org.apache.niolex.network.example.EchoPacketHandler;
 import org.apache.niolex.network.handler.DispatchPacketHandler;
 import org.apache.niolex.network.handler.SessionPacketHandler;
 import org.apache.niolex.network.handler.SummaryPacketHandler;
+import org.apache.niolex.network.rpc.RpcUtil;
 
 /**
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
@@ -70,13 +73,10 @@ public class CoreRunner {
 		Integer b = (Integer) a;
 		System.out.println(b);
 		//createServer();
-		ConcurrentLinkedQueue<Integer> inn = new ConcurrentLinkedQueue<Integer>();
-		Iterator<Integer> it = inn.iterator();
-		inn.add(4);
-		inn.add(6);
-		System.out.println(it.next());
-		System.out.println(it.next());
-		inn.add(8);
-		System.out.println(it.next());
+		Method[] arr = MethodUtil.getMethods(RpcService.class);
+		for (Method m : arr) {
+			System.out.println(ObjToStringUtil.objToString(
+					RpcUtil.decodeParams(m.getGenericParameterTypes())));
+		}
 	}
 }

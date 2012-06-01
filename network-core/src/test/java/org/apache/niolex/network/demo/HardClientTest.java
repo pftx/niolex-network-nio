@@ -86,6 +86,7 @@ public class HardClientTest {
 	}
 
 	public static void main(String args[]) throws Exception {
+		CoreRunner.createServer();
 		HardClientTest hdt = new HardClientTest();
 		hdt.setup();
 		for (int i = 0; i < 1000; ++i) {
@@ -93,5 +94,6 @@ public class HardClientTest {
 			System.out.println("Test iter.");
 		}
 		hdt.down();
+		CoreRunner.shutdown();
 	}
 }
