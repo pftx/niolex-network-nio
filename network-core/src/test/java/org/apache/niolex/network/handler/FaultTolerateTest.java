@@ -101,7 +101,7 @@ public class FaultTolerateTest {
 		Thread.sleep(500);
 
 		ArgumentCaptor<PacketData> argument = ArgumentCaptor.forClass(PacketData.class);
-		verify(packetHandler, times(1)).handleRead(argument.capture(), eq(packetClient));
+		verify(packetHandler, times(2)).handleRead(argument.capture(), eq(packetClient));
 		assertArrayEquals(arr, argument.getValue().getData());
 		packetClient.stop();
 	}

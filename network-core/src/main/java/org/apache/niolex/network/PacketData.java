@@ -182,4 +182,8 @@ public class PacketData extends Packet {
         }
     }
 
+	public void setDataPos(int dataPos) {
+		this.dataPos = dataPos;
+	}
+
 }

@@ -17,10 +17,6 @@
  */
 package org.apache.niolex.network;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
@@ -36,17 +32,6 @@ public class TBasePacketWriter extends BasePacketWriter {
 	@Override
 	public String getRemoteName() {
 		return "Mock";
-	}
-
-	/**
-	 * Override super method
-	 * @see org.apache.niolex.network.IPacketWriter#getRemainPackets()
-	 */
-	@Override
-	public Collection<PacketData> getRemainPackets() {
-		List<PacketData> dest = new ArrayList<PacketData>();
-		Collections.copy(dest, this.sendPacketList);
-		return dest;
 	}
 
 }

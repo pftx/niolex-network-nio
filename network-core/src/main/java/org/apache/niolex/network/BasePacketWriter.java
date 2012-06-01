@@ -17,11 +17,11 @@
  */
 package org.apache.niolex.network;
 
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
+
+import org.apache.niolex.commons.util.LinkedIterList;
+import org.apache.niolex.commons.util.LinkedIterList.Iter;
 
 /**
  * The base BasePacketWriter, handle attach and PacketData storage.
@@ -32,12 +32,57 @@ import java.util.Map;
  */
 public abstract class BasePacketWriter implements IPacketWriter {
 
+	/**
+	 * Attachment map, save all attachments here.
+	 */
 	protected Map<String, Object> attachMap = new HashMap<String, Object>();
-    protected List<PacketData> sendPacketList = Collections.synchronizedList(new LinkedList<PacketData>());
+
+	/**
+	 * Internal variables.
+	 */
+	private LinkedIterList<PacketData> sendPacketList = new LinkedIterList<PacketData>();
+	private Iter<PacketData> sendIter;
+	private int cacheSize;
+
+	/**
+	 * Initialize send iterator here.
+	 */
+	public BasePacketWriter() {
+		super();
+		this.sendIter = sendPacketList.iterator();
+	}
 
 	@Override
 	public void handleWrite(PacketData sc) {
 		sendPacketList.add(sc);
+	}
+
+	@Override
+	public LinkedIterList<PacketData> getRemainPackets() {
+		return sendPacketList;
+	}
+
+	@Override
+	public void setRemainPackets(LinkedIterList<PacketData> list) {
+		this.sendPacketList = list;
+		this.sendIter = sendPacketList.iterator();
+	}
+
+	/**
+	 * Sub class need to use this method to get packets to send.
+	 * @return
+	 */
+	protected PacketData handleNext() {
+		PacketData d = sendIter.next();
+		if (d != null) {
+			if (cacheSize >= Config.SERVER_CACHE_TOLERATE_SIZE) {
+				sendPacketList.poll();
+			} else {
+				++ cacheSize;
+			}
+			d.setDataPos(0);
+		}
+		return d;
 	}
 
 	@Override
@@ -50,5 +95,4 @@ public abstract class BasePacketWriter implements IPacketWriter {
 	public <T> T getAttached(String key) {
 		return (T)attachMap.get(key);
 	}
-
 }

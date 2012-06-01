@@ -24,9 +24,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.util.Collection;
 
-import org.apache.niolex.commons.util.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -99,19 +97,10 @@ public class PacketClient extends BasePacketWriter {
 
     @Override
     public void handleWrite(PacketData sc) {
-        sendPacketList.add(sc);
+        super.handleWrite(sc);
         if (writeThread != null) {
             writeThread.interrupt();
         }
-    }
-
-    @Override
-    public Collection<PacketData> getRemainPackets() {
-    	if (sendPacket != null) {
-    		return CollectionUtils.concat(sendPacket.makeCopy(), this.sendPacketList);
-    	} else {
-    		return sendPacketList;
-    	}
     }
 
     /**
@@ -176,7 +165,8 @@ public class PacketClient extends BasePacketWriter {
         public void run() {
             try {
                 while (isWorking) {
-                    if (sendPacketList.size() == 0) {
+                	sendPacket = PacketClient.this.handleNext();
+                    if (sendPacket == null) {
                         // If nothing to send, let's sleep.
                         try {
                             Thread.sleep(100000);
@@ -200,8 +190,6 @@ public class PacketClient extends BasePacketWriter {
          * @throws IOException
          */
         public void sendNewPacket() throws IOException {
-            sendPacket = sendPacketList.get(0);
-            sendPacketList.remove(0);
             sendPacket.generateData(out);
         }
     }

@@ -30,6 +30,7 @@ public interface Config {
 	 */
 	int SERVER_NIO_BUFFER_SIZE = 8192;
 	int SERVER_FAULT_TOLERATE_SIZE = 100;
+	int SERVER_CACHE_TOLERATE_SIZE = 5;
 	String SERVER_ENCODING = "UTF-8";
 
 	/**

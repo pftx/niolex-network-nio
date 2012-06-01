@@ -15,9 +15,14 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.niolex.network.handler;
+package org.apache.niolex.network.adapter;
 
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import org.apache.niolex.network.Config;
 import org.apache.niolex.network.IPacketHandler;
@@ -38,16 +43,12 @@ import org.mockito.runners.MockitoJUnitRunner;
  */
 public class FaultTolerateAdapterTest {
 	@Mock
-	private IHandlerFactory factory;
-	@Mock
 	private IPacketHandler h;
 	private FaultTolerateAdapter faultTolerateSPacketHandler;
 
 	@Before
 	public void createFaultTolerateSPacketHandler() throws Exception {
-		faultTolerateSPacketHandler = new FaultTolerateAdapter();
-		faultTolerateSPacketHandler.setFactory(factory);
-		when(factory.createHandler(any(IPacketWriter.class))).thenReturn(h);
+		faultTolerateSPacketHandler = new FaultTolerateAdapter(h);
 	}
 
 	/**
@@ -74,15 +75,15 @@ public class FaultTolerateAdapterTest {
 		verify(wt0).attachData(Config.ATTACH_KEY_SESS_SESSID, "AJFIUEALKD");
 		faultTolerateSPacketHandler.handleError(wt0);
 		// ERROR
-		IPacketWriter wt = spy(new PacketClient());
+		PacketClient wt = spy(new PacketClient());
 		faultTolerateSPacketHandler.handleRead(sc, wt);
 		faultTolerateSPacketHandler.handleError(wt);
-		IPacketWriter wt2 = spy(new PacketClient());
+		PacketClient wt2 = spy(new PacketClient());
 		faultTolerateSPacketHandler.handleRead(sc, wt2);
 		verify(h, times(1)).handleRead(sc2, wt0);
 		verify(wt0, times(1)).handleWrite(sc2);
-		verify(wt, times(1)).handleWrite(sc2);
-		verify(wt2, times(1)).handleWrite(sc2);
+		assertEquals(1, wt.getRemainPackets().size());
+		assertEquals(1, wt2.getRemainPackets().size());
 	}
 
 	/**

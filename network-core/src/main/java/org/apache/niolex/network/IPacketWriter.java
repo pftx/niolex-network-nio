@@ -17,7 +17,7 @@
  */
 package org.apache.niolex.network;
 
-import java.util.Collection;
+import org.apache.niolex.commons.util.LinkedIterList;
 
 /**
  * The Packet Writer Interface.
@@ -43,7 +43,12 @@ public interface IPacketWriter {
      * Get the remained not sent packets.
      * @return
      */
-    public Collection<PacketData> getRemainPackets();
+    public LinkedIterList<PacketData> getRemainPackets();
+
+    /**
+     * Set the remained packets need to send.
+     */
+    public void setRemainPackets(LinkedIterList<PacketData> list);
 
     /**
      * Attach some data to this object, please use your unique key, all system internal data key

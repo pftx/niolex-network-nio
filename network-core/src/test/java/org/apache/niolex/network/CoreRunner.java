@@ -17,9 +17,13 @@
  */
 package org.apache.niolex.network;
 
+import java.util.Iterator;
+import java.util.concurrent.ConcurrentLinkedQueue;
+
+import org.apache.niolex.network.adapter.FaultTolerateAdapter;
 import org.apache.niolex.network.example.EchoPacketHandler;
 import org.apache.niolex.network.handler.DispatchPacketHandler;
-import org.apache.niolex.network.handler.FaultTolerateAdapter;
+import org.apache.niolex.network.handler.SessionPacketHandler;
 import org.apache.niolex.network.handler.SummaryPacketHandler;
 
 /**
@@ -42,11 +46,11 @@ public class CoreRunner {
 		DispatchPacketHandler handler = new DispatchPacketHandler();
 		handler.addHandler((short) 2, new EchoPacketHandler());
 		handler.addHandler((short) 3, new SummaryPacketHandler());
-		IPacketHandler packetHandler = new FaultTolerateAdapter(new TLastTalkFactory());
-		handler.addHandler((short) 4, packetHandler);
-		handler.addHandler((short) 5, packetHandler);
-		handler.addHandler(Config.CODE_SESSN_REGR, packetHandler);
-		nioServer.setPacketHandler(handler);
+		handler.addHandler((short) 4, new SessionPacketHandler(new TLastTalkFactory()));
+		handler.addHandler((short) 5, new SessionPacketHandler(new TLastTalkFactory()));
+
+		IPacketHandler finalHandler = new FaultTolerateAdapter(handler);
+		nioServer.setPacketHandler(finalHandler);
 		nioServer.setPort(PORT);
 		nioServer.start();
 		thread = new Thread(nioServer);
@@ -65,6 +69,14 @@ public class CoreRunner {
 		Object a = c;
 		Integer b = (Integer) a;
 		System.out.println(b);
-		createServer();
+		//createServer();
+		ConcurrentLinkedQueue<Integer> inn = new ConcurrentLinkedQueue<Integer>();
+		Iterator<Integer> it = inn.iterator();
+		inn.add(4);
+		inn.add(6);
+		System.out.println(it.next());
+		System.out.println(it.next());
+		inn.add(8);
+		System.out.println(it.next());
 	}
 }

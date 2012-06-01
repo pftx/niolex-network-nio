@@ -25,12 +25,10 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.niolex.commons.util.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -309,15 +307,6 @@ public class NioServer implements Runnable {
             return false;
         }
 
-        @Override
-        public Collection<PacketData> getRemainPackets() {
-        	if (sendPacket != null) {
-        		return CollectionUtils.concat(sendPacket.makeCopy(), this.sendPacketList);
-        	} else {
-        		return sendPacketList;
-        	}
-        }
-
         /**
          * Handle write request. called by NIO selector.
          * Send packets to client when there is any.
@@ -363,16 +352,15 @@ public class NioServer implements Runnable {
          * @throws IOException
          */
         private boolean sendNewPacket() throws IOException {
-            if (sendPacketList.size() == 0) {
+        	sendPacket = super.handleNext();
+
+            if (sendPacket == null) {
                 if (lastSentTime + heartBeatInterval < System.currentTimeMillis()) {
-                    sendPacketList.add(PacketData.getHeartBeatPacket());
-                } else {
-                    return false;
+                    super.handleWrite(PacketData.getHeartBeatPacket());
                 }
+                return false;
             }
             lastSentTime = System.currentTimeMillis();
-            sendPacket = sendPacketList.get(0);
-            sendPacketList.remove(0);
             sendStatus = Status.DATA;
             sendBuffer.clear();
             if (sendPacket.generateData(sendBuffer)) {

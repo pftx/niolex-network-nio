@@ -68,6 +68,14 @@ public class NioServerTest {
 	}
 
 	@Test
+	public void testSetter() throws Exception {
+		nioServer.setAcceptTimeOut(1233);
+		nioServer.setHeartBeatInterval(23122);
+		assertEquals(1233, nioServer.getAcceptTimeOut());
+		assertEquals(23122, nioServer.getHeartBeatInterval());
+	}
+
+	@Test
 	public void testStart() throws Exception {
 		assertEquals(8808, nioServer.getPort());
 		assertEquals(packetHandler, nioServer.getPacketHandler());

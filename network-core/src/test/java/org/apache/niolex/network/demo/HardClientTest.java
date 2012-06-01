@@ -24,10 +24,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.niolex.commons.test.MockUtil;
+import org.apache.niolex.network.CoreRunner;
 import org.apache.niolex.network.PacketClient;
 import org.apache.niolex.network.PacketData;
+import org.apache.niolex.network.example.SavePacketHandler;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
@@ -36,9 +40,19 @@ import org.junit.Test;
  * @Date: 2012-5-31
  */
 public class HardClientTest {
-	PacketClient c = new PacketClient(new InetSocketAddress("localhost", 8808));
+	PacketClient c = new PacketClient(new InetSocketAddress("localhost", 8809));
 	List<PacketData> list = new ArrayList<PacketData>();
 	List<PacketData> list2 = new ArrayList<PacketData>();
+
+	@BeforeClass
+	public static void run() throws Exception {
+		CoreRunner.createServer();
+	}
+
+	@AfterClass
+	public static void down2() throws Exception {
+		CoreRunner.shutdown();
+	}
 
 	@Before
 	public void setup() throws Exception {

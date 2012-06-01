@@ -32,7 +32,6 @@ public class TLastTalkFactory extends LastTalkFactory {
 
             @Override
             public void handleError(IPacketWriter wt) {
-                System.out.println("This is error. Last talk: " + lastTalk + "\n");
             }
 
             @Override

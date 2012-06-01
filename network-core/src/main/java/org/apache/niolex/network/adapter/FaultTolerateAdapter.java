@@ -17,10 +17,10 @@
  */
 package org.apache.niolex.network.adapter;
 
-import java.util.Collection;
 import java.util.Map;
 
 import org.apache.niolex.commons.util.LRUHashMap;
+import org.apache.niolex.commons.util.LinkedIterList;
 import org.apache.niolex.network.Config;
 import org.apache.niolex.network.IPacketHandler;
 import org.apache.niolex.network.IPacketWriter;
@@ -46,8 +46,8 @@ public class FaultTolerateAdapter implements IPacketHandler {
 	private static final Logger LOG = LoggerFactory.getLogger(FaultTolerateAdapter.class);
 
 	private static final String KEY = Config.ATTACH_KEY_SESS_SESSID;
-	private Map<String, Collection<PacketData>> dataMap =
-			new LRUHashMap<String, Collection<PacketData>>(Config.SERVER_FAULT_TOLERATE_SIZE);
+	private Map<String, LinkedIterList<PacketData>> dataMap =
+			new LRUHashMap<String, LinkedIterList<PacketData>>(Config.SERVER_FAULT_TOLERATE_SIZE);
 
 	// The Handler need to be adapted.
 	private IPacketHandler other;
@@ -70,11 +70,9 @@ public class FaultTolerateAdapter implements IPacketHandler {
 			other.handleRead(sc, wt);
 		} else {
 			String ssid = transformer.getDataObject(sc);
-			Collection<PacketData> data = dataMap.get(ssid);
+			LinkedIterList<PacketData> data = dataMap.get(ssid);
 			if (data != null) {
-				for (PacketData pc : data) {
-					wt.handleWrite(pc);
-				}
+				wt.setRemainPackets(data);
 				LOG.info("Data recoverd for client [{}] list size {}.", ssid, data.size());
 				dataMap.remove(ssid);
 			}
@@ -86,7 +84,7 @@ public class FaultTolerateAdapter implements IPacketHandler {
     public void handleError(IPacketWriter wt) {
 		other.handleError(wt);
 		String ssid = wt.getAttached(KEY);
-		Collection<PacketData> els = wt.getRemainPackets();
+		LinkedIterList<PacketData> els = wt.getRemainPackets();
 		if (ssid != null) {
 			dataMap.put(ssid, els);
 			LOG.info("Fault tolerate for client [{}] remain size {}.", ssid, els.size());
