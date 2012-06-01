@@ -20,8 +20,8 @@ package org.apache.niolex.network.demo;
 import java.io.IOException;
 
 import org.apache.niolex.network.NioServer;
+import org.apache.niolex.network.example.EchoPacketHandler;
 import org.apache.niolex.network.handler.DispatchPacketHandler;
-import org.apache.niolex.network.handler.EchoPacketHandler;
 import org.apache.niolex.network.handler.SessionPacketHandler;
 import org.apache.niolex.network.handler.SummaryPacketHandler;
 

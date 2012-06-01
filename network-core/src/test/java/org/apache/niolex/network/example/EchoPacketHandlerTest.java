@@ -15,7 +15,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.niolex.network.handler;
+package org.apache.niolex.network.example;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
@@ -25,6 +25,7 @@ import static org.mockito.Mockito.when;
 
 import org.apache.niolex.network.IPacketWriter;
 import org.apache.niolex.network.PacketData;
+import org.apache.niolex.network.example.EchoPacketHandler;
 import org.junit.Before;
 import org.junit.Test;
 

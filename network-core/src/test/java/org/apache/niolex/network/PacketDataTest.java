@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
-import org.apache.niolex.network.handler.EchoPacketHandler;
+import org.apache.niolex.network.example.EchoPacketHandler;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

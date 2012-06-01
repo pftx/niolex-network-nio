@@ -27,7 +27,7 @@ import static org.mockito.Mockito.verify;
 import java.net.InetSocketAddress;
 
 import org.apache.niolex.network.demo.PrintPacketHandler;
-import org.apache.niolex.network.handler.EchoPacketHandler;
+import org.apache.niolex.network.example.EchoPacketHandler;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

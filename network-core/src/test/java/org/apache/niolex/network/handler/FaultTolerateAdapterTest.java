@@ -36,22 +36,22 @@ import org.mockito.runners.MockitoJUnitRunner;
  * @version 1.0.0
  * @Date: 2012-5-31
  */
-public class FaultTolerateSPacketHandlerTest {
+public class FaultTolerateAdapterTest {
 	@Mock
 	private IHandlerFactory factory;
 	@Mock
 	private IPacketHandler h;
-	private FaultTolerateSPacketHandler faultTolerateSPacketHandler;
+	private FaultTolerateAdapter faultTolerateSPacketHandler;
 
 	@Before
 	public void createFaultTolerateSPacketHandler() throws Exception {
-		faultTolerateSPacketHandler = new FaultTolerateSPacketHandler();
+		faultTolerateSPacketHandler = new FaultTolerateAdapter();
 		faultTolerateSPacketHandler.setFactory(factory);
 		when(factory.createHandler(any(IPacketWriter.class))).thenReturn(h);
 	}
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.handler.FaultTolerateSPacketHandler#handleError(org.apache.niolex.network.IPacketWriter)}.
+	 * Test method for {@link org.apache.niolex.network.handler.FaultTolerateAdapter#handleError(org.apache.niolex.network.IPacketWriter)}.
 	 */
 	@Test
 	public void testHandleErrorSimple() {
@@ -60,7 +60,7 @@ public class FaultTolerateSPacketHandlerTest {
 	}
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.handler.FaultTolerateSPacketHandler#handleError(org.apache.niolex.network.IPacketWriter)}.
+	 * Test method for {@link org.apache.niolex.network.handler.FaultTolerateAdapter#handleError(org.apache.niolex.network.IPacketWriter)}.
 	 */
 	@Test
 	public void testHandleError() {
@@ -86,7 +86,7 @@ public class FaultTolerateSPacketHandlerTest {
 	}
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.handler.FaultTolerateSPacketHandler#handleRead(org.apache.niolex.network.PacketData, org.apache.niolex.network.IPacketWriter)}.
+	 * Test method for {@link org.apache.niolex.network.handler.FaultTolerateAdapter#handleRead(org.apache.niolex.network.PacketData, org.apache.niolex.network.IPacketWriter)}.
 	 */
 	@Test
 	public void testHandleReadNotRegi() {
@@ -96,7 +96,7 @@ public class FaultTolerateSPacketHandlerTest {
 	}
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.handler.FaultTolerateSPacketHandler#handleRead(org.apache.niolex.network.PacketData, org.apache.niolex.network.IPacketWriter)}.
+	 * Test method for {@link org.apache.niolex.network.handler.FaultTolerateAdapter#handleRead(org.apache.niolex.network.PacketData, org.apache.niolex.network.IPacketWriter)}.
 	 */
 	@Test
 	public void testHandleReadRegi() {

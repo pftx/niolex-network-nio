@@ -17,9 +17,9 @@
  */
 package org.apache.niolex.network;
 
+import org.apache.niolex.network.example.EchoPacketHandler;
 import org.apache.niolex.network.handler.DispatchPacketHandler;
-import org.apache.niolex.network.handler.EchoPacketHandler;
-import org.apache.niolex.network.handler.FaultTolerateSPacketHandler;
+import org.apache.niolex.network.handler.FaultTolerateAdapter;
 import org.apache.niolex.network.handler.SummaryPacketHandler;
 
 /**
@@ -42,7 +42,7 @@ public class CoreRunner {
 		DispatchPacketHandler handler = new DispatchPacketHandler();
 		handler.addHandler((short) 2, new EchoPacketHandler());
 		handler.addHandler((short) 3, new SummaryPacketHandler());
-		IPacketHandler packetHandler = new FaultTolerateSPacketHandler(new TLastTalkFactory());
+		IPacketHandler packetHandler = new FaultTolerateAdapter(new TLastTalkFactory());
 		handler.addHandler((short) 4, packetHandler);
 		handler.addHandler((short) 5, packetHandler);
 		handler.addHandler(Config.CODE_SESSN_REGR, packetHandler);

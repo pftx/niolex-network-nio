@@ -1,5 +1,5 @@
 /**
- * FaultTolerateSPacketHandler.java
+ * FaultTolerateAdapter.java
  *
  * Copyright 2011 Niolex, Inc.
  *
@@ -15,13 +15,14 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.niolex.network.handler;
+package org.apache.niolex.network.adapter;
 
 import java.util.Collection;
 import java.util.Map;
 
 import org.apache.niolex.commons.util.LRUHashMap;
 import org.apache.niolex.network.Config;
+import org.apache.niolex.network.IPacketHandler;
 import org.apache.niolex.network.IPacketWriter;
 import org.apache.niolex.network.PacketData;
 import org.apache.niolex.network.packet.PacketTransformer;
@@ -30,47 +31,43 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This is the fault tolerate session packet handler.
- * In this handler, the first connect packet need to be Session ID Packet, otherwise it can not handle the
- * fault toleration.
+ * This is the fault tolerate packet adapter.
+ * The difference between handler and adapter is that adapter can be applied on everything and handler
+ * only deal with a specific situation.
+ *
+ * In this adapter, the first connect packet need to be Session ID Packet, otherwise it can not handle the
+ * fault toleration properly.
+ *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
  * @Date: 2012-5-30
  */
-public class FaultTolerateSPacketHandler extends SessionPacketHandler {
-	private static final Logger LOG = LoggerFactory.getLogger(FaultTolerateSPacketHandler.class);
+public class FaultTolerateAdapter implements IPacketHandler {
+	private static final Logger LOG = LoggerFactory.getLogger(FaultTolerateAdapter.class);
 
 	private static final String KEY = Config.ATTACH_KEY_SESS_SESSID;
 	private Map<String, Collection<PacketData>> dataMap =
 			new LRUHashMap<String, Collection<PacketData>>(Config.SERVER_FAULT_TOLERATE_SIZE);
 
+	// The Handler need to be adapted.
+	private IPacketHandler other;
+
 	private PacketTransformer transformer;
 
 	/**
+	 * Implements a constructor, please pass a handler in.
 	 * Decode Session ID with StringSerializer.
 	 */
-	public FaultTolerateSPacketHandler() {
+	public FaultTolerateAdapter(IPacketHandler other) {
 		transformer = PacketTransformer.getInstance();
 		transformer.addSerializer(new StringSerializer(Config.CODE_SESSN_REGR));
+		this.other = other;
 	}
-
-	/**
-	 * Implements super constructor.
-	 *
-	 * @param factory
-	 */
-	public FaultTolerateSPacketHandler(IHandlerFactory factory) {
-		super(factory);
-		transformer = PacketTransformer.getInstance();
-		transformer.addSerializer(new StringSerializer(Config.CODE_SESSN_REGR));
-	}
-
-
 
 	@Override
     public void handleRead(PacketData sc, IPacketWriter wt) {
 		if (sc.getCode() != Config.CODE_SESSN_REGR) {
-			super.handleRead(sc, wt);
+			other.handleRead(sc, wt);
 		} else {
 			String ssid = transformer.getDataObject(sc);
 			Collection<PacketData> data = dataMap.get(ssid);
@@ -87,7 +84,7 @@ public class FaultTolerateSPacketHandler extends SessionPacketHandler {
 
 	@Override
     public void handleError(IPacketWriter wt) {
-		super.handleError(wt);
+		other.handleError(wt);
 		String ssid = wt.getAttached(KEY);
 		Collection<PacketData> els = wt.getRemainPackets();
 		if (ssid != null) {
