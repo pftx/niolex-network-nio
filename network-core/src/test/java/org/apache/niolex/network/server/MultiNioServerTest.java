@@ -71,6 +71,7 @@ public class MultiNioServerTest {
 		assertEquals(8808, nioServer.getPort());
 		nioServer.setThreadsNumber(3);
 		assertEquals(3, nioServer.getThreadsNumber());
+		nioServer.start();
 		assertEquals(packetHandler, nioServer.getPacketHandler());
 		PacketClient c = new PacketClient(new InetSocketAddress("localhost", 8808));
         c.setPacketHandler(new PrintPacketHandler());

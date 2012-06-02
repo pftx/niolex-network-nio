@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.niolex.network.PacketClient;
-import org.apache.niolex.network.rpc.RpcConfig;
 import org.apache.niolex.network.rpc.json.JsonRpcClient;
 
 /**
@@ -40,22 +39,38 @@ public class RpcClient {
     public static void main(String[] arg2s) throws Exception {
         PacketClient c = new PacketClient(new InetSocketAddress("localhost", 8808));
         JsonRpcClient client = new JsonRpcClient(c);
-        RpcConfig[] confs = new RpcConfig[1];
-        RpcConfig c2 = new RpcConfig();
-        c2.setInterfs(RpcService.class);
-        c2.setTarget(new RpcServiceImpl());
-        confs[0] = c2;
-        client.setRpcConfigs(confs);
         client.connect();
 
-        RpcService ser = client.getService(RpcService.class);
-        int k = ser.add(3, 4, 5, 6, 7, 8, 9);
-        System.out.println("Out => " + k);
+        final RpcService ser = client.getService(RpcService.class);
 
-        List<String> args = new ArrayList<String>();
-        args.add("3");
-        k = ser.size(args);
-        System.out.println("Out => " + k);
+        Runnable r = new Runnable() {
+
+			@Override
+			public void run() {
+				int i = 2212;
+				while (i-- > 0) {
+					int k = ser.add(3, 4, 5, 6, 7, 8, 9, i);
+					if (k != 42 + i) {
+						System.out.println("Out => " + k);
+					}
+
+					List<String> args = new ArrayList<String>();
+					args.add("3");
+					args.add("3");
+					k = ser.size(args);
+					if (k != 2) {
+						System.out.println("Out => " + k);
+					}
+				}
+
+			}};
+		Thread t = new Thread(r);
+		Thread q = new Thread(r);
+		t.start();
+		q.start();
+		t.join();
+		q.join();
+		System.out.println("Done.....");
         c.stop();
     }
 

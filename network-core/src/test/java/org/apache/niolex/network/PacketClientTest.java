@@ -65,8 +65,10 @@ public class PacketClientTest {
 
 	@Before
 	public void createPacketClient() throws Exception {
-		packetClient = new PacketClient(
-				new InetSocketAddress("localhost", 8808));
+		packetClient = new PacketClient();
+		packetClient.setServerAddress(new InetSocketAddress("localhost", 8808));
+		packetClient.getServerAddress();
+
 		packetClient.setPacketHandler(packetHandler);
 
 		nioServer = new NioServer();
@@ -90,6 +92,9 @@ public class PacketClientTest {
 	 */
 	@Test
 	public void testConnect() throws Exception {
+		assertEquals(false, packetClient.isWorking());
+		packetClient.setConnectTimeout(1234);
+		assertEquals(1234, packetClient.getConnectTimeout());
 		packetClient.connect();
 		PacketData sc = new PacketData();
 		sc.setCode((short) 4);

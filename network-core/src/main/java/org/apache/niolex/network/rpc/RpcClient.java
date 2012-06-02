@@ -53,7 +53,7 @@ public abstract class RpcClient implements InvocationHandler, IPacketHandler {
 	/**
 	 * Save the execution map.
 	 */
-	private Map<Method, RpcExecuteItem> executeMap = new HashMap<Method, RpcExecuteItem>();
+	private Map<Method, Short> executeMap = new HashMap<Method, Short>();
 
 	/**
 	 * The current waiting map.
@@ -68,19 +68,27 @@ public abstract class RpcClient implements InvocationHandler, IPacketHandler {
 	/**
 	 * The rpc handle timeout in milliseconds.
 	 */
-	private int rpcHandleTimeout = 10000;
+	private int rpcHandleTimeout = Config.RPC_HANDLE_TIMEOUT;
 
 	/**
 	 * The status of this Client.
 	 */
 	private Status connStatus;
 
-	private static enum Status {
-		NOT_CONNECTED, CONN, CLOSED
+	/**
+	 * The connections status of this RpcClient.
+	 *
+	 * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
+	 * @version 1.0.0
+	 * @Date: 2012-6-2
+	 */
+	public static enum Status {
+		INNITIAL, CONNECTED, CLOSED
 	}
 
 	/**
 	 * Create a RpcClient with this PacketClient as the backed communication tool.
+	 * The PacketClient will be managed internally, please use this.connect() to connect.
 	 *
 	 * Constructor
 	 * @param client
@@ -90,7 +98,7 @@ public abstract class RpcClient implements InvocationHandler, IPacketHandler {
 		this.client = client;
 		this.client.setPacketHandler(this);
 		this.auto = new AtomicInteger(1);
-		this.connStatus = Status.NOT_CONNECTED;
+		this.connStatus = Status.INNITIAL;
 	}
 
 	/**
@@ -99,11 +107,25 @@ public abstract class RpcClient implements InvocationHandler, IPacketHandler {
 	 */
 	public void connect() throws IOException {
 		this.client.connect();
-		this.connStatus = Status.CONN;
+		this.connStatus = Status.CONNECTED;
 	}
 
+	/**
+	 * Stop this client, and stop the backed communication PacketClient.
+	 */
+	public void stop() {
+		this.connStatus = Status.CLOSED;
+		this.client.stop();
+	}
+
+	/**
+	 * Get the Rpc Service Client Stub.
+	 * @param c The interface you want to invoke.
+	 * @return
+	 */
 	@SuppressWarnings("unchecked")
     public <T> T getService(Class<T> c) {
+		this.addInferface(c);
 		return (T) Proxy.newProxyInstance(RpcClient.class.getClassLoader(),
                 new Class[] {c}, this);
 	}
@@ -116,19 +138,19 @@ public abstract class RpcClient implements InvocationHandler, IPacketHandler {
 	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 		RpcException rep = null;
 		switch (connStatus) {
-			case NOT_CONNECTED:
+			case INNITIAL:
 				rep = new RpcException("Client not connected.", RpcException.Type.NOT_CONNECTED, null);
 				throw rep;
 			case CLOSED:
 				rep = new RpcException("Client closed.", RpcException.Type.CONNECTION_CLOSED, null);
 				throw rep;
 		}
-		RpcExecuteItem rei = executeMap.get(method);
+		Short rei = executeMap.get(method);
 		if (rei != null) {
 			// 1. Prepare parameters
 			byte[] arr = serializeParams(args);
 			// 2. Create PacketData
-			PacketData rc = new PacketData(rei.getCode(), arr);
+			PacketData rc = new PacketData(rei, arr);
 			// 3. Generate serial number
 			serialPacket(rc);
 			// 4. Set up the waiting information
@@ -149,7 +171,7 @@ public abstract class RpcClient implements InvocationHandler, IPacketHandler {
 			// 8. Process result.
 			if (wi.getReceived() == null) {
 				switch (connStatus) {
-					case NOT_CONNECTED:
+					case INNITIAL:
 						rep = new RpcException("Client not connected.", RpcException.Type.NOT_CONNECTED, null);
 						throw rep;
 					case CLOSED:
@@ -204,17 +226,29 @@ public abstract class RpcClient implements InvocationHandler, IPacketHandler {
 
 	@Override
 	public void handleError(IPacketWriter wt) {
+		if (this.connStatus == Status.CLOSED) {
+			return;
+		}
 		// We will retry to connect in this method.
 		client.stop();
 		try {
 			client.connect();
 		} catch (IOException e) {
+			LOG.error("Exception occured when try to re-connect to server.", e);
 			// Try to shutdown this Client, inform all the threads.
 			this.connStatus = Status.CLOSED;
 			for (RpcWaitItem wi : waitMap.values()) {
 				wi.getThread().interrupt();
 			}
 		}
+	}
+
+	/**
+	 * Get Connection Status of this client.
+	 * @return
+	 */
+	public Status getConnStatus() {
+		return connStatus;
 	}
 
 	public int getRpcHandleTimeout() {
@@ -229,23 +263,17 @@ public abstract class RpcClient implements InvocationHandler, IPacketHandler {
 	 * Set the Rpc Configs, this method will parse all the configurations and generate execute map.
 	 * @param confs
 	 */
-	public void setRpcConfigs(RpcConfig[] confs) {
-		for (RpcConfig conf : confs) {
-			Method[] arr = MethodUtil.getMethods(conf.getInterfs());
-			for (Method m : arr) {
-				if (m.isAnnotationPresent(RpcMethod.class)) {
-					RpcMethod rp = m.getAnnotation(RpcMethod.class);
-					RpcExecuteItem rei = new RpcExecuteItem();
-					rei.setCode(rp.value());
-					rei.setMethod(m);
-					rei.setTarget(conf.getTarget());
-					rei = executeMap.put(m, rei);
-					if (rei != null) {
-						LOG.warn("Duplicate configuration for code: {}", rp.value());
-					}
+	public void addInferface(Class<?> interfs) {
+		Method[] arr = MethodUtil.getMethods(interfs);
+		for (Method m : arr) {
+			if (m.isAnnotationPresent(RpcMethod.class)) {
+				RpcMethod rp = m.getAnnotation(RpcMethod.class);
+				Short rei = executeMap.put(m, rp.value());
+				if (rei != null) {
+					LOG.warn("Duplicate configuration for code: {}", rp.value());
 				}
-			} // End of arr
-		} // End of confs
+			}
+		} // End of arr
 	}
 
 	/**

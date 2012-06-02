@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
 public abstract class RpcPacketHandler implements IPacketHandler {
 	private static final Logger LOG = LoggerFactory.getLogger(RpcPacketHandler.class);
 
-	// The Thread pool size, default to 8, which is the majority CPU number on servers.
+	// The Thread pool size, default to 20, which is the majority configurations on servers.
     private ExecutorService tPool;
 	private Map<Short, RpcExecuteItem> executeMap = new HashMap<Short, RpcExecuteItem>();
 
@@ -171,7 +171,7 @@ public abstract class RpcPacketHandler implements IPacketHandler {
 	 */
 	public void setRpcConfigs(RpcConfig[] confs) {
 		for (RpcConfig conf : confs) {
-			Method[] arr = MethodUtil.getMethods(conf.getInterfs());
+			Method[] arr = MethodUtil.getMethods(conf.getInterface());
 			for (Method m : arr) {
 				if (m.isAnnotationPresent(RpcMethod.class)) {
 					RpcMethod rp = m.getAnnotation(RpcMethod.class);

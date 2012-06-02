@@ -42,6 +42,7 @@ public class PacketClient extends BasePacketWriter implements IClient {
     private PacketData sendPacket;
     private Thread writeThread;
     private boolean isWorking;
+    private int connectTimeout = Config.SO_CONNECT_TIMEOUT;
 
     /**
      * Create a PacketClient without any Server Address
@@ -67,6 +68,7 @@ public class PacketClient extends BasePacketWriter implements IClient {
     @Override
 	public void connect() throws IOException {
         socket = new Socket();
+        socket.setSoTimeout(connectTimeout);
         socket.connect(serverAddress);
         Thread tr = new Thread(new ReadLoop(socket.getInputStream()));
         tr.start();
@@ -236,6 +238,14 @@ public class PacketClient extends BasePacketWriter implements IClient {
 	@Override
 	public void setServerAddress(InetSocketAddress serverAddress) {
 		this.serverAddress = serverAddress;
+	}
+
+	public int getConnectTimeout() {
+		return connectTimeout;
+	}
+
+	public void setConnectTimeout(int connectTimeout) {
+		this.connectTimeout = connectTimeout;
 	}
 
 	/**

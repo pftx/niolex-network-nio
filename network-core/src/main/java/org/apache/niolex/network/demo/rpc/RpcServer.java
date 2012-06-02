@@ -42,7 +42,7 @@ public class RpcServer {
         s.setPacketHandler(handler);
         RpcConfig[] confs = new RpcConfig[1];
         RpcConfig c = new RpcConfig();
-        c.setInterfs(RpcService.class);
+        c.setInterface(RpcService.class);
         c.setTarget(new RpcServiceImpl());
         confs[0] = c;
 		handler.setRpcConfigs(confs);

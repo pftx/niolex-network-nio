@@ -48,8 +48,11 @@ public class PrintPacketHandlerTest {
 		verify(sc).getCode();
 	}
 
+	@SuppressWarnings("unused")
 	@Test
 	public void testCoverMain() throws Exception {
+		DemoServer a = new DemoServer();
+		DemoClient b = new DemoClient();
 	    Thread t = new Thread(new Runnable() {
             @Override
             public void run() {

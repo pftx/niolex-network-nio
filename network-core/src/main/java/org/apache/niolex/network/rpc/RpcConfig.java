@@ -29,19 +29,19 @@ public class RpcConfig {
 	/**
 	 * The interface.
 	 */
-	private Class<?> interfs;
+	private Class<?> interfaces;
 
 	/**
 	 * The implementation target.
 	 */
 	private Object target;
 
-	public Class<?> getInterfs() {
-		return interfs;
+	public Class<?> getInterface() {
+		return interfaces;
 	}
 
-	public void setInterfs(Class<?> interfs) {
-		this.interfs = interfs;
+	public void setInterface(Class<?> interfs) {
+		this.interfaces = interfs;
 	}
 
 	public Object getTarget() {
