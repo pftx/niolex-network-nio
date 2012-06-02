@@ -47,11 +47,19 @@ public abstract class RpcPacketHandler implements IPacketHandler {
 	private Map<Short, RpcExecuteItem> executeMap = new HashMap<Short, RpcExecuteItem>();
 
 
-
+	/**
+	 * Create an RpcPacketHandler with default pool size.
+	 * Constructor
+	 */
 	public RpcPacketHandler() {
 		this(Config.RPC_HANDLER_POOL_SIZE);
 	}
 
+	/**
+	 * Create an RpcPacketHandler with the specified pool size.
+	 * Constructor
+	 * @param threadsNumber
+	 */
 	public RpcPacketHandler(int threadsNumber) {
 		super();
 		tPool = Executors.newFixedThreadPool(threadsNumber);
@@ -70,12 +78,20 @@ public abstract class RpcPacketHandler implements IPacketHandler {
 			RpcExecute re = new RpcExecute(ei.getTarget(), ei.getMethod(), sc, wt);
 			tPool.execute(re);
 		} else {
-			rep = new RpcException("The method you want to invoke doesn't exist.", null);
+			rep = new RpcException("The method you want to invoke doesn't exist.",
+					RpcException.Type.METHOD_NOT_FOUND, null);
 			handleReturn(sc, wt, rep, 1);
 			return;
 		}
 	}
 
+	/**
+	 * Internal usage, Run the detailed Rpc execution.
+	 *
+	 * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
+	 * @version 1.0.0
+	 * @Date: 2012-6-1
+	 */
 	private class RpcExecute implements Runnable {
 		private Object host;
 		private Method method;
@@ -101,7 +117,8 @@ public abstract class RpcPacketHandler implements IPacketHandler {
 			try {
 				args = prepareParams(sc.getData(), method.getGenericParameterTypes());
 			} catch (Exception e1) {
-				rep = new RpcException("Error occured when prepare params.", e1);
+				rep = new RpcException("Error occured when prepare params.",
+						RpcException.Type.ERROR_PARSE_PARAMS, e1);
 				handleReturn(sc, wt, rep, 1);
 				return;
 			}
@@ -109,7 +126,8 @@ public abstract class RpcPacketHandler implements IPacketHandler {
 				Object ret = method.invoke(host, args);
 				handleReturn(sc, wt, ret, 0);
 			} catch (Exception e1) {
-				rep = new RpcException("Error occured when invoke method.", e1);
+				rep = new RpcException("Error occured when invoke method.",
+						RpcException.Type.ERROR_INVOKE, e1);
 				handleReturn(sc, wt, rep, 1);
 				return;
 			}
@@ -118,6 +136,14 @@ public abstract class RpcPacketHandler implements IPacketHandler {
 
 	}
 
+	/**
+	 * Handle how to generate return data and send them to client.
+	 *
+	 * @param sc
+	 * @param wt
+	 * @param data
+	 * @param exception
+	 */
 	private void handleReturn(PacketData sc, IPacketWriter wt, Object data, int exception) {
 		try {
 			byte[] arr = serializeReturn(data);
@@ -139,6 +165,10 @@ public abstract class RpcPacketHandler implements IPacketHandler {
 		// Error is not a big deal.
 	}
 
+	/**
+	 * Set the Rpc Configs, this method will parse all the configurations and generate execute map.
+	 * @param confs
+	 */
 	public void setRpcConfigs(RpcConfig[] confs) {
 		for (RpcConfig conf : confs) {
 			Method[] arr = MethodUtil.getMethods(conf.getInterfs());
@@ -158,8 +188,23 @@ public abstract class RpcPacketHandler implements IPacketHandler {
 		} // End of confs
 	}
 
+	/**
+	 * Read parameters from the data.
+	 *
+	 * @param data
+	 * @param generic
+	 * @return
+	 * @throws Exception
+	 */
 	protected abstract Object[] prepareParams(byte[] data, Type[] generic) throws Exception;
 
+	/**
+	 * Serialize returned object into byte array.
+	 *
+	 * @param ret
+	 * @return
+	 * @throws Exception
+	 */
 	protected abstract byte[] serializeReturn(Object ret) throws Exception;
 
 }

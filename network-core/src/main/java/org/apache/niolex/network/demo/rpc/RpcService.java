@@ -1,5 +1,5 @@
 /**
- * RpcConfig.java
+ * RpcService.java
  *
  * Copyright 2012 Niolex, Inc.
  *
@@ -15,41 +15,22 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.niolex.network.rpc;
+package org.apache.niolex.network.demo.rpc;
+
+import java.util.List;
+
+import org.apache.niolex.network.rpc.RpcMethod;
 
 /**
- * The Rpc configure class. Configure with an interface and a implementation target.
- *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
  * @Date: 2012-6-1
  */
-public class RpcConfig {
+public interface RpcService {
 
-	/**
-	 * The interface.
-	 */
-	private Class<?> interfs;
+	@RpcMethod(14)
+	public int add(int ...args);
 
-	/**
-	 * The implementation target.
-	 */
-	private Object target;
-
-	public Class<?> getInterfs() {
-		return interfs;
-	}
-
-	public void setInterfs(Class<?> interfs) {
-		this.interfs = interfs;
-	}
-
-	public Object getTarget() {
-		return target;
-	}
-
-	public void setTarget(Object target) {
-		this.target = target;
-	}
-
+	@RpcMethod(15)
+	public int size(List<String> arg);
 }

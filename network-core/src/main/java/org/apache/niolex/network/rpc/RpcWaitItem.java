@@ -1,5 +1,5 @@
 /**
- * RpcConfig.java
+ * RpcWaitItem.java
  *
  * Copyright 2012 Niolex, Inc.
  *
@@ -17,39 +17,41 @@
  */
 package org.apache.niolex.network.rpc;
 
+import org.apache.niolex.network.PacketData;
+
 /**
- * The Rpc configure class. Configure with an interface and a implementation target.
+ * The Rpc Wait Item Class, Used in the RpcClient.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
  * @Date: 2012-6-1
  */
-public class RpcConfig {
+public class RpcWaitItem {
 
 	/**
-	 * The interface.
+	 * The waiting thread.
 	 */
-	private Class<?> interfs;
+	private Thread thread;
 
 	/**
-	 * The implementation target.
+	 * The received Packet Data.
 	 */
-	private Object target;
+	private PacketData received;
 
-	public Class<?> getInterfs() {
-		return interfs;
+	public Thread getThread() {
+		return thread;
 	}
 
-	public void setInterfs(Class<?> interfs) {
-		this.interfs = interfs;
+	public void setThread(Thread thread) {
+		this.thread = thread;
 	}
 
-	public Object getTarget() {
-		return target;
+	public PacketData getReceived() {
+		return received;
 	}
 
-	public void setTarget(Object target) {
-		this.target = target;
+	public void setReceived(PacketData received) {
+		this.received = received;
 	}
 
 }

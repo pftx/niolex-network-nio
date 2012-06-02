@@ -1,5 +1,5 @@
 /**
- * RpcService.java
+ * RpcServiceImpl.java
  *
  * Copyright 2012 Niolex, Inc.
  *
@@ -15,22 +15,40 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.niolex.network.demo;
+package org.apache.niolex.network.demo.rpc;
 
 import java.util.List;
-
-import org.apache.niolex.network.rpc.RpcMethod;
 
 /**
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
- * @Date: 2012-6-1
+ * @Date: 2012-6-2
  */
-public interface RpcService {
+public class RpcServiceImpl implements RpcService {
 
-	@RpcMethod(14)
-	public int add(int ...args);
+	/**
+	 * This is the override of super method.
+	 * @see org.apache.niolex.network.demo.rpc.RpcService#add(int[])
+	 */
+	@Override
+	public int add(int... args) {
+		int k = 0;
+		for (int i : args) {
+			k += i;
+		}
+		return k;
+	}
 
-	@RpcMethod(15)
-	public int size(List<String> arg);
+	/**
+	 * This is the override of super method.
+	 * @see org.apache.niolex.network.demo.rpc.RpcService#size(java.util.List)
+	 */
+	@Override
+	public int size(List<String> arg) {
+		if (arg != null) {
+			return arg.size();
+		}
+		return 0;
+	}
+
 }

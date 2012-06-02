@@ -18,6 +18,8 @@
 package org.apache.niolex.network.rpc;
 
 /**
+ * The Exception thrown in Rpc Packet Handler.
+ *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
  * @Date: 2012-6-1
@@ -29,8 +31,21 @@ public class RpcException extends RuntimeException {
 	 */
 	private static final long serialVersionUID = -4027742478277292216L;
 
-	public RpcException(String message, Throwable cause) {
+	/**
+	 * Create a RpcException with a message and a throwable.
+	 *
+	 * Constructor
+	 * @param message
+	 * @param cause
+	 */
+	public RpcException(String message, Type type, Throwable cause) {
 		super(message, cause);
+	}
+
+
+	public static enum Type {
+		TIMEOUT, NOT_CONNECTED, CONNECTION_CLOSED, METHOD_NOT_FOUND, ERROR_PARSE_PARAMS,
+		ERROR_INVOKE
 	}
 
 }

@@ -17,12 +17,7 @@
  */
 package org.apache.niolex.network;
 
-import java.lang.reflect.Method;
-
-import org.apache.niolex.commons.reflect.MethodUtil;
-import org.apache.niolex.commons.test.ObjToStringUtil;
 import org.apache.niolex.network.adapter.FaultTolerateAdapter;
-import org.apache.niolex.network.demo.RpcService;
 import org.apache.niolex.network.example.EchoPacketHandler;
 import org.apache.niolex.network.handler.DispatchPacketHandler;
 import org.apache.niolex.network.handler.SessionPacketHandler;
@@ -68,15 +63,16 @@ public class CoreRunner {
 	}
 
 	public static void main(String[] args) throws Exception {
-		String c = null;
-		Object a = c;
-		Integer b = (Integer) a;
-		System.out.println(b);
-		//createServer();
-		Method[] arr = MethodUtil.getMethods(RpcService.class);
-		for (Method m : arr) {
-			System.out.println(ObjToStringUtil.objToString(
-					RpcUtil.decodeParams(m.getGenericParameterTypes())));
-		}
+		short a = (short) 0xcffc;
+		int q = a << 16;
+		System.out.println(Integer.toHexString(q));
+		byte b = -4;
+		q += (b & 0xFF) << 8;
+		System.out.println(Integer.toHexString(q));
+		byte c = -11;
+		q += (c & 0xFF);
+		System.out.println(Integer.toHexString(q));
+		int l = RpcUtil.generateKey(a, b, c);
+		System.out.println(Integer.toHexString(l));
 	}
 }

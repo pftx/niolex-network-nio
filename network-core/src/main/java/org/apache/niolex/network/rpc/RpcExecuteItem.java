@@ -20,30 +20,49 @@ package org.apache.niolex.network.rpc;
 import java.lang.reflect.Method;
 
 /**
+ * Rpc execute item, internal usage.
+ *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
  * @Date: 2012-6-1
  */
 public class RpcExecuteItem {
 
+	/**
+	 * The code mapped to this method.
+	 */
 	private short code;
+
+	/**
+	 * The target method.
+	 */
 	private Method method;
+
+	/**
+	 * The implementation object.
+	 */
 	private Object target;
+
 	public short getCode() {
 		return code;
 	}
+
 	public void setCode(short code) {
 		this.code = code;
 	}
+
 	public Method getMethod() {
 		return method;
 	}
+
 	public void setMethod(Method method) {
 		this.method = method;
 	}
+
 	public Object getTarget() {
 		return target;
 	}
+
 	public void setTarget(Object target) {
 		this.target = target;
 	}

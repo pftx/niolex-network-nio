@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
  * @author Xie, Jiyun
  *
  */
-public class PacketClient extends BasePacketWriter {
+public class PacketClient extends BasePacketWriter implements IClient {
 	private static final Logger LOG = LoggerFactory.getLogger(PacketClient.class);
 
     private InetSocketAddress serverAddress;
@@ -61,25 +61,27 @@ public class PacketClient extends BasePacketWriter {
     }
 
     /**
-     * Do real connect action. Start two separate threads for reads and writes.
-     * This method will return immediately.
-     * @throws IOException
-     */
-    public void connect() throws IOException {
-    	this.isWorking = true;
+	 * This is the override of super method.
+	 * @see org.apache.niolex.network.IClient#connect()
+	 */
+    @Override
+	public void connect() throws IOException {
         socket = new Socket();
         socket.connect(serverAddress);
         Thread tr = new Thread(new ReadLoop(socket.getInputStream()));
         tr.start();
         writeThread = new Thread(new WriteLoop(socket.getOutputStream()));
         writeThread.start();
+        this.isWorking = true;
         LOG.info("Client connected to address: {}", serverAddress);
     }
 
     /**
-     * Stop this client.
-     */
-    public void stop() {
+	 * This is the override of super method.
+	 * @see org.apache.niolex.network.IClient#stop()
+	 */
+    @Override
+	public void stop() {
         this.isWorking = false;
         if (writeThread != null) {
             writeThread.interrupt();
@@ -134,9 +136,21 @@ public class PacketClient extends BasePacketWriter {
             } catch(Exception e) {
                 if (isWorking) {
                     LOG.error("Error occured in read loop.", e);
+                    // Notice!
+                    /**
+                     * Packet Client Error will be handled in the Read Loop.
+                     * So the Write Loop will just return, so there will be just one Error to the
+                     * Upper layer.
+                     */
+                    isWorking = false;
+                    packetHandler.handleError(PacketClient.this);
                 } else {
                     LOG.info("Read loop stoped.");
                 }
+            } finally {
+            	try {
+            		in.close();
+            	} catch(Exception e) {}
             }
         }
     }
@@ -177,11 +191,14 @@ public class PacketClient extends BasePacketWriter {
                         sendNewPacket();
                     }
                 }
-                out.close();
-                socket.close();
                 LOG.info("Write loop stoped.");
             } catch(Exception e) {
                 LOG.error("Error occured in write loop.", e);
+            } finally {
+            	try {
+            		out.close();
+            		socket.close();
+            	} catch(Exception e) {}
             }
         }
 
@@ -195,20 +212,37 @@ public class PacketClient extends BasePacketWriter {
     }
 
     /**
-     * @param packetHandler the packetHandler to set
-     */
-    public void setPacketHandler(IPacketHandler packetHandler) {
+	 * This is the override of super method.
+	 * @see org.apache.niolex.network.IClient#setPacketHandler(org.apache.niolex.network.IPacketHandler)
+	 */
+    @Override
+	public void setPacketHandler(IPacketHandler packetHandler) {
         this.packetHandler = packetHandler;
     }
 
+	/**
+	 * This is the override of super method.
+	 * @see org.apache.niolex.network.IClient#getServerAddress()
+	 */
+	@Override
 	public InetSocketAddress getServerAddress() {
 		return serverAddress;
 	}
 
+	/**
+	 * This is the override of super method.
+	 * @see org.apache.niolex.network.IClient#setServerAddress(java.net.InetSocketAddress)
+	 */
+	@Override
 	public void setServerAddress(InetSocketAddress serverAddress) {
 		this.serverAddress = serverAddress;
 	}
 
+	/**
+	 * This is the override of super method.
+	 * @see org.apache.niolex.network.IClient#isWorking()
+	 */
+	@Override
 	public boolean isWorking() {
 		return isWorking;
 	}

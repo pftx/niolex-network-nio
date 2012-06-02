@@ -23,6 +23,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
+ * The annotation to mark a method as remote procedure call method.
+ * the single value is the code to map this method to.
+ *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
  * @Date: 2012-6-1
@@ -30,5 +33,9 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface RpcMethod {
+	/**
+	 * the code to map this method to.
+	 * @return
+	 */
 	short value();
 }

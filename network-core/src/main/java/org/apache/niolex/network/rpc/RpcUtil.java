@@ -24,16 +24,25 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.niolex.commons.compress.JacksonUtil;
+import org.apache.niolex.network.PacketData;
 import org.codehaus.jackson.map.type.TypeFactory;
 import org.codehaus.jackson.type.JavaType;
 
 /**
+ * Common utils for Rpc.
+ *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
  * @Date: 2012-6-1
  */
 public abstract class RpcUtil {
 
+	/**
+	 * Decode parameters to JavaType.
+	 *
+	 * @param generic
+	 * @return
+	 */
 	@SuppressWarnings("deprecation")
 	public static final List<JavaType> decodeParams(Type[] generic) {
 		List<JavaType> list = new ArrayList<JavaType>(generic.length);
@@ -43,6 +52,14 @@ public abstract class RpcUtil {
 		return list;
 	}
 
+	/**
+	 * prepare parameters, read them from the data, as the type specified by the second parameter.
+	 *
+	 * @param data
+	 * @param generic
+	 * @return
+	 * @throws IOException
+	 */
 	public static final Object[] prepareParams(byte[] data, Type[] generic) throws IOException {
 		List<JavaType> list = decodeParams(generic);
 		Object[] ret = new Object[list.size()];
@@ -51,5 +68,33 @@ public abstract class RpcUtil {
 			ret[i] = JacksonUtil.readObj(in, list.get(i));
 		}
 		return ret;
+	}
+
+	/**
+	 * Generate Key for this PacketData.
+	 *
+	 * @param rc
+	 * @return
+	 */
+	public static final int generateKey(PacketData rc) {
+		byte r = rc.getReserved();
+		if (r % 2 == 0) {
+			--r;
+		}
+		return generateKey(rc.getCode(), rc.getVersion(), r);
+	}
+
+	/**
+	 * Generate Key from a short and two bytes.
+	 *
+	 * @param a
+	 * @param b
+	 * @param c
+	 * @return
+	 */
+	public static final int generateKey(short a, byte b, byte c) {
+		int l = a << 16;
+		l += ((b & 0xFF) << 8) + (c & 0xFF);
+		return l;
 	}
 }
