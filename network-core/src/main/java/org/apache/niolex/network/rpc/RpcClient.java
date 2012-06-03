@@ -259,6 +259,10 @@ public abstract class RpcClient implements InvocationHandler, IPacketHandler {
 		this.rpcHandleTimeout = rpcHandleTimeout;
 	}
 
+	public void setConnectTimeout(int timeout) {
+		this.client.setConnectTimeout(timeout);
+	}
+
 	/**
 	 * Set the Rpc Configs, this method will parse all the configurations and generate execute map.
 	 * @param confs

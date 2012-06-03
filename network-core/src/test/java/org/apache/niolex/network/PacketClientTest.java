@@ -104,7 +104,7 @@ public class PacketClientTest {
 		sc.getData()[9] = (byte) 145;
 		sc.getData()[145] = (byte) 63;
 		packetClient.handleWrite(sc);
-		Thread.sleep(600);
+		Thread.sleep(6 * CoreRunner.CO_SLEEP);
 		packetClient.stop();
 
 		ArgumentCaptor<PacketData> argument = ArgumentCaptor
@@ -208,7 +208,7 @@ public class PacketClientTest {
 		while (i-- > 0) {
 			if (received == 6)
 				break;
-			Thread.sleep(1000);
+			Thread.sleep(10 * CoreRunner.CO_SLEEP);
 		}
 		packetClient.stop();
 		assertEquals(6, received);

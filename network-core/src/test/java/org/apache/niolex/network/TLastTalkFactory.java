@@ -46,7 +46,7 @@ public class TLastTalkFactory extends LastTalkFactory {
                 lastTalk = thisTalk;
                 if (sc.getCode() == 5) {
                 	try {
-						Thread.sleep(123);
+						Thread.sleep(CoreRunner.CO_SLEEP);
 					} catch (InterruptedException e) {
 					}
                 }

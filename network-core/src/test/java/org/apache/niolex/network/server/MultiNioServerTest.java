@@ -26,6 +26,7 @@ import static org.mockito.Mockito.verify;
 
 import java.net.InetSocketAddress;
 
+import org.apache.niolex.network.CoreRunner;
 import org.apache.niolex.network.IPacketHandler;
 import org.apache.niolex.network.IPacketWriter;
 import org.apache.niolex.network.PacketClient;
@@ -82,7 +83,7 @@ public class MultiNioServerTest {
         sc.setLength(0);
         sc.setData(new byte[0]);
         c.handleWrite(sc);
-        Thread.sleep(300);
+        Thread.sleep(3 * CoreRunner.CO_SLEEP);
         c.stop();
         ArgumentCaptor<PacketData> argument = ArgumentCaptor.forClass(PacketData.class);
         verify(packetHandler).handleRead(argument.capture(), any(IPacketWriter.class));
@@ -105,7 +106,7 @@ public class MultiNioServerTest {
 		sc.getData()[6] = (byte)145;
 		sc.getData()[145] = (byte)63;
 		c.handleWrite(sc);
-		Thread.sleep(600);
+		Thread.sleep(6 * CoreRunner.CO_SLEEP);
 		c.stop();
 		ArgumentCaptor<PacketData> argument = ArgumentCaptor.forClass(PacketData.class);
 		verify(packetHandler).handleRead(argument.capture(), any(IPacketWriter.class));
@@ -134,7 +135,7 @@ public class MultiNioServerTest {
 		sc.getData()[77] = (byte)145;
 		sc.getData()[145] = (byte)63;
 		c.handleWrite(sc);
-		Thread.sleep(600);
+		Thread.sleep(6 * CoreRunner.CO_SLEEP);
 		c.stop();
 		ArgumentCaptor<PacketData> argument = ArgumentCaptor.forClass(PacketData.class);
 		verify(packetHandler).handleRead(argument.capture(), any(IPacketWriter.class));
@@ -171,7 +172,7 @@ public class MultiNioServerTest {
             sc.setData(data);
             c.handleWrite(sc);
         }
-		Thread.sleep(500);
+		Thread.sleep(5 * CoreRunner.CO_SLEEP);
 		c.stop();
 		verify(h, times(4)).handleRead(any(PacketData.class), any(IPacketWriter.class));
 		verify(packetHandler, times(4)).handleRead(any(PacketData.class), any(IPacketWriter.class));
@@ -195,7 +196,7 @@ public class MultiNioServerTest {
 			sc.setData(data);
 			c.handleWrite(sc);
 		}
-		Thread.sleep(300);
+		Thread.sleep(3 * CoreRunner.CO_SLEEP);
 		c.stop();
 		verify(h, times(2)).handleRead(any(PacketData.class), any(IPacketWriter.class));
 		verify(packetHandler, times(2)).handleRead(any(PacketData.class), any(IPacketWriter.class));

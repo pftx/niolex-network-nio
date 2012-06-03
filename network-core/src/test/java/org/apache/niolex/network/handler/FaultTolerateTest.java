@@ -84,7 +84,7 @@ public class FaultTolerateTest {
 		byte[] arr = "Wre rea had to estt this project, please keep clean.".getBytes();
 		final PacketData sc1 = new PacketData(4, arr);
 		packetClient.handleWrite(sc1);
-		Thread.sleep(200);
+		Thread.sleep(2  * CoreRunner.CO_SLEEP);
 
 		verify(packetHandler, times(1)).handleRead(any(PacketData.class), eq(packetClient));
 		final PacketData sc2 = new PacketData(5, arr);
@@ -92,13 +92,13 @@ public class FaultTolerateTest {
 		Thread.sleep(20);
 		packetClient.stop();
 
-		Thread.sleep(500);
+		Thread.sleep(5 * CoreRunner.CO_SLEEP);
 		System.out.println("--------------------------------------------");
 		packetHandler = mock(IPacketHandler.class);
 		packetClient.setPacketHandler(packetHandler);
 		packetClient.connect();
 		packetClient.handleWrite(sc0);
-		Thread.sleep(500);
+		Thread.sleep(5 * CoreRunner.CO_SLEEP);
 
 		ArgumentCaptor<PacketData> argument = ArgumentCaptor.forClass(PacketData.class);
 		verify(packetHandler, times(2)).handleRead(argument.capture(), eq(packetClient));
