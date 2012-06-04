@@ -47,7 +47,8 @@ public class RpcClient {
 
 			@Override
 			public void run() {
-				int i = 2212;
+				int i = 1234;
+				long in = System.currentTimeMillis();
 				while (i-- > 0) {
 					int k = ser.add(3, 4, 5, 6, 7, 8, 9, i);
 					if (k != 42 + i) {
@@ -61,15 +62,22 @@ public class RpcClient {
 					if (k != 2) {
 						System.out.println("Out => " + k);
 					}
+					k = ser.size(null);
+					assert k == 0;
 				}
-
+				long t = System.currentTimeMillis() - in;
+				System.out.println("rps => " + (2212 * 3000 / t));
 			}};
-		Thread t = new Thread(r);
-		Thread q = new Thread(r);
-		t.start();
-		q.start();
-		t.join();
-		q.join();
+		Thread[] ts = new Thread[5];
+		for (int i = 0; i < 5; ++i) {
+			Thread t = new Thread(r);
+			t.start();
+			ts[i] = t;
+		}
+		for (int i = 0; i < 5; ++i) {
+			ts[i].join();
+			System.out.println("Join ...");
+		}
 		System.out.println("Done.....");
         c.stop();
     }

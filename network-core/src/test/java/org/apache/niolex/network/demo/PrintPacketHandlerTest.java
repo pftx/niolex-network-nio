@@ -22,7 +22,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 
 import org.apache.niolex.network.IPacketHandler;
 import org.apache.niolex.network.IPacketWriter;
@@ -53,19 +52,11 @@ public class PrintPacketHandlerTest {
 	public void testCoverMain() throws Exception {
 		DemoServer a = new DemoServer();
 		DemoClient b = new DemoClient();
-	    Thread t = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    DemoServer.main(null);
-                } catch (IOException e) {
-                }
-            }});
-	    t.start();
+		DemoServer.main(null);
+	    Thread.sleep(10);
 	    String cons = "4\nNice to meet you!\n4\nNice to meet you!\n-1\n";
 	    DemoClient.setIn(new ByteArrayInputStream(cons.getBytes()));
 	    DemoClient.main(null);
 	    DemoServer.stop();
-	    t.join();
 	}
 }
