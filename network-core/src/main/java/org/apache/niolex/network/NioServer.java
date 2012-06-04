@@ -295,6 +295,7 @@ public class NioServer implements Runnable {
                     if (receiveStatus == Status.HEADER) {
                         receivePacket = new PacketData();
                         if (receivePacket.parseHeader(receiveBuffer)) {
+                        	LOG.debug("Packet received. code {}, size {}.", receivePacket.code, receivePacket.getLength());
                             packetHandler.handleRead(receivePacket, this);
                             receiveBuffer.compact();
                             return true;
@@ -304,6 +305,7 @@ public class NioServer implements Runnable {
                         }
                     } else {
                         if (receivePacket.parseBody(receiveBuffer)) {
+                        	LOG.debug("Packet received. code {}, size {}.", receivePacket.code, receivePacket.getLength());
                             packetHandler.handleRead(receivePacket, this);
                             receiveStatus = Status.HEADER;
                             receiveBuffer.compact();
@@ -341,6 +343,7 @@ public class NioServer implements Runnable {
                     } else {
                         if (sendStatus == Status.SEND) {
                         	sendStatus = Status.NONE;
+                        	LOG.debug("Packet sent. code {}, size {}.", sendPacket.code, sendPacket.getLength());
                             return sendNewPacket();
                         } else {
                         	sendBuffer.clear();

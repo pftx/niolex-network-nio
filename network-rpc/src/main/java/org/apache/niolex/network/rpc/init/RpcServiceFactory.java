@@ -55,7 +55,7 @@ public class RpcServiceFactory {
 	 * @param fileName
 	 * @param factory
 	 */
-	private RpcServiceFactory(String fileName, RpcClientFactory factory) {
+	protected RpcServiceFactory(String fileName, RpcClientFactory factory) {
 		configer = new RpcConfiger(fileName);
 		Map<String, RpcConfigBean> confs = configer.getConfigs();
 		for (Entry<String, RpcConfigBean> entry : confs.entrySet()) {

@@ -135,6 +135,7 @@ public abstract class RpcPacketHandler implements IPacketHandler {
 				handleReturn(sc, wt, rep, 1);
 				return;
 			}
+			LOG.debug("Packet handled. code {}, size {}.", sc.getCode(), sc.getLength());
 		}
 
 

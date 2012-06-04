@@ -58,7 +58,7 @@ public class RpcInitUtil {
 				RpcClient proxy = factory.createRpcClient(completeUrl);
 				proxy.setConnectTimeout(conf.connectTimeout);
 				proxy.setRpcHandleTimeout(conf.readTimeout);
-
+				proxy.connect();
 				listHandlers.add(new RpcConnectionHandler(completeUrl, proxy));
 			} catch (Exception e) {
 				LOG.warn("Failed to build rpc proxy for " + completeUrl + " : " + e.getMessage());

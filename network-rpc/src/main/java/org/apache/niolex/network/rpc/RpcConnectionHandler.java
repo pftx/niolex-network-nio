@@ -62,6 +62,15 @@ public class RpcConnectionHandler implements IServiceHandler {
 
 	/**
 	 * This is the override of super method.
+	 * @see org.apache.niolex.network.rpc.IServiceHandler#toString()
+	 */
+	@Override
+	public String toString() {
+		return serviceUrl;
+	}
+
+	/**
+	 * This is the override of super method.
 	 * @see org.apache.niolex.network.rpc.IServiceHandler#isReady()
 	 */
 	@Override

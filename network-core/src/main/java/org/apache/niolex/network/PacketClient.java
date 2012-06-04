@@ -133,6 +133,7 @@ public class PacketClient extends BasePacketWriter implements IClient {
                 while (isWorking) {
                     PacketData readPacket = new PacketData();
                     readPacket.parseHeader(in);
+                    LOG.debug("Packet received. code {}, size {}.", readPacket.code, readPacket.getLength());
                     packetHandler.handleRead(readPacket, PacketClient.this);
                 }
             } catch(Exception e) {
@@ -210,6 +211,7 @@ public class PacketClient extends BasePacketWriter implements IClient {
          */
         public void sendNewPacket() throws IOException {
             sendPacket.generateData(out);
+            LOG.debug("Packet sent. code {}, size {}.", sendPacket.code, sendPacket.getLength());
         }
     }
 
