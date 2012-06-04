@@ -70,11 +70,11 @@ public class PacketClient extends BasePacketWriter implements IClient {
         socket = new Socket();
         socket.setSoTimeout(connectTimeout);
         socket.connect(serverAddress);
+        this.isWorking = true;
         Thread tr = new Thread(new ReadLoop(socket.getInputStream()));
         tr.start();
         writeThread = new Thread(new WriteLoop(socket.getOutputStream()));
         writeThread.start();
-        this.isWorking = true;
         LOG.info("Client connected to address: {}", serverAddress);
     }
 

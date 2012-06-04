@@ -33,8 +33,9 @@ import org.apache.niolex.network.PacketClient;
 import org.apache.niolex.network.PacketData;
 import org.apache.niolex.network.demo.PrintPacketHandler;
 import org.apache.niolex.network.example.EchoPacketHandler;
-import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -47,24 +48,29 @@ public class MultiNioServerTest {
 	@Mock
 	private IPacketHandler packetHandler;
 
-	private int port = 8808;
-	private MultiNioServer nioServer;
-	private Thread thread;
+	private static int port = 8808;
+	private static MultiNioServer nioServer;
+	private static Thread thread;
 
-	@Before
-	public void createNioServer() throws Exception {
+
+	@BeforeClass
+	public static void createNioServer() throws Exception {
 		nioServer = new MultiNioServer();
-		nioServer.setPacketHandler(packetHandler);
 		nioServer.setPort(port);
 		nioServer.start();
 		thread = new Thread(nioServer);
 		thread.start();
 	}
 
-	@After
-	public void stopNioServer() throws Exception {
+	@AfterClass
+	public static void stopNioServer() throws Exception {
 		nioServer.stop();
 		thread.join();
+	}
+
+	@Before
+	public void setHandler() throws Exception {
+		nioServer.setPacketHandler(packetHandler);
 	}
 
 	@Test

@@ -28,8 +28,9 @@ import java.net.InetSocketAddress;
 
 import org.apache.niolex.network.demo.PrintPacketHandler;
 import org.apache.niolex.network.example.EchoPacketHandler;
-import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -47,37 +48,41 @@ public class NioServerTest {
 	@Mock
 	private IPacketHandler packetHandler;
 
-	private int port = 8808;
-	private NioServer nioServer;
-	private Thread thread;
+	private static int port = 8808;
+	private static NioServer nioServer;
+	private static Thread thread;
 
-	@Before
-	public void createNioServer() throws Exception {
+	@BeforeClass
+	public static void createNioServer() throws Exception {
 		nioServer = new NioServer();
-		nioServer.setPacketHandler(packetHandler);
 		nioServer.setPort(port);
 		nioServer.start();
 		thread = new Thread(nioServer);
 		thread.start();
 	}
 
-	@After
-	public void stopNioServer() throws Exception {
+	@AfterClass
+	public static void stopNioServer() throws Exception {
 		nioServer.stop();
 		thread.join();
 	}
 
+	@Before
+	public void setHandler() throws Exception {
+		nioServer.setPacketHandler(packetHandler);
+	}
+
 	@Test
 	public void testSetter() throws Exception {
-		nioServer.setAcceptTimeOut(1233);
+		nioServer.setAcceptTimeOut(6233);
 		nioServer.setHeartBeatInterval(23122);
-		assertEquals(1233, nioServer.getAcceptTimeOut());
+		assertEquals(6233, nioServer.getAcceptTimeOut());
 		assertEquals(23122, nioServer.getHeartBeatInterval());
+		assertEquals(8808, nioServer.getPort());
 	}
 
 	@Test
 	public void testStart() throws Exception {
-		assertEquals(8808, nioServer.getPort());
 		assertEquals(packetHandler, nioServer.getPacketHandler());
 		PacketClient c = new PacketClient(new InetSocketAddress("localhost", 8808));
         c.setPacketHandler(new PrintPacketHandler());
