@@ -52,4 +52,54 @@ public class BasePacketWriterTest {
 		assertEquals("Not yet implemented", bpw.getAttached("IDIJF"));
 	}
 
+	@Test
+	public void testHandleWriteM() throws InterruptedException {
+		Runnable r = new Runnable() {
+
+			@Override
+			public void run() {
+				while (bpw.handleNext() == null) {
+					try {
+						Thread.sleep(1);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+				while (bpw.handleNext() == null) {
+					try {
+						Thread.sleep(1);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+				System.out.println("Out Time: " + System.currentTimeMillis());
+
+			}};
+		;
+		Thread t0 = new Thread(r);
+		Thread t1 = new Thread(r);
+		Thread t2 = new Thread(r);
+		t0.start();
+		t1.start();
+		t2.start();
+		Thread.sleep(10);
+		System.out.println("Inn Time: " + System.currentTimeMillis());
+		bpw.handleWrite(null);
+		bpw.handleWrite(PacketData.getHeartBeatPacket());
+		bpw.handleWrite(null);
+		bpw.handleWrite(PacketData.getHeartBeatPacket());
+		bpw.handleWrite(null);
+		bpw.handleWrite(PacketData.getHeartBeatPacket());
+		PacketData pc = new PacketData(4, new byte[4]);
+		bpw.handleWrite(null);
+		bpw.handleWrite(pc);
+		bpw.handleWrite(null);
+		bpw.handleWrite(pc);
+		bpw.handleWrite(null);
+		bpw.handleWrite(pc);
+		bpw.handleWrite(null);
+		t0.join();
+		t1.join();
+		t2.join();
+	}
 }

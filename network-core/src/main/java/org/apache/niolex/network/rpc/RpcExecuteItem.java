@@ -29,11 +29,6 @@ import java.lang.reflect.Method;
 public class RpcExecuteItem {
 
 	/**
-	 * The code mapped to this method.
-	 */
-	private short code;
-
-	/**
 	 * The target method.
 	 */
 	private Method method;
@@ -42,14 +37,6 @@ public class RpcExecuteItem {
 	 * The implementation object.
 	 */
 	private Object target;
-
-	public short getCode() {
-		return code;
-	}
-
-	public void setCode(short code) {
-		this.code = code;
-	}
 
 	public Method getMethod() {
 		return method;

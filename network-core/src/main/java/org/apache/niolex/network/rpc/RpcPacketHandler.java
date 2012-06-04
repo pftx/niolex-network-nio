@@ -72,6 +72,10 @@ public abstract class RpcPacketHandler implements IPacketHandler {
 	 */
 	@Override
 	public void handleRead(PacketData sc, IPacketWriter wt) {
+		if (sc.getCode() == Config.CODE_HEART_BEAT) {
+			// This is heart beat, just return.
+			return;
+		}
 		RpcExecuteItem ei = executeMap.get(sc.getCode());
 		RpcException rep = null;
 		if (ei != null) {
@@ -176,7 +180,6 @@ public abstract class RpcPacketHandler implements IPacketHandler {
 				if (m.isAnnotationPresent(RpcMethod.class)) {
 					RpcMethod rp = m.getAnnotation(RpcMethod.class);
 					RpcExecuteItem rei = new RpcExecuteItem();
-					rei.setCode(rp.value());
 					rei.setMethod(m);
 					rei.setTarget(conf.getTarget());
 					rei = executeMap.put(rp.value(), rei);

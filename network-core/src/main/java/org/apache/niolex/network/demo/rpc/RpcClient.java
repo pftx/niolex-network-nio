@@ -49,7 +49,9 @@ public class RpcClient {
 			public void run() {
 				int i = 1234;
 				long in = System.currentTimeMillis();
+				long maxin = 0;
 				while (i-- > 0) {
+					long xin = System.currentTimeMillis();
 					int k = ser.add(3, 4, 5, 6, 7, 8, 9, i);
 					if (k != 42 + i) {
 						System.out.println("Out => " + k);
@@ -64,9 +66,13 @@ public class RpcClient {
 					}
 					k = ser.size(null);
 					assert k == 0;
+					long xou = System.currentTimeMillis() - xin;
+					if (xou > maxin) {
+						maxin = xou;
+					}
 				}
 				long t = System.currentTimeMillis() - in;
-				System.out.println("rps => " + (2212 * 3000 / t));
+				System.out.println("rps => " + (2212 * 3000 / t) + ", Max " + maxin);
 			}};
 		Thread[] ts = new Thread[5];
 		for (int i = 0; i < 5; ++i) {

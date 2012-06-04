@@ -20,8 +20,10 @@ package org.apache.niolex.network.rpc.json;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
 
+import org.apache.niolex.commons.reflect.MethodUtil;
 import org.apache.niolex.network.CoreRunner;
 import org.apache.niolex.network.PacketClient;
 import org.apache.niolex.network.demo.rpc.RpcServer;
@@ -76,6 +78,12 @@ public class JsonRpcClientTest {
 	public void testPrepareReturn() {
 		String r = ser.tr();
 		fail(r);
+	}
+
+	@Test(expected=RpcException.class)
+	public void invoke() throws Throwable {
+		Method method = MethodUtil.getMethods(JsonRpcClientTest.class, "invoke")[0];
+		client.invoke(ser, method, null);
 	}
 
 	/**
