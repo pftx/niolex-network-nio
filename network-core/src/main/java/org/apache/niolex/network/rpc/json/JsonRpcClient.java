@@ -50,6 +50,9 @@ public class JsonRpcClient extends RpcClient {
 	 */
 	@Override
 	protected byte[] serializeParams(Object[] args) throws Exception {
+		if (args == null) {
+			return new byte[0];
+		}
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		for (Object o : args) {
 			JacksonUtil.writeObj(out, o);

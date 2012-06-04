@@ -47,7 +47,7 @@ public class FaultTolerateAdapter implements IPacketHandler {
 
 	private static final String KEY = Config.ATTACH_KEY_SESS_SESSID;
 	private Map<String, LinkedIterList<PacketData>> dataMap =
-			new LRUHashMap<String, LinkedIterList<PacketData>>(Config.SERVER_FAULT_TOLERATE_SIZE);
+			new LRUHashMap<String, LinkedIterList<PacketData>>(Config.SERVER_FAULT_TOLERATE_MAP_SIZE);
 
 	// The Handler need to be adapted.
 	private IPacketHandler other;

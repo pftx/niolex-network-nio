@@ -71,6 +71,16 @@ public abstract class RpcClient implements InvocationHandler, IPacketHandler {
 	private int rpcHandleTimeout = Config.RPC_HANDLE_TIMEOUT;
 
 	/**
+	 * The time to sleep between retry.
+	 */
+	private int sleepBetweenRetryTime = Config.RPC_SLEEP_BT_RETRY;
+
+	/**
+	 * Times to retry get connected.
+	 */
+	private int connectRetryTimes = Config.RPC_CONNECT_RETRY_TIMES;
+
+	/**
 	 * The status of this Client.
 	 */
 	private Status connStatus;
@@ -231,16 +241,33 @@ public abstract class RpcClient implements InvocationHandler, IPacketHandler {
 		}
 		// We will retry to connect in this method.
 		client.stop();
-		try {
-			client.connect();
-		} catch (IOException e) {
-			LOG.error("Exception occured when try to re-connect to server.", e);
+		if (!retryConnect()) {
+			LOG.error("Exception occured when try to re-connect to server.");
 			// Try to shutdown this Client, inform all the threads.
 			this.connStatus = Status.CLOSED;
 			for (RpcWaitItem wi : waitMap.values()) {
 				wi.getThread().interrupt();
 			}
 		}
+	}
+
+	private boolean retryConnect() {
+		for (int i = 0; i < connectRetryTimes; ++i) {
+			try {
+				Thread.sleep(sleepBetweenRetryTime);
+			} catch (InterruptedException e1) {
+				// It's OK.
+			}
+			LOG.info("RPC Client try to reconnect to server round {} ...", i);
+			try {
+				client.connect();
+				return true;
+			} catch (IOException e) {
+				// Not connected.
+				LOG.info("Try to re-connect to server failed. {}", e.toString());
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -257,6 +284,14 @@ public abstract class RpcClient implements InvocationHandler, IPacketHandler {
 
 	public void setRpcHandleTimeout(int rpcHandleTimeout) {
 		this.rpcHandleTimeout = rpcHandleTimeout;
+	}
+
+	public void setSleepBetweenRetryTime(int sleepBetweenRetryTime) {
+		this.sleepBetweenRetryTime = sleepBetweenRetryTime;
+	}
+
+	public void setConnectRetryTimes(int connectRetryTimes) {
+		this.connectRetryTimes = connectRetryTimes;
 	}
 
 	public void setConnectTimeout(int timeout) {

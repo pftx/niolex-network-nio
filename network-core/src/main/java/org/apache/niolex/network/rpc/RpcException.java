@@ -32,6 +32,20 @@ public class RpcException extends RuntimeException {
 	private static final long serialVersionUID = -4027742478277292216L;
 
 	/**
+	 * The exception type.
+	 */
+	private Type type;
+
+
+	/**
+	 * Default constructor, used by Serial Tools.
+	 */
+	public RpcException() {
+		super();
+	}
+
+
+	/**
 	 * Create a RpcException with a message and a throwable.
 	 *
 	 * Constructor
@@ -40,8 +54,16 @@ public class RpcException extends RuntimeException {
 	 */
 	public RpcException(String message, Type type, Throwable cause) {
 		super(message, cause);
+		this.type = type;
 	}
 
+	public Type getType() {
+		return type;
+	}
+
+	public void setType(Type type) {
+		this.type = type;
+	}
 
 	public static enum Type {
 		TIMEOUT, NOT_CONNECTED, CONNECTION_CLOSED, METHOD_NOT_FOUND, ERROR_PARSE_PARAMS,

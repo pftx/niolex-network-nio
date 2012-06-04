@@ -75,7 +75,7 @@ public abstract class BasePacketWriter implements IPacketWriter {
 	protected PacketData handleNext() {
 		PacketData d = sendIter.next();
 		if (d != null) {
-			if (cacheSize >= Config.SERVER_CACHE_TOLERATE_SIZE) {
+			if (cacheSize >= Config.SERVER_CACHE_TOLERATE_PACKETS_SIZE) {
 				sendPacketList.poll();
 			} else {
 				++ cacheSize;

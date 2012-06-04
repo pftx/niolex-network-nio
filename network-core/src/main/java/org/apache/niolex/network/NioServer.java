@@ -47,9 +47,9 @@ public class NioServer implements Runnable {
 
     private volatile boolean isListening = false;
 
-    private int acceptTimeOut = 5000;
+    private int acceptTimeOut = Config.SERVER_ACCEPT_TIMEOUT;
 
-    private int heartBeatInterval = 10000;
+    private int heartBeatInterval = Config.SERVER_HEARTBEAT_INTERVAL;
 
     private int port;
 
@@ -201,6 +201,14 @@ public class NioServer implements Runnable {
         } catch (Exception e) {
             LOG.error("Failed to stop server.", e);
         }
+        for (SocketChannel sc : clientMap.keySet()) {
+        	try {
+				sc.close();
+			} catch (IOException e) {
+				// Do nothing.
+			}
+        }
+        clientMap.clear();
     }
 
     /**

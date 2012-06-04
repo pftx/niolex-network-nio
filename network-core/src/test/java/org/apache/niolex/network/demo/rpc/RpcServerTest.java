@@ -1,5 +1,5 @@
 /**
- * RpcService.java
+ * RpcServerTest.java
  *
  * Copyright 2012 Niolex, Inc.
  *
@@ -17,23 +17,27 @@
  */
 package org.apache.niolex.network.demo.rpc;
 
-import java.util.List;
-
-import org.apache.niolex.network.rpc.RpcMethod;
+import org.junit.Test;
 
 /**
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
- * @Date: 2012-6-1
+ * @Date: 2012-6-4
  */
-public interface RpcService {
+public class RpcServerTest {
 
-	@RpcMethod(14)
-	public int add(int ...args);
+	/**
+	 * Test method for {@link org.apache.niolex.network.demo.rpc.RpcServer#main(java.lang.String[])}.
+	 * @throws Throwable
+	 */
+	@Test
+	@SuppressWarnings("unused")
+	public void testMain() throws Throwable {
+		RpcClient c = new RpcClient();
+		RpcServer s = new RpcServer();
+		RpcServer.main(null);
+		RpcClient.main(null);
+		RpcServer.stop();
+	}
 
-	@RpcMethod(15)
-	public int size(List<String> arg);
-
-	@RpcMethod(16)
-	public String tr();
 }

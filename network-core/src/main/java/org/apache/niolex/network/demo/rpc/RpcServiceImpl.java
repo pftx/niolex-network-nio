@@ -51,4 +51,13 @@ public class RpcServiceImpl implements RpcService {
 		return 0;
 	}
 
+	/**
+	 * Override super method
+	 * @see org.apache.niolex.network.demo.rpc.RpcService#tr()
+	 */
+	@Override
+	public String tr() {
+		throw new RuntimeException("org.apache.niolex.network.demo.rpc.RpcService#tr()");
+	}
+
 }
