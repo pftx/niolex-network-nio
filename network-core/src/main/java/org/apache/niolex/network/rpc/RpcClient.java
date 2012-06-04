@@ -24,6 +24,7 @@ import java.lang.reflect.Proxy;
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.niolex.commons.reflect.MethodUtil;
@@ -58,7 +59,7 @@ public abstract class RpcClient implements InvocationHandler, IPacketHandler {
 	/**
 	 * The current waiting map.
 	 */
-	private Map<Integer, RpcWaitItem> waitMap = new HashMap<Integer, RpcWaitItem>();
+	private Map<Integer, RpcWaitItem> waitMap = new ConcurrentHashMap<Integer, RpcWaitItem>();
 
 	/**
 	 * The serial generator.

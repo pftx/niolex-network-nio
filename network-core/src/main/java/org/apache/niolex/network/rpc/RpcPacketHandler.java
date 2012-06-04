@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.niolex.commons.reflect.MethodUtil;
 import org.apache.niolex.network.Config;
@@ -45,6 +46,8 @@ public abstract class RpcPacketHandler implements IPacketHandler {
 	// The Thread pool size, default to 20, which is the majority configurations on servers.
     private ExecutorService tPool;
 	private Map<Short, RpcExecuteItem> executeMap = new HashMap<Short, RpcExecuteItem>();
+	// The current queue size.
+	private AtomicInteger queueSize = new AtomicInteger(0);
 
 
 	/**
@@ -80,6 +83,7 @@ public abstract class RpcPacketHandler implements IPacketHandler {
 		RpcException rep = null;
 		if (ei != null) {
 			RpcExecute re = new RpcExecute(ei.getTarget(), ei.getMethod(), sc, wt);
+			queueSize.incrementAndGet();
 			tPool.execute(re);
 		} else {
 			rep = new RpcException("The method you want to invoke doesn't exist.",
@@ -116,6 +120,14 @@ public abstract class RpcPacketHandler implements IPacketHandler {
 		 */
 		@Override
 		public void run() {
+			try {
+				execute();
+			} finally {
+				LOG.debug("Packet handled. code {}, queue size {}.", sc.getCode(), queueSize.decrementAndGet());
+			}
+		}
+
+		private void execute() {
 			RpcException rep = null;
 			Object[] args = null;
 			try {
@@ -135,7 +147,6 @@ public abstract class RpcPacketHandler implements IPacketHandler {
 				handleReturn(sc, wt, rep, 1);
 				return;
 			}
-			LOG.debug("Packet handled. code {}, size {}.", sc.getCode(), sc.getLength());
 		}
 
 

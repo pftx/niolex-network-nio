@@ -73,7 +73,7 @@ public class RpcClient {
 					}
 				}
 				long t = System.currentTimeMillis() - in;
-				System.out.println("rps => " + (2212 * 3000 / t) + ", Max " + maxin);
+				System.out.println("rps => " + (2212 * 3000 / t) + ", Max " + maxin + ", Avg " + (t / 6636));
 			}};
 		Thread[] ts = new Thread[5];
 		for (int i = 0; i < 5; ++i) {
