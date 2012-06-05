@@ -36,4 +36,6 @@ public interface RpcService {
 
 	@RpcMethod(16)
 	public String tr();
+
+	public void testMe();
 }

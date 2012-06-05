@@ -159,7 +159,12 @@ public abstract class RpcClient implements InvocationHandler, IPacketHandler {
 		Short rei = executeMap.get(method);
 		if (rei != null) {
 			// 1. Prepare parameters
-			byte[] arr = serializeParams(args);
+			byte[] arr;
+			if (args == null || args.length == 0) {
+				arr = new byte[0];
+			} else {
+				arr = serializeParams(args);
+			}
 			// 2. Create PacketData
 			PacketData rc = new PacketData(rei, arr);
 			// 3. Generate serial number
@@ -317,6 +322,23 @@ public abstract class RpcClient implements InvocationHandler, IPacketHandler {
 	}
 
 	/**
+	 * De-serialize returned byte array into objects.
+	 * @param ret
+	 * @param type
+	 * @param exp 0 for returned objects, 1 for RpcException.
+	 * @return
+	 * @throws Exception
+	 */
+	protected Object prepareReturn(byte[] ret, Type type, int exp) throws Exception {
+		if (exp == 1) {
+			type = RpcException.class;
+		} else if (type == null || type.toString().equalsIgnoreCase("void")) {
+			return null;
+		}
+		return prepareReturn(ret, type);
+	}
+
+	/**
 	 * Serialize arguments objects into byte array.
 	 * @param data
 	 * @param generic
@@ -329,10 +351,9 @@ public abstract class RpcClient implements InvocationHandler, IPacketHandler {
 	 * De-serialize returned byte array into objects.
 	 * @param ret
 	 * @param type
-	 * @param exp 0 for returned objects, 1 for RpcException.
 	 * @return
 	 * @throws Exception
 	 */
-	protected abstract Object prepareReturn(byte[] ret, Type type, int exp) throws Exception;
+	protected abstract Object prepareReturn(byte[] ret, Type type) throws Exception;
 
 }

@@ -67,7 +67,7 @@ public class RpcException extends RuntimeException {
 
 	public static enum Type {
 		TIMEOUT, NOT_CONNECTED, CONNECTION_CLOSED, METHOD_NOT_FOUND, ERROR_PARSE_PARAMS,
-		ERROR_INVOKE, UNKNOWN
+		ERROR_INVOKE, ERROR_PARSE_RETURN, UNKNOWN
 	}
 
 }

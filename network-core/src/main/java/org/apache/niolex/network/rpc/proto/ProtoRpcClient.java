@@ -1,5 +1,5 @@
 /**
- * JsonRpcClient.java
+ * ProtoRpcClient.java
  *
  * Copyright 2012 Niolex, Inc.
  *
@@ -15,57 +15,60 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.niolex.network.rpc.json;
+package org.apache.niolex.network.rpc.proto;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.lang.reflect.Type;
 
-import org.apache.niolex.commons.compress.JacksonUtil;
 import org.apache.niolex.network.PacketClient;
 import org.apache.niolex.network.rpc.RpcClient;
-import org.codehaus.jackson.map.type.TypeFactory;
+import org.apache.niolex.network.rpc.RpcException;
+
+import com.google.protobuf.GeneratedMessage;
 
 /**
- * The Json Rpc Client.
+ * Using Google Protocol Buffer to serialize data.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
- * @Date: 2012-6-2
+ * @Date: 2012-6-5
  */
-public class JsonRpcClient extends RpcClient {
+public class ProtoRpcClient extends RpcClient {
 
 	/**
-	 * Implements super Constructor
+	 * Implements super constructor
 	 * @param client
 	 */
-	public JsonRpcClient(PacketClient client) {
+	public ProtoRpcClient(PacketClient client) {
 		super(client);
 	}
 
 	/**
-	 * This is the override of super method.
+	 * Override super method
 	 * @see org.apache.niolex.network.rpc.RpcClient#serializeParams(java.lang.Object[])
 	 */
 	@Override
 	protected byte[] serializeParams(Object[] args) throws Exception {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		for (Object o : args) {
-			JacksonUtil.writeObj(out, o);
+			if (o instanceof GeneratedMessage) {
+				GeneratedMessage gen = (GeneratedMessage)o;
+				gen.writeTo(out);
+			} else {
+				throw new RpcException("Message is not protobuf type: " + o.getClass(),
+						RpcException.Type.ERROR_PARSE_PARAMS, null);
+			}
 		}
 		return out.toByteArray();
 	}
 
 	/**
-	 * This is the override of super method.
+	 * Override super method
 	 * @see org.apache.niolex.network.rpc.RpcClient#prepareReturn(byte[], java.lang.reflect.Type, int)
 	 */
-	@SuppressWarnings("deprecation")
 	@Override
 	protected Object prepareReturn(byte[] ret, Type type) throws Exception {
-		ByteArrayInputStream in = new ByteArrayInputStream(ret);
-		Object r = JacksonUtil.readObj(in, TypeFactory.type(type));
-		return r;
+		return ProtoUtil.parseOne(ret, type);
 	}
 
 }

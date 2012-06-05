@@ -17,6 +17,10 @@
  */
 package org.apache.niolex.network.demo.rpc;
 
+import java.lang.reflect.Method;
+import java.lang.reflect.Type;
+
+import org.apache.niolex.commons.reflect.MethodUtil;
 import org.junit.Test;
 
 /**
@@ -33,11 +37,25 @@ public class RpcServerTest {
 	@Test
 	@SuppressWarnings("unused")
 	public void testMain() throws Throwable {
-		RpcClient c = new RpcClient();
+		DemoRpcClient c = new DemoRpcClient();
 		RpcServer s = new RpcServer();
 		RpcServer.main(null);
-		RpcClient.main(null);
+		DemoRpcClient.main(null);
 		RpcServer.stop();
 	}
 
+	@Test
+	public void test() throws Throwable {
+		Method method = MethodUtil.getMethods(RpcServiceImpl.class, "testMe")[0];
+		Type t = method.getGenericReturnType();
+		System.out.println("test " + t.toString());
+		Type[] ts = method.getGenericParameterTypes();
+		System.out.println("test " + ts.length);
+
+		method = MethodUtil.getMethods(RpcServiceImpl.class, "add")[0];
+		t = method.getGenericReturnType();
+		System.out.println("test " + t.toString());
+		ts = method.getGenericParameterTypes();
+		System.out.println("test " + ts.length);
+	}
 }

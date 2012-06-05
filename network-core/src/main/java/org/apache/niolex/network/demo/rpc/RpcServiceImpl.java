@@ -60,4 +60,13 @@ public class RpcServiceImpl implements RpcService {
 		throw new RuntimeException("org.apache.niolex.network.demo.rpc.RpcService#tr()");
 	}
 
+	/**
+	 * Override super method
+	 * @see org.apache.niolex.network.demo.rpc.RpcService#testMe()
+	 */
+	@Override
+	public void testMe() {
+		System.out.println("TestMe");
+	}
+
 }

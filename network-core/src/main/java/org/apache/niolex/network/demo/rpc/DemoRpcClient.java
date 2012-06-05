@@ -29,7 +29,7 @@ import org.apache.niolex.network.rpc.json.JsonRpcClient;
  * @version 1.0.0
  * @Date: 2012-6-2
  */
-public class RpcClient {
+public class DemoRpcClient {
 
     /**
      * The Client Demo

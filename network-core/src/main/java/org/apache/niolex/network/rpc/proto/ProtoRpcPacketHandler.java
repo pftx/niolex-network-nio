@@ -1,5 +1,5 @@
 /**
- * JsonRpcPacketHandler.java
+ * ProtoRpcPacketHandler.java
  *
  * Copyright 2012 Niolex, Inc.
  *
@@ -15,35 +15,45 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.niolex.network.rpc.json;
+package org.apache.niolex.network.rpc.proto;
 
+import java.io.ByteArrayInputStream;
 import java.lang.reflect.Type;
 
-import org.apache.niolex.commons.compress.JacksonUtil;
-import org.apache.niolex.network.Config;
+import org.apache.niolex.network.rpc.RpcException;
 import org.apache.niolex.network.rpc.RpcPacketHandler;
-import org.apache.niolex.network.rpc.RpcUtil;
+
+import com.google.protobuf.GeneratedMessage;
 
 /**
- * Use Json to serialize objects.
+ * Using Google Protocol Buffer to serialize data.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
- * @Date: 2012-6-1
+ * @Date: 2012-6-5
  */
-public class JsonRpcPacketHandler extends RpcPacketHandler {
+public class ProtoRpcPacketHandler extends RpcPacketHandler {
 
 	/**
-	 * This is the override of super method.
+	 * Override super method
 	 * @see org.apache.niolex.network.rpc.RpcPacketHandler#prepareParams(byte[], java.lang.reflect.Type[])
 	 */
 	@Override
 	protected Object[] prepareParams(byte[] data, Type[] generic) throws Exception {
-		return RpcUtil.prepareParams(data, generic);
+		if (generic == null || generic.length == 0) {
+			return null;
+		}
+		Object[] ret = new Object[generic.length];
+		ByteArrayInputStream in = new ByteArrayInputStream(data);
+		for (int i = 0; i < generic.length; ++i) {
+			Type t = generic[i];
+			ret[i] = ProtoUtil.parseOne(in, t);
+		}
+		return ret;
 	}
 
 	/**
-	 * This is the override of super method.
+	 * Override super method
 	 * @see org.apache.niolex.network.rpc.RpcPacketHandler#serializeReturn(java.lang.Object)
 	 */
 	@Override
@@ -51,7 +61,13 @@ public class JsonRpcPacketHandler extends RpcPacketHandler {
 		if (ret == null) {
 			return new byte[0];
 		}
-		return JacksonUtil.obj2Str(ret).getBytes(Config.SERVER_ENCODING);
+		if (ret instanceof GeneratedMessage) {
+			GeneratedMessage gen = (GeneratedMessage) ret;
+			return gen.toByteArray();
+		} else {
+			throw new RpcException("Message is not protobuf type: " + ret.getClass(),
+					RpcException.Type.ERROR_PARSE_PARAMS, null);
+		}
 	}
 
 }
