@@ -42,6 +42,7 @@ public class LogContextTest {
 	@BeforeClass
 	public static void test() {
 		Assert.assertEquals("LOGID", LogContext.prefix());
+		LogContext.serviceUrl("hdhdhdj");
 	}
 
 	@Before

@@ -37,7 +37,7 @@ public class RpcServiceHandlerTest {
 	protected static List<IServiceHandler> listHandlers = new ArrayList<IServiceHandler>();
 
 	static {
-		listHandlers.add(new RpcServiceHandler("5", new A("5"), 15, true));
+		listHandlers.add(new RpcServiceHandler("5", new A("5"), 20, true));
 		listHandlers.add(new RpcServiceHandler("6", new A("6"), 28, true));
 		listHandlers.add(new RpcServiceHandler("7", new A("7"), 17, true));
 		listHandlers.add(new RpcServiceHandler("8", new A("8"), 5000, true));
@@ -56,7 +56,7 @@ public class RpcServiceHandlerTest {
 		a.notReady(new IOException("Failed to connect when server initialize."));
 		Assert.assertFalse(a.isReady());
 		try {
-			Thread.sleep(16);
+			Thread.sleep(50);
 		} catch (Throwable t) {
 		}
 		Assert.assertTrue(a.isReady());
@@ -64,10 +64,10 @@ public class RpcServiceHandlerTest {
 
 	@Test
 	public void testNotReady() {
-		IServiceHandler a = new RpcServiceHandler("6", new A("6"), 8, false);
+		IServiceHandler a = new RpcServiceHandler("6", new A("6"), 20, false);
 		Assert.assertFalse(a.isReady());
 		try {
-			Thread.sleep(15);
+			Thread.sleep(50);
 		} catch (Throwable t) {
 		}
 		Assert.assertTrue(a.isReady());

@@ -58,7 +58,7 @@ public class JsonRpcFactory extends RpcServiceFactory {
 	 * @version 1.0.0
 	 * @Date: 2012-6-4
 	 */
-	private static class JsonRpcClientFactory implements RpcClientFactory {
+	public static class JsonRpcClientFactory implements RpcClientFactory {
 
 		/**
 		 * Override super method
