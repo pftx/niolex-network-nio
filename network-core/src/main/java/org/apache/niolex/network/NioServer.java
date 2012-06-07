@@ -94,9 +94,10 @@ public class NioServer implements Runnable {
      */
     public void listen() throws IOException {
         isListening = true;
-        int sleepIter = 20;
+        int sleepIter = 100;
+        long startMil = System.nanoTime();
         while (isListening) {
-            long startMil = System.nanoTime();
+        	--sleepIter;
             // Setting the timeout for accept method. Avoid can not be shut
             // down since blocking thread when waiting accept.
             selector.select(acceptTimeOut);
@@ -105,19 +106,25 @@ public class NioServer implements Runnable {
                 handleKey(selectionKey);
             }
             selectionKeys.clear();
-            long timeMil = System.nanoTime() - startMil;
             // If the selector run too fast, so there is no data to send at all.
-            // Consumed time small than 0.1 millisecond, sleep 1 millisecond.
-            if (timeMil < 50000) {
-            	--sleepIter;
-            	if (sleepIter < 0) {
-            		sleepIter = 10;
+            // We need to check this every 100 iteration.
+            if (sleepIter < 0) {
+            	sleepIter = 50;
+            	// Nano time is very small, 1000000 nanoseconds = 1 millisecond
+            	long timeMil = System.nanoTime() - startMil;
+            	startMil = System.nanoTime();
+            	// Consumed time small than 0.5 millisecond, sleep 1 millisecond.
+	            if (timeMil < 500000) {
 	                try {
-	                    Thread.yield();
+	                    Thread.sleep(1);
 	                } catch (Exception e) {
 	                    // To not need to deal this.
 	                }
-            	}
+	            } else if (timeMil < 1000000) {
+	            	// Consumed time small than 1 milliseconds, but longer than 0.1 millisecond
+	            	// just yield this thread.
+	            	Thread.yield();
+	            }
             }
         }
         LOG.info("Server is now shuting down.");
