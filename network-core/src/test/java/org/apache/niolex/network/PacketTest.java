@@ -42,6 +42,8 @@ public class PacketTest {
 		PacketData p = PacketData.getHeartBeatPacket();
 		PacketData o = p.makeCopy();
 		assertEquals(0, o.getCode());
+
+		assertEquals("00000100", p.descriptor());
 	}
 
 	/**

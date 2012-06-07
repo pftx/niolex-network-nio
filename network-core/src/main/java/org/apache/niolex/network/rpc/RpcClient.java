@@ -177,10 +177,16 @@ public abstract class RpcClient implements InvocationHandler, IPacketHandler {
 			// 5. Send request to remote server
 			client.handleWrite(rc);
 			// 6. Wait for result.
-			try {
-				Thread.sleep(rpcHandleTimeout);
-			} catch (InterruptedException e) {
-				// Do not care.
+			long in = System.currentTimeMillis();
+			while (System.currentTimeMillis() - in < rpcHandleTimeout) {
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					// Do not care.
+				}
+				if (wi.getReceived() != null) {
+					break;
+				}
 			}
 			// 7. Clean the map.
 			waitMap.remove(key);
@@ -235,6 +241,7 @@ public abstract class RpcClient implements InvocationHandler, IPacketHandler {
 		if (wi == null) {
 			LOG.warn("Packet received for key [{}] have no handler, just ignored.", key);
 		} else {
+			waitMap.remove(key);
 			wi.setReceived(sc);
 			wi.getThread().interrupt();
 		}

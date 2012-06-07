@@ -37,7 +37,7 @@ public class DemoRpcClient {
      * @param args
      */
     public static void main(String[] arg2s) throws Exception {
-    	//PacketClient c = new PacketClient(new InetSocketAddress("10.22.241.233", 8808));
+//    	PacketClient c = new PacketClient(new InetSocketAddress("10.22.241.233", 8808));
         PacketClient c = new PacketClient(new InetSocketAddress("localhost", 8808));
         JsonRpcClient client = new JsonRpcClient(c);
         client.connect();
@@ -46,9 +46,11 @@ public class DemoRpcClient {
 
         Runnable r = new Runnable() {
 
+        	final int SIZE = 2212;
+
 			@Override
 			public void run() {
-				int i = 1234;
+				int i = SIZE;
 				long in = System.currentTimeMillis();
 				long maxin = 0;
 				while (i-- > 0) {
@@ -73,7 +75,7 @@ public class DemoRpcClient {
 					}
 				}
 				long t = System.currentTimeMillis() - in;
-				System.out.println("rps => " + (2212 * 3000 / t) + ", Max " + maxin + ", Avg " + (t / 6636));
+				System.out.println("rps => " + (SIZE * 3000 / t) + ", Max " + maxin + ", Avg " + (t / (SIZE * 3)));
 			}};
 		Thread[] ts = new Thread[5];
 		for (int i = 0; i < 5; ++i) {
@@ -86,7 +88,7 @@ public class DemoRpcClient {
 			System.out.println("Join ...");
 		}
 		System.out.println("Done.....");
-        c.stop();
+		client.stop();
     }
 
 }

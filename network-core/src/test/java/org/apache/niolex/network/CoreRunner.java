@@ -75,5 +75,13 @@ public class CoreRunner {
 		System.out.println(Integer.toHexString(q));
 		int l = RpcUtil.generateKey(a, b, c);
 		System.out.println(Integer.toHexString(l));
+
+		byte d = -4;
+		System.out.println(d % 2 == 0);
+		System.out.println(d & 0xFF);
+		if (d % 2 == 0) {
+			--d;
+		}
+		System.out.println(d & 0xFF);
 	}
 }

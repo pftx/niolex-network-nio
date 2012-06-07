@@ -111,10 +111,10 @@ public class NioServer implements Runnable {
             if (timeMil < 50000) {
             	--sleepIter;
             	if (sleepIter < 0) {
-            		sleepIter = 20;
+            		sleepIter = 10;
 	                try {
-	                    Thread.sleep(1);
-	                } catch (InterruptedException e) {
+	                    Thread.yield();
+	                } catch (Exception e) {
 	                    // To not need to deal this.
 	                }
             	}
@@ -295,7 +295,7 @@ public class NioServer implements Runnable {
                     if (receiveStatus == Status.HEADER) {
                         receivePacket = new PacketData();
                         if (receivePacket.parseHeader(receiveBuffer)) {
-                        	LOG.debug("Packet received. code {}, size {}.", receivePacket.code, receivePacket.getLength());
+                        	LOG.debug("Packet received. desc {}, size {}.", receivePacket.descriptor(), receivePacket.getLength());
                             packetHandler.handleRead(receivePacket, this);
                             receiveBuffer.compact();
                             return true;
@@ -305,7 +305,7 @@ public class NioServer implements Runnable {
                         }
                     } else {
                         if (receivePacket.parseBody(receiveBuffer)) {
-                        	LOG.debug("Packet received. code {}, size {}.", receivePacket.code, receivePacket.getLength());
+                        	LOG.debug("Packet received. desc {}, size {}.", receivePacket.descriptor(), receivePacket.getLength());
                             packetHandler.handleRead(receivePacket, this);
                             receiveStatus = Status.HEADER;
                             receiveBuffer.compact();
@@ -343,7 +343,7 @@ public class NioServer implements Runnable {
                     } else {
                         if (sendStatus == Status.SEND) {
                         	sendStatus = Status.NONE;
-                        	LOG.debug("Packet sent. code {}, size {}.", sendPacket.code, sendPacket.getLength());
+                        	LOG.debug("Packet sent. desc {}, size {}.", sendPacket.descriptor(), sendPacket.getLength());
                             return sendNewPacket();
                         } else {
                         	sendBuffer.clear();

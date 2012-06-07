@@ -17,6 +17,8 @@
  */
 package org.apache.niolex.network;
 
+import org.apache.niolex.commons.codec.Base16Util;
+
 /**
  * The basic data structure of this framework.
  * @author Xie, Jiyun
@@ -29,12 +31,25 @@ public class Packet {
     protected short code;
     protected int length;
     protected byte[] data;
+    private String desc;
 
     /**
      * Create an empty Packet
      */
     public Packet() {
         super();
+    }
+
+    public String descriptor() {
+    	if (desc == null) {
+	    	byte[] bytes = new byte[4];
+	    	bytes[0] = (byte)(code >> 8);
+	    	bytes[1] = (byte)code;
+	    	bytes[2] = version;
+	    	bytes[3] = reserved;
+	    	desc = Base16Util.byteToBase16(bytes);
+    	}
+    	return desc;
     }
 
     /**

@@ -17,7 +17,6 @@
  */
 package org.apache.niolex.network;
 
-import org.apache.niolex.commons.util.LinkedIterList;
 
 /**
  * The Packet Writer Interface.
@@ -40,17 +39,6 @@ public interface IPacketWriter {
     public void handleWrite(PacketData sc);
 
     /**
-     * Get the remained not sent packets.
-     * @return
-     */
-    public LinkedIterList<PacketData> getRemainPackets();
-
-    /**
-     * Set the remained packets need to send.
-     */
-    public void setRemainPackets(LinkedIterList<PacketData> list);
-
-    /**
      * Attach some data to this object, please use your unique key, all system internal data key
      * will start will SYS_, please keep away from them.
      * @param key
@@ -65,4 +53,9 @@ public interface IPacketWriter {
      * @return
      */
     public <T> T getAttached(String key);
+
+    /**
+     * Get current non-send packets size.
+     */
+    public int size();
 }

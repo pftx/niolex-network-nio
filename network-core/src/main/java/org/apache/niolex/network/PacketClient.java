@@ -24,6 +24,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.util.concurrent.LinkedBlockingDeque;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,16 +34,18 @@ import org.slf4j.LoggerFactory;
  * @author Xie, Jiyun
  *
  */
-public class PacketClient extends BasePacketWriter implements IClient {
+public class PacketClient implements IPacketWriter, IClient {
 	private static final Logger LOG = LoggerFactory.getLogger(PacketClient.class);
+
+	private LinkedBlockingDeque<PacketData> sendPacketList = new LinkedBlockingDeque<PacketData>();
 
     private InetSocketAddress serverAddress;
     private IPacketHandler packetHandler;
     private Socket socket;
-    private PacketData sendPacket;
     private Thread writeThread;
     private boolean isWorking;
     private int connectTimeout = Config.SO_CONNECT_TIMEOUT;
+
 
     /**
      * Create a PacketClient without any Server Address
@@ -101,11 +104,28 @@ public class PacketClient extends BasePacketWriter implements IClient {
 
     @Override
     public void handleWrite(PacketData sc) {
-        super.handleWrite(sc);
-        if (writeThread != null) {
-            writeThread.interrupt();
-        }
+    	sendPacketList.add(sc);
     }
+
+	@Override
+	public Object attachData(String key, Object value) {
+		throw new UnsupportedOperationException("This method has not implemented yet.");
+	}
+
+	@Override
+	public <T> T getAttached(String key) {
+		throw new UnsupportedOperationException("This method has not implemented yet.");
+	}
+
+	/**
+	 * Override super method
+	 * @see org.apache.niolex.network.IPacketWriter#size()
+	 */
+	@Override
+	public int size() {
+		return sendPacketList.size();
+	}
+
 
     /**
      * The ReadLoop, reads packet from remote server over and over again.
@@ -133,7 +153,7 @@ public class PacketClient extends BasePacketWriter implements IClient {
                 while (isWorking) {
                     PacketData readPacket = new PacketData();
                     readPacket.parseHeader(in);
-                    LOG.debug("Packet received. code {}, size {}.", readPacket.code, readPacket.getLength());
+                    LOG.debug("Packet received. desc {}, size {}.", readPacket.descriptor(), readPacket.getLength());
                     packetHandler.handleRead(readPacket, PacketClient.this);
                 }
             } catch(Exception e) {
@@ -182,16 +202,14 @@ public class PacketClient extends BasePacketWriter implements IClient {
         public void run() {
             try {
                 while (isWorking) {
-                	sendPacket = PacketClient.this.handleNext();
-                    if (sendPacket == null) {
-                        // If nothing to send, let's sleep.
-                        try {
-                            Thread.sleep(100000);
-                        } catch (InterruptedException e) {
-                            // Let's ignore it.
-                        }
-                    } else {
-                        sendNewPacket();
+                    try {
+                    	PacketData sendPacket = sendPacketList.takeFirst();
+                    	if (sendPacket != null) {
+                    		// If nothing to send, let's sleep.
+                    		sendNewPacket(sendPacket);
+                    	}
+                    } catch (InterruptedException e) {
+                        // Let's ignore it.
                     }
                 }
                 LOG.info("Write loop stoped.");
@@ -209,9 +227,9 @@ public class PacketClient extends BasePacketWriter implements IClient {
          * Send new packet to remote server.
          * @throws IOException
          */
-        public void sendNewPacket() throws IOException {
+        public void sendNewPacket(PacketData sendPacket) throws IOException {
             sendPacket.generateData(out);
-            LOG.debug("Packet sent. code {}, size {}.", sendPacket.code, sendPacket.getLength());
+            LOG.debug("Packet sent. desc {}, queue {}.", sendPacket.descriptor(), PacketClient.this.size());
         }
     }
 

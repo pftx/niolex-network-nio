@@ -19,12 +19,11 @@ package org.apache.niolex.network;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import org.apache.niolex.commons.util.LinkedIterList;
-import org.apache.niolex.commons.util.LinkedIterList.Iter;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * The base BasePacketWriter, handle attach and PacketData storage.
+ * PacketData will be stored in a ConcurrentLinkedQueue, which is good at many writes.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
@@ -38,34 +37,20 @@ public abstract class BasePacketWriter implements IPacketWriter {
 	protected Map<String, Object> attachMap = new HashMap<String, Object>();
 
 	/**
-	 * Internal variables.
+	 * Internal variables. Store all the packets need to send.
 	 */
-	private LinkedIterList<PacketData> sendPacketList = new LinkedIterList<PacketData>();
-	private Iter<PacketData> sendIter;
-	private int cacheSize;
+	private ConcurrentLinkedQueue<PacketData> sendPacketsQueue = new ConcurrentLinkedQueue<PacketData>();
 
 	/**
 	 * Initialize send iterator here.
 	 */
 	public BasePacketWriter() {
 		super();
-		this.sendIter = sendPacketList.iterator();
 	}
 
 	@Override
 	public void handleWrite(PacketData sc) {
-		sendPacketList.add(sc);
-	}
-
-	@Override
-	public LinkedIterList<PacketData> getRemainPackets() {
-		return sendPacketList;
-	}
-
-	@Override
-	public void setRemainPackets(LinkedIterList<PacketData> list) {
-		this.sendPacketList = list;
-		this.sendIter = sendPacketList.iterator();
+		sendPacketsQueue.add(sc);
 	}
 
 	/**
@@ -73,16 +58,7 @@ public abstract class BasePacketWriter implements IPacketWriter {
 	 * @return
 	 */
 	protected PacketData handleNext() {
-		PacketData d = sendIter.next();
-		if (d != null) {
-			if (cacheSize >= Config.SERVER_CACHE_TOLERATE_PACKETS_SIZE) {
-				sendPacketList.poll();
-			} else {
-				++ cacheSize;
-			}
-			d.setDataPos(0);
-		}
-		return d;
+		return sendPacketsQueue.poll();
 	}
 
 	@Override
@@ -94,5 +70,26 @@ public abstract class BasePacketWriter implements IPacketWriter {
 	@Override
 	public <T> T getAttached(String key) {
 		return (T)attachMap.get(key);
+	}
+
+	@Override
+	public int size() {
+		return sendPacketsQueue.size();
+	}
+
+	/**
+	 * Get the current non send packet queue.
+	 * @return
+	 */
+	public ConcurrentLinkedQueue<PacketData> getRemainQueue() {
+		return sendPacketsQueue;
+	}
+
+	/**
+	 * replace the internal packet queue.
+	 * @param list
+	 */
+	public void replaceQueue(ConcurrentLinkedQueue<PacketData> list) {
+		this.sendPacketsQueue = list;
 	}
 }

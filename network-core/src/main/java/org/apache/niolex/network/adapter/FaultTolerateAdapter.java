@@ -18,9 +18,10 @@
 package org.apache.niolex.network.adapter;
 
 import java.util.Map;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.apache.niolex.commons.util.LRUHashMap;
-import org.apache.niolex.commons.util.LinkedIterList;
+import org.apache.niolex.network.BasePacketWriter;
 import org.apache.niolex.network.Config;
 import org.apache.niolex.network.IPacketHandler;
 import org.apache.niolex.network.IPacketWriter;
@@ -46,8 +47,8 @@ public class FaultTolerateAdapter implements IPacketHandler {
 	private static final Logger LOG = LoggerFactory.getLogger(FaultTolerateAdapter.class);
 
 	private static final String KEY = Config.ATTACH_KEY_SESS_SESSID;
-	private Map<String, LinkedIterList<PacketData>> dataMap =
-			new LRUHashMap<String, LinkedIterList<PacketData>>(Config.SERVER_FAULT_TOLERATE_MAP_SIZE);
+	private Map<String, ConcurrentLinkedQueue<PacketData>> dataMap =
+			new LRUHashMap<String, ConcurrentLinkedQueue<PacketData>>(Config.SERVER_FAULT_TOLERATE_MAP_SIZE);
 
 	// The Handler need to be adapted.
 	private IPacketHandler other;
@@ -70,10 +71,11 @@ public class FaultTolerateAdapter implements IPacketHandler {
 			other.handleRead(sc, wt);
 		} else {
 			String ssid = transformer.getDataObject(sc);
-			LinkedIterList<PacketData> data = dataMap.get(ssid);
-			if (data != null) {
-				wt.setRemainPackets(data);
-				LOG.info("Data recoverd for client [{}] list size {}.", ssid, data.size());
+			ConcurrentLinkedQueue<PacketData> data = dataMap.get(ssid);
+			if (data != null && wt instanceof BasePacketWriter) {
+				BasePacketWriter bpw = (BasePacketWriter) wt;
+				bpw.replaceQueue(data);
+				LOG.info("Fault tolerate recoverd for client [{}] list size {}.", ssid, data.size());
 				dataMap.remove(ssid);
 			}
 			wt.attachData(KEY, ssid);
@@ -84,10 +86,13 @@ public class FaultTolerateAdapter implements IPacketHandler {
     public void handleError(IPacketWriter wt) {
 		other.handleError(wt);
 		String ssid = wt.getAttached(KEY);
-		LinkedIterList<PacketData> els = wt.getRemainPackets();
-		if (ssid != null) {
-			dataMap.put(ssid, els);
-			LOG.info("Fault tolerate for client [{}] remain size {}.", ssid, els.size());
+		if (ssid != null && wt instanceof BasePacketWriter) {
+			BasePacketWriter bpw = (BasePacketWriter) wt;
+			ConcurrentLinkedQueue<PacketData> els = bpw.getRemainQueue();
+			if (els.size() > 0) {
+				dataMap.put(ssid, els);
+				LOG.info("Fault tolerate received for client [{}] remain size {}.", ssid, els.size());
+			}
 		}
 	}
 

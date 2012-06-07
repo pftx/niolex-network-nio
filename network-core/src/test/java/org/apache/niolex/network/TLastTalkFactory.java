@@ -52,6 +52,7 @@ public class TLastTalkFactory extends LastTalkFactory {
                 }
                 System.out.println("This is send.");
                 wt.handleWrite(sc);
+                wt.handleWrite(sc);
             }
 
         };

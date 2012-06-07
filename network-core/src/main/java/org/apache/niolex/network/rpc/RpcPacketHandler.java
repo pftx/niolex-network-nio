@@ -123,7 +123,7 @@ public abstract class RpcPacketHandler implements IPacketHandler {
 			try {
 				execute();
 			} finally {
-				LOG.debug("Packet handled. code {}, queue size {}.", sc.getCode(), queueSize.decrementAndGet());
+				LOG.debug("Packet handled. key {}, queue size {}.", RpcUtil.generateKey(sc), queueSize.decrementAndGet());
 			}
 		}
 

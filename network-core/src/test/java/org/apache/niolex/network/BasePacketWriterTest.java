@@ -19,6 +19,8 @@ package org.apache.niolex.network;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.concurrent.ConcurrentLinkedQueue;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -40,7 +42,14 @@ public class BasePacketWriterTest {
 	 */
 	@Test
 	public void testHandleWrite() {
-		bpw.handleWrite(null);
+		PacketData sc = new PacketData();
+        sc.setCode((short)4);
+        sc.setVersion((byte)1);
+        sc.setLength(0);
+        sc.setData(new byte[0]);
+		bpw.handleWrite(sc);
+		assertEquals(1, bpw.size());
+		assertEquals(sc, bpw.handleNext());
 	}
 
 	/**
@@ -54,52 +63,31 @@ public class BasePacketWriterTest {
 
 	@Test
 	public void testHandleWriteM() throws InterruptedException {
-		Runnable r = new Runnable() {
-
-			@Override
-			public void run() {
-				while (bpw.handleNext() == null) {
-					try {
-						Thread.sleep(1);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-				}
-				while (bpw.handleNext() == null) {
-					try {
-						Thread.sleep(1);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-				}
-				System.out.println("Out Time: " + System.currentTimeMillis());
-
-			}};
-		;
-		Thread t0 = new Thread(r);
-		Thread t1 = new Thread(r);
-		Thread t2 = new Thread(r);
-		t0.start();
-		t1.start();
-		t2.start();
-		Thread.sleep(10);
-		System.out.println("Inn Time: " + System.currentTimeMillis());
-		bpw.handleWrite(null);
+		PacketData sc = new PacketData();
+        sc.setCode((short)4);
+        sc.setVersion((byte)1);
+        sc.setLength(0);
+        sc.setData(new byte[0]);
+		bpw.handleWrite(sc);
 		bpw.handleWrite(PacketData.getHeartBeatPacket());
-		bpw.handleWrite(null);
+		bpw.handleWrite(sc);
 		bpw.handleWrite(PacketData.getHeartBeatPacket());
-		bpw.handleWrite(null);
+		bpw.handleWrite(sc);
 		bpw.handleWrite(PacketData.getHeartBeatPacket());
 		PacketData pc = new PacketData(4, new byte[4]);
-		bpw.handleWrite(null);
+		bpw.handleWrite(sc);
 		bpw.handleWrite(pc);
-		bpw.handleWrite(null);
+		bpw.handleWrite(sc);
 		bpw.handleWrite(pc);
-		bpw.handleWrite(null);
+		bpw.handleWrite(sc);
 		bpw.handleWrite(pc);
-		bpw.handleWrite(null);
-		t0.join();
-		t1.join();
-		t2.join();
+		bpw.handleWrite(sc);
+		ConcurrentLinkedQueue<PacketData> queue = bpw.getRemainQueue();
+		assertEquals(13, queue.size());
+		assertEquals(sc, bpw.handleNext());
+		assertEquals(PacketData.getHeartBeatPacket(), bpw.handleNext());
+		assertEquals(sc, queue.poll());
+		assertEquals(10, queue.size());
+		assertEquals(10, bpw.size());
 	}
 }

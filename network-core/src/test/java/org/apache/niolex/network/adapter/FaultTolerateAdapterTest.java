@@ -27,8 +27,8 @@ import static org.mockito.Mockito.verify;
 import org.apache.niolex.network.Config;
 import org.apache.niolex.network.IPacketHandler;
 import org.apache.niolex.network.IPacketWriter;
-import org.apache.niolex.network.PacketClient;
 import org.apache.niolex.network.PacketData;
+import org.apache.niolex.network.TBasePacketWriter;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -56,7 +56,7 @@ public class FaultTolerateAdapterTest {
 	 */
 	@Test
 	public void testHandleErrorSimple() {
-		IPacketWriter wt = spy(new PacketClient());
+		IPacketWriter wt = spy(new TBasePacketWriter());
 		faultTolerateSPacketHandler.handleError(wt);
 	}
 
@@ -66,7 +66,8 @@ public class FaultTolerateAdapterTest {
 	@Test
 	public void testHandleError() {
 		PacketData sc = new PacketData(Config.CODE_SESSN_REGR, "AJFIUEALKD".getBytes());
-		IPacketWriter wt0 = spy(new PacketClient());
+
+		TBasePacketWriter wt0 = spy(new TBasePacketWriter());
 		doReturn("Mock").when(wt0).getRemoteName();
 		PacketData sc2 = new PacketData(3, "AJ231FIUEALKD".getBytes());
 		faultTolerateSPacketHandler.handleRead(sc, wt0);
@@ -75,15 +76,15 @@ public class FaultTolerateAdapterTest {
 		verify(wt0).attachData(Config.ATTACH_KEY_SESS_SESSID, "AJFIUEALKD");
 		faultTolerateSPacketHandler.handleError(wt0);
 		// ERROR
-		PacketClient wt = spy(new PacketClient());
+		TBasePacketWriter wt = spy(new TBasePacketWriter());
 		faultTolerateSPacketHandler.handleRead(sc, wt);
 		faultTolerateSPacketHandler.handleError(wt);
-		PacketClient wt2 = spy(new PacketClient());
+		TBasePacketWriter wt2 = spy(new TBasePacketWriter());
 		faultTolerateSPacketHandler.handleRead(sc, wt2);
 		verify(h, times(1)).handleRead(sc2, wt0);
 		verify(wt0, times(1)).handleWrite(sc2);
-		assertEquals(1, wt.getRemainPackets().size());
-		assertEquals(1, wt2.getRemainPackets().size());
+		assertEquals(1, wt.size());
+		assertEquals(1, wt2.size());
 	}
 
 	/**
