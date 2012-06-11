@@ -166,7 +166,7 @@ public class PacketClient implements IPacketWriter, IClient {
                      * So the Write Loop will just return, so there will be just one Error to the
                      * Upper layer.
                      */
-                    isWorking = false;
+                    PacketClient.this.stop();
                     packetHandler.handleClose(PacketClient.this);
                 } else {
                     LOG.info("Read loop stoped.");

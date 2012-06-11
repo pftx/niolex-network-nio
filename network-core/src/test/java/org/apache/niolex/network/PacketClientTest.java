@@ -19,6 +19,7 @@ package org.apache.niolex.network;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.spy;
@@ -123,6 +124,18 @@ public class PacketClientTest {
 	@Test
 	public void testGetRemoteName() {
 		assertEquals("localhost/127.0.0.1:8808-0000", packetClient.getRemoteName());
+		try {
+			packetClient.attachData("adsfasdf", "adsfasdf");
+			assertTrue("Should not attache.", false);
+		} catch (Exception e) {
+			;
+		}
+		try {
+			packetClient.getAttached("adsfasdf");
+			assertTrue("Should not attache.", false);
+		} catch (Exception e) {
+			;
+		}
 	}
 
 	private byte[] generateRandom(int len, Random r) {

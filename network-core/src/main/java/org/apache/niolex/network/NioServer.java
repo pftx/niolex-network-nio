@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.CancelledKeyException;
+import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
@@ -254,7 +255,7 @@ public class NioServer implements IServer {
                 }
             }
         } catch (Exception e) {
-        	if (e instanceof CancelledKeyException) {
+        	if (e instanceof CancelledKeyException || e instanceof ClosedChannelException) {
         		return;
         	}
             LOG.info("Failed to handle client socket: {}", e.toString());

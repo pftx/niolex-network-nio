@@ -34,7 +34,7 @@ public class CoreRunner {
 	public static NioServer nioServer;
 	public static boolean isOn;
 	public static final int PORT = 8809;
-	public static final int CO_SLEEP = 10000;
+	public static final int CO_SLEEP = 100;
 
 	public static void createServer() throws Exception {
 		if (isOn) {
