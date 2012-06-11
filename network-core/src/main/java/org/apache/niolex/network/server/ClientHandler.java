@@ -138,6 +138,7 @@ public class ClientHandler  extends BasePacketWriter {
 			if (!writeAttached) {
 				try {
 					socketChannel.register(selector, SelectionKey.OP_READ | SelectionKey.OP_WRITE, this);
+					selector.wakeup();
 				} catch (Exception e) {
 					LOG.warn("Failed to attach write to selector, client will stop. " , e.toString());
 					handleClose();

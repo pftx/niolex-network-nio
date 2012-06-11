@@ -1,5 +1,5 @@
 /**
- * BaseServer.java
+ * NioServer.java
  *
  * Copyright 2012 Niolex, Inc.
  *
