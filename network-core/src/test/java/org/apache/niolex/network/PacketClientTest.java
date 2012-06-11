@@ -101,7 +101,7 @@ public class PacketClientTest {
 		sc.getData()[9] = (byte) 145;
 		sc.getData()[145] = (byte) 63;
 		packetClient.handleWrite(sc);
-		Thread.sleep(6 * CoreRunner.CO_SLEEP);
+		Thread.sleep(5 * CoreRunner.CO_SLEEP);
 		packetClient.stop();
 
 		ArgumentCaptor<PacketData> argument = ArgumentCaptor
@@ -122,7 +122,7 @@ public class PacketClientTest {
 	 * .
 	 */
 	@Test
-	public void testGetRemoteName() {
+	public void testGetRemoteName() throws Exception {
 		assertEquals("localhost/127.0.0.1:8808-0000", packetClient.getRemoteName());
 		try {
 			packetClient.attachData("adsfasdf", "adsfasdf");
@@ -136,6 +136,11 @@ public class PacketClientTest {
 		} catch (Exception e) {
 			;
 		}
+		packetClient.connect();
+		nioServer.stop();
+		Thread.sleep(10 * CoreRunner.CO_SLEEP);
+
+		verify(packetHandler).handleClose(packetClient);
 	}
 
 	private byte[] generateRandom(int len, Random r) {

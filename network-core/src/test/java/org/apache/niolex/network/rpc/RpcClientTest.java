@@ -20,6 +20,7 @@ package org.apache.niolex.network.rpc;
 import static org.junit.Assert.fail;
 
 import java.lang.reflect.Method;
+import java.net.InetSocketAddress;
 
 import org.apache.niolex.commons.reflect.MethodUtil;
 import org.apache.niolex.network.PacketClient;
@@ -63,6 +64,13 @@ public class RpcClientTest {
 		Method method = MethodUtil.getMethods(RpcService.class, "add")[0];
 		rr.invoke(rr, method, null);
 		fail("Not yet implemented");
+	}
+
+	@Test
+	public void testHandleClose() throws Throwable {
+		PacketClient pc = new PacketClient(new InetSocketAddress("localhost", 8808));
+		RpcClient rr = new JsonRpcClient(pc);
+		rr.handleClose(pc);
 	}
 
 }

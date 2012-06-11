@@ -33,6 +33,18 @@ import org.apache.niolex.network.rpc.RpcUtil;
  */
 public class JsonRpcPacketHandler extends RpcPacketHandler {
 
+
+	/**
+	 * Override super Constructor
+	 */
+	public JsonRpcPacketHandler() {
+		super();
+	}
+
+	public JsonRpcPacketHandler(int threadsNumber) {
+		super(threadsNumber);
+	}
+
 	/**
 	 * This is the override of super method.
 	 * @see org.apache.niolex.network.rpc.RpcPacketHandler#prepareParams(byte[], java.lang.reflect.Type[])

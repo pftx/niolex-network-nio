@@ -57,7 +57,7 @@ public class RpcPacketHandlerTest {
 	 */
 	@Test
 	public void setConfigs() {
-		RpcPacketHandler rr = new JsonRpcPacketHandler();
+		RpcPacketHandler rr = new JsonRpcPacketHandler(20);
 		RpcConfig[] confs = new RpcConfig[2];
 		RpcConfig c = new RpcConfig();
 		c.setInterface(RpcService.class);

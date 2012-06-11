@@ -240,7 +240,13 @@ public class NioServer implements IServer {
         try {
             ss.socket().close();
             ss.close();
+            for (SelectionKey skey : mainSelector.keys()) {
+            	try {
+            		skey.channel().close();
+            	} catch (Exception e) {}
+            }
             mainSelector.close();
+
         } catch (Exception e) {
             LOG.error("Failed to close server port.", e);
         }
