@@ -79,7 +79,7 @@ public class HardClientTest {
 			c.handleWrite(sc);
 			list2.add(sc);
 		}
-		int k = 40;
+		int k = 100;
 		while (k-- > 0) {
 			if (list.size() == 5000)
 				break;
