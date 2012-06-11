@@ -38,11 +38,11 @@ public class PrintPacketHandlerTest {
 		when(sc.getCode()).thenReturn((short)3, (short)3, (short)4);
 		IPacketWriter ip = mock(IPacketWriter.class);
 		PrintPacketHandler p = new PrintPacketHandler();
-		p.handleError(ip);
+		p.handleClose(ip);
 		p.handleRead(sc, ip);
 		LastTalkFactory l = new LastTalkFactory();
 		IPacketHandler pp = l.createHandler(ip);
-		pp.handleError(ip);
+		pp.handleClose(ip);
 		pp.handleRead(sc, ip);
 		verify(sc).getCode();
 	}

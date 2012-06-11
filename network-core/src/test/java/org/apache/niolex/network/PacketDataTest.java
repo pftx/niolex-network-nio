@@ -54,7 +54,6 @@ public class PacketDataTest {
 
 	private int port = 8808;
 	private NioServer nioServer;
-	private Thread thread;
 	private Set<String> received = new HashSet<String>();
 
 	@Before
@@ -64,14 +63,11 @@ public class PacketDataTest {
 		nioServer.setPacketHandler(packetHandler2);
 		nioServer.setPort(port);
 		nioServer.start();
-		thread = new Thread(nioServer);
-		thread.start();
 	}
 
 	@After
 	public void stopNioServer() throws Exception {
 		nioServer.stop();
-		thread.join();
 	}
 
 	private byte[] generateRandom(int len, Random r) {

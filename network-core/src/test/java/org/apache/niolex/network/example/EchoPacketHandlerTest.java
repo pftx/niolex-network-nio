@@ -39,13 +39,13 @@ public class EchoPacketHandlerTest {
 	}
 
 	@Test
-	public void testHandleError() {
-		IPacketWriter ip = mock(IPacketWriter.class);
-		handler.handleError(ip);
-		handler.handleError(ip);
-		verify(ip, times(0)).handleWrite(any(PacketData.class));
-		verify(ip, times(2)).getRemoteName();
-	}
+		public void testHandleClose() {
+			IPacketWriter ip = mock(IPacketWriter.class);
+			handler.handleClose(ip);
+			handler.handleClose(ip);
+			verify(ip, times(0)).handleWrite(any(PacketData.class));
+			verify(ip, times(2)).getRemoteName();
+		}
 
 	@Test
 	public void testHandleRead() {

@@ -36,7 +36,7 @@ public class EchoPacketHandler implements IPacketHandler {
      * @see com.renren.ad.datacenter.follower.network.IPacketHandler#handleError()
      */
     @Override
-    public void handleError(IPacketWriter wt) {
+    public void handleClose(IPacketWriter wt) {
     	LOG.warn("Error occured from remote: " + wt.getRemoteName());
     }
 

@@ -54,21 +54,21 @@ public class SessionPacketHandlerTest {
 	}
 
 	@Test
-	public void testHandleError() {
-		PacketData sc = mock(PacketData.class);
-		when(sc.getCode()).thenReturn((short)3, (short)3, (short)4);
-		IPacketWriter ip = spy(new TBasePacketWriter());
-		IPacketWriter wt = spy(new TBasePacketWriter());
-		IPacketWriter qt = spy(new TBasePacketWriter());
-		sessionPacketHandler.handleRead(sc, wt);
-		sessionPacketHandler.handleRead(sc, ip);
-		sessionPacketHandler.handleRead(sc, wt);
-		sessionPacketHandler.handleError(wt);
-		sessionPacketHandler.handleError(qt);
-		verify(pHandler1, times(1)).handleError(wt);
-		verify(pHandler1, never()).handleError(qt);
-		verify(pHandler1, never()).handleError(ip);
-	}
+		public void testHandleClose() {
+			PacketData sc = mock(PacketData.class);
+			when(sc.getCode()).thenReturn((short)3, (short)3, (short)4);
+			IPacketWriter ip = spy(new TBasePacketWriter());
+			IPacketWriter wt = spy(new TBasePacketWriter());
+			IPacketWriter qt = spy(new TBasePacketWriter());
+			sessionPacketHandler.handleRead(sc, wt);
+			sessionPacketHandler.handleRead(sc, ip);
+			sessionPacketHandler.handleRead(sc, wt);
+			sessionPacketHandler.handleClose(wt);
+			sessionPacketHandler.handleClose(qt);
+			verify(pHandler1, times(1)).handleClose(wt);
+			verify(pHandler1, never()).handleClose(qt);
+			verify(pHandler1, never()).handleClose(ip);
+		}
 
 	@Test
 	public void testHandleRead() {

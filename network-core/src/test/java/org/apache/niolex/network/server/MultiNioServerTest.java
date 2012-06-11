@@ -50,7 +50,6 @@ public class MultiNioServerTest {
 
 	private static int port = 8808;
 	private static MultiNioServer nioServer;
-	private static Thread thread;
 
 
 	@BeforeClass
@@ -58,14 +57,11 @@ public class MultiNioServerTest {
 		nioServer = new MultiNioServer();
 		nioServer.setPort(port);
 		nioServer.start();
-		thread = new Thread(nioServer);
-		thread.start();
 	}
 
 	@AfterClass
 	public static void stopNioServer() throws Exception {
 		nioServer.stop();
-		thread.join();
 	}
 
 	@Before

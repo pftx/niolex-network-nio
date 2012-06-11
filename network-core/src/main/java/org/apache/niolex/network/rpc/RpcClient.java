@@ -248,7 +248,7 @@ public abstract class RpcClient implements InvocationHandler, IPacketHandler {
 	}
 
 	@Override
-	public void handleError(IPacketWriter wt) {
+	public void handleClose(IPacketWriter wt) {
 		if (this.connStatus == Status.CLOSED) {
 			return;
 		}

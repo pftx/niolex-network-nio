@@ -78,7 +78,7 @@ public class ProtoRpcPacketHandlerTest {
 
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.rpc.RpcPacketHandler#handleError(org.apache.niolex.network.IPacketWriter)}.
+	 * Test method for {@link org.apache.niolex.network.rpc.RpcPacketHandler#handleClose(org.apache.niolex.network.IPacketWriter)}.
 	 * @throws Exception
 	 */
 	@Test

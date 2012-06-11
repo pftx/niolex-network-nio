@@ -83,8 +83,8 @@ public class FaultTolerateAdapter implements IPacketHandler {
 	}
 
 	@Override
-    public void handleError(IPacketWriter wt) {
-		other.handleError(wt);
+    public void handleClose(IPacketWriter wt) {
+		other.handleClose(wt);
 		String ssid = wt.getAttached(KEY);
 		if (ssid != null && wt instanceof BasePacketWriter) {
 			BasePacketWriter bpw = (BasePacketWriter) wt;

@@ -55,9 +55,9 @@ public class DispatchPacketHandler implements IPacketHandler {
      * Every Handler registered will be invoked.
      */
     @Override
-    public void handleError(IPacketWriter wt) {
+    public void handleClose(IPacketWriter wt) {
         for (IPacketHandler h : dispatchMap.values()) {
-            h.handleError(wt);
+            h.handleClose(wt);
         }
     }
 

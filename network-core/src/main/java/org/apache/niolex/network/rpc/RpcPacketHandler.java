@@ -174,10 +174,10 @@ public abstract class RpcPacketHandler implements IPacketHandler {
 
 	/**
 	 * Override super method
-	 * @see org.apache.niolex.network.IPacketHandler#handleError(org.apache.niolex.network.IPacketWriter)
+	 * @see org.apache.niolex.network.IPacketHandler#handleClose(org.apache.niolex.network.IPacketWriter)
 	 */
 	@Override
-	public void handleError(IPacketWriter wt) {
+	public void handleClose(IPacketWriter wt) {
 		// Error is not a big deal.
 	}
 

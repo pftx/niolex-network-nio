@@ -47,8 +47,6 @@ public class RpcServer {
         confs[0] = c;
 		handler.setRpcConfigs(confs);
         s.start();
-        Thread t = new Thread(s);
-        t.start();
     }
 
     public static void stop() {

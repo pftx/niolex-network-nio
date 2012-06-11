@@ -32,10 +32,9 @@ import org.apache.niolex.network.rpc.RpcUtil;
 public class CoreRunner {
 
 	public static NioServer nioServer;
-	public static Thread thread;
 	public static boolean isOn;
 	public static final int PORT = 8809;
-	public static final int CO_SLEEP = 100;
+	public static final int CO_SLEEP = 10000;
 
 	public static void createServer() throws Exception {
 		if (isOn) {
@@ -52,14 +51,11 @@ public class CoreRunner {
 		nioServer.setPacketHandler(finalHandler);
 		nioServer.setPort(PORT);
 		nioServer.start();
-		thread = new Thread(nioServer);
-		thread.start();
 		isOn = true;
 	}
 
 	public static void shutdown() throws Exception {
 		nioServer.stop();
-		thread.join();
 		isOn = false;
 	}
 

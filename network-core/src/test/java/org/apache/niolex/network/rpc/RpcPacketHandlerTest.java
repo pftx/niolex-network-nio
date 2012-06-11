@@ -53,7 +53,7 @@ public class RpcPacketHandlerTest {
 
 	/**
 	 * Test method for
-	 * {@link org.apache.niolex.network.rpc.RpcPacketHandler#handleError(org.apache.niolex.network.IPacketWriter)}.
+	 * {@link org.apache.niolex.network.rpc.RpcPacketHandler#handleClose(org.apache.niolex.network.IPacketWriter)}.
 	 */
 	@Test
 	public void setConfigs() {
@@ -68,14 +68,14 @@ public class RpcPacketHandlerTest {
 	}
 
 	/**
-	 * Test method for
-	 * {@link org.apache.niolex.network.rpc.RpcPacketHandler#handleError(org.apache.niolex.network.IPacketWriter)}.
-	 */
-	@Test
-	public void testHandleError() {
-		RpcPacketHandler rr = new JsonRpcPacketHandler();
-		rr.handleError(null);
-	}
+		 * Test method for
+		 * {@link org.apache.niolex.network.rpc.RpcPacketHandler#handleClose(org.apache.niolex.network.IPacketWriter)}.
+		 */
+		@Test
+		public void testHandleClose() {
+			RpcPacketHandler rr = new JsonRpcPacketHandler();
+			rr.handleClose(null);
+		}
 
 	@Test
 	public void testHandleHB() {

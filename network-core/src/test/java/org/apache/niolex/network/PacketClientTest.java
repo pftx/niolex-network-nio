@@ -59,7 +59,6 @@ public class PacketClientTest {
 
 	private int port = 8808;
 	private NioServer nioServer;
-	private Thread thread;
 	private PacketClient packetClient;
 	private int received = 0;
 
@@ -76,14 +75,11 @@ public class PacketClientTest {
 		nioServer.setPacketHandler(packetHandler2);
 		nioServer.setPort(port);
 		nioServer.start();
-		thread = new Thread(nioServer);
-		thread.start();
 	}
 
 	@After
 	public void stopNioServer() throws Exception {
 		nioServer.stop();
-		thread.join();
 	}
 
 	/**

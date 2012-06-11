@@ -50,21 +50,17 @@ public class NioServerTest {
 
 	private static int port = 8808;
 	private static NioServer nioServer;
-	private static Thread thread;
 
 	@BeforeClass
 	public static void createNioServer() throws Exception {
 		nioServer = new NioServer();
 		nioServer.setPort(port);
 		nioServer.start();
-		thread = new Thread(nioServer);
-		thread.start();
 	}
 
 	@AfterClass
 	public static void stopNioServer() throws Exception {
 		nioServer.stop();
-		thread.join();
 	}
 
 	@Before

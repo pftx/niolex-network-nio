@@ -57,10 +57,10 @@ public class SessionPacketHandler implements IPacketHandler {
      * @see com.renren.ad.datacenter.follower.network.IPacketHandler#handleError(com.renren.ad.datacenter.follower.network.IPacketWriter)
      */
     @Override
-    public void handleError(IPacketWriter wt) {
+    public void handleClose(IPacketWriter wt) {
         IPacketHandler h = wt.getAttached(KEY);
         if (h != null) {
-            h.handleError(wt);
+            h.handleClose(wt);
             LOG.info("Session removed for remote: {}", wt.getRemoteName());
         }
     }

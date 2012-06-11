@@ -52,40 +52,40 @@ public class FaultTolerateAdapterTest {
 	}
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.handler.FaultTolerateAdapter#handleError(org.apache.niolex.network.IPacketWriter)}.
-	 */
-	@Test
-	public void testHandleErrorSimple() {
-		IPacketWriter wt = spy(new TBasePacketWriter());
-		faultTolerateSPacketHandler.handleError(wt);
-	}
+		 * Test method for {@link org.apache.niolex.network.handler.FaultTolerateAdapter#handleClose(org.apache.niolex.network.IPacketWriter)}.
+		 */
+		@Test
+		public void testHandleCloseSimple() {
+			IPacketWriter wt = spy(new TBasePacketWriter());
+			faultTolerateSPacketHandler.handleClose(wt);
+		}
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.handler.FaultTolerateAdapter#handleError(org.apache.niolex.network.IPacketWriter)}.
-	 */
-	@Test
-	public void testHandleError() {
-		PacketData sc = new PacketData(Config.CODE_SESSN_REGR, "AJFIUEALKD".getBytes());
-
-		TBasePacketWriter wt0 = spy(new TBasePacketWriter());
-		doReturn("Mock").when(wt0).getRemoteName();
-		PacketData sc2 = new PacketData(3, "AJ231FIUEALKD".getBytes());
-		faultTolerateSPacketHandler.handleRead(sc, wt0);
-		faultTolerateSPacketHandler.handleRead(sc2, wt0);
-		wt0.handleWrite(sc2);
-		verify(wt0).attachData(Config.ATTACH_KEY_SESS_SESSID, "AJFIUEALKD");
-		faultTolerateSPacketHandler.handleError(wt0);
-		// ERROR
-		TBasePacketWriter wt = spy(new TBasePacketWriter());
-		faultTolerateSPacketHandler.handleRead(sc, wt);
-		faultTolerateSPacketHandler.handleError(wt);
-		TBasePacketWriter wt2 = spy(new TBasePacketWriter());
-		faultTolerateSPacketHandler.handleRead(sc, wt2);
-		verify(h, times(1)).handleRead(sc2, wt0);
-		verify(wt0, times(1)).handleWrite(sc2);
-		assertEquals(1, wt.size());
-		assertEquals(1, wt2.size());
-	}
+		 * Test method for {@link org.apache.niolex.network.handler.FaultTolerateAdapter#handleClose(org.apache.niolex.network.IPacketWriter)}.
+		 */
+		@Test
+		public void testHandleClose() {
+			PacketData sc = new PacketData(Config.CODE_SESSN_REGR, "AJFIUEALKD".getBytes());
+	
+			TBasePacketWriter wt0 = spy(new TBasePacketWriter());
+			doReturn("Mock").when(wt0).getRemoteName();
+			PacketData sc2 = new PacketData(3, "AJ231FIUEALKD".getBytes());
+			faultTolerateSPacketHandler.handleRead(sc, wt0);
+			faultTolerateSPacketHandler.handleRead(sc2, wt0);
+			wt0.handleWrite(sc2);
+			verify(wt0).attachData(Config.ATTACH_KEY_SESS_SESSID, "AJFIUEALKD");
+			faultTolerateSPacketHandler.handleClose(wt0);
+			// ERROR
+			TBasePacketWriter wt = spy(new TBasePacketWriter());
+			faultTolerateSPacketHandler.handleRead(sc, wt);
+			faultTolerateSPacketHandler.handleClose(wt);
+			TBasePacketWriter wt2 = spy(new TBasePacketWriter());
+			faultTolerateSPacketHandler.handleRead(sc, wt2);
+			verify(h, times(1)).handleRead(sc2, wt0);
+			verify(wt0, times(1)).handleWrite(sc2);
+			assertEquals(1, wt.size());
+			assertEquals(1, wt2.size());
+		}
 
 	/**
 	 * Test method for {@link org.apache.niolex.network.handler.FaultTolerateAdapter#handleRead(org.apache.niolex.network.PacketData, org.apache.niolex.network.IPacketWriter)}.

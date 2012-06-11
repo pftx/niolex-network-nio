@@ -31,7 +31,7 @@ public class TLastTalkFactory extends LastTalkFactory {
             private String lastTalk;
 
             @Override
-            public void handleError(IPacketWriter wt) {
+            public void handleClose(IPacketWriter wt) {
             }
 
             @Override

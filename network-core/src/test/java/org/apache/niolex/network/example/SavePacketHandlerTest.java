@@ -56,11 +56,11 @@ public class SavePacketHandlerTest {
 	}
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.example.SavePacketHandler#handleError(org.apache.niolex.network.IPacketWriter)}.
-	 */
-	@Test
-	public void testHandleError() {
-		savePacketHandler.handleError(null);
-	}
+		 * Test method for {@link org.apache.niolex.network.example.SavePacketHandler#handleClose(org.apache.niolex.network.IPacketWriter)}.
+		 */
+		@Test
+		public void testHandleClose() {
+			savePacketHandler.handleClose(null);
+		}
 
 }

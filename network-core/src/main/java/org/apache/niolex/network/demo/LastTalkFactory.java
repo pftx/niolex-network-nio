@@ -38,7 +38,7 @@ public class LastTalkFactory implements IHandlerFactory {
             private String lastTalk;
 
             @Override
-            public void handleError(IPacketWriter wt) {
+            public void handleClose(IPacketWriter wt) {
             }
 
             @Override

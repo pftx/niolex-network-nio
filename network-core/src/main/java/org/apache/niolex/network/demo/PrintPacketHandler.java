@@ -33,7 +33,7 @@ public class PrintPacketHandler implements IPacketHandler {
      * @see com.renren.ad.datacenter.follower.network.IPacketHandler#handleError()
      */
     @Override
-    public void handleError(IPacketWriter wt) {
+    public void handleClose(IPacketWriter wt) {
         System.out.println("Error occured, this is from PrintPacketHandler. " + wt.getRemoteName());
     }
 

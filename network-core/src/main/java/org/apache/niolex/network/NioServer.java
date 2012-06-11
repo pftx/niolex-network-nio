@@ -28,6 +28,8 @@ import java.nio.channels.SocketChannel;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,15 +38,47 @@ import org.slf4j.LoggerFactory;
  * The basic NioServer reads and writes Packet.
  * @author Xie, Jiyun
  */
-public class NioServer implements Runnable {
+public class NioServer implements IServer {
     private static final Logger LOG = LoggerFactory.getLogger(NioServer.class);
 
+    /**
+     * The server socket channel, which is there the server listening.
+     */
     private ServerSocketChannel ss;
 
-    private Selector selector;
+    /**
+     * The server accept and read selector, which is the main selector.
+     */
+    private Selector mainSelector;
 
+    /**
+     * The listen thread.
+     */
+    private Thread mainThread;
+
+    /**
+     * The signal whether there is anything to write.
+     */
+    private final Semaphore available = new Semaphore(0);
+
+    /**
+     * The server write selector.
+     */
+    private Selector writeSelector;
+
+    /**
+     * The write thread.
+     */
+    private Thread writeThread;
+
+    /**
+     * The packet handler.
+     */
     private IPacketHandler packetHandler;
 
+    /**
+     * The current server status.
+     */
     private volatile boolean isListening = false;
 
     private int acceptTimeOut = Config.SERVER_ACCEPT_TIMEOUT;
@@ -56,16 +90,22 @@ public class NioServer implements Runnable {
     private Map<SocketChannel, ClientHandler> clientMap = new HashMap<SocketChannel, ClientHandler>();
 
     /**
-     * Start the NioServer, bind to Port.
-     * Need to call listen() after start manually
-     */
-    public boolean start() {
+     * Run this NioServer as a Runnable.
+     * It call the listen() method internally.
+	 * Override super method
+	 * @see org.apache.niolex.network.IServer#start()
+	 */
+    @Override
+	public boolean start() {
         try {
             ss = ServerSocketChannel.open();
             ss.socket().bind(new InetSocketAddress(this.getPort()));
             ss.configureBlocking(false);
-            selector = Selector.open();
-            ss.register(selector, SelectionKey.OP_ACCEPT);
+            mainSelector = Selector.open();
+            writeSelector = Selector.open();
+            ss.register(mainSelector, SelectionKey.OP_ACCEPT);
+            isListening = true;
+            run();
             LOG.info("Server started at {}", this.getPort());
             return true;
         } catch (IOException e) {
@@ -74,60 +114,77 @@ public class NioServer implements Runnable {
         return false;
     }
 
-    /**
-     * Run this NioServer as a Runnable.
-     * It call the listen() method internally.
-     */
-    public void run() {
+    private void run() {
         try {
-            listen();
+        	mainThread = new Thread() {
+        		public void run() {
+                    // Listen the main loop.
+        			try {
+						listenMain();
+					} catch (IOException e) {
+			            LOG.error("Error occured while server is listening. The server will now shutdown.", e);
+			            NioServer.this.stop();
+					}
+                }
+        	};
+        	writeThread = new Thread() {
+        		public void run() {
+                    // Listen the write loop.
+        			try {
+        				listenWrite();
+					} catch (IOException e) {
+			            LOG.error("Error occured while server is listening. The server will now shutdown.", e);
+			            NioServer.this.stop();
+					}
+                }
+        	};
+        	mainThread.start();
+        	writeThread.start();
         } catch (Exception e) {
-            LOG.error("Error occured while server is listening.", e);
+            LOG.error("Error occured while server is listening. The server will now shutdown.", e);
+            this.stop();
         }
     }
 
     /**
-     * Run this NioServer manually.
      * This method will never return after this server stop or IOException.
      * Call stop() to shutdown this server.
      * @throws IOException
      */
-    public void listen() throws IOException {
-        isListening = true;
-        int sleepIter = 100;
-        long startMil = System.nanoTime();
+    private void listenMain() throws IOException {
         while (isListening) {
-        	--sleepIter;
-            // Setting the timeout for accept method. Avoid can not be shut
-            // down since blocking thread when waiting accept.
-            selector.select(acceptTimeOut);
-            Set<SelectionKey> selectionKeys = selector.selectedKeys();
+            // Setting the timeout for accept method. Avoid that this server can not be shut
+            // down when this thread is waiting to accept.
+            mainSelector.select(acceptTimeOut);
+            Set<SelectionKey> selectionKeys = mainSelector.selectedKeys();
             for (SelectionKey selectionKey: selectionKeys) {
                 handleKey(selectionKey);
             }
             selectionKeys.clear();
-            // If the selector run too fast, so there is no data to send at all.
-            // We need to check this every 100 iteration.
-            if (sleepIter < 0) {
-            	sleepIter = 50;
-            	// Nano time is very small, 1000000 nanoseconds = 1 millisecond
-            	long timeMil = System.nanoTime() - startMil;
-            	startMil = System.nanoTime();
-            	// Consumed time small than 0.5 millisecond, sleep 1 millisecond.
-	            if (timeMil < 500000) {
-	                try {
-	                    Thread.sleep(1);
-	                } catch (Exception e) {
-	                    // To not need to deal this.
-	                }
-	            } else if (timeMil < 1000000) {
-	            	// Consumed time small than 1 milliseconds, but longer than 0.1 millisecond
-	            	// just yield this thread.
-	            	Thread.yield();
-	            }
-            }
+            Thread.yield();
         }
-        LOG.info("Server is now shuting down.");
+    }
+
+    /**
+     * This method will never return after this server stop or IOException.
+     * Call stop() to shutdown this server.
+     * @throws IOException
+     */
+    private void listenWrite() throws IOException {
+    	while (isListening) {
+    		try {
+    			available.tryAcquire(10, TimeUnit.MILLISECONDS);
+    			available.drainPermits();
+    		} catch (Exception e) {
+    			// To not need to deal this.
+    		}
+    		writeSelector.select(10);
+    		Set<SelectionKey> selectionKeys = writeSelector.selectedKeys();
+    		for (SelectionKey selectionKey: selectionKeys) {
+    			handleKey(selectionKey);
+    		}
+    		selectionKeys.clear();
+    	}
     }
 
     /**
@@ -179,7 +236,8 @@ public class NioServer implements Runnable {
                 client = server.accept();
                 client.configureBlocking(false);
                 clientMap.put(client, getClientHandler(client));
-                client.register(selector, SelectionKey.OP_READ | SelectionKey.OP_WRITE);
+                client.register(mainSelector, SelectionKey.OP_READ);
+                client.register(writeSelector, SelectionKey.OP_WRITE);
             }
             if (selectionKey.isReadable()) {
                 client = (SocketChannel) selectionKey.channel();
@@ -195,21 +253,34 @@ public class NioServer implements Runnable {
                 	handleWrite(clientHandler);
                 }
             }
-        } catch (CancelledKeyException e) {
+        } catch (Exception e) {
+        	if (e instanceof CancelledKeyException) {
+        		return;
+        	}
             LOG.info("Failed to handle client socket: {}", e.toString());
         }
     }
 
     /**
-     * Stop this server.
-     * After stop, the method listen() will return.
-     */
-    public void stop() {
+	 * Override super method
+	 * @see org.apache.niolex.network.IServer#stop()
+	 */
+    @Override
+	public void stop() {
         isListening = false;
         try {
             ss.socket().close();
             ss.close();
-            selector.close();
+            mainThread.interrupt();
+            writeThread.interrupt();
+        } catch (Exception e) {
+            LOG.error("Failed to stop server.", e);
+        }
+        try {
+        	mainThread.join();
+        	writeThread.join();
+	        mainSelector.close();
+	        writeSelector.close();
         } catch (Exception e) {
             LOG.error("Failed to stop server.", e);
         }
@@ -221,6 +292,7 @@ public class NioServer implements Runnable {
 			}
         }
         clientMap.clear();
+        LOG.info("Server stoped.");
     }
 
     /**
@@ -281,7 +353,14 @@ public class NioServer implements Runnable {
             return remoteName;
         }
 
-        /**
+        @Override
+		public void handleWrite(PacketData sc) {
+			super.handleWrite(sc);
+			// Signal the write thread there is data to write.
+			available.release();
+		}
+
+		/**
          * handle read request. called by NIO selector.
          * This method will read packet over and over again. Never stop.
          *
@@ -292,7 +371,12 @@ public class NioServer implements Runnable {
          */
         public boolean handleRead() {
             try {
-                client.read(receiveBuffer);
+                int k = client.read(receiveBuffer);
+                if (k < 0) {
+                	// This socket is closed now.
+                	handleClose();
+                	return false;
+                }
                 if (receiveBuffer.position() > 0) {
                     if (receiveStatus == Status.HEADER && receiveBuffer.position() < 8) {
                         return false;
@@ -324,7 +408,7 @@ public class NioServer implements Runnable {
                 }
             } catch (Exception e) {
                 LOG.info("Failed to read data from client socket: {}", e.toString());
-                handleError();
+                handleClose();
             }
             return false;
         }
@@ -365,7 +449,7 @@ public class NioServer implements Runnable {
                 }
             } catch (Exception e) {
                 LOG.info("Failed to send data to client socket: {}", e.getMessage());
-                handleError();
+                handleClose();
             }
             return false;
         }
@@ -396,76 +480,98 @@ public class NioServer implements Runnable {
 
         /**
          * Error occurred when read or write.
+         * Anyway, socket is closed.
+         *
          * Need to close socket and clean Map.
-         * Call IPacketHandler.handleError internally.
+         *
+         * Call IPacketHandler.handleClose internally.
          */
-        private void handleError() {
-            try {
+        private void handleClose() {
+        	try {
                 clientMap.remove(client);
                 client.close();
+                StringBuilder sb = new StringBuilder();
+                sb.append("Remote Client [").append(remoteName);
+                sb.append("] disconnected.");
+                LOG.info(sb.toString());
             } catch (IOException e) {
                 LOG.info("Failed to close client socket: {}", e.getMessage());
             } finally {
-                packetHandler.handleError(this);
+            	packetHandler.handleClose(this);
             }
         }
+
     }
 
     /**
-     * The current listen port.
-     * @return
-     */
-    public int getPort() {
+	 * Override super method
+	 * @see org.apache.niolex.network.IServer#getPort()
+	 */
+    @Override
+	public int getPort() {
         return this.port;
     }
 
     /**
-     * Set listen port.
-     * @param port
-     */
-    public void setPort(int port) {
+	 * Override super method
+	 * @see org.apache.niolex.network.IServer#setPort(int)
+	 */
+    @Override
+	public void setPort(int port) {
         this.port = port;
     }
 
     /**
-     * @return the packetHandler
-     */
-    public IPacketHandler getPacketHandler() {
+	 * Override super method
+	 * @see org.apache.niolex.network.IServer#getPacketHandler()
+	 */
+    @Override
+	public IPacketHandler getPacketHandler() {
         return packetHandler;
     }
 
     /**
-     * @param packetHandler the packetHandler to set
-     */
-    public void setPacketHandler(IPacketHandler packetHandler) {
+	 * Override super method
+	 * @see org.apache.niolex.network.IServer#setPacketHandler(org.apache.niolex.network.IPacketHandler)
+	 */
+    @Override
+	public void setPacketHandler(IPacketHandler packetHandler) {
         this.packetHandler = packetHandler;
     }
 
     /**
-     * @return the acceptTimeOut
-     */
-    public int getAcceptTimeOut() {
+	 * Override super method
+	 * @see org.apache.niolex.network.IServer#getAcceptTimeOut()
+	 */
+    @Override
+	public int getAcceptTimeOut() {
         return acceptTimeOut;
     }
 
     /**
-     * @param acceptTimeOut the acceptTimeOut to set
-     */
-    public void setAcceptTimeOut(int acceptTimeOut) {
+	 * Override super method
+	 * @see org.apache.niolex.network.IServer#setAcceptTimeOut(int)
+	 */
+    @Override
+	public void setAcceptTimeOut(int acceptTimeOut) {
         this.acceptTimeOut = acceptTimeOut;
     }
 
     /**
-     * @return the heartBeatInterval
-     */
-    public int getHeartBeatInterval() {
+	 * Override super method
+	 * @see org.apache.niolex.network.IServer#getHeartBeatInterval()
+	 */
+    @Override
+	public int getHeartBeatInterval() {
         return heartBeatInterval;
     }
 
     /**
-     * @param heartBeatInterval the heartBeatInterval to set
-     */
-    public void setHeartBeatInterval(int heartBeatInterval) {
+	 * Override super method
+	 * @see org.apache.niolex.network.IServer#setHeartBeatInterval(int)
+	 */
+    @Override
+	public void setHeartBeatInterval(int heartBeatInterval) {
         this.heartBeatInterval = heartBeatInterval;
     }
 

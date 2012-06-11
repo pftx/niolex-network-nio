@@ -51,21 +51,21 @@ public class DispatchPacketHandlerTest {
 	}
 
 	@Test
-	public void testHandleError() {
-		PacketData sc = mock(PacketData.class);
-		when(sc.getCode()).thenReturn((short)3, (short)3, (short)4);
-		IPacketWriter ip = mock(IPacketWriter.class);
-		handler.handleRead(sc , ip);
-		handler.handleRead(sc , ip);
-		handler.handleRead(sc , ip);
-		handler.handleRead(sc , ip);
-		handler.handleError(ip);
-		handler.handleError(ip);
-		handler.handleError(ip);
-		verify(pHandler1, times(3)).handleError(ip);
-		verify(pHandler2, times(3)).handleError(ip);
-		assertEquals(2, handler.getDispatchSize());
-	}
+		public void testHandleClose() {
+			PacketData sc = mock(PacketData.class);
+			when(sc.getCode()).thenReturn((short)3, (short)3, (short)4);
+			IPacketWriter ip = mock(IPacketWriter.class);
+			handler.handleRead(sc , ip);
+			handler.handleRead(sc , ip);
+			handler.handleRead(sc , ip);
+			handler.handleRead(sc , ip);
+			handler.handleClose(ip);
+			handler.handleClose(ip);
+			handler.handleClose(ip);
+			verify(pHandler1, times(3)).handleClose(ip);
+			verify(pHandler2, times(3)).handleClose(ip);
+			assertEquals(2, handler.getDispatchSize());
+		}
 
 	@Test
 	public void testHandleRead() {

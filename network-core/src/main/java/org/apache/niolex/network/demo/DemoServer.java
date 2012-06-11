@@ -47,8 +47,6 @@ public class DemoServer {
         handler.addHandler((short)4, new SessionPacketHandler(new LastTalkFactory()));
         s.setPacketHandler(handler);
         s.start();
-        Thread t = new Thread(s);
-        t.start();
     }
 
     public static void stop() {

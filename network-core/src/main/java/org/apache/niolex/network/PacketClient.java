@@ -155,6 +155,7 @@ public class PacketClient implements IPacketWriter, IClient {
                     readPacket.parseHeader(in);
                     LOG.debug("Packet received. desc {}, size {}.", readPacket.descriptor(), readPacket.getLength());
                     packetHandler.handleRead(readPacket, PacketClient.this);
+                    Thread.yield();
                 }
             } catch(Exception e) {
                 if (isWorking) {
@@ -166,7 +167,7 @@ public class PacketClient implements IPacketWriter, IClient {
                      * Upper layer.
                      */
                     isWorking = false;
-                    packetHandler.handleError(PacketClient.this);
+                    packetHandler.handleClose(PacketClient.this);
                 } else {
                     LOG.info("Read loop stoped.");
                 }
@@ -208,6 +209,7 @@ public class PacketClient implements IPacketWriter, IClient {
                     		// If nothing to send, let's sleep.
                     		sendNewPacket(sendPacket);
                     	}
+                    	Thread.yield();
                     } catch (InterruptedException e) {
                         // Let's ignore it.
                     }

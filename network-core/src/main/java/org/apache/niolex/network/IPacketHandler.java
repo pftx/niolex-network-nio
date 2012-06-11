@@ -36,5 +36,5 @@ public interface IPacketHandler {
      * The remote peer identified by this IPacketWriter is broken.
      * @param wt
      */
-    public void handleError(IPacketWriter wt);
+    public void handleClose(IPacketWriter wt);
 }
