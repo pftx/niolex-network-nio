@@ -26,9 +26,9 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
@@ -80,15 +80,15 @@ public class NioServer implements IServer {
     /**
      * The current server status.
      */
-    private volatile boolean isListening = false;
+    protected volatile boolean isListening = false;
 
-    private int acceptTimeOut = Config.SERVER_ACCEPT_TIMEOUT;
+    protected int acceptTimeOut = Config.SERVER_ACCEPT_TIMEOUT;
 
     private int heartBeatInterval = Config.SERVER_HEARTBEAT_INTERVAL;
 
     private int port;
 
-    private Map<SocketChannel, ClientHandler> clientMap = new HashMap<SocketChannel, ClientHandler>();
+    private Map<SocketChannel, ClientHandler> clientMap = new ConcurrentHashMap<SocketChannel, ClientHandler>();
 
     /**
      * Run this NioServer as a Runnable.
@@ -122,7 +122,7 @@ public class NioServer implements IServer {
                     // Listen the main loop.
         			try {
 						listenMain();
-					} catch (IOException e) {
+					} catch (Exception e) {
 			            LOG.error("Error occured while server is listening. The server will now shutdown.", e);
 			            NioServer.this.stop();
 					}
@@ -133,7 +133,7 @@ public class NioServer implements IServer {
                     // Listen the write loop.
         			try {
         				listenWrite();
-					} catch (IOException e) {
+					} catch (Exception e) {
 			            LOG.error("Error occured while server is listening. The server will now shutdown.", e);
 			            NioServer.this.stop();
 					}
@@ -167,22 +167,86 @@ public class NioServer implements IServer {
     }
 
     /**
+     * This method will return the main selector which is used to register READ operation.
+     * Sub class can override this method to return there own selector.
+     * @return
+     */
+    protected Selector getReadSelector() {
+    	return mainSelector;
+    }
+
+
+    /**
+     * 处理请求
+     */
+    protected void handleKey(SelectionKey selectionKey) throws IOException {
+        SocketChannel client = null;
+        try {
+            if (selectionKey.isAcceptable()) {
+                ServerSocketChannel server = (ServerSocketChannel) selectionKey.channel();
+                client = server.accept();
+                client.configureBlocking(false);
+                clientMap.put(client, getClientHandler(client));
+                client.register(getReadSelector(), SelectionKey.OP_READ);
+                client.register(writeSelector, SelectionKey.OP_WRITE);
+            }
+            if (selectionKey.isReadable()) {
+                client = (SocketChannel) selectionKey.channel();
+                ClientHandler clientHandler = clientMap.get(client);
+                if (clientHandler != null) {
+                	handleRead(clientHandler);
+                }
+            }
+        } catch (Exception e) {
+        	if (e instanceof CancelledKeyException || e instanceof ClosedChannelException) {
+        		return;
+        	}
+            LOG.info("Failed to handle client socket: {}", e.toString());
+        }
+    }
+
+
+    /**
      * This method will never return after this server stop or IOException.
      * Call stop() to shutdown this server.
      * @throws IOException
      */
     private void listenWrite() throws IOException {
+    	/**
+    	 * Dry run means there is nothing to send.
+    	 */
+    	boolean dryRun = true;
     	while (isListening) {
-    		try {
-    			available.tryAcquire(10, TimeUnit.MILLISECONDS);
-    			available.drainPermits();
-    		} catch (Exception e) {
-    			// To not need to deal this.
+    		if (dryRun) {
+	    		try {
+	    			available.tryAcquire(acceptTimeOut, TimeUnit.MILLISECONDS);
+	    			available.drainPermits();
+	    		} catch (Exception e) {
+	    			// To not need to deal this.
+	    		}
     		}
-    		writeSelector.select(10);
+    		if (writeSelector.select(acceptTimeOut) > 0) {
+    			// Selected channel greater than 0, so this maybe dry run.
+    			dryRun = true;
+    		}
     		Set<SelectionKey> selectionKeys = writeSelector.selectedKeys();
     		for (SelectionKey selectionKey: selectionKeys) {
-    			handleKey(selectionKey);
+    			try {
+    				if (selectionKey.isWritable()) {
+    					SocketChannel client = (SocketChannel) selectionKey.channel();
+    	                ClientHandler clientHandler = clientMap.get(client);
+    	                if (clientHandler != null) {
+    	                	if (handleWrite(clientHandler) != null) {
+    	                		dryRun = false;
+    	                	}
+    	                }
+    	            }
+    	        } catch (Exception e) {
+    	        	if (e instanceof CancelledKeyException || e instanceof ClosedChannelException) {
+    	        		return;
+    	        	}
+    	            LOG.info("Failed to handle client socket: {}", e.toString());
+    	        }
     		}
     		selectionKeys.clear();
     	}
@@ -217,50 +281,16 @@ public class NioServer implements IServer {
      * The default client handler will just process in the main thread.
      * @param clientHandler
      */
-    protected void handleWrite(ClientHandler clientHandler) {
+    protected Boolean handleWrite(ClientHandler clientHandler) {
     	// Call clientHandler.handleWrite will just send one buffer.
     	// If that buffer is sent immediately, we need to call it again to send more data.
-    	while (clientHandler.handleWrite()) {
+    	Boolean dryRun = null;
+    	while ((dryRun = clientHandler.handleWrite()) == Boolean.TRUE) {
     		continue;
     	}
+    	return dryRun;
     }
 
-
-    /**
-     * 处理请求
-     */
-    private void handleKey(SelectionKey selectionKey) throws IOException {
-        SocketChannel client = null;
-        try {
-            if (selectionKey.isAcceptable()) {
-                ServerSocketChannel server = (ServerSocketChannel) selectionKey.channel();
-                client = server.accept();
-                client.configureBlocking(false);
-                clientMap.put(client, getClientHandler(client));
-                client.register(mainSelector, SelectionKey.OP_READ);
-                client.register(writeSelector, SelectionKey.OP_WRITE);
-            }
-            if (selectionKey.isReadable()) {
-                client = (SocketChannel) selectionKey.channel();
-                ClientHandler clientHandler = clientMap.get(client);
-                if (clientHandler != null) {
-                	handleRead(clientHandler);
-                }
-            }
-            if (selectionKey.isWritable()) {
-                client = (SocketChannel) selectionKey.channel();
-                ClientHandler clientHandler = clientMap.get(client);
-                if (clientHandler != null) {
-                	handleWrite(clientHandler);
-                }
-            }
-        } catch (Exception e) {
-        	if (e instanceof CancelledKeyException || e instanceof ClosedChannelException) {
-        		return;
-        	}
-            LOG.info("Failed to handle client socket: {}", e.toString());
-        }
-    }
 
     /**
 	 * Override super method
@@ -268,6 +298,9 @@ public class NioServer implements IServer {
 	 */
     @Override
 	public void stop() {
+    	if (!isListening) {
+    		return;
+    	}
         isListening = false;
         try {
             ss.socket().close();
@@ -424,7 +457,7 @@ public class NioServer implements IServer {
          * SEND -> Sending a packet, all in the buffer. If buffer sent, can start new
          *
          */
-        public boolean handleWrite() {
+        public Boolean handleWrite() {
             try {
                 if (sendStatus == Status.NONE) {
                     return sendNewPacket();
@@ -459,14 +492,14 @@ public class NioServer implements IServer {
          * Start to send a new packet, or send the first packet.
          * @throws IOException
          */
-        private boolean sendNewPacket() throws IOException {
+        private Boolean sendNewPacket() throws IOException {
         	sendPacket = super.handleNext();
 
             if (sendPacket == null) {
                 if (lastSentTime + heartBeatInterval < System.currentTimeMillis()) {
                     super.handleWrite(PacketData.getHeartBeatPacket());
                 }
-                return false;
+                return null;
             }
             lastSentTime = System.currentTimeMillis();
             sendStatus = Status.DATA;

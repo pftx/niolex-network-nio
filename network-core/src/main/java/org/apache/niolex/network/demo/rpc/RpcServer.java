@@ -46,6 +46,7 @@ public class RpcServer {
         c.setTarget(new RpcServiceImpl());
         confs[0] = c;
 		handler.setRpcConfigs(confs);
+		s.setAcceptTimeOut(10);
         s.start();
     }
 

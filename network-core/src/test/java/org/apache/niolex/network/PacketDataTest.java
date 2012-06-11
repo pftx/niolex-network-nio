@@ -17,8 +17,8 @@
  */
 package org.apache.niolex.network;
 
-import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.spy;
@@ -62,6 +62,7 @@ public class PacketDataTest {
 		packetHandler2 = spy(new EchoPacketHandler());
 		nioServer.setPacketHandler(packetHandler2);
 		nioServer.setPort(port);
+		nioServer.setAcceptTimeOut(10);
 		nioServer.start();
 	}
 
@@ -74,6 +75,19 @@ public class PacketDataTest {
 		byte[] ret = new byte[len];
 		r.nextBytes(ret);
 		return ret;
+	}
+
+	private void assertArrayEquals(byte[] a, byte[] b) {
+		if (a.length == b.length) {
+			for (int k = 0; k < a.length; k += a.length / 100 + 1) {
+				if (a[k] != b[k]) {
+					assertFalse("Index at " + k, true);
+					return;
+				}
+			}
+		} else {
+			assertFalse("Invalid length", true);
+		}
 	}
 
 	/**

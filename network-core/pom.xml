@@ -4,7 +4,7 @@
 
 	<groupId>org.apache.niolex</groupId>
 	<artifactId>network-core</artifactId>
-	<version>0.1.0</version>
+	<version>0.2.0</version>
 	<packaging>jar</packaging>
 
 	<name>network-core</name>
@@ -55,6 +55,16 @@
 	</dependencies>
 
 	<build>
+		<resources>
+			<resource>
+				<directory>src/main/java</directory>
+				<includes>
+					<include>**/*.xml</include>
+					<include>**/*.properties</include>
+				</includes>
+			</resource>
+		</resources>
+
 		<testResources>
 			<testResource>
 				<directory>src/test/java</directory>

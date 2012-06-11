@@ -17,10 +17,12 @@
  */
 package org.apache.niolex.network.server;
 
-import java.nio.channels.SocketChannel;
+import java.io.IOException;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.Selector;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.niolex.network.NioServer;
 import org.slf4j.Logger;
@@ -37,7 +39,9 @@ public class MultiNioServer extends NioServer {
 
 	// The Thread pool size, default to 8, which is the majority CPU number on servers.
     private int threadsNumber = 8;
+    private int currentIdx = 0;
     private ExecutorService tPool;
+    private Selector[] selectors;
 
     /**
      * Start the server, then the worker pool internally.
@@ -49,38 +53,59 @@ public class MultiNioServer extends NioServer {
 			return false;
 		}
 		tPool = Executors.newFixedThreadPool(threadsNumber);
+		selectors = new Selector[threadsNumber];
+		try {
+			for (int i = 0; i < threadsNumber; ++i) {
+				Selector s = Selector.open();
+				tPool.execute(new RunnableSelector(s));
+				selectors[i] = s;
+			}
+		} catch (IOException e) {
+            LOG.error("Failed to start MultiNioServer.", e);
+            return false;
+        }
 		LOG.info("MultiNioServer started to work with {} threads.", threadsNumber);
 		return true;
 	}
 
 	/**
-	 * Use the ConcurrentClientHandler instead of super common ClientHandler
+	 * Return multiple selector to super class.
+	 *
+	 * Override super method
+	 * @see org.apache.niolex.network.NioServer#getReadSelector()
 	 */
 	@Override
-	protected ClientHandler getClientHandler(SocketChannel client) {
-		return new ConcurrentClientHandler(client);
-	}
-
-	@Override
-	protected void handleRead(ClientHandler clientHandler) {
-		tPool.execute(new Read(clientHandler));
-	}
-
-
-	@Override
-	protected void handleWrite(ClientHandler clientHandler) {
-		tPool.execute(new Write(clientHandler));
+	protected Selector getReadSelector() {
+		if (currentIdx >= threadsNumber) {
+			currentIdx = 0;
+		}
+		return selectors[currentIdx++];
 	}
 
 	/**
-	 * Stop the internal worker pool.
+	 * Invoke super stop internally.
+	 * Then stop the internal worker pool.
 	 */
 	@Override
 	public void stop() {
+		if (!isListening) {
+    		return;
+    	}
 		super.stop();
-		tPool.shutdown();
+		tPool.shutdownNow();
+		try {
+			for (int i = 0; i < threadsNumber; ++i) {
+				selectors[i].close();
+			}
+		} catch (IOException e) {
+            LOG.error("Failed to stop MultiNioServer.", e);
+        }
 	}
 
+	/**
+	 * Get the current threads number.
+	 * @return
+	 */
 	public int getThreadsNumber() {
 		return threadsNumber;
 	}
@@ -95,76 +120,43 @@ public class MultiNioServer extends NioServer {
 		this.threadsNumber = threadsNumber;
 	}
 
-	protected void superRead(ClientHandler clientHandler) {
-		super.handleRead(clientHandler);
-	}
-
-	protected class Read implements Runnable {
-		private ClientHandler clientHandler;
-
-		public Read(ClientHandler clientHandler) {
-			super();
-			this.clientHandler = clientHandler;
-		}
-
-		@Override
-		public void run() {
-			superRead(clientHandler);
-		}
-
-	}
-
-	protected void superWrite(ClientHandler clientHandler) {
-		super.handleWrite(clientHandler);
-	}
-
-	protected class Write implements Runnable {
-		private ClientHandler clientHandler;
-
-		public Write(ClientHandler clientHandler) {
-			super();
-			this.clientHandler = clientHandler;
-		}
-
-		@Override
-		public void run() {
-			superWrite(clientHandler);
-		}
-
-	}
-
-
 	/**
-	 * When in concurrent environment, Socket Channel need to be handled by
-	 * one thread at a time, so we need some kind of locking and synchronization.
+	 * Run the wrapped selector endlessly.
 	 *
+	 * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
+	 * @version 1.0.0
+	 * @Date: 2012-6-11
 	 */
-	public class ConcurrentClientHandler extends ClientHandler {
-		AtomicBoolean isRead = new AtomicBoolean(false);
-		AtomicBoolean isWrite = new AtomicBoolean(false);
+	private class RunnableSelector implements Runnable {
+		private Selector selector;
 
-		public ConcurrentClientHandler(SocketChannel sc) {
-			super(sc);
+		public RunnableSelector(Selector selector) {
+			super();
+			this.selector = selector;
 		}
 
+		/**
+		 * Override super method
+		 * @see java.lang.Runnable#run()
+		 */
 		@Override
-		public boolean handleRead() {
-			if (!isRead.getAndSet(true)) {
-				boolean r = super.handleRead();
-				isRead.set(false);
-				return r;
+		public void run() {
+			try {
+				while (isListening) {
+		            // Setting the timeout for accept method. Avoid that this server can not be shut
+		            // down when this thread is waiting to accept.
+					selector.select(acceptTimeOut);
+		            Set<SelectionKey> selectionKeys = selector.selectedKeys();
+		            for (SelectionKey selectionKey: selectionKeys) {
+		                handleKey(selectionKey);
+		            }
+		            selectionKeys.clear();
+		            Thread.yield();
+		        }
+			} catch (Exception e) {
+	            LOG.error("Error occured while server is listening. The server will now shutdown.", e);
+	            stop();
 			}
-			return false;
-		}
-
-		@Override
-		public boolean handleWrite() {
-			if (!isWrite.getAndSet(true)) {
-				boolean r = super.handleWrite();
-				isWrite.set(false);
-				return r;
-			}
-			return false;
 		}
 
 	}

@@ -48,7 +48,7 @@ public class MultiNioServerTest {
 	@Mock
 	private IPacketHandler packetHandler;
 
-	private static int port = 8808;
+	private static int port = 8908;
 	private static MultiNioServer nioServer;
 
 
@@ -56,6 +56,7 @@ public class MultiNioServerTest {
 	public static void createNioServer() throws Exception {
 		nioServer = new MultiNioServer();
 		nioServer.setPort(port);
+		nioServer.setAcceptTimeOut(10);
 		nioServer.start();
 	}
 
@@ -71,12 +72,11 @@ public class MultiNioServerTest {
 
 	@Test
 	public void testStart() throws Exception {
-		assertEquals(8808, nioServer.getPort());
+		assertEquals(port, nioServer.getPort());
 		nioServer.setThreadsNumber(3);
 		assertEquals(3, nioServer.getThreadsNumber());
-		nioServer.start();
 		assertEquals(packetHandler, nioServer.getPacketHandler());
-		PacketClient c = new PacketClient(new InetSocketAddress("localhost", 8808));
+		PacketClient c = new PacketClient(new InetSocketAddress("localhost", port));
         c.setPacketHandler(new PrintPacketHandler());
         c.connect();
         PacketData sc = new PacketData();
@@ -85,7 +85,7 @@ public class MultiNioServerTest {
         sc.setLength(0);
         sc.setData(new byte[0]);
         c.handleWrite(sc);
-        Thread.sleep(3 * CoreRunner.CO_SLEEP);
+        Thread.sleep(5 * CoreRunner.CO_SLEEP);
         c.stop();
         ArgumentCaptor<PacketData> argument = ArgumentCaptor.forClass(PacketData.class);
         verify(packetHandler).handleRead(argument.capture(), any(IPacketWriter.class));
@@ -97,7 +97,7 @@ public class MultiNioServerTest {
 
 	@Test
 	public void testStop() throws Exception {
-		PacketClient c = new PacketClient(new InetSocketAddress("localhost", 8808));
+		PacketClient c = new PacketClient(new InetSocketAddress("localhost", port));
 		c.setPacketHandler(new PrintPacketHandler());
 		c.connect();
 		PacketData sc = new PacketData();
@@ -125,7 +125,7 @@ public class MultiNioServerTest {
 		packetHandler = spy(new EchoPacketHandler());
 		nioServer.setPacketHandler(packetHandler);
 
-		PacketClient c = new PacketClient(new InetSocketAddress("localhost", 8808));
+		PacketClient c = new PacketClient(new InetSocketAddress("localhost", port));
 		IPacketHandler h = spy(new PrintPacketHandler());
 		c.setPacketHandler(h);
 		c.connect();
@@ -159,7 +159,7 @@ public class MultiNioServerTest {
 
 	@Test
 	public void testListen() throws Exception {
-		PacketClient c = new PacketClient(new InetSocketAddress("localhost", 8808));
+		PacketClient c = new PacketClient(new InetSocketAddress("localhost", port));
 		IPacketHandler h = spy(new PrintPacketHandler());
 		c.setPacketHandler(h);
 		c.connect();
@@ -182,7 +182,7 @@ public class MultiNioServerTest {
 
 	@Test
 	public void testHugeData() throws Exception {
-		PacketClient c = new PacketClient(new InetSocketAddress("localhost", 8808));
+		PacketClient c = new PacketClient(new InetSocketAddress("localhost", port));
 		IPacketHandler h = mock(IPacketHandler.class);
 		c.setPacketHandler(h);
 		c.connect();

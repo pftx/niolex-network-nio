@@ -155,7 +155,6 @@ public class PacketClient implements IPacketWriter, IClient {
                     readPacket.parseHeader(in);
                     LOG.debug("Packet received. desc {}, size {}.", readPacket.descriptor(), readPacket.getLength());
                     packetHandler.handleRead(readPacket, PacketClient.this);
-                    Thread.yield();
                 }
             } catch(Exception e) {
                 if (isWorking) {
