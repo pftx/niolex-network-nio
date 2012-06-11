@@ -71,14 +71,4 @@ public interface IServer {
 	 */
 	public abstract void setAcceptTimeOut(int acceptTimeOut);
 
-	/**
-	 * @return the heartBeatInterval
-	 */
-	public abstract int getHeartBeatInterval();
-
-	/**
-	 * @param heartBeatInterval the heartBeatInterval to set
-	 */
-	public abstract void setHeartBeatInterval(int heartBeatInterval);
-
 }

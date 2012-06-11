@@ -20,9 +20,8 @@ package org.apache.niolex.network.server;
 import java.io.IOException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
+import java.nio.channels.SocketChannel;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import org.apache.niolex.network.NioServer;
 import org.slf4j.Logger;
@@ -37,13 +36,25 @@ import org.slf4j.LoggerFactory;
 public class MultiNioServer extends NioServer {
 	private static final Logger LOG = LoggerFactory.getLogger(MultiNioServer.class);
 
-	// The Thread pool size, default to 8, which is the majority CPU number on servers.
+	// The Thread pool size
     private int threadsNumber = 8;
     private int currentIdx = 0;
-    private ExecutorService tPool;
+    private ThreadGroup tPool;
     private Selector[] selectors;
 
-    /**
+
+
+    public MultiNioServer() {
+		super();
+		this.threadsNumber = Runtime.getRuntime().availableProcessors();
+		if (threadsNumber > 8) {
+			// Default to 8, which is the majority CPU number on servers.
+			// Setting too many selectors is not good.
+			threadsNumber = 8;
+		}
+	}
+
+	/**
      * Start the server, then the worker pool internally.
      */
 	@Override
@@ -52,13 +63,14 @@ public class MultiNioServer extends NioServer {
 		if (!started) {
 			return false;
 		}
-		tPool = Executors.newFixedThreadPool(threadsNumber);
+		tPool = new ThreadGroup("Selectors");
 		selectors = new Selector[threadsNumber];
 		try {
 			for (int i = 0; i < threadsNumber; ++i) {
 				Selector s = Selector.open();
-				tPool.execute(new RunnableSelector(s));
+				Thread th = new Thread(tPool, new RunnableSelector(s));
 				selectors[i] = s;
+				th.start();
 			}
 		} catch (IOException e) {
             LOG.error("Failed to start MultiNioServer.", e);
@@ -75,11 +87,15 @@ public class MultiNioServer extends NioServer {
 	 * @see org.apache.niolex.network.NioServer#getReadSelector()
 	 */
 	@Override
-	protected Selector getReadSelector() {
-		if (currentIdx >= threadsNumber) {
-			currentIdx = 0;
+	protected void registerClient(SocketChannel client) throws IOException {
+		int k = currentIdx++;
+		if (k >= selectors.length) {
+			k = 0;
+			currentIdx = 1;
 		}
-		return selectors[currentIdx++];
+		Selector s = selectors[k];
+    	client.register(s, SelectionKey.OP_READ,
+    			new ClientHandler(packetHandler, s, client));
 	}
 
 	/**
@@ -92,9 +108,9 @@ public class MultiNioServer extends NioServer {
     		return;
     	}
 		super.stop();
-		tPool.shutdownNow();
+		tPool.interrupt();
 		try {
-			for (int i = 0; i < threadsNumber; ++i) {
+			for (int i = 0; i < selectors.length; ++i) {
 				selectors[i].close();
 			}
 		} catch (IOException e) {

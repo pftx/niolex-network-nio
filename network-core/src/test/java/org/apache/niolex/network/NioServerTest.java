@@ -71,9 +71,7 @@ public class NioServerTest {
 	@Test
 	public void testSetter() throws Exception {
 		nioServer.setAcceptTimeOut(6233);
-		nioServer.setHeartBeatInterval(23122);
 		assertEquals(6233, nioServer.getAcceptTimeOut());
-		assertEquals(23122, nioServer.getHeartBeatInterval());
 		assertEquals(8808, nioServer.getPort());
 	}
 
@@ -163,12 +161,12 @@ public class NioServerTest {
 
 	@Test
 	public void testListen() throws Exception {
+		packetHandler = spy(new EchoPacketHandler());
+		nioServer.setPacketHandler(packetHandler);
 		PacketClient c = new PacketClient(new InetSocketAddress("localhost", 8808));
 		IPacketHandler h = spy(new PrintPacketHandler());
 		c.setPacketHandler(h);
 		c.connect();
-		packetHandler = spy(new EchoPacketHandler());
-		nioServer.setPacketHandler(packetHandler);
 		for (int i = 1; i < 5; ++ i) {
             PacketData sc = new PacketData();
             sc.setCode((short)i);
@@ -186,12 +184,12 @@ public class NioServerTest {
 
 	@Test
 	public void testHugeData() throws Exception {
+		packetHandler = spy(new EchoPacketHandler());
+		nioServer.setPacketHandler(packetHandler);
 		PacketClient c = new PacketClient(new InetSocketAddress("localhost", 8808));
 		IPacketHandler h = mock(IPacketHandler.class);
 		c.setPacketHandler(h);
 		c.connect();
-		packetHandler = spy(new EchoPacketHandler());
-		nioServer.setPacketHandler(packetHandler);
 		for (int i = 1; i < 3; ++ i) {
 			PacketData sc = new PacketData();
 			sc.setCode((short)i);

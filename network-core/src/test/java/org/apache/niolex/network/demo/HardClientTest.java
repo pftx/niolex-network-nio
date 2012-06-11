@@ -79,7 +79,7 @@ public class HardClientTest {
 			c.handleWrite(sc);
 			list2.add(sc);
 		}
-		Thread.sleep(30 * CoreRunner.CO_SLEEP);
+		Thread.sleep(20 * CoreRunner.CO_SLEEP);
 		for (int i = 0; i < 5000; ++i) {
 			assertArrayEquals(list.get(i).getData(), list2.get(i).getData());
 		}

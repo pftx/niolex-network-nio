@@ -137,7 +137,7 @@ public class MultiNioServerTest {
 		sc.getData()[77] = (byte)145;
 		sc.getData()[145] = (byte)63;
 		c.handleWrite(sc);
-		Thread.sleep(6 * CoreRunner.CO_SLEEP);
+		Thread.sleep(5 * CoreRunner.CO_SLEEP);
 		c.stop();
 		ArgumentCaptor<PacketData> argument = ArgumentCaptor.forClass(PacketData.class);
 		verify(packetHandler).handleRead(argument.capture(), any(IPacketWriter.class));
@@ -159,12 +159,12 @@ public class MultiNioServerTest {
 
 	@Test
 	public void testListen() throws Exception {
+		packetHandler = spy(new EchoPacketHandler());
+		nioServer.setPacketHandler(packetHandler);
 		PacketClient c = new PacketClient(new InetSocketAddress("localhost", port));
 		IPacketHandler h = spy(new PrintPacketHandler());
 		c.setPacketHandler(h);
 		c.connect();
-		packetHandler = spy(new EchoPacketHandler());
-		nioServer.setPacketHandler(packetHandler);
 		for (int i = 1; i < 5; ++ i) {
             PacketData sc = new PacketData();
             sc.setCode((short)i);
@@ -182,12 +182,12 @@ public class MultiNioServerTest {
 
 	@Test
 	public void testHugeData() throws Exception {
+		packetHandler = spy(new EchoPacketHandler());
+		nioServer.setPacketHandler(packetHandler);
 		PacketClient c = new PacketClient(new InetSocketAddress("localhost", port));
 		IPacketHandler h = mock(IPacketHandler.class);
 		c.setPacketHandler(h);
 		c.connect();
-		packetHandler = spy(new EchoPacketHandler());
-		nioServer.setPacketHandler(packetHandler);
 		for (int i = 1; i < 3; ++ i) {
 			PacketData sc = new PacketData();
 			sc.setCode((short)i);

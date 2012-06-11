@@ -37,8 +37,8 @@ public class DemoRpcClient {
      * @param args
      */
     public static void main(String[] arg2s) throws Exception {
-    	PacketClient c = new PacketClient(new InetSocketAddress("10.22.241.233", 8808));
-//        PacketClient c = new PacketClient(new InetSocketAddress("localhost", 8808));
+//    	PacketClient c = new PacketClient(new InetSocketAddress("10.22.241.233", 8808));
+        PacketClient c = new PacketClient(new InetSocketAddress("localhost", 8808));
         JsonRpcClient client = new JsonRpcClient(c);
         client.connect();
 

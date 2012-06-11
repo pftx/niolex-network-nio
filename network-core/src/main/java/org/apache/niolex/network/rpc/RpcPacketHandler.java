@@ -55,7 +55,12 @@ public abstract class RpcPacketHandler implements IPacketHandler {
 	 * Constructor
 	 */
 	public RpcPacketHandler() {
-		this(Config.RPC_HANDLER_POOL_SIZE);
+		int threadsNumber = Runtime.getRuntime().availableProcessors() * 4;
+		if (threadsNumber > Config.RPC_HANDLER_POOL_SIZE) {
+			threadsNumber = Config.RPC_HANDLER_POOL_SIZE;
+		}
+		tPool = Executors.newFixedThreadPool(threadsNumber);
+		LOG.info("RpcPacketHandler started to work with {} threads.", threadsNumber);
 	}
 
 	/**
