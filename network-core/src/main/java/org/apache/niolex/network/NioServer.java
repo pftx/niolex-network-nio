@@ -169,6 +169,7 @@ public class NioServer implements IServer {
                 ServerSocketChannel server = (ServerSocketChannel) selectionKey.channel();
                 client = server.accept();
                 client.configureBlocking(false);
+                client.socket().setTcpNoDelay(true);
                 // Register this client to a selector.
                 registerClient(client);
                 return;

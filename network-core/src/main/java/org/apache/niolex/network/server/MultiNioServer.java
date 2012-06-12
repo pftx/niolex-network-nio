@@ -65,17 +65,6 @@ public class MultiNioServer extends NioServer {
 		}
 		tPool = new ThreadGroup("Selectors");
 		selectors = new Selector[threadsNumber];
-		try {
-			for (int i = 0; i < threadsNumber; ++i) {
-				Selector s = Selector.open();
-				Thread th = new Thread(tPool, new RunnableSelector(s));
-				selectors[i] = s;
-				th.start();
-			}
-		} catch (IOException e) {
-            LOG.error("Failed to start MultiNioServer.", e);
-            return false;
-        }
 		LOG.info("MultiNioServer started to work with {} threads.", threadsNumber);
 		return true;
 	}
@@ -88,15 +77,24 @@ public class MultiNioServer extends NioServer {
 	 */
 	@Override
 	protected void registerClient(SocketChannel client) throws IOException {
-		int k = currentIdx++;
-		if (k >= selectors.length) {
-			k = 0;
-			currentIdx = 1;
+		int kdx = currentIdx++ % selectors.length;
+		Selector s = selectors[kdx];
+		boolean startNew = s == null;
+		LOG.info("hahaha " + startNew);
+		if (startNew) {
+			s = Selector.open();
+			selectors[kdx] = s;
 		}
-		Selector s = selectors[k];
     	client.register(s, SelectionKey.OP_READ,
     			new ClientHandler(packetHandler, s, client));
-    	s.wakeup();
+    	LOG.info("hahaha " + startNew);
+    	if (startNew) {
+    		Thread th = new Thread(tPool, new RunnableSelector(s));
+    		th.start();
+    		LOG.debug("A new selector thread started.");
+    	} else {
+    		s.wakeup();
+    	}
 	}
 
 	/**
@@ -165,7 +163,7 @@ public class MultiNioServer extends NioServer {
 				while (isListening) {
 		            // Setting the timeout for accept method. Avoid that this server can not be shut
 		            // down when this thread is waiting to accept.
-					selector.select(acceptTimeOut);
+					selector.select();
 		            Set<SelectionKey> selectionKeys = selector.selectedKeys();
 		            for (SelectionKey selectionKey: selectionKeys) {
 		                handleKey(selectionKey);

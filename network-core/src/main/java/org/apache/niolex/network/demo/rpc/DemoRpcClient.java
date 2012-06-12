@@ -31,20 +31,20 @@ import org.apache.niolex.network.rpc.json.JsonRpcClient;
  */
 public class DemoRpcClient {
 
-    /**
-     * The Client Demo
-     *
-     * @param args
-     */
-    public static void main(String[] arg2s) throws Exception {
-//    	PacketClient c = new PacketClient(new InetSocketAddress("10.22.241.233", 8808));
-        PacketClient c = new PacketClient(new InetSocketAddress("localhost", 8808));
-        JsonRpcClient client = new JsonRpcClient(c);
-        client.connect();
+	/**
+	 * The Client Demo
+	 *
+	 * @param args
+	 */
+	public static void main(String[] arg2s) throws Exception {
+		// PacketClient c = new PacketClient(new InetSocketAddress("10.22.241.233", 8808));
+		PacketClient c = new PacketClient(new InetSocketAddress("localhost", 8808));
+		JsonRpcClient client = new JsonRpcClient(c);
+		client.connect();
 
-        final RpcService ser = client.getService(RpcService.class);
+		final RpcService ser = client.getService(RpcService.class);
 
-        int k = ser.add(3, 4, 5, 6, 7, 8, 9);
+		int k = ser.add(3, 4, 5, 6, 7, 8, 9);
 		System.out.println("Out => " + k);
 		List<String> args = new ArrayList<String>();
 		args.add("3");
@@ -57,9 +57,9 @@ public class DemoRpcClient {
 		k = ser.add(3, 4, 5);
 		System.out.println("Out => " + k);
 
-        Runnable r = new Runnable() {
+		Runnable r = new Runnable() {
 
-        	final int SIZE = 2212;
+			final int SIZE = 2212;
 
 			@Override
 			public void run() {
@@ -89,19 +89,21 @@ public class DemoRpcClient {
 				}
 				long t = System.currentTimeMillis() - in;
 				System.out.println("rps => " + (SIZE * 3000 / t) + ", Max " + maxin + ", Avg " + (t / (SIZE * 3)));
-			}};
-		Thread[] ts = new Thread[5];
-		for (int i = 0; i < 5; ++i) {
+			}
+		};
+		final int THREAD_NUM = 5;
+		Thread[] ts = new Thread[THREAD_NUM];
+		for (int i = 0; i < THREAD_NUM; ++i) {
 			Thread t = new Thread(r);
 			t.start();
 			ts[i] = t;
 		}
-		for (int i = 0; i < 5; ++i) {
+		for (int i = 0; i < THREAD_NUM; ++i) {
 			ts[i].join();
 			System.out.println("Join ...");
 		}
 		System.out.println("Done.....");
 		client.stop();
-    }
+	}
 
 }

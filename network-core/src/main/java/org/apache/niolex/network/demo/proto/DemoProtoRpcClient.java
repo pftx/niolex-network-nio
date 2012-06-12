@@ -88,13 +88,14 @@ public class DemoProtoRpcClient {
 				long t = System.currentTimeMillis() - in;
 				System.out.println("rps => " + (SIZE * 3000 / t) + ", Max " + maxin + ", Avg " + (t / (SIZE * 3)));
 			}};
-		Thread[] ts = new Thread[5];
-		for (int i = 0; i < 5; ++i) {
+		final int THREAD_NUM = 5;
+		Thread[] ts = new Thread[THREAD_NUM];
+		for (int i = 0; i < THREAD_NUM; ++i) {
 			Thread t = new Thread(r);
 			t.start();
 			ts[i] = t;
 		}
-		for (int i = 0; i < 5; ++i) {
+		for (int i = 0; i < THREAD_NUM; ++i) {
 			ts[i].join();
 			System.out.println("Join ...");
 		}

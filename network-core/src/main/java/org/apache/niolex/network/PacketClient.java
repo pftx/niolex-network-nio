@@ -72,6 +72,7 @@ public class PacketClient implements IPacketWriter, IClient {
 	public void connect() throws IOException {
         socket = new Socket();
         socket.setSoTimeout(connectTimeout);
+        socket.setTcpNoDelay(true);
         socket.connect(serverAddress);
         this.isWorking = true;
         Thread tr = new Thread(new ReadLoop(socket.getInputStream()));
