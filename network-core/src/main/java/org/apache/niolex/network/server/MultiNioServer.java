@@ -22,6 +22,7 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.util.Set;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.apache.niolex.network.NioServer;
 import org.slf4j.Logger;
@@ -40,7 +41,7 @@ public class MultiNioServer extends NioServer {
     private int threadsNumber = 8;
     private int currentIdx = 0;
     private ThreadGroup tPool;
-    private Selector[] selectors;
+    private RunnableSelector[] selectors;
 
 
 
@@ -64,7 +65,15 @@ public class MultiNioServer extends NioServer {
 			return false;
 		}
 		tPool = new ThreadGroup("Selectors");
-		selectors = new Selector[threadsNumber];
+		selectors = new RunnableSelector[threadsNumber];
+		try {
+			for (int i = 0; i < selectors.length; ++i) {
+				selectors[i] = new RunnableSelector(tPool);
+			}
+		} catch (IOException e) {
+            LOG.error("Failed to start MultiNioServer.", e);
+            return false;
+        }
 		LOG.info("MultiNioServer started to work with {} threads.", threadsNumber);
 		return true;
 	}
@@ -77,24 +86,8 @@ public class MultiNioServer extends NioServer {
 	 */
 	@Override
 	protected void registerClient(SocketChannel client) throws IOException {
-		int kdx = currentIdx++ % selectors.length;
-		Selector s = selectors[kdx];
-		boolean startNew = s == null;
-		LOG.info("hahaha " + startNew);
-		if (startNew) {
-			s = Selector.open();
-			selectors[kdx] = s;
-		}
-    	client.register(s, SelectionKey.OP_READ,
-    			new ClientHandler(packetHandler, s, client));
-    	LOG.info("hahaha " + startNew);
-    	if (startNew) {
-    		Thread th = new Thread(tPool, new RunnableSelector(s));
-    		th.start();
-    		LOG.debug("A new selector thread started.");
-    	} else {
-    		s.wakeup();
-    	}
+		RunnableSelector runSelec = selectors[currentIdx++ % selectors.length];
+    	runSelec.registerClient(client);
 	}
 
 	/**
@@ -107,15 +100,11 @@ public class MultiNioServer extends NioServer {
     		return;
     	}
 		super.stop();
-		for (int i = 0; i < selectors.length; ++i) {
-			selectors[i].wakeup();
-		}
-		tPool.interrupt();
 		try {
 			for (int i = 0; i < selectors.length; ++i) {
 				selectors[i].close();
 			}
-		} catch (IOException e) {
+		} catch (Exception e) {
             LOG.error("Failed to stop MultiNioServer.", e);
         }
 	}
@@ -146,11 +135,39 @@ public class MultiNioServer extends NioServer {
 	 * @Date: 2012-6-11
 	 */
 	private class RunnableSelector implements Runnable {
+		private ConcurrentLinkedQueue<SocketChannel> clientQueue = new ConcurrentLinkedQueue<SocketChannel>();
 		private Selector selector;
+		private Thread thread;
 
-		public RunnableSelector(Selector selector) {
+		public RunnableSelector(ThreadGroup tPool) throws IOException {
 			super();
-			this.selector = selector;
+			this.selector = Selector.open();
+			this.thread = new Thread(tPool, this);
+			thread.start();
+		}
+
+		/**
+		 * @param client
+		 */
+		public void registerClient(SocketChannel client) {
+			clientQueue.add(client);
+			selector.wakeup();
+		}
+
+		/**
+		 * Close the internal selector and wait for the thread to shutdown.
+		 * @throws IOException
+		 * @throws InterruptedException
+		 */
+		public void close() throws IOException, InterruptedException {
+			selector.wakeup();
+			thread.join();
+			for (SelectionKey skey : selector.keys()) {
+            	try {
+            		skey.channel().close();
+            	} catch (Exception e) {}
+            }
+			selector.close();
 		}
 
 		/**
@@ -161,15 +178,23 @@ public class MultiNioServer extends NioServer {
 		public void run() {
 			try {
 				while (isListening) {
-		            // Setting the timeout for accept method. Avoid that this server can not be shut
-		            // down when this thread is waiting to accept.
 					selector.select();
-		            Set<SelectionKey> selectionKeys = selector.selectedKeys();
-		            for (SelectionKey selectionKey: selectionKeys) {
-		                handleKey(selectionKey);
+					Set<SelectionKey> selectionKeys = selector.selectedKeys();
+					for (SelectionKey selectionKey: selectionKeys) {
+						handleKey(selectionKey);
+					}
+					selectionKeys.clear();
+					// Check the status, if there is any clients need to attach.
+		            if (!clientQueue.isEmpty()) {
+		            	while (true) {
+		            		SocketChannel client = clientQueue.poll();
+		            		if (client == null) {
+		            			break;
+		            		}
+		            		client.register(selector, SelectionKey.OP_READ,
+		            				new ClientHandler(packetHandler, selector, client));
+		            	}
 		            }
-		            selectionKeys.clear();
-		            Thread.yield();
 		        }
 			} catch (Exception e) {
 	            LOG.error("Error occured while server is listening. The server will now shutdown.", e);
