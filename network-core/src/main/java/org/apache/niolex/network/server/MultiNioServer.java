@@ -96,6 +96,7 @@ public class MultiNioServer extends NioServer {
 		Selector s = selectors[k];
     	client.register(s, SelectionKey.OP_READ,
     			new ClientHandler(packetHandler, s, client));
+    	s.wakeup();
 	}
 
 	/**
@@ -108,6 +109,9 @@ public class MultiNioServer extends NioServer {
     		return;
     	}
 		super.stop();
+		for (int i = 0; i < selectors.length; ++i) {
+			selectors[i].wakeup();
+		}
 		tPool.interrupt();
 		try {
 			for (int i = 0; i < selectors.length; ++i) {

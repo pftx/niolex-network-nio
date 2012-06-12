@@ -232,7 +232,7 @@ public class NioServer implements IServer {
     	// Mark the server as stopped, so main thread will return.
         isListening = false;
         try {
-        	mainThread.interrupt();
+        	mainSelector.wakeup();
         	mainThread.join();
         } catch (Exception e) {
         	LOG.error("Failed to stop server main thread.", e);

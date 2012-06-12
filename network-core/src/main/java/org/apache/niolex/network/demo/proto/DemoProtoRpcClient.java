@@ -53,8 +53,54 @@ public class DemoProtoRpcClient {
 			p = ser.getPerson(p);
 			System.out.println("Join ... " + p);
 		}
+		Runnable r = new Runnable() {
+
+        	final int SIZE = 2212;
+
+			@Override
+			public void run() {
+				int i = SIZE;
+				long in = System.currentTimeMillis();
+				long maxin = 0;
+				while (i-- > 0) {
+					long xin = System.currentTimeMillis();
+					Person p = Person.newBuilder().setId(45).setName("a").build();
+					p = ser.getPerson(p);
+					if (!p.getName().startsWith("Niolex [0]")) {
+						System.out.println("Out => " + p);
+					}
+					p = Person.newBuilder().setId(46).setName("a").build();
+					p = ser.getPerson(p);
+					if (!p.getName().startsWith("Niolex [1]")) {
+						System.out.println("Out => " + p);
+					}
+					p = Person.newBuilder().setId(47).setName("a").build();
+					p = ser.getPerson(p);
+					if (!p.getName().startsWith("Niolex [2]")) {
+						System.out.println("Out => " + p);
+					}
+
+					long xou = System.currentTimeMillis() - xin;
+					if (xou > maxin) {
+						maxin = xou;
+					}
+				}
+				long t = System.currentTimeMillis() - in;
+				System.out.println("rps => " + (SIZE * 3000 / t) + ", Max " + maxin + ", Avg " + (t / (SIZE * 3)));
+			}};
+		Thread[] ts = new Thread[5];
+		for (int i = 0; i < 5; ++i) {
+			Thread t = new Thread(r);
+			t.start();
+			ts[i] = t;
+		}
+		for (int i = 0; i < 5; ++i) {
+			ts[i].join();
+			System.out.println("Join ...");
+		}
+
 		System.out.println("Done.....");
-		c.stop();
+		client.stop();
 	}
 
 }

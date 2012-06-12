@@ -22,6 +22,7 @@ import java.io.IOException;
 import org.apache.niolex.network.NioServer;
 import org.apache.niolex.network.rpc.RpcConfig;
 import org.apache.niolex.network.rpc.json.JsonRpcPacketHandler;
+import org.apache.niolex.network.server.MultiNioServer;
 
 /**
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
@@ -30,7 +31,7 @@ import org.apache.niolex.network.rpc.json.JsonRpcPacketHandler;
  */
 public class RpcServer {
 
-    private static NioServer s = new NioServer();
+    private static NioServer s = new MultiNioServer();
 
     /**
      * The Server Demo
