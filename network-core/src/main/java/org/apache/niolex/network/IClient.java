@@ -25,46 +25,52 @@ import java.net.InetSocketAddress;
  * @version 1.0.0
  * @Date: 2012-6-2
  */
-public interface IClient {
+public interface IClient extends IPacketWriter {
 
 	/**
-	 * Do real connect action. Start two separate threads for reads and writes.
+	 * Do real connect action, connect to server.
 	 * This method will return immediately.
 	 * @throws IOException
 	 */
-	public abstract void connect() throws IOException;
+	public void connect() throws IOException;
 
 	/**
 	 * Stop this client.
 	 */
-	public abstract void stop();
-
-	/**
-	 * @param packetHandler the packetHandler to set
-	 */
+	public void stop();
 
 	/**
 	 * Test whether this client is working now
 	 * @return
 	 */
-	public abstract boolean isWorking();
+	public boolean isWorking();
 
 	/**
 	 * Set the packet handler this client using
 	 * @param packetHandler
 	 */
-	public abstract void setPacketHandler(IPacketHandler packetHandler);
+	public void setPacketHandler(IPacketHandler packetHandler);
 
 	/**
-	 * Set the Internet address to connect to
-	 * @return
+	 * Set the underline socket connect timeout
+	 * This method must be called before connect()
+	 *
+	 * @param connectTimeout
 	 */
-	public abstract InetSocketAddress getServerAddress();
+	public void setConnectTimeout(int connectTimeout);
+
+	/**
+	 * Set the server Internet address this client want to connect
+	 * This method must be called before connect()
+	 *
+	 * @param serverAddress
+	 */
+	public void setServerAddress(InetSocketAddress serverAddress);
 
 	/**
 	 * Get the current Internet address
-	 * @param serverAddress
+	 * @return
 	 */
-	public abstract void setServerAddress(InetSocketAddress serverAddress);
+	public InetSocketAddress getServerAddress();
 
 }

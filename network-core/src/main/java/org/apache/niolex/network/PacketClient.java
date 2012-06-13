@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
  * @author Xie, Jiyun
  *
  */
-public class PacketClient implements IPacketWriter, IClient {
+public class PacketClient implements IClient {
 	private static final Logger LOG = LoggerFactory.getLogger(PacketClient.class);
 
 	private LinkedBlockingDeque<PacketData> sendPacketList = new LinkedBlockingDeque<PacketData>();
@@ -65,6 +65,8 @@ public class PacketClient implements IPacketWriter, IClient {
     }
 
     /**
+     * Start two separate threads for reads and writes.
+     *
 	 * This is the override of super method.
 	 * @see org.apache.niolex.network.IClient#connect()
 	 */
@@ -155,6 +157,10 @@ public class PacketClient implements IPacketWriter, IClient {
                     PacketData readPacket = new PacketData();
                     readPacket.parseHeader(in);
                     LOG.debug("Packet received. desc {}, size {}.", readPacket.descriptor(), readPacket.getLength());
+                    if (readPacket.getCode() == Config.CODE_HEART_BEAT) {
+                    	// Let's ignore the heart beat packet here.
+                    	continue;
+                    }
                     packetHandler.handleRead(readPacket, PacketClient.this);
                 }
             } catch(Exception e) {

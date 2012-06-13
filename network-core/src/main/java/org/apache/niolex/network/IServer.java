@@ -27,48 +27,53 @@ package org.apache.niolex.network;
 public interface IServer {
 
 	/**
-	 * Start the NioServer, bind to Port.
+	 * Start the Server, bind to the Port.
 	 * Server need to start threads internally to run.
 	 * This method need to return after this server is started.
 	 */
-	public abstract boolean start();
+	public boolean start();
 
 	/**
 	 * Stop this server.
 	 * After stop, the internal threads need to be stopped.
 	 */
-	public abstract void stop();
+	public void stop();
 
 	/**
 	 * The current listen port.
 	 * @return
 	 */
-	public abstract int getPort();
+	public int getPort();
 
 	/**
 	 * Set listen port.
+	 * This method must be called before start()
 	 * @param port
 	 */
-	public abstract void setPort(int port);
+	public void setPort(int port);
 
 	/**
 	 * @return the packetHandler
 	 */
-	public abstract IPacketHandler getPacketHandler();
+	public IPacketHandler getPacketHandler();
 
 	/**
+	 * Set the server side packet handler
+	 * This method must be called before start()
 	 * @param packetHandler the packetHandler to set
 	 */
-	public abstract void setPacketHandler(IPacketHandler packetHandler);
+	public void setPacketHandler(IPacketHandler packetHandler);
 
 	/**
 	 * @return the acceptTimeOut
 	 */
-	public abstract int getAcceptTimeOut();
+	public int getAcceptTimeOut();
 
 	/**
+	 * Set the server accept timeout
+	 * This method must be called before start()
 	 * @param acceptTimeOut the acceptTimeOut to set
 	 */
-	public abstract void setAcceptTimeOut(int acceptTimeOut);
+	public void setAcceptTimeOut(int acceptTimeOut);
 
 }

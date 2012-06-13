@@ -29,9 +29,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.niolex.commons.reflect.MethodUtil;
 import org.apache.niolex.network.Config;
+import org.apache.niolex.network.IClient;
 import org.apache.niolex.network.IPacketHandler;
 import org.apache.niolex.network.IPacketWriter;
-import org.apache.niolex.network.PacketClient;
 import org.apache.niolex.network.PacketData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,7 +49,7 @@ public abstract class RpcClient implements InvocationHandler, IPacketHandler {
 	/**
 	 * The PacketClient to send and receive Rpc packets.
 	 */
-	private PacketClient client;
+	private IClient client;
 
 	/**
 	 * Save the execution map.
@@ -104,7 +104,7 @@ public abstract class RpcClient implements InvocationHandler, IPacketHandler {
 	 * Constructor
 	 * @param client
 	 */
-	public RpcClient(PacketClient client) {
+	public RpcClient(IClient client) {
 		super();
 		this.client = client;
 		this.client.setPacketHandler(this);
