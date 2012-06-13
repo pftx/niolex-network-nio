@@ -50,7 +50,7 @@ public class PacketDataTest {
 	@Mock
 	private IPacketHandler packetHandler;
 
-	private IPacketHandler packetHandler2;
+	private IPacketHandler packetHandlerServer;
 
 	private int port = 8808;
 	private NioServer nioServer;
@@ -59,10 +59,9 @@ public class PacketDataTest {
 	@Before
 	public void createPacketClient() throws Exception {
 		nioServer = new NioServer();
-		packetHandler2 = spy(new EchoPacketHandler());
-		nioServer.setPacketHandler(packetHandler2);
+		packetHandlerServer = spy(new EchoPacketHandler());
+		nioServer.setPacketHandler(packetHandlerServer);
 		nioServer.setPort(port);
-		nioServer.setAcceptTimeOut(10);
 		nioServer.start();
 	}
 
@@ -112,22 +111,22 @@ public class PacketDataTest {
 				Object[] args = invocation.getArguments();
 				PacketData sc = (PacketData) args[0];
 				switch (sc.getCode()) {
-				case 0:
+				case 1:
 					assertArrayEquals(sc0.getData(), sc.getData());
 					break;
-				case 1:
+				case 2:
 					assertArrayEquals(sc1.getData(), sc.getData());
 					break;
-				case 2:
+				case 3:
 					assertArrayEquals(sc2.getData(), sc.getData());
 					break;
-				case 3:
+				case 4:
 					assertArrayEquals(sc3.getData(), sc.getData());
 					break;
-				case 4:
+				case 5:
 					assertArrayEquals(sc4.getData(), sc.getData());
 					break;
-				case 5:
+				case 6:
 					assertArrayEquals(sc5.getData(), sc.getData());
 					break;
 				default:
@@ -157,6 +156,7 @@ public class PacketDataTest {
 		packetClient2.connect();
 		packetClient3.connect();
 		packetClient4.connect();
+
 		List<PacketData> list = new ArrayList<PacketData>();
 		list.add(sc0);
 		list.add(sc1);
@@ -165,9 +165,10 @@ public class PacketDataTest {
 		list.add(sc4);
 		list.add(sc5);
 		Random r = new Random(System.nanoTime());
+
 		for (int i = 0; i < 6; ++i) {
 			PacketData sc = list.get(i);
-			sc.setCode((short) i);
+			sc.setCode((short) (i + 1));
 			sc.setVersion((byte) 8);
 			int len = (r.nextInt(1024) + 1) * 1024;
 			sc.setLength(len);
@@ -177,7 +178,7 @@ public class PacketDataTest {
 			packetClient3.handleWrite(sc);
 			packetClient4.handleWrite(sc);
 		}
-		int i = 60;
+		int i = 30;
 		while (i-- > 0) {
 			if (received.size() == 24)
 				break;

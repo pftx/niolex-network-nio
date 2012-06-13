@@ -178,12 +178,16 @@ public class MultiNioServer extends NioServer {
 		public void run() {
 			try {
 				while (isListening) {
-					selector.select();
+					selector.select(acceptTimeOut);
 					Set<SelectionKey> selectionKeys = selector.selectedKeys();
 					for (SelectionKey selectionKey: selectionKeys) {
 						handleKey(selectionKey);
 					}
 					selectionKeys.clear();
+
+					// Handle heart beat.
+					handleHeartBeat(selector);
+
 					// Check the status, if there is any clients need to attach.
 		            if (!clientQueue.isEmpty()) {
 		            	while (true) {

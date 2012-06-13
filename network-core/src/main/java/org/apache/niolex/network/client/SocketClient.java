@@ -160,15 +160,6 @@ public class SocketClient implements IClient {
 
 	/**
 	 * Override super method
-	 * @see org.apache.niolex.network.IPacketWriter#size()
-	 */
-	@Override
-	public int size() {
-		return 0;
-	}
-
-	/**
-	 * Override super method
 	 * @see org.apache.niolex.network.IClient#isWorking()
 	 */
 	@Override

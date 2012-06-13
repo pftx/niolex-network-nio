@@ -72,9 +72,12 @@ public abstract class BasePacketWriter implements IPacketWriter {
 		return (T)attachMap.get(key);
 	}
 
-	@Override
-	public int size() {
-		return sendPacketsQueue.size();
+	/**
+	 * Return whether wht send packets queue is empty or not.
+	 * @return
+	 */
+	public boolean isEmpty() {
+		return sendPacketsQueue.isEmpty();
 	}
 
 	/**

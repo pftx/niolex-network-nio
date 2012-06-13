@@ -242,6 +242,12 @@ public class ClientHandler  extends BasePacketWriter {
         return false;
     }
 
+	public void handleHeartBeat() {
+		if (isEmpty() && lastSentTime + heartBeatInterval < System.currentTimeMillis()) {
+			handleWrite(PacketData.getHeartBeatPacket());
+		}
+	}
+
     /**
      * Start to send a new packet, or send the heart beat packet.
      * @throws IOException
@@ -250,27 +256,22 @@ public class ClientHandler  extends BasePacketWriter {
     	sendPacket = super.handleNext();
 
         if (sendPacket == null) {
-            if (lastSentTime + heartBeatInterval < System.currentTimeMillis()) {
-            	sendPacket = PacketData.getHeartBeatPacket();
-            	return doSendNewPacket();
-            } else {
-            	// Nothing to send, remove the OP_WRITE from selector.
-            	synchronized (writeAttached) {
-            		if (writeAttached) {
-            			// The second time try to find a packet. If still nothing, then do the remove.
-            			sendPacket = super.handleNext();
-            			if (sendPacket != null) {
-            				return doSendNewPacket();
-            			}
-            			try {
-        					socketChannel.register(selector, SelectionKey.OP_READ, this);
-        				} catch (Exception e) {
-        					LOG.warn("Failed to dettach write from selector, client will stop. " , e.toString());
-        					handleClose();
-        				}
-        				writeAttached = Boolean.FALSE;
-            		}
-            	}
+        	// Nothing to send, remove the OP_WRITE from selector.
+        	synchronized (writeAttached) {
+        		if (writeAttached) {
+        			// The second time try to find a packet. If still nothing, then do the remove.
+        			sendPacket = super.handleNext();
+        			if (sendPacket != null) {
+        				return doSendNewPacket();
+        			}
+        			try {
+    					socketChannel.register(selector, SelectionKey.OP_READ, this);
+    				} catch (Exception e) {
+    					LOG.warn("Failed to dettach write from selector, client will stop. " , e.toString());
+    					handleClose();
+    				}
+    				writeAttached = Boolean.FALSE;
+        		}
             }
             return false;
         }

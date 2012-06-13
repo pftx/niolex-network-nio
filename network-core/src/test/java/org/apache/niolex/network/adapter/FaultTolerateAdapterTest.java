@@ -17,7 +17,6 @@
  */
 package org.apache.niolex.network.adapter;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -66,7 +65,7 @@ public class FaultTolerateAdapterTest {
 		@Test
 		public void testHandleClose() {
 			PacketData sc = new PacketData(Config.CODE_SESSN_REGR, "AJFIUEALKD".getBytes());
-	
+
 			TBasePacketWriter wt0 = spy(new TBasePacketWriter());
 			doReturn("Mock").when(wt0).getRemoteName();
 			PacketData sc2 = new PacketData(3, "AJ231FIUEALKD".getBytes());
@@ -83,8 +82,6 @@ public class FaultTolerateAdapterTest {
 			faultTolerateSPacketHandler.handleRead(sc, wt2);
 			verify(h, times(1)).handleRead(sc2, wt0);
 			verify(wt0, times(1)).handleWrite(sc2);
-			assertEquals(1, wt.size());
-			assertEquals(1, wt2.size());
 		}
 
 	/**

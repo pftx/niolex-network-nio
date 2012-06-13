@@ -181,7 +181,7 @@ public class PacketClientTest {
 				Object[] args = invocation.getArguments();
 				PacketData sc = (PacketData) args[0];
 				switch (sc.getCode()) {
-				case 0:
+				case 6:
 					assertArrayEquals(sc0.getData(), sc.getData());
 					break;
 				case 1:
@@ -224,14 +224,18 @@ public class PacketClientTest {
 		Random r = new Random(System.nanoTime());
 		for (int i = 0; i < 6; ++i) {
 			PacketData sc = list.get(i);
-			sc.setCode((short) i);
+			if (i == 0) {
+				sc.setCode((short) 6);
+			} else {
+				sc.setCode((short) i);
+			}
 			sc.setVersion((byte) 8);
 			int len = (r.nextInt(1024) + 1) * 10240;
 			sc.setLength(len);
 			sc.setData(generateRandom(len, r));
 			packetClient.handleWrite(sc);
 		}
-		int i = 45;
+		int i = 30;
 		while (i-- > 0) {
 			if (received == 6)
 				break;

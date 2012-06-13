@@ -121,10 +121,9 @@ public class PacketClient implements IClient {
 	}
 
 	/**
-	 * Override super method
-	 * @see org.apache.niolex.network.IPacketWriter#size()
+	 * Return he nun-send packets size.
+	 * @return
 	 */
-	@Override
 	public int size() {
 		return sendPacketList.size();
 	}

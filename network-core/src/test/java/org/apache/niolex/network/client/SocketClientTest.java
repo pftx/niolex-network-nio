@@ -38,7 +38,6 @@ public class SocketClientTest {
 		SocketClient sc = new SocketClient();
 		InetSocketAddress inn = new InetSocketAddress("localhost", 8808);
 		sc.setServerAddress(inn);
-		assertEquals(0, sc.size());
 		assertFalse(sc.isWorking());
 		sc.setConnectTimeout(90821);
 		sc.setPacketHandler(null);

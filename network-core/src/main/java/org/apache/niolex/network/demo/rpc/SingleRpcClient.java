@@ -94,6 +94,7 @@ public class SingleRpcClient {
 		t.join();
 		System.out.println("Join ...");
 		System.out.println("Done.....");
+
 		client.stop();
 	}
 

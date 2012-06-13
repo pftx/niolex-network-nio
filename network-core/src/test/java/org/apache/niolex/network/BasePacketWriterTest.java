@@ -48,7 +48,6 @@ public class BasePacketWriterTest {
         sc.setLength(0);
         sc.setData(new byte[0]);
 		bpw.handleWrite(sc);
-		assertEquals(1, bpw.size());
 		assertEquals(sc, bpw.handleNext());
 	}
 
@@ -88,6 +87,5 @@ public class BasePacketWriterTest {
 		assertEquals(PacketData.getHeartBeatPacket(), bpw.handleNext());
 		assertEquals(sc, queue.poll());
 		assertEquals(10, queue.size());
-		assertEquals(10, bpw.size());
 	}
 }

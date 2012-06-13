@@ -17,7 +17,8 @@
  */
 package org.apache.niolex.network.rpc;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
 import org.apache.niolex.network.IClient;
@@ -42,9 +43,10 @@ public class PacketInvokerTest {
 
 	/**
 	 * Test method for {@link org.apache.niolex.network.rpc.PacketInvoker#handleClose(org.apache.niolex.network.IPacketWriter)}.
+	 * @throws InterruptedException
 	 */
 	@Test
-	public void testHandleClose() {
+	public void testHandleClose() throws InterruptedException {
 		final PacketInvoker in = new PacketInvoker();
 		final PacketData rc = new PacketData(56, new byte[76]);
 		final IClient client = mock(IClient.class);
@@ -55,6 +57,7 @@ public class PacketInvokerTest {
 		};
 		r.start();
 		assertTrue(!r.isInterrupted());
+		Thread.sleep(10);
 		in.handleClose(null);
 		assertTrue(r.isInterrupted());
 	}

@@ -54,8 +54,4 @@ public interface IPacketWriter {
      */
     public <T> T getAttached(String key);
 
-    /**
-     * Get current non-send packets size.
-     */
-    public int size();
 }
