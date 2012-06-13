@@ -1,5 +1,5 @@
 /**
- * RpcClient.java
+ * SingleRpcClient.java
  *
  * Copyright 2012 Niolex, Inc.
  *
@@ -17,30 +17,27 @@
  */
 package org.apache.niolex.network.demo.rpc;
 
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.niolex.network.PacketClient;
-import org.apache.niolex.network.rpc.PacketInvoker;
+import org.apache.niolex.network.client.SocketClient;
+import org.apache.niolex.network.rpc.SingleInvoker;
 import org.apache.niolex.network.rpc.json.JsonRpcClient;
 
 /**
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
- * @Date: 2012-6-2
+ * @Date: 2012-6-13
  */
-public class DemoRpcClient {
+public class SingleRpcClient {
 
-	/**
-	 * The Client Demo
-	 *
-	 * @param args
-	 */
-	public static void main(String[] arg2s) throws Exception {
-		// PacketClient c = new PacketClient(new InetSocketAddress("10.22.241.233", 8808));
-		PacketClient c = new PacketClient(new InetSocketAddress("localhost", 8808));
-		JsonRpcClient client = new JsonRpcClient(c, new PacketInvoker());
+
+	public static void main(String[] arg2s) throws IOException, Throwable {
+		// SocketClient c = new SocketClient(new InetSocketAddress("10.22.241.233", 8808));
+		SocketClient c = new SocketClient(new InetSocketAddress("localhost", 8808));
+		JsonRpcClient client = new JsonRpcClient(c, new SingleInvoker());
 		client.connect();
 
 		final RpcService ser = client.getService(RpcService.class);
@@ -92,17 +89,10 @@ public class DemoRpcClient {
 				System.out.println("rps => " + (SIZE * 3000 / t) + ", Max " + maxin + ", Avg " + (t / (SIZE * 3)));
 			}
 		};
-		final int THREAD_NUM = 5;
-		Thread[] ts = new Thread[THREAD_NUM];
-		for (int i = 0; i < THREAD_NUM; ++i) {
-			Thread t = new Thread(r);
-			t.start();
-			ts[i] = t;
-		}
-		for (int i = 0; i < THREAD_NUM; ++i) {
-			ts[i].join();
-			System.out.println("Join ...");
-		}
+		Thread t = new Thread(r);
+		t.start();
+		t.join();
+		System.out.println("Join ...");
 		System.out.println("Done.....");
 		client.stop();
 	}

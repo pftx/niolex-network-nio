@@ -23,6 +23,7 @@ import org.apache.niolex.network.PacketClient;
 import org.apache.niolex.network.demo.proto.PersonProtos.Person;
 import org.apache.niolex.network.demo.proto.PersonProtos.Person.PhoneNumber;
 import org.apache.niolex.network.demo.proto.PersonProtos.Person.PhoneType;
+import org.apache.niolex.network.rpc.PacketInvoker;
 import org.apache.niolex.network.rpc.proto.ProtoRpcClient;
 
 /**
@@ -36,7 +37,7 @@ public class DemoProtoRpcClient {
 	public static void main(String[] arg2s) throws Exception {
 		// PacketClient c = new PacketClient(new InetSocketAddress("10.22.241.233", 8808));
 		PacketClient c = new PacketClient(new InetSocketAddress("localhost", 8808));
-		ProtoRpcClient client = new ProtoRpcClient(c);
+		ProtoRpcClient client = new ProtoRpcClient(c, new PacketInvoker());
 		client.connect();
 
 		final PersonService ser = client.getService(PersonService.class);

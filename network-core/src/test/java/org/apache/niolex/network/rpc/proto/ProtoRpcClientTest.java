@@ -23,6 +23,7 @@ import org.apache.niolex.network.PacketClient;
 import org.apache.niolex.network.demo.proto.PersonProtos.Person;
 import org.apache.niolex.network.demo.proto.PersonProtos.Person.PhoneNumber;
 import org.apache.niolex.network.demo.proto.PersonProtos.Person.PhoneType;
+import org.apache.niolex.network.rpc.PacketInvoker;
 import org.apache.niolex.network.rpc.RpcException;
 import org.junit.Before;
 import org.junit.Test;
@@ -44,7 +45,7 @@ public class ProtoRpcClientTest {
 
 	@Before
 	public void createProtoRpcClient() throws Exception {
-		protoRpcClient = new ProtoRpcClient(client);
+		protoRpcClient = new ProtoRpcClient(client, new PacketInvoker());
 	}
 
 	/**

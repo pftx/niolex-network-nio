@@ -24,7 +24,6 @@ import java.lang.reflect.Proxy;
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.niolex.commons.reflect.MethodUtil;
@@ -52,24 +51,19 @@ public abstract class RpcClient implements InvocationHandler, IPacketHandler {
 	private IClient client;
 
 	/**
+	 * The RPC invoker to do the real method invoke.
+	 */
+	private RpcInvoker invoker;
+
+	/**
 	 * Save the execution map.
 	 */
 	private Map<Method, Short> executeMap = new HashMap<Method, Short>();
 
 	/**
-	 * The current waiting map.
-	 */
-	private Map<Integer, RpcWaitItem> waitMap = new ConcurrentHashMap<Integer, RpcWaitItem>();
-
-	/**
 	 * The serial generator.
 	 */
 	private AtomicInteger auto;
-
-	/**
-	 * The rpc handle timeout in milliseconds.
-	 */
-	private int rpcHandleTimeout = Config.RPC_HANDLE_TIMEOUT;
 
 	/**
 	 * The time to sleep between retry.
@@ -104,9 +98,10 @@ public abstract class RpcClient implements InvocationHandler, IPacketHandler {
 	 * Constructor
 	 * @param client
 	 */
-	public RpcClient(IClient client) {
+	public RpcClient(IClient client, RpcInvoker invoker) {
 		super();
 		this.client = client;
+		this.invoker = invoker;
 		this.client.setPacketHandler(this);
 		this.auto = new AtomicInteger(1);
 		this.connStatus = Status.INNITIAL;
@@ -142,11 +137,9 @@ public abstract class RpcClient implements InvocationHandler, IPacketHandler {
 	}
 
 	/**
-	 * This is the override of super method.
-	 * @see java.lang.reflect.InvocationHandler#invoke(java.lang.Object, java.lang.reflect.Method, java.lang.Object[])
+	 * Check the client status before doing remote call.
 	 */
-	@Override
-	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+	private void checkStatus() {
 		RpcException rep = null;
 		switch (connStatus) {
 			case INNITIAL:
@@ -156,6 +149,16 @@ public abstract class RpcClient implements InvocationHandler, IPacketHandler {
 				rep = new RpcException("Client closed.", RpcException.Type.CONNECTION_CLOSED, null);
 				throw rep;
 		}
+	}
+
+	/**
+	 * This is the override of super method.
+	 * @see java.lang.reflect.InvocationHandler#invoke(java.lang.Object, java.lang.reflect.Method, java.lang.Object[])
+	 */
+	@Override
+	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+		checkStatus();
+		RpcException rep = null;
 		Short rei = executeMap.get(method);
 		if (rei != null) {
 			// 1. Prepare parameters
@@ -169,44 +172,19 @@ public abstract class RpcClient implements InvocationHandler, IPacketHandler {
 			PacketData rc = new PacketData(rei, arr);
 			// 3. Generate serial number
 			serialPacket(rc);
-			// 4. Set up the waiting information
-			RpcWaitItem wi = new RpcWaitItem();
-			wi.setThread(Thread.currentThread());
-			Integer key = RpcUtil.generateKey(rc);
-			waitMap.put(key, wi);
-			// 5. Send request to remote server
-			client.handleWrite(rc);
-			// 6. Wait for result.
-			long in = System.currentTimeMillis();
-			while (System.currentTimeMillis() - in < rpcHandleTimeout) {
-				try {
-					Thread.sleep(1000);
-				} catch (InterruptedException e) {
-					// Do not care.
-				}
-				if (wi.getReceived() != null) {
-					break;
-				}
-			}
-			// 7. Clean the map.
-			waitMap.remove(key);
-			// 8. Process result.
-			if (wi.getReceived() == null) {
-				switch (connStatus) {
-					case INNITIAL:
-						rep = new RpcException("Client not connected.", RpcException.Type.NOT_CONNECTED, null);
-						throw rep;
-					case CLOSED:
-						rep = new RpcException("Client closed.", RpcException.Type.CONNECTION_CLOSED, null);
-						throw rep;
-				}
+
+			// 4. Invoke rpc
+			PacketData sc = invoker.invoke(rc, client);
+
+			// 5. Process result.
+			if (sc == null) {
+				checkStatus();
 				rep = new RpcException("Timeout for this remote procedure call.", RpcException.Type.TIMEOUT, null);
 				throw rep;
 			} else {
-				PacketData sc = wi.getReceived();
 				int exp = sc.getReserved() - rc.getReserved();
 				Object ret = prepareReturn(sc.getData(), method.getGenericReturnType(), exp);
-				if (exp == 1) {
+				if (exp == 1 || exp == -255) {
 					rep = (RpcException) ret;
 					throw rep;
 				}
@@ -231,20 +209,7 @@ public abstract class RpcClient implements InvocationHandler, IPacketHandler {
 
 	@Override
 	public void handleRead(PacketData sc, IPacketWriter wt) {
-		if (sc.getCode() == Config.CODE_HEART_BEAT) {
-			// This is heart beat, just return.
-			return;
-		}
-		int key = RpcUtil.generateKey(sc);
-		RpcWaitItem wi = waitMap.get(key);
-
-		if (wi == null) {
-			LOG.warn("Packet received for key [{}] have no handler, just ignored.", key);
-		} else {
-			waitMap.remove(key);
-			wi.setReceived(sc);
-			wi.getThread().interrupt();
-		}
+		this.invoker.handleRead(sc, wt);
 	}
 
 	@Override
@@ -258,9 +223,7 @@ public abstract class RpcClient implements InvocationHandler, IPacketHandler {
 			LOG.error("Exception occured when try to re-connect to server.");
 			// Try to shutdown this Client, inform all the threads.
 			this.connStatus = Status.CLOSED;
-			for (RpcWaitItem wi : waitMap.values()) {
-				wi.getThread().interrupt();
-			}
+			this.invoker.handleClose(wt);
 		}
 	}
 
@@ -289,14 +252,6 @@ public abstract class RpcClient implements InvocationHandler, IPacketHandler {
 	 */
 	public Status getConnStatus() {
 		return connStatus;
-	}
-
-	public int getRpcHandleTimeout() {
-		return rpcHandleTimeout;
-	}
-
-	public void setRpcHandleTimeout(int rpcHandleTimeout) {
-		this.rpcHandleTimeout = rpcHandleTimeout;
 	}
 
 	public void setSleepBetweenRetryTime(int sleepBetweenRetryTime) {

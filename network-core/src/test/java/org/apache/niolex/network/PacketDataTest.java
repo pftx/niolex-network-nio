@@ -177,7 +177,7 @@ public class PacketDataTest {
 			packetClient3.handleWrite(sc);
 			packetClient4.handleWrite(sc);
 		}
-		int i = 30;
+		int i = 60;
 		while (i-- > 0) {
 			if (received.size() == 24)
 				break;

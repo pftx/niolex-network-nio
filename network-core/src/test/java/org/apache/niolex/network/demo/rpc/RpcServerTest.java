@@ -38,9 +38,11 @@ public class RpcServerTest {
 	@SuppressWarnings("unused")
 	public void testMain() throws Throwable {
 		DemoRpcClient c = new DemoRpcClient();
+		SingleRpcClient g = new SingleRpcClient();
 		RpcServer s = new RpcServer();
 		RpcServer.main(null);
 		DemoRpcClient.main(null);
+		SingleRpcClient.main(null);
 		RpcServer.stop();
 	}
 

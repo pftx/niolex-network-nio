@@ -22,8 +22,9 @@ import java.io.ByteArrayOutputStream;
 import java.lang.reflect.Type;
 
 import org.apache.niolex.commons.compress.JacksonUtil;
-import org.apache.niolex.network.PacketClient;
+import org.apache.niolex.network.IClient;
 import org.apache.niolex.network.rpc.RpcClient;
+import org.apache.niolex.network.rpc.RpcInvoker;
 import org.codehaus.jackson.map.type.TypeFactory;
 
 /**
@@ -38,9 +39,10 @@ public class JsonRpcClient extends RpcClient {
 	/**
 	 * Implements super Constructor
 	 * @param client
+	 * @param invoker
 	 */
-	public JsonRpcClient(PacketClient client) {
-		super(client);
+	public JsonRpcClient(IClient client, RpcInvoker invoker) {
+		super(client, invoker);
 	}
 
 	/**

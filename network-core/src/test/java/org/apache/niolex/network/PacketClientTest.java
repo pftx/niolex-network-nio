@@ -231,7 +231,7 @@ public class PacketClientTest {
 			sc.setData(generateRandom(len, r));
 			packetClient.handleWrite(sc);
 		}
-		int i = 25;
+		int i = 45;
 		while (i-- > 0) {
 			if (received == 6)
 				break;

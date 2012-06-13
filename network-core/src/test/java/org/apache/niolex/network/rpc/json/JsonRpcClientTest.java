@@ -29,6 +29,7 @@ import org.apache.niolex.network.PacketClient;
 import org.apache.niolex.network.demo.rpc.RpcServer;
 import org.apache.niolex.network.demo.rpc.RpcService;
 import org.apache.niolex.network.rpc.RpcClient.Status;
+import org.apache.niolex.network.rpc.PacketInvoker;
 import org.apache.niolex.network.rpc.RpcException;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -47,7 +48,7 @@ public class JsonRpcClientTest {
 	public static void up() throws IOException {
 		RpcServer.main(null);
 		PacketClient c = new PacketClient(new InetSocketAddress("localhost", 8808));
-        client = new JsonRpcClient(c);
+        client = new JsonRpcClient(c, new PacketInvoker());
         client.connect();
 
         ser = client.getService(RpcService.class);
@@ -66,8 +67,6 @@ public class JsonRpcClientTest {
 		client.addInferface(getClass());
 		client.addInferface(RpcService.class);
 		client.setConnectTimeout(1234);
-		client.setRpcHandleTimeout(4321);
-		assertEquals(4321, client.getRpcHandleTimeout());
 		assertTrue(client.getConnStatus() == Status.CONNECTED);
 	}
 

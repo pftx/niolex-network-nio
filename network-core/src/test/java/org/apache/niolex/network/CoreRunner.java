@@ -79,5 +79,15 @@ public class CoreRunner {
 			--d;
 		}
 		System.out.println(d & 0xFF);
+		System.out.println("--");
+		d = 8;
+		byte x = -1, y = 126;
+		while (d-- > 0) {
+			x = y++;
+			int z = y - x;
+			int s = 1;
+			byte m = (byte) (y + s);
+			System.out.println(y + " " + (z) + " " + (x - y) + " " + (m));
+		}
 	}
 }

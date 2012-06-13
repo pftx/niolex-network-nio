@@ -20,9 +20,10 @@ package org.apache.niolex.network.rpc.proto;
 import java.io.ByteArrayOutputStream;
 import java.lang.reflect.Type;
 
-import org.apache.niolex.network.PacketClient;
+import org.apache.niolex.network.IClient;
 import org.apache.niolex.network.rpc.RpcClient;
 import org.apache.niolex.network.rpc.RpcException;
+import org.apache.niolex.network.rpc.RpcInvoker;
 
 import com.google.protobuf.GeneratedMessage;
 
@@ -38,9 +39,10 @@ public class ProtoRpcClient extends RpcClient {
 	/**
 	 * Implements super constructor
 	 * @param client
+	 * @param invoker
 	 */
-	public ProtoRpcClient(PacketClient client) {
-		super(client);
+	public ProtoRpcClient(IClient client, RpcInvoker invoker) {
+		super(client, invoker);
 	}
 
 	/**
