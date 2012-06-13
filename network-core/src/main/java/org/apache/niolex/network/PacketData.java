@@ -29,6 +29,7 @@ import java.nio.ByteBuffer;
 public class PacketData extends Packet {
     // The HEART_BEAT Packet is for testing server and client being alive
     private static final PacketData HEART_BEAT = new PacketData((short)0, new byte[0]);
+    private static final int MAX_SIZE = Config.SERVER_MAX_PACKET_SIZE;
     // The current handled data position in packet.
     private int dataPos;
 
@@ -121,7 +122,13 @@ public class PacketData extends Packet {
         reserved = bb.get();
         code = bb.getShort();
         length = bb.getInt();
+
+        if (length > MAX_SIZE) {
+        	throw new IllegalStateException("The packet length is larger than the max size: " + length);
+        }
+
         data = new byte[length];
+
         dataPos = 0;
         return parseBody(bb);
     }
@@ -137,7 +144,13 @@ public class PacketData extends Packet {
         reserved = in.readByte();
         code = in.readShort();
         length = in.readInt();
+
+        if (length > MAX_SIZE) {
+        	throw new IOException("The packet length is larger than the max size: " + length);
+        }
+
         data = new byte[length];
+
         dataPos = 0;
         parseBody(in);
     }

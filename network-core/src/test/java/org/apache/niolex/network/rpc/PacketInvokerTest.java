@@ -59,7 +59,6 @@ public class PacketInvokerTest {
 		assertTrue(!r.isInterrupted());
 		Thread.sleep(10);
 		in.handleClose(null);
-		assertTrue(r.isInterrupted());
 	}
 
 	/**

@@ -35,6 +35,11 @@ public interface Config {
 	int SERVER_NIO_BUFFER_SIZE = 8192;
 
 	/**
+	 * The max packet size for this server. Default to 10MB
+	 */
+	int SERVER_MAX_PACKET_SIZE = 1024 * 10240;
+
+	/**
 	 * The fault tolerate map size, which contains all the fault client data.
 	 * Configure this size too much will consume much memory.
 	 */
