@@ -140,23 +140,6 @@ public class NioServer implements IServer {
                 handleKey(selectionKey);
             }
             selectionKeys.clear();
-            handleHeartBeat(mainSelector);
-        }
-    }
-
-    /**
-     * Handle the heart beat problem of the channels attached with this selector.
-     * Any sub class with there own selector will need to invoke this method.
-     * @param sel
-     */
-    protected void handleHeartBeat(Selector sel) {
-    	for (SelectionKey key: sel.keys()) {
-        	if (key.isValid()) {
-        		ClientHandler clientHandler = (ClientHandler) key.attachment();
-        		if (clientHandler != null) {
-        			clientHandler.handleHeartBeat();
-        		}
-        	}
         }
     }
 

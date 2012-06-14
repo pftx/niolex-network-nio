@@ -69,21 +69,12 @@ public class ClientHandler  extends BasePacketWriter {
      */
     private SocketChannel socketChannel;
 
-    /**
-     * The interval to send heart beat if no packet sent between this time.
-     */
-    private int heartBeatInterval = Config.SERVER_HEARTBEAT_INTERVAL;
-
     /* 发送数据缓冲区*/
     private ByteBuffer sendBuffer = ByteBuffer.allocate(BLOCK);
     private Status sendStatus;
     private PacketData sendPacket;
     private int sendPos;
 
-    /**
-     * The latest packet send time.
-     */
-    private long lastSentTime;
 
     /**
      * Current write status. attached to the selector or not.
@@ -117,7 +108,6 @@ public class ClientHandler  extends BasePacketWriter {
         sendStatus = Status.NONE;
         receiveStatus = Status.HEADER;
         remoteName = client.socket().getRemoteSocketAddress().toString();
-        lastSentTime = System.currentTimeMillis();
         StringBuilder sb = new StringBuilder();
         sb.append("Remote Client [").append(remoteName);
         sb.append("] connected to local Port [").append(client.socket().getLocalPort());
@@ -242,11 +232,6 @@ public class ClientHandler  extends BasePacketWriter {
         return false;
     }
 
-	public void handleHeartBeat() {
-		if (isEmpty() && lastSentTime + heartBeatInterval < System.currentTimeMillis()) {
-			handleWrite(PacketData.getHeartBeatPacket());
-		}
-	}
 
     /**
      * Start to send a new packet, or send the heart beat packet.
@@ -284,7 +269,6 @@ public class ClientHandler  extends BasePacketWriter {
      * @throws IOException
      */
     private boolean doSendNewPacket() throws IOException {
-        lastSentTime = System.currentTimeMillis();
         sendStatus = Status.DATA;
         sendBuffer.clear();
         if (sendPacket.generateData(sendBuffer)) {
@@ -317,20 +301,4 @@ public class ClientHandler  extends BasePacketWriter {
         }
     }
 
-
-    /**
-	 * Return The heartBeatInterval
-	 * @see org.apache.niolex.network.IServer#getHeartBeatInterval()
-	 */
-	public int getHeartBeatInterval() {
-        return heartBeatInterval;
-    }
-
-    /**
-	 * The heartBeatInterval to set
-	 * @see org.apache.niolex.network.IServer#setHeartBeatInterval(int)
-	 */
-	public void setHeartBeatInterval(int heartBeatInterval) {
-        this.heartBeatInterval = heartBeatInterval;
-    }
 }

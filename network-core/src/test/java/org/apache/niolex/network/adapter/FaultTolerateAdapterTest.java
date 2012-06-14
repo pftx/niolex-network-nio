@@ -72,7 +72,7 @@ public class FaultTolerateAdapterTest {
 			faultTolerateSPacketHandler.handleRead(sc, wt0);
 			faultTolerateSPacketHandler.handleRead(sc2, wt0);
 			wt0.handleWrite(sc2);
-			verify(wt0).attachData(Config.ATTACH_KEY_SESS_SESSID, "AJFIUEALKD");
+			verify(wt0).attachData(Config.ATTACH_KEY_FAULTTO_UUID, "AJFIUEALKD");
 			faultTolerateSPacketHandler.handleClose(wt0);
 			// ERROR
 			TBasePacketWriter wt = spy(new TBasePacketWriter());
@@ -102,7 +102,7 @@ public class FaultTolerateAdapterTest {
 		PacketData sc = new PacketData(Config.CODE_SESSN_REGR, "AJFIUEALKD".getBytes());
 		IPacketWriter wt = mock(IPacketWriter.class);
 		faultTolerateSPacketHandler.handleRead(sc , wt);
-		verify(wt).attachData(Config.ATTACH_KEY_SESS_SESSID, "AJFIUEALKD");
+		verify(wt).attachData(Config.ATTACH_KEY_FAULTTO_UUID, "AJFIUEALKD");
 	}
 
 }

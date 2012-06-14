@@ -21,8 +21,8 @@ import java.io.IOException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
+import java.util.LinkedList;
 import java.util.Set;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.apache.niolex.network.NioServer;
 import org.slf4j.Logger;
@@ -135,7 +135,7 @@ public class MultiNioServer extends NioServer {
 	 * @Date: 2012-6-11
 	 */
 	private class RunnableSelector implements Runnable {
-		private ConcurrentLinkedQueue<SocketChannel> clientQueue = new ConcurrentLinkedQueue<SocketChannel>();
+		private LinkedList<SocketChannel> clientQueue = new LinkedList<SocketChannel>();
 		private Selector selector;
 		private Thread thread;
 
@@ -184,9 +184,6 @@ public class MultiNioServer extends NioServer {
 						handleKey(selectionKey);
 					}
 					selectionKeys.clear();
-
-					// Handle heart beat.
-					handleHeartBeat(selector);
 
 					// Check the status, if there is any clients need to attach.
 		            if (!clientQueue.isEmpty()) {

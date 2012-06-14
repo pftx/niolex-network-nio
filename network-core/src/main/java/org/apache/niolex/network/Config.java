@@ -106,8 +106,21 @@ public interface Config {
 	 * Handler attachment key, all system key will start with SYS_
 	 * Please keep away from them.
 	 */
+
+	/**
+	 * Attach session handler to the packet writer with this key.
+	 */
 	String ATTACH_KEY_SESS_HANDLER = "SYS_HAND_SESS_HANDLER";
-	String ATTACH_KEY_SESS_SESSID = "SYS_HAND_SESS_SESSID";
+
+	/**
+	 * Attach client uuid which is for fault tolerate.
+	 */
+	String ATTACH_KEY_FAULTTO_UUID = "SYS_HAND_FAULTTO_UUID";
+
+	/**
+	 * Attach last packet send time which is for heart beat.
+	 */
+	String ATTACH_KEY_HEART_BEAT = "SYS_HAND_HEART_BEAT";
 
 	/**
 	 * The packet code is a 2-bytes short int. The system will use some this code,

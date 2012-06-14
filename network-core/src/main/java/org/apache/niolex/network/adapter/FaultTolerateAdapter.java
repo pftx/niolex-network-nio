@@ -46,7 +46,8 @@ import org.slf4j.LoggerFactory;
 public class FaultTolerateAdapter implements IPacketHandler {
 	private static final Logger LOG = LoggerFactory.getLogger(FaultTolerateAdapter.class);
 
-	private static final String KEY = Config.ATTACH_KEY_SESS_SESSID;
+	private static final String KEY = Config.ATTACH_KEY_FAULTTO_UUID;
+
 	private Map<String, ConcurrentLinkedQueue<PacketData>> dataMap =
 			new LRUHashMap<String, ConcurrentLinkedQueue<PacketData>>(Config.SERVER_FAULT_TOLERATE_MAP_SIZE);
 
