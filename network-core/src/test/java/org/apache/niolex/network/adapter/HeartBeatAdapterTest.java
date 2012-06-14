@@ -81,10 +81,10 @@ public class HeartBeatAdapterTest {
 		wEvent.setPacketWriter(wt2);
 		ha.afterSend(wEvent);
 
-		Thread.sleep(120);
+		Thread.sleep(150);
 
 		// After then, heart beat should be ready now.
-		verify(wt).handleWrite(PacketData.getHeartBeatPacket());
+		verify(wt, atLeast(1)).handleWrite(PacketData.getHeartBeatPacket());
 		verify(wt2, never()).handleWrite(PacketData.getHeartBeatPacket());
 
 		// Close wt2
