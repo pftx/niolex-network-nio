@@ -19,10 +19,10 @@ package org.apache.niolex.network.demo.proto;
 
 import java.io.IOException;
 
-import org.apache.niolex.network.NioServer;
 import org.apache.niolex.network.rpc.RpcConfig;
 import org.apache.niolex.network.rpc.proto.ProtoRpcPacketHandler;
 import org.apache.niolex.network.server.MultiNioServer;
+import org.apache.niolex.network.server.NioServer;
 
 /**
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>

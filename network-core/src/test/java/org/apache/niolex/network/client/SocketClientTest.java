@@ -64,6 +64,12 @@ public class SocketClientTest {
 		} catch (Exception e) {
 			;
 		}
+		try {
+			packetClient.addEventListener(null);
+			assertTrue("Should not listen.", false);
+		} catch (Exception e) {
+			;
+		}
 	}
 
 }

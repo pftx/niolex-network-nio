@@ -19,7 +19,7 @@ package org.apache.niolex.network.rpc.proto;
 
 import static org.junit.Assert.*;
 
-import org.apache.niolex.network.PacketClient;
+import org.apache.niolex.network.client.PacketClient;
 import org.apache.niolex.network.demo.proto.PersonProtos.Person;
 import org.apache.niolex.network.demo.proto.PersonProtos.Person.PhoneNumber;
 import org.apache.niolex.network.demo.proto.PersonProtos.Person.PhoneType;

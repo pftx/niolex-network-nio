@@ -21,8 +21,8 @@ import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.util.Scanner;
 
-import org.apache.niolex.network.PacketClient;
 import org.apache.niolex.network.PacketData;
+import org.apache.niolex.network.client.PacketClient;
 
 
 /**

@@ -21,7 +21,7 @@ import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.niolex.network.PacketClient;
+import org.apache.niolex.network.client.PacketClient;
 import org.apache.niolex.network.rpc.PacketInvoker;
 import org.apache.niolex.network.rpc.json.JsonRpcClient;
 

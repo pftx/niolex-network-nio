@@ -25,8 +25,6 @@ import java.net.Socket;
 import java.util.concurrent.RejectedExecutionException;
 
 import org.apache.niolex.network.Config;
-import org.apache.niolex.network.IClient;
-import org.apache.niolex.network.IPacketHandler;
 import org.apache.niolex.network.PacketData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,16 +36,11 @@ import org.slf4j.LoggerFactory;
  * @version 1.0.0
  * @Date: 2012-6-13
  */
-public class SocketClient implements IClient {
+public class SocketClient extends BaseClient {
 	private static final Logger LOG = LoggerFactory.getLogger(SocketClient.class);
 
-    private InetSocketAddress serverAddress;
-    private IPacketHandler packetHandler;
-    private Socket socket;
     private DataInputStream inS;
     private DataOutputStream outS;
-    private boolean isWorking;
-    private int connectTimeout = Config.SO_CONNECT_TIMEOUT;
 
     /**
      * Crate a SocketClient without any server address
@@ -100,19 +93,6 @@ public class SocketClient implements IClient {
 
 	/**
 	 * Override super method
-	 * @see org.apache.niolex.network.IPacketWriter#getRemoteName()
-	 */
-	@Override
-	public String getRemoteName() {
-		if (socket == null) {
-    		return serverAddress.toString() + "-0000";
-    	} else {
-    		return serverAddress.toString() + "-" + socket.getLocalPort();
-    	}
-	}
-
-	/**
-	 * Override super method
 	 * @see org.apache.niolex.network.IPacketWriter#handleWrite(org.apache.niolex.network.PacketData)
 	 */
 	@Override
@@ -138,69 +118,6 @@ public class SocketClient implements IClient {
 			packetHandler.handleRead(readPacket, this);
 			break;
 		}
-	}
-
-	/**
-	 * Override super method
-	 * @see org.apache.niolex.network.IPacketWriter#attachData(java.lang.String, java.lang.Object)
-	 */
-	@Override
-	public Object attachData(String key, Object value) {
-		throw new UnsupportedOperationException("This method has not implemented yet.");
-	}
-
-	/**
-	 * Override super method
-	 * @see org.apache.niolex.network.IPacketWriter#getAttached(java.lang.String)
-	 */
-	@Override
-	public <T> T getAttached(String key) {
-		throw new UnsupportedOperationException("This method has not implemented yet.");
-	}
-
-	/**
-	 * Override super method
-	 * @see org.apache.niolex.network.IClient#isWorking()
-	 */
-	@Override
-	public boolean isWorking() {
-		return this.isWorking;
-	}
-
-	/**
-	 * Override super method
-	 * @see org.apache.niolex.network.IClient#setPacketHandler(org.apache.niolex.network.IPacketHandler)
-	 */
-	@Override
-	public void setPacketHandler(IPacketHandler packetHandler) {
-		this.packetHandler = packetHandler;
-	}
-
-	/**
-	 * Override super method
-	 * @see org.apache.niolex.network.IClient#setConnectTimeout(int)
-	 */
-	@Override
-	public void setConnectTimeout(int connectTimeout) {
-		this.connectTimeout = connectTimeout;
-	}
-
-	/**
-	 * Override super method
-	 * @see org.apache.niolex.network.IClient#setServerAddress(java.net.InetSocketAddress)
-	 */
-	@Override
-	public void setServerAddress(InetSocketAddress serverAddress) {
-		this.serverAddress = serverAddress;
-	}
-
-	/**
-	 * Override super method
-	 * @see org.apache.niolex.network.IClient#getServerAddress()
-	 */
-	@Override
-	public InetSocketAddress getServerAddress() {
-		return this.serverAddress;
 	}
 
 }

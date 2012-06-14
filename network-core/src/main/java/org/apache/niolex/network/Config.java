@@ -118,6 +118,11 @@ public interface Config {
 	String ATTACH_KEY_FAULTTO_UUID = "SYS_HAND_FAULTTO_UUID";
 
 	/**
+	 * Attach the fault packet data round robin list
+	 */
+	String ATTACH_KEY_FAULT_RRLIST = "SYS_HAND_FAULT_RRLIST";
+
+	/**
 	 * Attach last packet send time which is for heart beat.
 	 */
 	String ATTACH_KEY_HEART_BEAT = "SYS_HAND_HEART_BEAT";
@@ -133,5 +138,14 @@ public interface Config {
 	 *
 	 */
 	short CODE_HEART_BEAT = 0;
-	short CODE_SESSN_REGR = (short)65501;
+
+	/**
+	 * Register the client UUID to server.
+	 */
+	short CODE_REGR_UUID = (short)65501;
+
+	/**
+	 * Register the client Need heart beat.
+	 */
+	short CODE_REGR_HBEAT = (short)65502;
 }

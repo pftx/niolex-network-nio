@@ -25,8 +25,8 @@ import java.util.List;
 
 import org.apache.niolex.commons.test.MockUtil;
 import org.apache.niolex.network.CoreRunner;
-import org.apache.niolex.network.PacketClient;
 import org.apache.niolex.network.PacketData;
+import org.apache.niolex.network.client.PacketClient;
 import org.apache.niolex.network.example.SavePacketHandler;
 import org.junit.After;
 import org.junit.AfterClass;

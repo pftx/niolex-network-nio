@@ -23,6 +23,7 @@ import org.apache.niolex.network.handler.DispatchPacketHandler;
 import org.apache.niolex.network.handler.SessionPacketHandler;
 import org.apache.niolex.network.handler.SummaryPacketHandler;
 import org.apache.niolex.network.rpc.RpcUtil;
+import org.apache.niolex.network.server.NioServer;
 
 /**
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>

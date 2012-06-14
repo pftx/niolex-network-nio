@@ -24,7 +24,6 @@ import java.nio.channels.SocketChannel;
 import java.util.LinkedList;
 import java.util.Set;
 
-import org.apache.niolex.network.NioServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -82,7 +81,7 @@ public class MultiNioServer extends NioServer {
 	 * Return multiple selector to super class.
 	 *
 	 * Override super method
-	 * @see org.apache.niolex.network.NioServer#getReadSelector()
+	 * @see org.apache.niolex.network.server.NioServer#getReadSelector()
 	 */
 	@Override
 	protected void registerClient(SocketChannel client) throws IOException {

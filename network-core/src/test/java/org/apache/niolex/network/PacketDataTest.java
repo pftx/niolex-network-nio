@@ -30,7 +30,9 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
+import org.apache.niolex.network.client.PacketClient;
 import org.apache.niolex.network.example.EchoPacketHandler;
+import org.apache.niolex.network.server.NioServer;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -91,7 +93,7 @@ public class PacketDataTest {
 
 	/**
 	 * Test method for
-	 * {@link com.renren.ad.datacenter.follower.network.PacketClient#handleWrite(com.renren.ad.datacenter.follower.network.PacketData)}
+	 * {@link org.apache.niolex.network.client.renren.ad.datacenter.follower.network.PacketClient#handleWrite(com.renren.ad.datacenter.follower.network.PacketData)}
 	 * .
 	 */
 	@Test

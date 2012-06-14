@@ -15,7 +15,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.niolex.network;
+package org.apache.niolex.network.server;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
@@ -26,8 +26,14 @@ import static org.mockito.Mockito.verify;
 
 import java.net.InetSocketAddress;
 
+import org.apache.niolex.network.CoreRunner;
+import org.apache.niolex.network.IPacketHandler;
+import org.apache.niolex.network.IPacketWriter;
+import org.apache.niolex.network.PacketData;
+import org.apache.niolex.network.client.PacketClient;
 import org.apache.niolex.network.demo.PrintPacketHandler;
 import org.apache.niolex.network.example.EchoPacketHandler;
+import org.apache.niolex.network.server.NioServer;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -91,10 +97,10 @@ public class NioServerTest {
         c.stop();
         ArgumentCaptor<PacketData> argument = ArgumentCaptor.forClass(PacketData.class);
         verify(packetHandler).handleRead(argument.capture(), any(IPacketWriter.class));
-        assertEquals((short)4, argument.getValue().code);
-        assertEquals((byte)1, argument.getValue().version);
-        assertEquals(0, argument.getValue().length);
-        assertEquals(0, argument.getValue().data.length);
+        assertEquals((short)4, argument.getValue().getCode());
+        assertEquals((byte)1, argument.getValue().getVersion());
+        assertEquals(0, argument.getValue().getLength());
+        assertEquals(0, argument.getValue().getData().length);
 	}
 
 	@Test
@@ -117,7 +123,7 @@ public class NioServerTest {
 		assertEquals((short)4, argument.getValue().getCode());
 		assertEquals((byte)1, argument.getValue().getVersion());
 		assertEquals(1024 * 1024 + 6, argument.getValue().getLength());
-		assertEquals(1024 * 1024 + 6, argument.getValue().data.length);
+		assertEquals(1024 * 1024 + 6, argument.getValue().getData().length);
 		assertEquals((byte)145, argument.getValue().getData()[6]);
 		assertEquals((byte)63, argument.getValue().getData()[145]);
 	}
@@ -146,7 +152,7 @@ public class NioServerTest {
 		assertEquals((short)4, argument.getValue().getCode());
 		assertEquals((byte)1, argument.getValue().getVersion());
 		assertEquals(1024 * 1024 + 6, argument.getValue().getLength());
-		assertEquals(1024 * 1024 + 6, argument.getValue().data.length);
+		assertEquals(1024 * 1024 + 6, argument.getValue().getData().length);
 		assertEquals((byte)145, argument.getValue().getData()[77]);
 		assertEquals((byte)63, argument.getValue().getData()[145]);
 		argument = ArgumentCaptor.forClass(PacketData.class);
@@ -154,7 +160,7 @@ public class NioServerTest {
 		assertEquals((short)4, argument.getValue().getCode());
 		assertEquals((byte)1, argument.getValue().getVersion());
 		assertEquals(1024 * 1024 + 6, argument.getValue().getLength());
-		assertEquals(1024 * 1024 + 6, argument.getValue().data.length);
+		assertEquals(1024 * 1024 + 6, argument.getValue().getData().length);
 		assertEquals((byte)145, argument.getValue().getData()[77]);
 		assertEquals((byte)63, argument.getValue().getData()[145]);
 	}

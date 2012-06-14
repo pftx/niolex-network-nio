@@ -15,11 +15,17 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.niolex.network;
+package org.apache.niolex.network.server;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
+
+import org.apache.niolex.network.IPacketWriter;
+import org.apache.niolex.network.PacketData;
+import org.apache.niolex.network.event.WriteEvent;
+import org.apache.niolex.network.event.WriteEventListener;
 
 /**
  * The base BasePacketWriter, handle attach and PacketData storage.
@@ -42,6 +48,11 @@ public abstract class BasePacketWriter implements IPacketWriter {
 	private ConcurrentLinkedQueue<PacketData> sendPacketsQueue = new ConcurrentLinkedQueue<PacketData>();
 
 	/**
+	 * The packet write event listener list
+	 */
+	private ArrayList<WriteEventListener> listenerList = new ArrayList<WriteEventListener>(2);
+
+	/**
 	 * Initialize send iterator here.
 	 */
 	public BasePacketWriter() {
@@ -53,6 +64,23 @@ public abstract class BasePacketWriter implements IPacketWriter {
 		sendPacketsQueue.add(sc);
 	}
 
+	@Override
+	public void addEventListener(WriteEventListener listener) {
+		listenerList.add(listener);
+	}
+
+	/**
+	 * Sub class need to use this method to fire send event.
+	 * @param sc
+	 */
+	protected void fireSendEvent(PacketData sc) {
+		WriteEvent wEvent = new WriteEvent();
+		wEvent.setPacketData(sc);
+		wEvent.setPacketWriter(this);
+		for (WriteEventListener listener : listenerList) {
+			listener.afterSend(wEvent);
+		}
+	}
 	/**
 	 * Sub class need to use this method to get packets to send.
 	 * @return

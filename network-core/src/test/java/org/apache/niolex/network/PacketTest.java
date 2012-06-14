@@ -24,7 +24,9 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 
+import org.apache.niolex.network.client.PacketClient;
 import org.apache.niolex.network.demo.PrintPacketHandler;
+import org.apache.niolex.network.server.NioServer;
 import org.junit.Test;
 
 /**

@@ -15,7 +15,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.niolex.network;
+package org.apache.niolex.network.client;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -26,25 +26,27 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.concurrent.LinkedBlockingDeque;
 
+import org.apache.niolex.network.Config;
+import org.apache.niolex.network.PacketData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The PacketClient connect to NioServer, send and receive packets.
+ * The PacketClient connect to NioServer, send and receive packets. In it's
+ * own threads. This client can be used in multiple threads.
+ *
  * @author Xie, Jiyun
  *
  */
-public class PacketClient implements IClient {
+public class PacketClient extends BaseClient {
 	private static final Logger LOG = LoggerFactory.getLogger(PacketClient.class);
 
 	private LinkedBlockingDeque<PacketData> sendPacketList = new LinkedBlockingDeque<PacketData>();
 
-    private InetSocketAddress serverAddress;
-    private IPacketHandler packetHandler;
-    private Socket socket;
+	/**
+	 * The internal write thread.
+	 */
     private Thread writeThread;
-    private boolean isWorking;
-    private int connectTimeout = Config.SO_CONNECT_TIMEOUT;
 
 
     /**
@@ -97,28 +99,9 @@ public class PacketClient implements IClient {
     }
 
     @Override
-    public String getRemoteName() {
-    	if (socket == null) {
-    		return serverAddress.toString() + "-0000";
-    	} else {
-    		return serverAddress.toString() + "-" + socket.getLocalPort();
-    	}
-    }
-
-    @Override
     public void handleWrite(PacketData sc) {
     	sendPacketList.add(sc);
     }
-
-	@Override
-	public Object attachData(String key, Object value) {
-		throw new UnsupportedOperationException("This method has not implemented yet.");
-	}
-
-	@Override
-	public <T> T getAttached(String key) {
-		throw new UnsupportedOperationException("This method has not implemented yet.");
-	}
 
 	/**
 	 * Return he nun-send packets size.
@@ -239,49 +222,5 @@ public class PacketClient implements IClient {
             LOG.debug("Packet sent. desc {}, queue {}.", sendPacket.descriptor(), PacketClient.this.size());
         }
     }
-
-    /**
-	 * This is the override of super method.
-	 * @see org.apache.niolex.network.IClient#setPacketHandler(org.apache.niolex.network.IPacketHandler)
-	 */
-    @Override
-	public void setPacketHandler(IPacketHandler packetHandler) {
-        this.packetHandler = packetHandler;
-    }
-
-	/**
-	 * This is the override of super method.
-	 * @see org.apache.niolex.network.IClient#getServerAddress()
-	 */
-	@Override
-	public InetSocketAddress getServerAddress() {
-		return serverAddress;
-	}
-
-	/**
-	 * This is the override of super method.
-	 * @see org.apache.niolex.network.IClient#setServerAddress(java.net.InetSocketAddress)
-	 */
-	@Override
-	public void setServerAddress(InetSocketAddress serverAddress) {
-		this.serverAddress = serverAddress;
-	}
-
-	public int getConnectTimeout() {
-		return connectTimeout;
-	}
-
-	public void setConnectTimeout(int connectTimeout) {
-		this.connectTimeout = connectTimeout;
-	}
-
-	/**
-	 * This is the override of super method.
-	 * @see org.apache.niolex.network.IClient#isWorking()
-	 */
-	@Override
-	public boolean isWorking() {
-		return isWorking;
-	}
 
 }

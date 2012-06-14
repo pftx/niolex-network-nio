@@ -15,12 +15,16 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.niolex.network;
+package org.apache.niolex.network.server;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import org.apache.niolex.network.PacketData;
+import org.apache.niolex.network.TBasePacketWriter;
+import org.apache.niolex.network.server.BasePacketWriter;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -38,7 +42,7 @@ public class BasePacketWriterTest {
 	}
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.BasePacketWriter#handleWrite(org.apache.niolex.network.PacketData)}.
+	 * Test method for {@link org.apache.niolex.network.server.BasePacketWriter#handleWrite(org.apache.niolex.network.PacketData)}.
 	 */
 	@Test
 	public void testHandleWrite() {
@@ -49,10 +53,11 @@ public class BasePacketWriterTest {
         sc.setData(new byte[0]);
 		bpw.handleWrite(sc);
 		assertEquals(sc, bpw.handleNext());
+		assertTrue(bpw.isEmpty());
 	}
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.BasePacketWriter#attachData(java.lang.String, java.lang.Object)}.
+	 * Test method for {@link org.apache.niolex.network.server.BasePacketWriter#attachData(java.lang.String, java.lang.Object)}.
 	 */
 	@Test
 	public void testAttachData() {

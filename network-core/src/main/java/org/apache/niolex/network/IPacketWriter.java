@@ -17,6 +17,8 @@
  */
 package org.apache.niolex.network;
 
+import org.apache.niolex.network.event.WriteEventListener;
+
 
 /**
  * The Packet Writer Interface.
@@ -37,6 +39,12 @@ public interface IPacketWriter {
      * @param sc The Packet to write
      */
     public void handleWrite(PacketData sc);
+
+    /**
+     * WriteEventListener is the listener fired after packet send to client.
+     * @param listener
+     */
+    public void addEventListener(WriteEventListener listener);
 
     /**
      * Attach some data to this object, please use your unique key, all system internal data key

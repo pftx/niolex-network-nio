@@ -30,14 +30,13 @@ import java.net.InetSocketAddress;
 import org.apache.niolex.network.Config;
 import org.apache.niolex.network.CoreRunner;
 import org.apache.niolex.network.IPacketHandler;
-import org.apache.niolex.network.PacketClient;
 import org.apache.niolex.network.PacketData;
+import org.apache.niolex.network.client.PacketClient;
 import org.apache.niolex.network.packet.PacketTransformer;
 import org.apache.niolex.network.packet.StringSerializer;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -73,13 +72,12 @@ public class FaultTolerateTest {
 	@Before
 	public void testGetInstance() {
 		pt = PacketTransformer.getInstance();
-		pt.addSerializer(new StringSerializer(Config.CODE_SESSN_REGR));
+		pt.addSerializer(new StringSerializer(Config.CODE_REGR_UUID));
 	}
 
 	@Test
-	@Ignore
 	/**
-	 * TODO make fault tolerate work again.
+	 * make fault tolerate work again.
 	 *
 	 * @throws Exception
 	 */
@@ -88,7 +86,7 @@ public class FaultTolerateTest {
 		packetClient.setPacketHandler(packetHandler);
 		packetClient.connect();
 
-		final PacketData sc0 = pt.getPacketData(Config.CODE_SESSN_REGR, "FaultTolerateTest");
+		final PacketData sc0 = pt.getPacketData(Config.CODE_REGR_UUID, "FaultTolerateTest");
 		packetClient.handleWrite(sc0);
 		verify(packetHandler, never()).handleRead(any(PacketData.class), eq(packetClient));
 
@@ -105,6 +103,7 @@ public class FaultTolerateTest {
 
 		Thread.sleep(5 * CoreRunner.CO_SLEEP);
 		System.out.println("--------------------------------------------");
+
 		packetHandler = mock(IPacketHandler.class);
 		packetClient.setPacketHandler(packetHandler);
 		packetClient.connect();
@@ -112,7 +111,7 @@ public class FaultTolerateTest {
 		Thread.sleep(5 * CoreRunner.CO_SLEEP);
 
 		ArgumentCaptor<PacketData> argument = ArgumentCaptor.forClass(PacketData.class);
-		verify(packetHandler, times(1)).handleRead(argument.capture(), eq(packetClient));
+		verify(packetHandler, times(2)).handleRead(argument.capture(), eq(packetClient));
 		assertArrayEquals(arr, argument.getValue().getData());
 		packetClient.stop();
 	}

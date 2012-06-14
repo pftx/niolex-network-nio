@@ -15,7 +15,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.niolex.network;
+package org.apache.niolex.network.server;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -27,7 +27,9 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.Set;
 
-import org.apache.niolex.network.server.ClientHandler;
+import org.apache.niolex.network.Config;
+import org.apache.niolex.network.IPacketHandler;
+import org.apache.niolex.network.IServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

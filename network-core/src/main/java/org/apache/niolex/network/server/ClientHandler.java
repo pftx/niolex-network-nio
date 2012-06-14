@@ -23,7 +23,6 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 
-import org.apache.niolex.network.BasePacketWriter;
 import org.apache.niolex.network.Config;
 import org.apache.niolex.network.IPacketHandler;
 import org.apache.niolex.network.PacketData;
@@ -212,6 +211,9 @@ public class ClientHandler  extends BasePacketWriter {
                 } else {
                     if (sendStatus == Status.SEND) {
                     	sendStatus = Status.NONE;
+                    	// Tell listener this packet has been send now.
+                    	this.fireSendEvent(sendPacket);
+
                     	LOG.debug("Packet sent. desc {}, size {}.", sendPacket.descriptor(), sendPacket.getLength());
                         return sendNewPacket();
                     } else {

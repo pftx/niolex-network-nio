@@ -19,7 +19,7 @@ package org.apache.niolex.network.demo.proto;
 
 import java.net.InetSocketAddress;
 
-import org.apache.niolex.network.PacketClient;
+import org.apache.niolex.network.client.PacketClient;
 import org.apache.niolex.network.demo.proto.PersonProtos.Person;
 import org.apache.niolex.network.demo.proto.PersonProtos.Person.PhoneNumber;
 import org.apache.niolex.network.demo.proto.PersonProtos.Person.PhoneType;

@@ -15,7 +15,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.niolex.network;
+package org.apache.niolex.network.client;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -30,7 +30,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import org.apache.niolex.network.CoreRunner;
+import org.apache.niolex.network.IPacketHandler;
+import org.apache.niolex.network.IPacketWriter;
+import org.apache.niolex.network.PacketData;
+import org.apache.niolex.network.client.PacketClient;
 import org.apache.niolex.network.example.EchoPacketHandler;
+import org.apache.niolex.network.server.NioServer;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -85,7 +91,7 @@ public class PacketClientTest {
 
 	/**
 	 * Test method for
-	 * {@link com.renren.ad.datacenter.follower.network.PacketClient#connect()}.
+	 * {@link org.apache.niolex.network.client.renren.ad.datacenter.follower.network.PacketClient#connect()}.
 	 */
 	@Test
 	public void testConnect() throws Exception {
@@ -111,14 +117,14 @@ public class PacketClientTest {
 		assertEquals((short) 4, argument.getValue().getCode());
 		assertEquals((byte) 8, argument.getValue().getVersion());
 		assertEquals(1024 * 1024 + 6, argument.getValue().getLength());
-		assertEquals(1024 * 1024 + 6, argument.getValue().data.length);
+		assertEquals(1024 * 1024 + 6, argument.getValue().getData().length);
 		assertEquals((byte) 145, argument.getValue().getData()[9]);
 		assertEquals((byte) 63, argument.getValue().getData()[145]);
 	}
 
 	/**
 	 * Test method for
-	 * {@link com.renren.ad.datacenter.follower.network.PacketClient#getRemoteName()}
+	 * {@link org.apache.niolex.network.client.renren.ad.datacenter.follower.network.PacketClient#getRemoteName()}
 	 * .
 	 */
 	@Test
@@ -164,7 +170,7 @@ public class PacketClientTest {
 
 	/**
 	 * Test method for
-	 * {@link com.renren.ad.datacenter.follower.network.PacketClient#handleWrite(com.renren.ad.datacenter.follower.network.PacketData)}
+	 * {@link org.apache.niolex.network.client.renren.ad.datacenter.follower.network.PacketClient#handleWrite(com.renren.ad.datacenter.follower.network.PacketData)}
 	 * .
 	 */
 	@Test

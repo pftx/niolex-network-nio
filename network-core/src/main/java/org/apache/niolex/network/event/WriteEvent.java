@@ -1,5 +1,5 @@
 /**
- * TBasePacketWriter.java
+ * WriteEvent.java
  *
  * Copyright 2012 Niolex, Inc.
  *
@@ -15,28 +15,37 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.niolex.network;
+package org.apache.niolex.network.event;
 
-import org.apache.niolex.network.server.BasePacketWriter;
-
+import org.apache.niolex.network.IPacketWriter;
+import org.apache.niolex.network.PacketData;
 
 /**
+ * Packet write event.
+ *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
- * @Date: 2012-5-31
+ * @Date: 2012-6-14
  */
-public class TBasePacketWriter extends BasePacketWriter {
+public class WriteEvent {
 
-	/**
-	 * Override super method
-	 * @see org.apache.niolex.network.IPacketWriter#getRemoteName()
-	 */
-	@Override
-	public String getRemoteName() {
-		return "Mock";
+	private IPacketWriter packetWriter;
+	private PacketData packetData;
+
+	public IPacketWriter getPacketWriter() {
+		return packetWriter;
 	}
 
-	public PacketData handleNext() {
-		return super.handleNext();
+	public void setPacketWriter(IPacketWriter packetWriter) {
+		this.packetWriter = packetWriter;
 	}
+
+	public PacketData getPacketData() {
+		return packetData;
+	}
+
+	public void setPacketData(PacketData packetData) {
+		this.packetData = packetData;
+	}
+
 }
