@@ -148,4 +148,14 @@ public interface Config {
 	 * Register the client Need heart beat.
 	 */
 	short CODE_REGR_HBEAT = (short)65502;
+
+	/**
+	 * Register the name service address.
+	 */
+	short CODE_REGR_NAME = (short)65503;
+
+	/**
+	 * Listen the name service address.
+	 */
+	short CODE_LISTN_NAME = (short)65504;
 }

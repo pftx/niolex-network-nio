@@ -17,6 +17,8 @@
  */
 package org.apache.niolex.network.packet;
 
+import org.apache.niolex.commons.codec.StringUtil;
+
 
 /**
  * StringSerializer serialize String.
@@ -54,7 +56,7 @@ public class StringSerializer extends BaseSerializer<String> {
 	 */
 	@Override
 	public byte[] serObj(String t) {
-		return t.getBytes();
+		return StringUtil.strToUTF8Byte(t);
 	}
 
 	/* (non-Javadoc)
@@ -62,7 +64,7 @@ public class StringSerializer extends BaseSerializer<String> {
 	 */
 	@Override
 	public String deserObj(byte[] arr) {
-		return new String(arr);
+		return StringUtil.utf8ByteToStr(arr);
 	}
 
 }
