@@ -17,22 +17,44 @@
  */
 package org.apache.niolex.network.rpc.init;
 
-import org.apache.niolex.network.rpc.RpcClient;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
- * Create rpc client from the complete connection Url.
+ * The factory method of RpcClientBuilder.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
- * @Date: 2012-6-3
+ * @Date: 2012-6-19
  */
-public interface RpcClientFactory {
+public class RpcClientFactory {
 
 	/**
-	 * Create rpc client from the complete connection Url
-	 * @param url
+	 * The internal hash map of builders.
+	 */
+	private static Map<String, RpcClientBuilder> builderMap = new HashMap<String, RpcClientBuilder>();
+
+	/**
+	 * Register builder.
+	 *
+	 * @param serviceType
+	 * @param builder
+	 */
+	public static void registerBuilder(String serviceType, RpcClientBuilder builder) {
+		builderMap.put(serviceType, builder);
+	}
+
+	/**
+	 * Get builder for this service type.
+	 *
+	 * @param serviceType
 	 * @return
 	 */
-	public RpcClient createRpcClient(String url);
-
+	public static RpcClientBuilder getBuilder(String serviceType) {
+		RpcClientBuilder builder = builderMap.get(serviceType);
+		if (builder == null) {
+			throw new IllegalArgumentException("Builder for " + serviceType + " not found.");
+		}
+		return builder;
+	}
 }

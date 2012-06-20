@@ -39,6 +39,7 @@ public class RpcConfigBean extends BaseConfigBean {
     public int intervalBetweenRetry = Constants.CLIENT_INTERVAL_BT_RETRY;
     public String[] serverList;
     public String serviceUrl = "";
+    public String serviceType = "network/json";
 
     public RpcConfigBean(String groupName) {
         super(groupName);
@@ -71,6 +72,7 @@ public class RpcConfigBean extends BaseConfigBean {
         this.intervalBetweenRetry = co.intervalBetweenRetry;
         this.serverList = co.serverList;
         this.serviceUrl = co.serviceUrl;
+        this.serviceType = co.serviceType;
     }
 
     @Override

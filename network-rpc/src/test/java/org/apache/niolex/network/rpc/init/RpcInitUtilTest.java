@@ -36,11 +36,26 @@ public class RpcInitUtilTest {
 	@Test(expected=IllegalStateException.class)
 	public void testBuildProxy() {
 		RpcInitUtil u = new RpcInitUtil();
-		RpcClientFactory factory = mock(RpcClientFactory.class);
-
+		RpcClientBuilder factory = mock(RpcClientBuilder.class);
+		RpcClientFactory.registerBuilder("network/json", factory);
 		RpcConfigBean conf = new RpcConfigBean("d");
 		conf.serverList = new String[0];
-		u.buildProxy(conf , factory);
+		u.buildProxy(conf);
+	}
+
+	/**
+	 * Test method for {@link org.apache.niolex.network.rpc.init.RpcInitUtil#buildProxy(org.apache.niolex.network.rpc.conf.RpcConfigBean, org.apache.niolex.network.rpc.init.RpcClientFactory)}.
+	 */
+	@SuppressWarnings("static-access")
+	@Test(expected=IllegalStateException.class)
+	public void testBuildProxy2() {
+		RpcInitUtil u = new RpcInitUtil();
+		RpcClientBuilder factory = mock(RpcClientBuilder.class);
+		RpcClientFactory.registerBuilder("network/json", factory);
+		RpcConfigBean conf = new RpcConfigBean("d");
+		conf.serverList = new String[1];
+		conf.serverList[0] = "locidd:3022";
+		u.buildProxy(conf);
 	}
 
 }

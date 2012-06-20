@@ -26,7 +26,7 @@ import org.apache.niolex.network.rpc.RpcConfig;
 import org.apache.niolex.network.rpc.RpcMethod;
 import org.apache.niolex.network.rpc.conf.BaseConfiger;
 import org.apache.niolex.network.rpc.conf.RpcConfiger;
-import org.apache.niolex.network.rpc.json.JsonRpcFactory;
+import org.apache.niolex.network.rpc.json.JsonRpcBuilder;
 import org.junit.Test;
 
 /**
@@ -43,9 +43,8 @@ public class RpcServiceFactoryTest {
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void testGetInstance() {
-		RpcClientFactory factory = new JsonRpcFactory.JsonRpcClientFactory();
-		RpcServiceFactory in = RpcServiceFactory.getInstance("/org/apache/niolex/network/rpc/json/rpc.properties",
-				factory);
+		RpcClientFactory.registerBuilder("network/json", new JsonRpcBuilder());
+		RpcServiceFactory in = RpcServiceFactory.getInstance("/org/apache/niolex/network/rpc/json/rpc.properties");
 		in.getService("nan", RpcClientFactory.class);
 		fail("Not yet implemented");
 	}
@@ -56,8 +55,25 @@ public class RpcServiceFactoryTest {
 	 */
 	@Test
 	public void testGetServiceStringClassOfT() {
-		RpcServiceFactory factory = JsonRpcFactory.getInstance("/org/apache/niolex/network/rpc/json/rpc.properties");
+		RpcClientFactory.registerBuilder("network/json", new JsonRpcBuilder());
+		RpcServiceFactory factory = RpcServiceFactory.getInstance("/org/apache/niolex/network/rpc/json/rpc.properties");
 		LocalService ser = factory.getService(LocalService.class);
+		for (int i = 0; i < 10; ++i) {
+			int r = ser.add(2, 3214, 123, 12, i);
+			System.out.println(r);
+			assertEquals(3351 + i, r);
+		}
+	}
+
+	/**
+	 * Test method for
+	 * {@link org.apache.niolex.network.rpc.init.RpcServiceFactory#getService(java.lang.String, java.lang.Class)}.
+	 */
+	@Test
+	public void testGetServiceStringClassOfF() {
+		RpcClientFactory.registerBuilder("network/json", new JsonRpcBuilder());
+		RpcServiceFactory factory = RpcServiceFactory.getInstance("/org/apache/niolex/network/rpc/json/rpc.properties");
+		EfService ser = factory.getService(EfService.class);
 		for (int i = 0; i < 10; ++i) {
 			int r = ser.add(2, 3214, 123, 12, i);
 			System.out.println(r);
@@ -70,9 +86,8 @@ public class RpcServiceFactoryTest {
 	 */
 	@Test
 	public void testGetConfiger() {
-		RpcClientFactory factory = new JsonRpcFactory.JsonRpcClientFactory();
-		RpcServiceFactory in = RpcServiceFactory.getInstance("/org/apache/niolex/network/rpc/json/rpc.properties",
-				factory);
+		RpcClientFactory.registerBuilder("network/json", new JsonRpcBuilder());
+		RpcServiceFactory in = RpcServiceFactory.getInstance("/org/apache/niolex/network/rpc/json/rpc.properties");
 		RpcConfiger con = in.getConfiger();
 		con.getConfig();
 	}
@@ -81,6 +96,18 @@ public class RpcServiceFactoryTest {
 
 @RpcConfig(BaseConfiger.DEFAULT)
 interface LocalService {
+
+	@RpcMethod(14)
+	public int add(int... args);
+
+	@RpcMethod(15)
+	public int size(List<String> arg);
+
+	@RpcMethod(16)
+	public String tr();
+}
+
+interface EfService {
 
 	@RpcMethod(14)
 	public int add(int... args);

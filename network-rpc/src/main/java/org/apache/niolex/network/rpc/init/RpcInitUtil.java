@@ -46,7 +46,7 @@ public class RpcInitUtil {
 	 * @param factory
 	 * @return
 	 */
-	public static RetryHandler buildProxy(RpcConfigBean conf, RpcClientFactory factory) {
+	public static RetryHandler buildProxy(RpcConfigBean conf) {
 		LOG.info("Start to build rpc proxy: [serverList=" + Arrays.toString(conf.serverList) + ", serviceUrl=" + conf.serviceUrl + ", header="
 				+ conf.getHeader() + "]");
 		List<IServiceHandler> listHandlers = new ArrayList<IServiceHandler>();
@@ -55,13 +55,15 @@ public class RpcInitUtil {
 		for (int i = 0; i < serverNum; ++i) {
 			completeUrl = conf.serverList[i];
 			try {
-				RpcClient proxy = factory.createRpcClient(completeUrl);
+				RpcClientBuilder proxy = RpcClientFactory.getBuilder(conf.serviceType);
+				proxy.setClientUrl(completeUrl);
 				proxy.setConnectTimeout(conf.connectTimeout);
 				proxy.setRpcHandleTimeout(conf.readTimeout);
-				proxy.connect();
-				listHandlers.add(new RpcConnectionHandler(completeUrl, proxy));
+				RpcClient cli = proxy.build();
+				cli.connect();
+				listHandlers.add(new RpcConnectionHandler(completeUrl, cli));
 			} catch (Exception e) {
-				LOG.warn("Failed to build rpc proxy for " + completeUrl + " : " + e.getMessage());
+				LOG.warn("Failed to build rpc proxy for " + completeUrl + " : " + e.toString());
 			}
 		}
 		if (listHandlers.isEmpty()) {

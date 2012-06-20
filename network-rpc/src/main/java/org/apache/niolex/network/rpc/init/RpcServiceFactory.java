@@ -55,12 +55,12 @@ public class RpcServiceFactory {
 	 * @param fileName
 	 * @param factory
 	 */
-	protected RpcServiceFactory(String fileName, RpcClientFactory factory) {
+	protected RpcServiceFactory(String fileName) {
 		configer = new RpcConfiger(fileName);
 		Map<String, RpcConfigBean> confs = configer.getConfigs();
 		for (Entry<String, RpcConfigBean> entry : confs.entrySet()) {
 			RpcConfigBean conf = entry.getValue();
-			InvocationHandler handler = RpcInitUtil.buildProxy(conf, factory);
+			InvocationHandler handler = RpcInitUtil.buildProxy(conf);
 			handlers.put(entry.getKey(), handler);
 			StringBuilder sb = new StringBuilder();
 			sb.append("\n===>Api server list for [" + entry.getKey() + "]:\n");
@@ -76,8 +76,8 @@ public class RpcServiceFactory {
 	 * @param factory
 	 * @return
 	 */
-	public static final RpcServiceFactory getInstance(String fileName, RpcClientFactory factory) {
-	    return new RpcServiceFactory(fileName, factory);
+	public static final RpcServiceFactory getInstance(String fileName) {
+	    return new RpcServiceFactory(fileName);
 	}
 
 	/**

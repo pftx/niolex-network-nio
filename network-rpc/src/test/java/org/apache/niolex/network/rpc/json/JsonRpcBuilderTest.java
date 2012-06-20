@@ -17,10 +17,12 @@
  */
 package org.apache.niolex.network.rpc.json;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+
+import java.io.IOException;
 
 import org.apache.niolex.network.demo.rpc.RpcService;
-import org.apache.niolex.network.rpc.init.RpcServiceFactory;
+import org.apache.niolex.network.rpc.RpcClient;
 import org.junit.Test;
 
 /**
@@ -28,15 +30,21 @@ import org.junit.Test;
  * @version 1.0.0
  * @Date: 2012-6-4
  */
-public class JsonRpcFactoryTest {
+public class JsonRpcBuilderTest {
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.rpc.json.JsonRpcFactory#getInstance(java.lang.String)}.
+	 * Test method for {@link org.apache.niolex.network.rpc.json.JsonRpcBuilder#getInstance(java.lang.String)}.
+	 * @throws IOException
 	 */
 	@Test
-	public void testGetInstanceString() {
-		RpcServiceFactory factory = JsonRpcFactory.getInstance("/org/apache/niolex/network/rpc/json/rpc.properties");
-		RpcService ser = factory.getService(RpcService.class);
+	public void testGetInstanceString() throws IOException {
+		JsonRpcBuilder factory = new JsonRpcBuilder();
+		factory.setClientUrl("10.22.241.233:8808");
+		factory.setConnectTimeout(5000);
+		factory.setRpcHandleTimeout(10000);
+		RpcClient cc = factory.build();
+		cc.connect();
+		RpcService ser = cc.getService(RpcService.class);
 		for (int i = 0; i < 10; ++i) {
 			int r = ser.add(2, 3214, 123, 12, i);
 			System.out.println(r);
