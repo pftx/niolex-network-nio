@@ -56,7 +56,7 @@ public class StringSerializer extends BaseSerializer<String> {
 	 */
 	@Override
 	public byte[] serObj(String t) {
-		return StringUtil.strToUTF8Byte(t);
+		return StringUtil.strToUtf8Byte(t);
 	}
 
 	/* (non-Javadoc)

@@ -45,6 +45,10 @@ public class PacketData extends Packet {
         this.version = 1;
     }
 
+    public PacketData(int code) {
+    	this(code, new byte[0]);
+    }
+
     /**
      * Create packet by code and data
      * @param code

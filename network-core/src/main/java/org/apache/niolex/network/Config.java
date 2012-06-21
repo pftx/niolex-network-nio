@@ -103,6 +103,11 @@ public interface Config {
 	String SERVER_ENCODING = "UTF-8";
 
 	/**
+	 * Field separator of name service.
+	 */
+	String NAME_FIELD_SEP = "/*/";
+
+	/**
 	 * Handler attachment key, all system key will start with SYS_
 	 * Please keep away from them.
 	 */
@@ -126,6 +131,11 @@ public interface Config {
 	 * Attach last packet send time which is for heart beat.
 	 */
 	String ATTACH_KEY_HEART_BEAT = "SYS_HAND_HEART_BEAT";
+
+	/**
+	 * Attach the registered service address.
+	 */
+	String ATTACH_KEY_REGIST_ADDR = "SYS_HAND_REGIST_ADDR";
 
 	/**
 	 * The packet code is a 2-bytes short int. The system will use some this code,
@@ -152,10 +162,25 @@ public interface Config {
 	/**
 	 * Register the name service address.
 	 */
-	short CODE_REGR_NAME = (short)65503;
+	short CODE_NAME_PUBLISH = (short)65503;
 
 	/**
 	 * Listen the name service address.
 	 */
-	short CODE_LISTN_NAME = (short)65504;
+	short CODE_NAME_OBTAIN = (short)65504;
+
+	/**
+	 * The name service address data.
+	 */
+	short CODE_NAME_DATA = (short)65505;
+
+	/**
+	 * The name service address difference increment package.
+	 */
+	short CODE_NAME_DIFF = (short)65506;
+
+	/**
+	 * Packet not recognized.
+	 */
+	short CODE_NOT_RECOGNIZED = -1;
 }

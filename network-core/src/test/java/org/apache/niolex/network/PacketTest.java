@@ -72,6 +72,12 @@ public class PacketTest {
 		p.stop();
 	}
 
+	@Test
+	public void testGConstr() {
+		PacketData pc = new PacketData(34);
+		assertEquals(34, pc.getCode());
+	}
+
 	/**
 	 * Test method for {@link org.apache.niolex.network.Packet#setReserved(byte)}.
 	 * @throws IOException
