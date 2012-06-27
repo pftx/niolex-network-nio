@@ -15,13 +15,14 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.niolex.network.name.core;
+package org.apache.niolex.network.name.demo;
 
 import static org.mockito.Mockito.mock;
 
 import java.io.IOException;
 
 import org.apache.niolex.network.name.bean.RecordStorage;
+import org.apache.niolex.network.name.core.NameServer;
 import org.apache.niolex.network.name.event.IDispatcher;
 import org.apache.niolex.network.server.NioServer;
 

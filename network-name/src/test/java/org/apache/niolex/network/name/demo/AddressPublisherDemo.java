@@ -15,10 +15,12 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.niolex.network.name.client;
+package org.apache.niolex.network.name.demo;
 
 import java.io.InputStream;
 import java.util.Scanner;
+
+import org.apache.niolex.network.name.client.AddressPublisher;
 
 /**
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
