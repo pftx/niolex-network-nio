@@ -1,5 +1,5 @@
 /**
- * PacketWaiter.java
+ * BlockingWaiter.java
  *
  * Copyright 2012 Niolex, Inc.
  *
@@ -24,15 +24,13 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.apache.niolex.network.PacketData;
-
 /**
  * This is a waiting utility for clients to wait for the response and in the mean time hold the thread.
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
  * @Date: 2012-6-20
  */
-public class PacketWaiter {
+public class BlockingWaiter<E> {
 
 	/**
 	 * The lock to stop threads.
@@ -51,7 +49,7 @@ public class PacketWaiter {
 	 * @return
 	 * @throws InterruptedException
 	 */
-	public PacketData waitForResult(Object key, long time) throws InterruptedException {
+	public E waitForResult(Object key, long time) throws InterruptedException {
 		lock.lock();
 		try {
 			Condition waitOn = lock.newCondition();
@@ -60,6 +58,7 @@ public class PacketWaiter {
 			waitOn.await(time, TimeUnit.MILLISECONDS);
 			return value.result;
 		} finally {
+			waitMap.remove(key);
 			lock.unlock();
 		}
 	}
@@ -71,10 +70,9 @@ public class PacketWaiter {
 	 * @param value
 	 * @return
 	 */
-	public boolean release(Object key, PacketData value) {
+	public boolean release(Object key, E value) {
 		WaitItem it = waitMap.get(key);
 		if (it != null) {
-			waitMap.remove(key);
 			it.release(value);
 			return true;
 		} else {
@@ -91,7 +89,7 @@ public class PacketWaiter {
 	 */
 	private class WaitItem {
 		private Condition waitOn;
-		private PacketData result;
+		private E result;
 
 		/**
 		 * The only constructor.
@@ -102,11 +100,11 @@ public class PacketWaiter {
 			this.waitOn = waitOn;
 		}
 
-		public void release(PacketData result) {
+		public void release(E result) {
 			this.result = result;
 			lock.lock();
 			try {
-				waitOn.notify();
+				waitOn.signal();
 			} finally {
 				lock.unlock();
 			}

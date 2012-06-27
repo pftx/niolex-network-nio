@@ -108,6 +108,11 @@ public interface Config {
 	String NAME_FIELD_SEP = "/*/";
 
 	/**
+	 * The regex representation of field separator.
+	 */
+	String NAME_FIELD_SEP_REGEX = "/\\*/";
+
+	/**
 	 * Handler attachment key, all system key will start with SYS_
 	 * Please keep away from them.
 	 */
