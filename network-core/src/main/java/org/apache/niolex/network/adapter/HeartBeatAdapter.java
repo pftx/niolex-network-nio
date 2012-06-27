@@ -135,6 +135,7 @@ public class HeartBeatAdapter implements IPacketHandler, WriteEventListener, Run
 	public void handleClose(IPacketWriter wt) {
 		// Clean the time stamp. The client will be removed when fire heart beat.
 		wt.attachData(KEY, null);
+		other.handleClose(wt);
 	}
 
 
@@ -169,6 +170,7 @@ public class HeartBeatAdapter implements IPacketHandler, WriteEventListener, Run
     			// One heart beat interval.
     			if (ttm + heartBeatInterval < System.currentTimeMillis()) {
     				wt.handleWrite(PacketData.getHeartBeatPacket());
+    				wt.attachData(KEY, System.currentTimeMillis());
     			}
         	} else {
         		it.remove();
