@@ -1,5 +1,5 @@
 /**
- * IDispatcher.java
+ * AddressEventListener.java
  *
  * Copyright 2012 Niolex, Inc.
  *
@@ -15,21 +15,35 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.niolex.network.name.event;
+package org.apache.niolex.network.name.client;
 
-import org.apache.niolex.network.IPacketWriter;
-import org.apache.niolex.network.name.bean.AddressRecord;
+import java.util.List;
 
 /**
+ * Listen to the address change from name server.
+ *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
- * @Date: 2012-6-21
+ * @Date: 2012-6-28
  */
-public interface IDispatcher {
+public interface AddressEventListener {
 
-	public void fireEvent(AddressRecord rec);
+	/**
+	 * A new working server added into name server.
+	 * @param addressValue
+	 */
+	public void addressAdd(String addressValue);
 
-	public void register(String addressKey, IPacketWriter wt);
+	/**
+	 * A server disconnected from name server.
+	 * @param addressValue
+	 */
+	public void addressRemove(String addressValue);
 
-	public void handleClose(String addressKey, IPacketWriter wt);
+	/**
+	 * This means a total refresh of current address list.
+	 * @param addressList
+	 */
+	public void addressRefresh(List<String> addressList);
+
 }

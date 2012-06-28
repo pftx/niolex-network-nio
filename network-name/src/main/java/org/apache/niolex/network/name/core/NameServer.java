@@ -106,6 +106,8 @@ public class NameServer implements IPacketHandler {
 				String addressKey = transformer.getDataObject(sc);
 				// 监听后续地址的变化
 				dispatcher.register(addressKey, wt);
+				// 将AddressKey附加到IPacketWriter里面，供后续使用
+				attachData(wt, addressKey);
 				// Return list
 				List<String> list = storage.getAddress(addressKey);
 				PacketData rc = transformer.getPacketData(Config.CODE_NAME_DATA, list);
@@ -124,6 +126,15 @@ public class NameServer implements IPacketHandler {
 				wt.handleWrite(new PacketData(Config.CODE_NOT_RECOGNIZED));
 				break;
 		}
+	}
+
+	private void attachData(IPacketWriter wt, String addressKey) {
+		List<String> addrList = wt.getAttached(Config.ATTACH_KEY_OBTAIN_ADDR);
+		if (addrList == null) {
+			addrList = new ArrayList<String>();
+			wt.attachData(Config.ATTACH_KEY_OBTAIN_ADDR, addrList);
+		}
+		addrList.add(addressKey);
 	}
 
 	private void attachData(IPacketWriter wt, AddressRecord rec) {
@@ -147,6 +158,13 @@ public class NameServer implements IPacketHandler {
 			// 将服务地址标记为已断线
 			for (AddressRecord rec : recList) {
 				rec.setStatus(Status.DISCONNECTED);
+			}
+		}
+		List<String> addrList = wt.getAttached(Config.ATTACH_KEY_OBTAIN_ADDR);
+		if (addrList != null) {
+			// 将监听器移除掉
+			for (String addressKey : addrList) {
+				dispatcher.handleClose(addressKey, wt);
 			}
 		}
 	}

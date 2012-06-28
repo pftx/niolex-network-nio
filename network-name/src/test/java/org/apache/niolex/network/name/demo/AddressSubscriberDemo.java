@@ -19,8 +19,7 @@ package org.apache.niolex.network.name.demo;
 
 import java.util.List;
 
-import org.apache.niolex.commons.event.EventListener;
-import org.apache.niolex.network.name.bean.AddressRecord;
+import org.apache.niolex.network.name.client.AddressEventListener;
 import org.apache.niolex.network.name.client.AddressSubscriber;
 
 /**
@@ -37,14 +36,23 @@ public class AddressSubscriberDemo {
      */
     public static void main(String[] args) throws Exception {
     	AddressSubscriber c = new AddressSubscriber("localhost:8181");
-        EventListener<AddressRecord> listn = new EventListener<AddressRecord>() {
+    	AddressEventListener listn = new AddressEventListener() {
 
 			@Override
-			public void eventHappened(AddressRecord e) {
-				System.out.println("Address changed: " + e.getStatus()
-						+ ", " + e.getAddressKey() + ", " + e.getAddressValue());
+			public void addressAdd(String addressValue) {
+				System.out.println("Address add: " + addressValue);
+			}
 
+			@Override
+			public void addressRemove(String addressValue) {
+				System.out.println("Address remove: " + addressValue);
+			}
+
+			@Override
+			public void addressRefresh(List<String> addressList) {
+				System.out.println("Address refresh: " + addressList);
 			}};
+
 		List<String> ls = c.getServiceAddrList("network/name", listn);
 		System.out.println("Address list: " + ls);
         Thread.sleep(100000);

@@ -18,11 +18,11 @@
 package org.apache.niolex.network.name.client;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
-import org.apache.niolex.commons.event.ConcurrentEventDispatcher;
-import org.apache.niolex.commons.event.EventListener;
-import org.apache.niolex.commons.event.IEventDispatcher;
 import org.apache.niolex.network.Config;
 import org.apache.niolex.network.PacketData;
 import org.apache.niolex.network.name.bean.AddressRecord;
@@ -35,12 +35,17 @@ import org.apache.niolex.network.name.core.NameClient;
  * @version 1.0.0
  * @Date: 2012-6-20
  */
-public class AddressSubscriber extends NameClient implements IEventDispatcher<AddressRecord> {
+public class AddressSubscriber extends NameClient {
+
+	/**
+	 * Store all the requests, retry them after reconnection.
+	 */
+	private final List<PacketData> list = Collections.synchronizedList(new ArrayList<PacketData>());
 
 	/**
 	 * The service address dispatcher proxy.
 	 */
-	private final ConcurrentEventDispatcher<AddressRecord> dispatcher = new ConcurrentEventDispatcher<AddressRecord>();
+	private final HashMap<String, AddressEventListener> map = new HashMap<String, AddressEventListener>();
 
 	/**
 	 * The rpc handle timeout in milliseconds.
@@ -56,32 +61,6 @@ public class AddressSubscriber extends NameClient implements IEventDispatcher<Ad
 		super(serverAddress);
 	}
 
-	/**
-	 * Proxy method.
-	 * Override super method
-	 * @see org.apache.niolex.commons.event.IEventDispatcher#addListener(org.apache.niolex.commons.event.EventListener)
-	 */
-	public void addListener(EventListener<AddressRecord> eListener) {
-		dispatcher.addListener(eListener);
-	}
-
-	/**
-	 * Proxy method.
-	 * Override super method
-	 * @see org.apache.niolex.commons.event.IEventDispatcher#removeListener(org.apache.niolex.commons.event.EventListener)
-	 */
-	public void removeListener(EventListener<AddressRecord> eListener) {
-		dispatcher.removeListener(eListener);
-	}
-
-	/**
-	 * Proxy method.
-	 * Override super method
-	 * @see org.apache.niolex.commons.event.IEventDispatcher#fireEvent(java.lang.Object)
-	 */
-	public void fireEvent(AddressRecord e) {
-		dispatcher.fireEvent(e);
-	}
 
 	/**
 	 * It's fire event.
@@ -90,7 +69,30 @@ public class AddressSubscriber extends NameClient implements IEventDispatcher<Ad
 	 */
 	@Override
 	protected void handleDiff(AddressRecord bean) {
-		fireEvent(bean);
+		AddressEventListener li = map.get(bean.getAddressKey());
+		if (li != null) {
+			switch (bean.getStatus()) {
+				case OK:
+					li.addressAdd(bean.getAddressValue());
+					break;
+				case DEL:
+					li.addressRemove(bean.getAddressValue());
+					break;
+			}
+		}
+	}
+
+
+	/**
+	 * Subscribe all the serviceKeys.
+	 *
+	 * Override super method
+	 * @see org.apache.niolex.network.name.core.NameClient#reconnected()
+	 */
+	protected void reconnected() {
+		for (PacketData data : list) {
+			client.handleWrite(data);
+		}
 	}
 
 	/**
@@ -100,11 +102,12 @@ public class AddressSubscriber extends NameClient implements IEventDispatcher<Ad
 	 * @param listener
 	 * @return
 	 */
-	public List<String> getServiceAddrList(String serviceKey, EventListener<AddressRecord> listener) {
+	public List<String> getServiceAddrList(String serviceKey, AddressEventListener listener) {
 		// We can listen changes from now on.
-		addListener(listener);
+		map.put(serviceKey, listener);
 		// Register this subscriber.
 		PacketData listnName = transformer.getPacketData(Config.CODE_NAME_OBTAIN, serviceKey);
+		list.add(listnName);
 		client.handleWrite(listnName);
 		try {
 			List<String> list = waiter.waitForResult(client, rpcHandleTimeout);

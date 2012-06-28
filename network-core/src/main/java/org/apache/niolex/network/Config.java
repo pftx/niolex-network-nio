@@ -143,6 +143,11 @@ public interface Config {
 	String ATTACH_KEY_REGIST_ADDR = "SYS_HAND_REGIST_ADDR";
 
 	/**
+	 * Attach the service address listen key.
+	 */
+	String ATTACH_KEY_OBTAIN_ADDR = "SYS_HAND_OBTAIN_ADDR";
+
+	/**
 	 * The packet code is a 2-bytes short int. The system will use some this code,
 	 * according to the following map:
 	 *

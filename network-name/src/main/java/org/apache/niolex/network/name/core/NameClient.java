@@ -143,6 +143,13 @@ public class NameClient implements IPacketHandler {
 	}
 
 	/**
+	 * Stop this client.
+	 */
+	public void stop() {
+		client.stop();
+	}
+
+	/**
 	 * 由子类去处理重连之后的修复，这里什么都不做
 	 */
 	protected void reconnected() {}

@@ -41,6 +41,7 @@ import org.apache.niolex.network.name.core.NameClient;
  * @Date: 2012-6-27
  */
 public class AddressPublisher extends NameClient {
+
 	/**
 	 * Store all the requests, retry them after reconnection.
 	 */
@@ -79,6 +80,10 @@ public class AddressPublisher extends NameClient {
 		for (PacketData data : list) {
 			client.handleWrite(data);
 		}
+	}
+
+	public int size() {
+		return list.size();
 	}
 
 }

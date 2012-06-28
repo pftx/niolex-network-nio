@@ -54,6 +54,7 @@ public class AddressPublisherDemo {
             c.pushlishService(msg, val);
         }
         Thread.sleep(1000);
+        c.stop();
     }
 
     /**

@@ -17,12 +17,11 @@
  */
 package org.apache.niolex.network.name.demo;
 
-import static org.mockito.Mockito.mock;
-
 import java.io.IOException;
 
 import org.apache.niolex.network.name.bean.RecordStorage;
 import org.apache.niolex.network.name.core.NameServer;
+import org.apache.niolex.network.name.event.ConcurrentDispatcher;
 import org.apache.niolex.network.name.event.IDispatcher;
 import org.apache.niolex.network.server.NioServer;
 
@@ -40,7 +39,7 @@ public class NameServerDemo {
         s.setPort(8181);
         name = new NameServer(s);
         name.setStorage(new RecordStorage());
-        IDispatcher dd = mock(IDispatcher.class);
+        IDispatcher dd = new ConcurrentDispatcher();
         name.setDispatcher(dd);
 	}
 

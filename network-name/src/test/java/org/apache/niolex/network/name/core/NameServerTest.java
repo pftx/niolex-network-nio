@@ -17,8 +17,14 @@
  */
 package org.apache.niolex.network.name.core;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.fail;
 
+import org.apache.niolex.network.name.bean.RecordStorage;
+import org.apache.niolex.network.name.event.ConcurrentDispatcher;
+import org.apache.niolex.network.name.event.IDispatcher;
+import org.apache.niolex.network.server.NioServer;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
@@ -27,6 +33,24 @@ import org.junit.Test;
  * @Date: 2012-6-27
  */
 public class NameServerTest {
+
+	private static NioServer s = new NioServer();
+	private static NameServer name;
+
+	@BeforeClass
+	public static void startServer() {
+		s.setPort(8181);
+        name = new NameServer(s);
+        name.setStorage(new RecordStorage());
+        IDispatcher dd = new ConcurrentDispatcher();
+        name.setDispatcher(dd);
+        name.start();
+	}
+
+	@AfterClass
+	public static void stopServer() {
+		name.stop();
+	}
 
 	/**
 	 * Test method for {@link org.apache.niolex.network.name.core.NameServer#NameServer(org.apache.niolex.network.IServer)}.
