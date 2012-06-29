@@ -17,15 +17,28 @@
  */
 package org.apache.niolex.network.name.core;
 
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
+import java.util.List;
+
+import org.apache.niolex.network.Config;
+import org.apache.niolex.network.IPacketWriter;
+import org.apache.niolex.network.PacketData;
+import org.apache.niolex.network.name.bean.AddressRegiBean;
 import org.apache.niolex.network.name.bean.RecordStorage;
 import org.apache.niolex.network.name.event.ConcurrentDispatcher;
 import org.apache.niolex.network.name.event.IDispatcher;
+import org.apache.niolex.network.packet.PacketTransformer;
+import org.apache.niolex.network.server.BasePacketWriter;
 import org.apache.niolex.network.server.NioServer;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 
 /**
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
@@ -36,15 +49,20 @@ public class NameServerTest {
 
 	private static NioServer s = new NioServer();
 	private static NameServer name;
+	private static PacketTransformer transformer;
 
 	@BeforeClass
 	public static void startServer() {
 		s.setPort(8181);
         name = new NameServer(s);
-        name.setStorage(new RecordStorage());
+        RecordStorage st = new RecordStorage();
+        name.setStorage(st);
         IDispatcher dd = new ConcurrentDispatcher();
         name.setDispatcher(dd);
+        st.setDispatcher(dd);
+        st.setDeleteTime(123);
         name.start();
+        transformer = PacketTransformer.getInstance();
 	}
 
 	@AfterClass
@@ -57,7 +75,21 @@ public class NameServerTest {
 	 */
 	@Test
 	public void testNameServer() {
-		fail("Not yet implemented");
+		IPacketWriter wt = mock(IPacketWriter.class);
+		// Step 1 publish.
+		AddressRegiBean regi = new AddressRegiBean("network.name.core.NameServer", "localhost:8181");
+		PacketData pb = transformer.getPacketData(Config.CODE_NAME_PUBLISH, regi);
+		name.handleRead(pb, wt);
+
+		// Step 2 subscribe.
+		PacketData pd = transformer.getPacketData(Config.CODE_NAME_OBTAIN, "network.name.core.NameServer");
+		name.handleRead(pd, wt);
+		ArgumentCaptor<PacketData> cap = ArgumentCaptor.forClass(PacketData.class);
+		verify(wt).handleWrite(cap.capture());
+		List<String> list = transformer.getDataObject(cap.getValue());
+		assertEquals(Config.CODE_NAME_DATA, cap.getValue().getCode());
+		assertEquals(1, list.size());
+		assertEquals("localhost:8181", list.get(0));
 	}
 
 	/**
@@ -65,23 +97,13 @@ public class NameServerTest {
 	 */
 	@Test
 	public void testStart() {
-		fail("Not yet implemented");
-	}
-
-	/**
-	 * Test method for {@link org.apache.niolex.network.name.core.NameServer#stop()}.
-	 */
-	@Test
-	public void testStop() {
-		fail("Not yet implemented");
-	}
-
-	/**
-	 * Test method for {@link org.apache.niolex.network.name.core.NameServer#handleRead(org.apache.niolex.network.PacketData, org.apache.niolex.network.IPacketWriter)}.
-	 */
-	@Test
-	public void testHandleRead() {
-		fail("Not yet implemented");
+		IPacketWriter wt = mock(IPacketWriter.class);
+		// Step 1 publish.
+		PacketData pb = new PacketData(56);
+		name.handleRead(pb, wt);
+		ArgumentCaptor<PacketData> cap = ArgumentCaptor.forClass(PacketData.class);
+		verify(wt).handleWrite(cap.capture());
+		assertEquals(Config.CODE_NOT_RECOGNIZED, cap.getValue().getCode());
 	}
 
 	/**
@@ -89,7 +111,8 @@ public class NameServerTest {
 	 */
 	@Test
 	public void testHandleClose() {
-		fail("Not yet implemented");
+		IPacketWriter wt = mock(IPacketWriter.class);
+		name.handleClose(wt);
 	}
 
 	/**
@@ -97,15 +120,30 @@ public class NameServerTest {
 	 */
 	@Test
 	public void testSetStorage() {
-		fail("Not yet implemented");
+		IPacketWriter wt = new BasePacketWriter() {
+
+			@Override
+			public String getRemoteName() {
+				return "@link org.apache.niolex";
+			}};
+
+		// Step 1 publish.
+		AddressRegiBean regi = new AddressRegiBean("network.name.core.NameServer", "localhost:8181");
+		PacketData pb = transformer.getPacketData(Config.CODE_NAME_PUBLISH, regi);
+		name.handleRead(pb, wt);
+		regi = new AddressRegiBean("network.name.core.NameServer", "localhost:8182");
+		pb = transformer.getPacketData(Config.CODE_NAME_PUBLISH, regi);
+		name.handleRead(pb, wt);
+
+		// Step 2 subscribe.
+		PacketData pd = transformer.getPacketData(Config.CODE_NAME_OBTAIN, "network.name.core.NameServer");
+		name.handleRead(pd, wt);
+		assertFalse(wt.getAttached(Config.ATTACH_KEY_OBTAIN_ADDR) == null);
+		assertFalse(wt.getAttached(Config.ATTACH_KEY_REGIST_ADDR) == null);
+		name.handleClose(wt);
+		assertTrue(wt.getAttached(Config.ATTACH_KEY_OBTAIN_ADDR) == null);
+		assertTrue(wt.getAttached(Config.ATTACH_KEY_REGIST_ADDR) == null);
 	}
 
-	/**
-	 * Test method for {@link org.apache.niolex.network.name.core.NameServer#setDispatcher(org.apache.niolex.network.name.event.IDispatcher)}.
-	 */
-	@Test
-	public void testSetDispatcher() {
-		fail("Not yet implemented");
-	}
 
 }

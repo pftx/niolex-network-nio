@@ -92,6 +92,14 @@ public class AddressSubscriber extends NameClient {
 	protected void reconnected() {
 		for (PacketData data : list) {
 			client.handleWrite(data);
+			try {
+				List<String> list = waiter.waitForResult(client, rpcHandleTimeout);
+				String serviceKey = transformer.getDataObject(data);
+				AddressEventListener li = map.get(serviceKey);
+				if (li != null) {
+					li.addressRefresh(list);
+				}
+			} catch (Exception e) {}
 		}
 	}
 

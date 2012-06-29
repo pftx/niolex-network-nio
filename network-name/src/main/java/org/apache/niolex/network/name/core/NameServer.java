@@ -20,6 +20,7 @@ package org.apache.niolex.network.name.core;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.niolex.commons.util.Runme;
 import org.apache.niolex.network.Config;
 import org.apache.niolex.network.IPacketHandler;
 import org.apache.niolex.network.IPacketWriter;
@@ -36,6 +37,8 @@ import org.apache.niolex.network.name.bean.RecordStorage;
 import org.apache.niolex.network.name.event.IDispatcher;
 import org.apache.niolex.network.packet.PacketTransformer;
 import org.apache.niolex.network.packet.StringSerializer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
@@ -44,6 +47,7 @@ import org.apache.niolex.network.packet.StringSerializer;
  */
 public class NameServer implements IPacketHandler {
 
+	private static final Logger LOG = LoggerFactory.getLogger(NameServer.class);
 	/**
 	 * The real server implementation.
 	 */
@@ -56,6 +60,8 @@ public class NameServer implements IPacketHandler {
 	private RecordStorage storage;
 
 	private IDispatcher dispatcher;
+
+	private Runme gcThread;
 
 	public NameServer(IServer server) {
 		super();
@@ -80,6 +86,14 @@ public class NameServer implements IPacketHandler {
 	public boolean start() {
 		if (server.start()) {
 			ada.start();
+			gcThread = new Runme() {
+				@Override
+				public void runMe() {
+					storage.deleteGarbage();
+				}
+			};
+			gcThread.setSleepInterval(5000);
+			gcThread.start();
 		}
 		return false;
 	}
@@ -90,6 +104,7 @@ public class NameServer implements IPacketHandler {
 	public void stop() {
 		server.stop();
 		ada.stop();
+		gcThread.stopMe();
 	}
 
 	/**
@@ -112,6 +127,7 @@ public class NameServer implements IPacketHandler {
 				List<String> list = storage.getAddress(addressKey);
 				PacketData rc = transformer.getPacketData(Config.CODE_NAME_DATA, list);
 				wt.handleWrite(rc);
+				LOG.info("Client {} try to subscribe address {}.", wt.getRemoteName(), addressKey);
 				break;
 			// 发布服务地址信息
 			case Config.CODE_NAME_PUBLISH:
@@ -121,6 +137,7 @@ public class NameServer implements IPacketHandler {
 				attachData(wt, rec);
 				//Fire event
 				dispatcher.fireEvent(rec);
+				LOG.info("Client {} try to publish address {}.", wt.getRemoteName(), rec.toString());
 				break;
 			default:
 				wt.handleWrite(new PacketData(Config.CODE_NOT_RECOGNIZED));
@@ -159,6 +176,7 @@ public class NameServer implements IPacketHandler {
 			for (AddressRecord rec : recList) {
 				rec.setStatus(Status.DISCONNECTED);
 			}
+			wt.attachData(Config.ATTACH_KEY_REGIST_ADDR, null);
 		}
 		List<String> addrList = wt.getAttached(Config.ATTACH_KEY_OBTAIN_ADDR);
 		if (addrList != null) {
@@ -166,6 +184,7 @@ public class NameServer implements IPacketHandler {
 			for (String addressKey : addrList) {
 				dispatcher.handleClose(addressKey, wt);
 			}
+			wt.attachData(Config.ATTACH_KEY_OBTAIN_ADDR, null);
 		}
 	}
 

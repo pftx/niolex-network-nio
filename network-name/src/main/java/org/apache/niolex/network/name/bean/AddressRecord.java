@@ -65,7 +65,6 @@ public class AddressRecord {
 		if (addressKey == null || addressValue == null) {
 			throw new IllegalArgumentException("addressKey & Value should not be null.");
 		}
-		LOG.info(this.toString());
 	}
 
 	public Status getStatus() {
