@@ -22,8 +22,8 @@ import static org.junit.Assert.assertEquals;
 import java.io.IOException;
 import java.util.List;
 
-import org.apache.niolex.network.name.core.NameServerTest;
 import org.apache.niolex.network.name.demo.DemoAddressEventListener;
+import org.apache.niolex.network.name.server.MasterNameServer;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -34,15 +34,19 @@ import org.junit.Test;
  * @Date: 2012-6-27
  */
 public class AddressPublisherTest {
+	private static MasterNameServer server;
 
 	@BeforeClass
 	public static void startServer() {
-		NameServerTest.startServer();
+		server = new MasterNameServer();
+		server.setPort(8181);
+		server.setDeleteTime(1000);
+		server.start();
 	}
 
 	@AfterClass
 	public static void stopServer() {
-		NameServerTest.stopServer();
+		server.stop();
 	}
 
 	/**

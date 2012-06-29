@@ -74,6 +74,8 @@ public class PacketData extends Packet {
 
     public PacketData makeCopy() {
     	PacketData other = new PacketData(this.code, this.data);
+    	other.reserved = this.reserved;
+    	other.version = this.version;
     	return other;
     }
 

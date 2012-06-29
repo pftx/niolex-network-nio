@@ -56,7 +56,7 @@ public class ConcurrentDispatcher implements IDispatcher {
 		Hashtable<IPacketWriter, String> queue = map.get(rec.getAddressKey());
 		if (queue != null) {
 			for (IPacketWriter wt : queue.keySet()) {
-				wt.handleWrite(rc);
+				wt.handleWrite(rc.makeCopy());
 			}
 		}
 	}

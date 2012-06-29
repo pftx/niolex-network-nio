@@ -4,7 +4,7 @@
 
 	<groupId>org.apache.niolex</groupId>
 	<artifactId>network-name</artifactId>
-	<version>0.0.2</version>
+	<version>0.0.5</version>
 	<packaging>jar</packaging>
 
 	<name>network-name</name>
