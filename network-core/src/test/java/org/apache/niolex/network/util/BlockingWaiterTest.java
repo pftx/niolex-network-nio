@@ -41,7 +41,7 @@ public class BlockingWaiterTest {
 			public void run() {
 				try {
 					System.out.println("St " + 10);
-					String out = test.waitForResult("testWaitForResult", 100);
+					String out = test.initWait("testWaitForResult").waitForResult(100);
 					System.out.println(out);
 					au.incrementAndGet();
 				} catch (InterruptedException e) {
@@ -97,5 +97,19 @@ public class BlockingWaiterTest {
 			t.join();
 		assertEquals(SIZE, au.intValue());
 	}
+
+
+	/**
+	 * Test method for {@link org.apache.niolex.network.util.BlockingWaiter#release(java.lang.Object, org.apache.niolex.network.PacketData)}.
+	 */
+	@Test
+	public void testVerse() throws Exception {
+		final BlockingWaiter<String> test = new BlockingWaiter<String>();
+		BlockingWaiter<String>.WaitOn on = test.initWait("goodmood");
+		test.release("goodmood", "@link org.apache.niolex.network.util.Blocking");
+		String b = on.waitForResult(200);
+		System.out.println("Vt " + b);
+	}
+
 
 }

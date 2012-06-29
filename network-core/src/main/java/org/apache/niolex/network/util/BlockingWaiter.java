@@ -36,13 +36,33 @@ public class BlockingWaiter<E> {
 	 * The lock to stop threads.
 	 */
 	private final Lock lock = new ReentrantLock();
+
 	/**
 	 * The current waiting map.
 	 */
-	private final Map<Object, WaitItem> waitMap = new ConcurrentHashMap<Object, WaitItem>();
+	private final Map<Object, WaitOn> waitMap = new ConcurrentHashMap<Object, WaitOn>();
 
 	/**
-	 * Wait for result from server.
+	 * Initialize an internal wait structure, and return it.
+	 *
+	 * @param key
+	 * @return
+	 */
+	public WaitOn initWait(Object key) {
+		lock.lock();
+		try {
+			Condition waitOn = lock.newCondition();
+			WaitOn value = new WaitOn(key, waitOn);
+			waitMap.put(key, value);
+			return value;
+		} finally {
+			lock.unlock();
+		}
+	}
+
+	/**
+	 * A short method for initWait(key).waitForResult(time).
+	 * Just for some one do not care about initialization.
 	 *
 	 * @param key
 	 * @param time
@@ -50,17 +70,7 @@ public class BlockingWaiter<E> {
 	 * @throws InterruptedException
 	 */
 	public E waitForResult(Object key, long time) throws InterruptedException {
-		lock.lock();
-		try {
-			Condition waitOn = lock.newCondition();
-			WaitItem value = new WaitItem(waitOn);
-			waitMap.put(key, value);
-			waitOn.await(time, TimeUnit.MILLISECONDS);
-			return value.result;
-		} finally {
-			waitMap.remove(key);
-			lock.unlock();
-		}
+		return initWait(key).waitForResult(time);
 	}
 
 	/**
@@ -68,10 +78,10 @@ public class BlockingWaiter<E> {
 	 *
 	 * @param key
 	 * @param value
-	 * @return
+	 * @return true if success to release, false if no thread waiting on it.
 	 */
 	public boolean release(Object key, E value) {
-		WaitItem it = waitMap.get(key);
+		WaitOn it = waitMap.get(key);
 		if (it != null) {
 			it.release(value);
 			return true;
@@ -81,13 +91,19 @@ public class BlockingWaiter<E> {
 	}
 
 	/**
-	 * The internal wait item structure.
+	 * Use this class to wait for result.
+	 * The internal wait structure.
 	 *
 	 * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
 	 * @version 1.0.0
-	 * @Date: 2012-6-20
+	 * @Date: 2012-6-29
 	 */
-	private class WaitItem {
+	public class WaitOn {
+
+		/**
+		 * The internal managed wait item.
+		 */
+		private Object key;
 		private Condition waitOn;
 		private E result;
 
@@ -95,9 +111,36 @@ public class BlockingWaiter<E> {
 		 * The only constructor.
 		 * @param waitOn
 		 */
-		public WaitItem(Condition waitOn) {
+		public WaitOn(Object key, Condition waitOn) {
 			super();
+			this.key = key;
 			this.waitOn = waitOn;
+		}
+
+		/**
+		 * Wait for result from server.
+		 * If result is not ready after the given time, will return null.
+		 *
+		 * @param key
+		 * @param time
+		 * @return
+		 * @throws InterruptedException
+		 */
+		public E waitForResult(long time) throws InterruptedException {
+			lock.lock();
+			try {
+				if (result != null)
+					return result;
+				// Not ready yet, let's wait.
+				waitOn.await(time, TimeUnit.MILLISECONDS);
+				// Just return, if not ready, will return null.
+				return result;
+			} finally {
+				// Anyway, we will remove the key from map, to prevent
+				// memory leak.
+				waitMap.remove(key);
+				lock.unlock();
+			}
 		}
 
 		public void release(E result) {
@@ -111,4 +154,5 @@ public class BlockingWaiter<E> {
 		}
 
 	}
+
 }
