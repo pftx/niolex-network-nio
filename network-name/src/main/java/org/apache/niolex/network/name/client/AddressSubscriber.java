@@ -27,6 +27,7 @@ import org.apache.niolex.network.Config;
 import org.apache.niolex.network.PacketData;
 import org.apache.niolex.network.name.bean.AddressRecord;
 import org.apache.niolex.network.name.core.NameClient;
+import org.apache.niolex.network.util.BlockingWaiter;
 
 /**
  * Subscribe to name server to listen address change.
@@ -48,9 +49,15 @@ public class AddressSubscriber extends NameClient {
 	private final HashMap<String, AddressEventListener> map = new HashMap<String, AddressEventListener>();
 
 	/**
+	 * The help class to wait for result.
+	 */
+	protected final BlockingWaiter<List<String>> waiter = new BlockingWaiter<List<String>>();
+
+	/**
 	 * The rpc handle timeout in milliseconds.
 	 */
 	private int rpcHandleTimeout = Config.RPC_HANDLE_TIMEOUT;
+
 
 	/**
 	 * Construct a subscriber by a client.
@@ -83,6 +90,22 @@ public class AddressSubscriber extends NameClient {
 	}
 
 
+	@Override
+	protected void handleRefresh(List<String> list) {
+		int last = list.size() - 1;
+		if (last > -1) {
+			String addressKey = list.get(last);
+			list = list.subList(0, last);
+			if (!waiter.release(addressKey, list)) {
+				AddressEventListener li = map.get(addressKey);
+				if (li != null) {
+					li.addressRefresh(list);
+				}
+			}
+		}
+	}
+
+
 	/**
 	 * Subscribe all the serviceKeys.
 	 *
@@ -92,14 +115,6 @@ public class AddressSubscriber extends NameClient {
 	protected void reconnected() {
 		for (PacketData data : list) {
 			client.handleWrite(data);
-			try {
-				List<String> list = waiter.waitForResult(client, rpcHandleTimeout);
-				String serviceKey = transformer.getDataObject(data);
-				AddressEventListener li = map.get(serviceKey);
-				if (li != null) {
-					li.addressRefresh(list);
-				}
-			} catch (Exception e) {}
 		}
 	}
 

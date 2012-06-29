@@ -33,7 +33,6 @@ import org.apache.niolex.network.name.bean.AddressRecordSerializer;
 import org.apache.niolex.network.name.bean.AddressRegiSerializer;
 import org.apache.niolex.network.packet.PacketTransformer;
 import org.apache.niolex.network.packet.StringSerializer;
-import org.apache.niolex.network.util.BlockingWaiter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,10 +64,6 @@ public class NameClient implements IPacketHandler {
 	 */
 	protected final PacketTransformer transformer;
 
-	/**
-	 * The help class to wait for result.
-	 */
-	protected final BlockingWaiter<List<String>> waiter = new BlockingWaiter<List<String>>();
 
 	/**
 	 * Constructor.
@@ -105,7 +100,7 @@ public class NameClient implements IPacketHandler {
 			// 发布服务地址信息全量
 			case Config.CODE_NAME_DATA:
 				List<String> list = transformer.getDataObject(sc);
-				waiter.release(wt, list);
+				handleRefresh(list);
 				break;
 			// 发布服务地址信息增量
 			case Config.CODE_NAME_DIFF:
@@ -124,6 +119,12 @@ public class NameClient implements IPacketHandler {
 	 * @param bean
 	 */
 	protected void handleDiff(AddressRecord bean) {}
+
+	/**
+	 * 由子类去处理全量返回的地址列表，这里什么都不做
+	 * @param list
+	 */
+	protected void handleRefresh(List<String> list) {}
 
 	/**
 	 * Override super method

@@ -88,7 +88,7 @@ public class NameServerTest {
 		verify(wt).handleWrite(cap.capture());
 		List<String> list = transformer.getDataObject(cap.getValue());
 		assertEquals(Config.CODE_NAME_DATA, cap.getValue().getCode());
-		assertEquals(1, list.size());
+		assertEquals(2, list.size());
 		assertEquals("localhost:8181", list.get(0));
 	}
 

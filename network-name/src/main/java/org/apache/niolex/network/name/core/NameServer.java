@@ -125,6 +125,7 @@ public class NameServer implements IPacketHandler {
 				attachData(wt, addressKey);
 				// Return list
 				List<String> list = storage.getAddress(addressKey);
+				list.add(addressKey);
 				PacketData rc = transformer.getPacketData(Config.CODE_NAME_DATA, list);
 				wt.handleWrite(rc);
 				LOG.info("Client {} try to subscribe address {}.", wt.getRemoteName(), addressKey);
