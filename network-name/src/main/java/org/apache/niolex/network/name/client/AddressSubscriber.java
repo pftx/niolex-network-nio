@@ -90,6 +90,11 @@ public class AddressSubscriber extends NameClient {
 	}
 
 
+	/**
+	 * This is a direct answer of subscribe address.
+	 * Override super method
+	 * @see org.apache.niolex.network.name.core.NameClient#handleRefresh(java.util.List)
+	 */
 	@Override
 	protected void handleRefresh(List<String> list) {
 		int last = list.size() - 1;
@@ -119,11 +124,12 @@ public class AddressSubscriber extends NameClient {
 	}
 
 	/**
-	 * Get service addresses list.
+	 * Get service addresses list, and add the listener to listen changes.
 	 *
 	 * @param serviceKey
 	 * @param listener
-	 * @return
+	 * @return The current addresses list
+	 * @throws NameServiceException if any exception occurred.
 	 */
 	public List<String> getServiceAddrList(String serviceKey, AddressEventListener listener) {
 		// We can listen changes from now on.
@@ -131,9 +137,10 @@ public class AddressSubscriber extends NameClient {
 		// Register this subscriber.
 		PacketData listnName = transformer.getPacketData(Config.CODE_NAME_OBTAIN, serviceKey);
 		list.add(listnName);
+		BlockingWaiter<List<String>>.WaitOn on = waiter.initWait(serviceKey);
 		client.handleWrite(listnName);
 		try {
-			List<String> list = waiter.waitForResult(client, rpcHandleTimeout);
+			List<String> list = on.waitForResult(rpcHandleTimeout);
 			return list;
 		} catch (Exception e) {
 			throw new NameServiceException("Error occured when getServiceAddrList", e);

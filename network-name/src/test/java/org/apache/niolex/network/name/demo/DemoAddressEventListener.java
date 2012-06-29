@@ -1,5 +1,5 @@
 /**
- * AddressSubscriberDemo.java
+ * DemoAddressEventListener.java
  *
  * Copyright 2012 Niolex, Inc.
  *
@@ -20,26 +20,27 @@ package org.apache.niolex.network.name.demo;
 import java.util.List;
 
 import org.apache.niolex.network.name.client.AddressEventListener;
-import org.apache.niolex.network.name.client.AddressSubscriber;
 
 /**
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
- * @Date: 2012-6-27
+ * @Date: 2012-6-29
  */
-public class AddressSubscriberDemo {
+public class DemoAddressEventListener implements AddressEventListener {
 
-    /**
-     * The Client Demo
-     *
-     * @param args
-     */
-    public static void main(String[] args) throws Exception {
-    	AddressSubscriber c = new AddressSubscriber("localhost:8181");
-    	AddressEventListener listn = new DemoAddressEventListener();
-		List<String> ls = c.getServiceAddrList("network/name", listn);
-		System.out.println("Address list: " + ls);
-        Thread.sleep(100000);
-    }
+	@Override
+	public void addressAdd(String addressValue) {
+		System.out.println("Address add: " + addressValue);
+	}
+
+	@Override
+	public void addressRemove(String addressValue) {
+		System.out.println("Address remove: " + addressValue);
+	}
+
+	@Override
+	public void addressRefresh(List<String> addressList) {
+		System.out.println("Address refresh: " + addressList);
+	}
 
 }
