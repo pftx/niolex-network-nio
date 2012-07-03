@@ -26,6 +26,29 @@ import org.junit.Test;
  */
 public class TimeTest {
 
+	static class A {
+		public A() {
+			System.out.println("New A");
+		}
+	}
+
+	static class B {
+		public A a = new A();
+		public B() {
+			System.out.println("New B");
+		}
+
+		public void foo() {}
+	}
+
+	static class C {
+		public static B BB = new B();
+
+		static {
+			System.out.println("Static C");
+		}
+	}
+
 	@Test
 	public void test() {
 		final int SIZE = 1 << 28;
@@ -41,6 +64,7 @@ public class TimeTest {
 		}
 		t = System.currentTimeMillis() - in;
 		System.out.println("Nano Time: " + t);
+		C.BB.foo();
 	}
 
 }

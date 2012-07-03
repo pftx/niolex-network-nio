@@ -65,6 +65,7 @@ public class VolatileTest {
 				e.printStackTrace();
 			}
 		}
+		System.out.println("volatile size: " + size);
 		if (size == 12000)
 			assertEquals(12000, size);
 	}

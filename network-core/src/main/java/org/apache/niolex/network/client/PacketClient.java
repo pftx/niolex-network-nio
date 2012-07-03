@@ -104,7 +104,7 @@ public class PacketClient extends BaseClient {
     }
 
 	/**
-	 * Return he nun-send packets size.
+	 * Return he non-send packets size.
 	 * @return
 	 */
 	public int size() {
