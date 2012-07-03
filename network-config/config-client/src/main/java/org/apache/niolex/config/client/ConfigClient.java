@@ -18,6 +18,7 @@
 package org.apache.niolex.config.client;
 
 import java.net.InetSocketAddress;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.niolex.commons.codec.StringUtil;
 import org.apache.niolex.commons.config.PropUtil;
@@ -28,6 +29,8 @@ import org.apache.niolex.config.core.CodeMap;
 import org.apache.niolex.config.core.ConfigException;
 import org.apache.niolex.config.core.MemoryStorage;
 import org.apache.niolex.config.core.PacketTranslater;
+import org.apache.niolex.config.event.ConfigEventDispatcher;
+import org.apache.niolex.config.event.ConfigListener;
 import org.apache.niolex.network.Config;
 import org.apache.niolex.network.IPacketHandler;
 import org.apache.niolex.network.IPacketWriter;
@@ -68,6 +71,11 @@ public class ConfigClient {
      * Store all the configurations in memory.
      */
     private static final MemoryStorage STORAGE = new MemoryStorage();
+
+    /**
+     * Store all the event dispatcher.
+     */
+    private static final ConcurrentHashMap<String, ConfigEventDispatcher> DISPATCHER = new ConcurrentHashMap<String, ConfigEventDispatcher>();
 
     //------------------------------------------------------------
 
@@ -173,10 +181,39 @@ public class ConfigClient {
     			String groupName = findGroupName(item);
     			boolean b = STORAGE.updateConfigItem(groupName, item);
     			if (b) {
-    				//TODO dispatch event.
+    				// dispatch event.
+    				ConfigEventDispatcher disp = DISPATCHER.get(groupName);
+    				if (disp != null) {
+    					disp.fireEvent(item);
+    				}
     			}
     			break;
+    		default:
+    			LOG.warn("Packet received for code [{}] have no handler, just ignored.", sc.getCode());
+				break;
     	}
+    }
+
+    /**
+     * Register an event listener.
+     *
+     * @param groupName
+     * @param key
+     * @param listener
+     */
+    protected static final void registerEventHandler(String groupName, String key, ConfigListener listener) {
+    	ConfigEventDispatcher disp = DISPATCHER.get(groupName);
+		if (disp == null) {
+			ConfigEventDispatcher tmp = new ConfigEventDispatcher();
+			disp = DISPATCHER.putIfAbsent(groupName, tmp);
+			if (disp != null) {
+				disp.addListener(key, listener);
+			} else {
+				tmp.addListener(key, listener);
+			}
+		} else {
+			disp.addListener(key, listener);
+		}
     }
 
     /**
