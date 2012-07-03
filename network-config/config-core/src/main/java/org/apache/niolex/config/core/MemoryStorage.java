@@ -17,7 +17,6 @@
  */
 package org.apache.niolex.config.core;
 
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.niolex.config.bean.ConfigItem;
@@ -36,7 +35,7 @@ public class MemoryStorage {
 	/**
 	 * The total storage.
 	 */
-	private final Map<String, GroupConfig> mapStorage = new ConcurrentHashMap<String, GroupConfig>();
+	private final ConcurrentHashMap<String, GroupConfig> mapStorage = new ConcurrentHashMap<String, GroupConfig>();
 
 	/**
 	 * Store the GroupConfig into MemoryStorage.
@@ -46,11 +45,9 @@ public class MemoryStorage {
 	 *
 	 * @param config
 	 */
-	public synchronized void store(GroupConfig config) {
-		GroupConfig tmp = mapStorage.get(config.getGroupName());
-		if (tmp == null) {
-			mapStorage.put(config.getGroupName(), config);
-		} else {
+	public void store(GroupConfig config) {
+		GroupConfig tmp = mapStorage.putIfAbsent(config.getGroupName(), config);
+		if (tmp != null) {
 			tmp.replaceConfig(config);
 		}
 	}
@@ -63,6 +60,20 @@ public class MemoryStorage {
 	 */
 	public GroupConfig get(String groupName) {
 		return mapStorage.get(groupName);
+	}
+
+	/**
+	 * Get group name by group id.
+	 * @param groupId
+	 * @return null if group not found.
+	 */
+	public String findGroupName(int groupId) {
+		for (GroupConfig tmp : mapStorage.values()) {
+			if (tmp.getGroupId() == groupId) {
+				return tmp.getGroupName();
+			}
+		}
+		return null;
 	}
 
 	/**

@@ -21,6 +21,7 @@ import java.net.InetSocketAddress;
 
 import org.apache.niolex.commons.codec.StringUtil;
 import org.apache.niolex.commons.config.PropUtil;
+import org.apache.niolex.config.bean.ConfigItem;
 import org.apache.niolex.config.bean.GroupConfig;
 import org.apache.niolex.config.bean.SubscribeBean;
 import org.apache.niolex.config.core.CodeMap;
@@ -145,6 +146,15 @@ public class ConfigClient {
     }
 
     /**
+     * Get group name by group id.
+     * @param groupId
+     * @return
+     */
+    private static final String findGroupName(ConfigItem item) {
+    	return STORAGE.findGroupName(item.getGroupId());
+    }
+
+    /**
      * Do the real packet reading which is from config server.
      * @param sc
      */
@@ -156,6 +166,15 @@ public class ConfigClient {
     			STORAGE.store(conf);
     			// Notify anyone waiting for this.
     			WAITER.release(conf.getGroupName(), conf);
+    			break;
+    		case CodeMap.GROUP_DIF:
+    			ConfigItem item = PacketTranslater.toConfigItem(sc);
+    			// Store this item into memory storage.
+    			String groupName = findGroupName(item);
+    			boolean b = STORAGE.updateConfigItem(groupName, item);
+    			if (b) {
+    				//TODO dispatch event.
+    			}
     			break;
     	}
     }

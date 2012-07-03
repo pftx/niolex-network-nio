@@ -19,6 +19,7 @@ package org.apache.niolex.config.core;
 
 import org.apache.niolex.commons.codec.StringUtil;
 import org.apache.niolex.commons.compress.JacksonUtil;
+import org.apache.niolex.config.bean.ConfigItem;
 import org.apache.niolex.config.bean.GroupConfig;
 import org.apache.niolex.config.bean.SubscribeBean;
 import org.apache.niolex.network.PacketData;
@@ -50,6 +51,15 @@ public class PacketTranslater {
 		try {
 			String s = StringUtil.utf8ByteToStr(sc.getData());
 			return JacksonUtil.str2Obj(s, GroupConfig.class);
+		} catch (Exception e) {
+			throw new ConfigException("Failed to translate GroupConfig.", e);
+		}
+	}
+
+	public static final ConfigItem toConfigItem(PacketData sc) {
+		try {
+			String s = StringUtil.utf8ByteToStr(sc.getData());
+			return JacksonUtil.str2Obj(s, ConfigItem.class);
 		} catch (Exception e) {
 			throw new ConfigException("Failed to translate GroupConfig.", e);
 		}

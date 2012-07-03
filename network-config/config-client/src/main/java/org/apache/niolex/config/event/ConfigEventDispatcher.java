@@ -17,6 +17,8 @@
  */
 package org.apache.niolex.config.event;
 
+import java.util.concurrent.ConcurrentHashMap;
+
 import org.apache.niolex.config.bean.ConfigItem;
 
 /**
@@ -26,29 +28,42 @@ import org.apache.niolex.config.bean.ConfigItem;
  */
 public class ConfigEventDispatcher {
 
+	/**
+	 * The total storage.
+	 */
+	private final ConcurrentHashMap<String, ConfigListener> mapStorage = new ConcurrentHashMap<String, ConfigListener>();
 
 	/**
 	 * Add an event listener who care this event.
+	 * Attention! We can only manage one listener for one key.
+	 *
 	 * @param eListener
+	 * @return the old listener.
 	 */
-	public void addListener(String key, ConfigListener listener) {
-
+	public ConfigListener addListener(String key, ConfigListener listener) {
+		return mapStorage.put(key, listener);
 	}
 
 	/**
 	 * Remove the specified event listener.
+	 * Attention! We will only remove if the current listener is the specified one.
+	 *
 	 * @param eListener
+	 * @return whether the specified listener is removed.
 	 */
-	public void removeListener(String key, ConfigListener listener) {
-
+	public boolean removeListener(String key, ConfigListener listener) {
+		return mapStorage.remove(key, listener);
 	}
 
 	/**
-	 * Fire the specified event to all the listeners registered to this dispatcher.
+	 * Fire the specified event to the listener registered to this dispatcher.
 	 * @param e
 	 */
 	public void fireEvent(ConfigItem item) {
-		;
+		ConfigListener listener = mapStorage.get(item.getKey());
+		if (listener != null) {
+			listener.configChanged(item.getValue(), item.getUpdateTime());
+		}
 	}
 
 }
