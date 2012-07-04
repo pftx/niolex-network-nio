@@ -17,6 +17,7 @@
  */
 package org.apache.niolex.config.core;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -63,6 +64,14 @@ public class MemoryStorage {
 	 */
 	public GroupConfig get(String groupName) {
 		return mapStorage.get(groupName);
+	}
+
+	/**
+	 * Get all the current stored group config(s).
+	 * @return
+	 */
+	public Collection<GroupConfig> getAll() {
+		return mapStorage.values();
 	}
 
 	/**

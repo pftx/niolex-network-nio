@@ -17,11 +17,14 @@
  */
 package org.apache.niolex.config.core;
 
+import java.util.List;
+
 import org.apache.niolex.commons.codec.StringUtil;
 import org.apache.niolex.commons.compress.JacksonUtil;
 import org.apache.niolex.config.bean.ConfigItem;
 import org.apache.niolex.config.bean.GroupConfig;
 import org.apache.niolex.config.bean.SubscribeBean;
+import org.apache.niolex.config.bean.SyncBean;
 import org.apache.niolex.network.PacketData;
 
 /**
@@ -44,6 +47,34 @@ public class PacketTranslater {
 			return new PacketData(CodeMap.AUTH_SUBS, data);
 		} catch (Exception e) {
 			throw new ConfigException("Failed to translate SubscribeBean.", e);
+		}
+	}
+
+	/**
+	 * Translate GroupConfig into PacketData
+	 * @param bean
+	 * @return
+	 */
+	public static final PacketData translate(GroupConfig conf) {
+		try {
+			byte[] data = StringUtil.strToUtf8Byte(JacksonUtil.obj2Str(conf));
+			return new PacketData(CodeMap.GROUP_DAT, data);
+		} catch (Exception e) {
+			throw new ConfigException("Failed to translate GroupConfig.", e);
+		}
+	}
+
+	/**
+	 * Translate list of SyncBean into PacketData
+	 * @param bean
+	 * @return
+	 */
+	public static final PacketData translate(List<SyncBean> list) {
+		try {
+			byte[] data = StringUtil.strToUtf8Byte(JacksonUtil.obj2Str(list));
+			return new PacketData(CodeMap.GROUP_SYN, data);
+		} catch (Exception e) {
+			throw new ConfigException("Failed to translate GroupConfig.", e);
 		}
 	}
 

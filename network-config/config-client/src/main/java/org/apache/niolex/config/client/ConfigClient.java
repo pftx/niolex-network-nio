@@ -18,14 +18,19 @@
 package org.apache.niolex.config.client;
 
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.niolex.commons.codec.StringUtil;
+import org.apache.niolex.commons.compress.JacksonUtil;
 import org.apache.niolex.commons.config.PropUtil;
+import org.apache.niolex.commons.file.FileUtil;
+import org.apache.niolex.commons.util.Runme;
 import org.apache.niolex.config.bean.ConfigItem;
 import org.apache.niolex.config.bean.GroupConfig;
 import org.apache.niolex.config.bean.SubscribeBean;
+import org.apache.niolex.config.bean.SyncBean;
 import org.apache.niolex.config.core.CodeMap;
 import org.apache.niolex.config.core.ConfigException;
 import org.apache.niolex.config.core.MemoryStorage;
@@ -52,6 +57,8 @@ public class ConfigClient {
     private static final String USERNAME;
     private static final String PASSWORD;
     private static final int CONNECT_TIMEOUT;
+    private static final long REFRESH_INTERVAL;
+    private static final String STORAGE_PATH;
 
     /**
      * The real packet client do the tcp connection.
@@ -97,6 +104,10 @@ public class ConfigClient {
     	USERNAME = PropUtil.getProperty("auth.username", "node");
     	PASSWORD = PropUtil.getProperty("auth.password", "nodepasswd");
     	CONNECT_TIMEOUT = PropUtil.getInteger("server.contimeout", 30000);
+    	// Default to 6 hours.
+    	REFRESH_INTERVAL = PropUtil.getLong("server.refresh.interval", 21600000);
+    	STORAGE_PATH = PropUtil.getProperty("local.storage.path", "/data/follower/config/storage");
+    	FileUtil.mkdirsIfAbsent(STORAGE_PATH);
     	initConnection();
     }
 
@@ -120,7 +131,37 @@ public class ConfigClient {
     	CLIENT.setPacketHandler(new ClientHandler());
     	BEAN.setUserName(USERNAME);
     	BEAN.setPassword(PASSWORD);
+    	// Connect with server.
     	connect();
+    	// Sync with server periodically.
+    	Runme me = new Runme() {
+
+			@Override
+			public void runMe() {
+				syncWithServer();
+			}
+
+		};
+		me.setSleepInterval(REFRESH_INTERVAL);
+		me.setInitialSleep(true);
+		me.start();
+    }
+
+    /**
+     * Sync all the local groups with server.
+     */
+    private static final void syncWithServer() {
+    	LOG.info("Start to sync local groups with server.");
+    	List<SyncBean> list = new ArrayList<SyncBean>();
+    	for (GroupConfig tmp : STORAGE.getAll()) {
+    		SyncBean bean = new SyncBean(tmp);
+    		list.add(bean);
+    	}
+    	if (list.size() != 0) {
+    		// Send local sync bean to config server.
+    		PacketData syn = PacketTranslater.translate(list);
+        	CLIENT.handleWrite(syn);
+    	}
     }
 
     /**
@@ -182,6 +223,8 @@ public class ConfigClient {
     			}
     			// Notify anyone waiting for this.
     			WAITER.release(conf.getGroupName(), conf);
+    			// Store this config to local disk.
+    			storeGroupConfigToLocakDisk(STORAGE.get(conf.getGroupName()));
     			break;
     		case CodeMap.GROUP_DIF:
     			ConfigItem item = PacketTranslater.toConfigItem(sc);
@@ -193,6 +236,15 @@ public class ConfigClient {
     			LOG.warn("Packet received for code [{}] have no handler, just ignored.", sc.getCode());
 				break;
     	}
+    }
+
+    /**
+     * Store the group config into local disk.
+     * @param conf
+     */
+    private static final void storeGroupConfigToLocakDisk(GroupConfig conf) {
+    	FileUtil.setBinaryFileContentToFileSystem(STORAGE_PATH + "/" + conf.getGroupName(),
+    			PacketTranslater.translate(conf).getData());
     }
 
     /**
@@ -279,6 +331,16 @@ public class ConfigClient {
     	}
     }
 
+    private static final GroupConfig getGroupConfigFromLocakDisk(String groupName) {
+    	try {
+    		byte[] arr = FileUtil.getBinaryFileContentFromFileSystem(STORAGE_PATH + "/" + groupName);
+    		if (arr != null) {
+    			return JacksonUtil.str2Obj(StringUtil.utf8ByteToStr(arr), GroupConfig.class);
+    		}
+		} catch (Exception e) {}
+    	return null;
+    }
+
     /**
      * Get group config by group name. If not found in local, we will try to
      * get it from config server.
@@ -294,10 +356,21 @@ public class ConfigClient {
     	GroupConfig tmp = STORAGE.get(groupName);
     	if (tmp != null)
     		return tmp;
-    	checkConncetion();
-    	BlockingWaiter<GroupConfig>.WaitOn on = WAITER.initWait(groupName);
+    	// Try to load config from local disk.
+    	tmp = getGroupConfigFromLocakDisk(groupName);
+    	if (tmp != null) {
+    		STORAGE.store(tmp);
+    		// Add this group name to bean.
+        	BEAN.getGroupList().add(groupName);
+        	// Send packet to remote server.
+        	PacketData sub = new PacketData(CodeMap.GROUP_SUB, StringUtil.strToUtf8Byte(groupName));
+        	CLIENT.handleWrite(sub);
+    		return tmp;
+    	}
     	// Add this group name to bean.
     	BEAN.getGroupList().add(groupName);
+    	checkConncetion();
+    	BlockingWaiter<GroupConfig>.WaitOn on = WAITER.initWait(groupName);
     	// Send packet to remote server.
     	PacketData sub = new PacketData(CodeMap.GROUP_SUB, StringUtil.strToUtf8Byte(groupName));
     	CLIENT.handleWrite(sub);

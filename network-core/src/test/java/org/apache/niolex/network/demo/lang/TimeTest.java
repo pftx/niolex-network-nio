@@ -38,7 +38,10 @@ public class TimeTest {
 			System.out.println("New B");
 		}
 
-		public void foo() {}
+		public String[] foo() {
+			System.out.println("Invoke");
+			return new String[] {"A", "B", "C"};
+		}
 	}
 
 	static class C {
@@ -64,7 +67,9 @@ public class TimeTest {
 		}
 		t = System.currentTimeMillis() - in;
 		System.out.println("Nano Time: " + t);
-		C.BB.foo();
+		for (String s : C.BB.foo()) {
+			System.out.println("It: " + s);
+		}
 	}
 
 }
