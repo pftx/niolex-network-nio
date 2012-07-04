@@ -25,6 +25,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.niolex.commons.codec.StringUtil;
 import org.apache.niolex.commons.compress.JacksonUtil;
 import org.apache.niolex.commons.config.PropUtil;
+import org.apache.niolex.commons.download.DownloadUtil;
 import org.apache.niolex.commons.file.FileUtil;
 import org.apache.niolex.commons.util.Runme;
 import org.apache.niolex.config.bean.ConfigItem;
@@ -100,7 +101,7 @@ public class ConfigClient {
         } catch (Throwable t) {
             LOG.info("conf-client.properties not found, use default configurations instead.");
         }
-    	SERVER_ADDRESS = PropUtil.getProperty("server.address", "localhost:8123,localhost:8181");
+    	SERVER_ADDRESS = PropUtil.getProperty("server.address", "http://configserver:8780/configserver/server.json");
     	USERNAME = PropUtil.getProperty("auth.username", "node");
     	PASSWORD = PropUtil.getProperty("auth.password", "nodepasswd");
     	CONNECT_TIMEOUT = PropUtil.getInteger("server.contimeout", 30000);
@@ -115,18 +116,11 @@ public class ConfigClient {
      * Init server properties and connect to server.
      */
     private static final void initConnection() {
-    	String[] servers = SERVER_ADDRESS.split(" *, *");
-    	if (servers.length < 1) {
-    		LOG.error("Server address is empty, init failed.");
+    	if (!syncServerAddress(true)) {
+    		// There is nothing we can do, we can not start client without addresses.
     		return;
     	}
-    	ADDRESSES = new InetSocketAddress[servers.length];
-    	for (int i = 0; i < servers.length; ++i) {
-    		String str = servers[i];
-    		String[] addrs = str.split(":");
-    		ADDRESSES[i] = new InetSocketAddress(addrs[0], Integer.parseInt(addrs[1]));
-    	}
-    	SERVER_IDX = (int) (System.nanoTime() % servers.length);
+    	SERVER_IDX = (int) (System.nanoTime() % ADDRESSES.length);
     	CLIENT.setConnectTimeout(CONNECT_TIMEOUT);
     	CLIENT.setPacketHandler(new ClientHandler());
     	BEAN.setUserName(USERNAME);
@@ -148,6 +142,45 @@ public class ConfigClient {
     }
 
     /**
+     * Sync server addresses from http server.
+     */
+    private static final boolean syncServerAddress(boolean isStart) {
+    	String json;
+		try {
+			json = StringUtil.utf8ByteToStr(DownloadUtil.downloadFile(SERVER_ADDRESS));
+			FileUtil.setCharacterFileContentToFileSystem(STORAGE_PATH + "/server.json",
+					json, Config.SERVER_ENCODING);
+		} catch (Exception e) {
+			LOG.error("Failed to download server address from remote.", e);
+			if (isStart) {
+				// Try to reload address list from backup config file.
+				json = FileUtil.getCharacterFileContentFromFileSystem(
+						STORAGE_PATH + "/server.json", Config.SERVER_ENCODING);
+			} else {
+				return false;
+			}
+		}
+		String[] servers = null;
+		try {
+			servers = JacksonUtil.str2Obj(json, String[].class);
+		} catch (Exception e) {
+			LOG.error("Failed to parse server address as json.", e);
+			return false;
+		}
+    	if (servers.length < 1) {
+    		LOG.error("Server address is empty, init failed.");
+    		return false;
+    	}
+    	ADDRESSES = new InetSocketAddress[servers.length];
+    	for (int i = 0; i < servers.length; ++i) {
+    		String str = servers[i];
+    		String[] addrs = str.split(":");
+    		ADDRESSES[i] = new InetSocketAddress(addrs[0], Integer.parseInt(addrs[1]));
+    	}
+    	return true;
+    }
+
+    /**
      * Sync all the local groups with server.
      */
     private static final void syncWithServer() {
@@ -162,6 +195,8 @@ public class ConfigClient {
     		PacketData syn = PacketTranslater.translate(list);
         	CLIENT.handleWrite(syn);
     	}
+    	// Sync server addresses.
+    	syncServerAddress(false);
     }
 
     /**
@@ -297,12 +332,16 @@ public class ConfigClient {
      * Try infinitely to get a valid connection.
      */
     private static final void connect() {
+    	InetSocketAddress serverAddress = null;
     	while (true) {
 	    	try {
-	    		CLIENT.setServerAddress(ADDRESSES[nextServer()]);
+	    		serverAddress = ADDRESSES[nextServer()];
+	    		CLIENT.setServerAddress(serverAddress);
 				CLIENT.connect();
 				break;
 			} catch (Exception e) {
+				LOG.info("Error occured when connect to address: {}, client will retry. {}",
+						serverAddress, e.toString());
 				try {
 					Thread.sleep(CONNECT_TIMEOUT / 3);
 				} catch (InterruptedException e1) {}
