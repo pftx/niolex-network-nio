@@ -18,6 +18,7 @@
 package org.apache.niolex.config.client;
 
 import java.net.InetSocketAddress;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.niolex.commons.codec.StringUtil;
@@ -171,7 +172,14 @@ public class ConfigClient {
     		case CodeMap.GROUP_DAT:
     			// When group config data arrived, store it into memory storage.
     			GroupConfig conf = PacketTranslater.toGroupConfig(sc);
-    			STORAGE.store(conf);
+    			List<ConfigItem> list = STORAGE.store(conf);
+    			// dispatch event.
+    			ConfigEventDispatcher disp = DISPATCHER.get(conf.getGroupName());
+    			if (list != null && disp != null) {
+    				for (ConfigItem item : list) {
+    					disp.fireEvent(item);
+    				}
+    			}
     			// Notify anyone waiting for this.
     			WAITER.release(conf.getGroupName(), conf);
     			break;
@@ -179,19 +187,28 @@ public class ConfigClient {
     			ConfigItem item = PacketTranslater.toConfigItem(sc);
     			// Store this item into memory storage.
     			String groupName = findGroupName(item);
-    			boolean b = STORAGE.updateConfigItem(groupName, item);
-    			if (b) {
-    				// dispatch event.
-    				ConfigEventDispatcher disp = DISPATCHER.get(groupName);
-    				if (disp != null) {
-    					disp.fireEvent(item);
-    				}
-    			}
+    			updateConfigItem(groupName, item);
     			break;
     		default:
     			LOG.warn("Packet received for code [{}] have no handler, just ignored.", sc.getCode());
 				break;
     	}
+    }
+
+    /**
+     * Store this item into memory, and dispatch event if necessary.
+     * @param groupName
+     * @param item
+     */
+    private static final void updateConfigItem(String groupName, ConfigItem item) {
+    	boolean b = STORAGE.updateConfigItem(groupName, item);
+		if (b) {
+			// dispatch event.
+			ConfigEventDispatcher disp = DISPATCHER.get(groupName);
+			if (disp != null) {
+				disp.fireEvent(item);
+			}
+		}
     }
 
     /**
@@ -201,18 +218,18 @@ public class ConfigClient {
      * @param key
      * @param listener
      */
-    protected static final void registerEventHandler(String groupName, String key, ConfigListener listener) {
+    protected static final ConfigListener registerEventHandler(String groupName, String key, ConfigListener listener) {
     	ConfigEventDispatcher disp = DISPATCHER.get(groupName);
 		if (disp == null) {
 			ConfigEventDispatcher tmp = new ConfigEventDispatcher();
 			disp = DISPATCHER.putIfAbsent(groupName, tmp);
 			if (disp != null) {
-				disp.addListener(key, listener);
+				return disp.addListener(key, listener);
 			} else {
-				tmp.addListener(key, listener);
+				return tmp.addListener(key, listener);
 			}
 		} else {
-			disp.addListener(key, listener);
+			return disp.addListener(key, listener);
 		}
     }
 

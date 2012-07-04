@@ -43,6 +43,8 @@ public class SubscribeBean {
 	 */
 	private List<String> groupList;
 
+	//---------------------- GETTER & SETTER ---------------------------------
+
 	public String getUserName() {
 		return userName;
 	}

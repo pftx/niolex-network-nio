@@ -17,6 +17,8 @@
  */
 package org.apache.niolex.config.bean;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -80,27 +82,31 @@ public class GroupConfig {
 	/**
 	 * Store the group config into this bean.
 	 * @param config
+	 * @return the changed item list
 	 */
-	public void replaceConfig(GroupConfig config) {
+	public List<ConfigItem> replaceConfig(GroupConfig config) {
+		List<ConfigItem> list = new ArrayList<ConfigItem>();
 		lock.lock();
 		try {
 			if (updateTime < config.getUpdateTime()) {
-				// If current if old, just replace it.
+				// If current time stamp is old, just replace it.
 				updateTime = config.updateTime;
-				groupData = config.groupData;
-			} else {
-				// Otherwise, we need to update config one by one.
-				for (ConfigItem item : config.groupData.values()) {
-					ConfigItem tmp = groupData.get(item.getKey());
-					if (tmp == null || tmp.getUpdateTime() < item.getUpdateTime()) {
-						groupData.put(item.getKey(), item);
-					}
+			}
+			// We need to update config one by one, to get change list.
+			for (ConfigItem item : config.groupData.values()) {
+				ConfigItem tmp = groupData.get(item.getKey());
+				if (tmp == null || tmp.getUpdateTime() < item.getUpdateTime()) {
+					groupData.put(item.getKey(), item);
+					list.add(item);
 				}
 			}
 		} finally {
 			lock.unlock();
 		}
+		return list;
 	}
+
+	//---------------------- GETTER & SETTER ---------------------------------
 
 	public int getGroupId() {
 		return groupId;

@@ -17,6 +17,7 @@
  */
 package org.apache.niolex.config.core;
 
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.niolex.config.bean.ConfigItem;
@@ -44,12 +45,14 @@ public class MemoryStorage {
 	 * This method is synchronized.
 	 *
 	 * @param config
+	 * @return the changed item list if this config already exist.
 	 */
-	public void store(GroupConfig config) {
+	public List<ConfigItem> store(GroupConfig config) {
 		GroupConfig tmp = mapStorage.putIfAbsent(config.getGroupName(), config);
 		if (tmp != null) {
-			tmp.replaceConfig(config);
+			return tmp.replaceConfig(config);
 		}
+		return null;
 	}
 
 	/**

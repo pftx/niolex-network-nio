@@ -20,6 +20,7 @@ package org.apache.niolex.config.client;
 import org.apache.niolex.config.bean.ConfigItem;
 import org.apache.niolex.config.bean.GroupConfig;
 import org.apache.niolex.config.core.ConfigException;
+import org.apache.niolex.config.event.ConfigListener;
 
 /**
  * Configer是一个用来读取配置中心的工具类
@@ -51,6 +52,17 @@ public class Configer extends ConfigClient {
 		if (this.config == null) {
 			throw new ConfigException("Failed to load group " + groupName);
 		}
+	}
+
+	/**
+	 * Add an event listener who cares the config with this key changes.
+	 * Attention! We can only manage one listener for one key.
+	 *
+	 * @param eListener
+	 * @return the old listener.
+	 */
+	public ConfigListener addListener(String key, ConfigListener listener) {
+		return registerEventHandler(config.getGroupName(), key, listener);
 	}
 
     /**

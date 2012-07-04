@@ -56,6 +56,8 @@ public class ConfigItem {
 	 */
 	private long updateTime;
 
+	//---------------------- GETTER & SETTER ---------------------------------
+
 	public int getGroupId() {
 		return groupId;
 	}
