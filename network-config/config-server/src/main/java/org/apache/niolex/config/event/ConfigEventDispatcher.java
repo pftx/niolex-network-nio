@@ -17,9 +17,16 @@
  */
 package org.apache.niolex.config.event;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
+
 import org.apache.niolex.config.bean.ConfigItem;
 import org.apache.niolex.config.core.PacketTranslater;
 import org.apache.niolex.network.IPacketWriter;
+import org.springframework.stereotype.Component;
 
 /**
  * Dispatch config item changes.
@@ -28,7 +35,20 @@ import org.apache.niolex.network.IPacketWriter;
  * @version 1.0.0
  * @Date: 2012-7-3
  */
+@Component
 public class ConfigEventDispatcher {
+
+	/**
+	 * Store other servers.
+	 */
+	private final List<IPacketWriter> otherServers = Collections.synchronizedList(
+			new ArrayList<IPacketWriter>(0));
+
+	/**
+	 * Store clients.
+	 */
+	private final ConcurrentHashMap<String, ConcurrentLinkedQueue<IPacketWriter>> clients =
+			new ConcurrentHashMap<String, ConcurrentLinkedQueue<IPacketWriter>>();
 
 
 	/**
@@ -36,7 +56,15 @@ public class ConfigEventDispatcher {
 	 * @param eListener
 	 */
 	public void addListener(String groupName, IPacketWriter listener) {
-
+		ConcurrentLinkedQueue<IPacketWriter> queue = clients.get(groupName);
+		if (queue == null) {
+			queue = new ConcurrentLinkedQueue<IPacketWriter>();
+			ConcurrentLinkedQueue<IPacketWriter> tmp = clients.putIfAbsent(groupName, queue);
+			if (tmp != null) {
+				queue = tmp;
+			}
+		}
+		queue.add(listener);
 	}
 
 	/**
@@ -44,7 +72,10 @@ public class ConfigEventDispatcher {
 	 * @param eListener
 	 */
 	public void removeListener(String groupName, IPacketWriter listener) {
-
+		ConcurrentLinkedQueue<IPacketWriter> queue = clients.get(groupName);
+		if (queue != null) {
+			queue.remove(listener);
+		}
 	}
 
 	/**
@@ -52,7 +83,7 @@ public class ConfigEventDispatcher {
 	 * @param listener
 	 */
 	public void addOtherServer(IPacketWriter listener) {
-		;
+		otherServers.add(listener);
 	}
 
 	/**
@@ -61,7 +92,11 @@ public class ConfigEventDispatcher {
 	 */
 	public void fireEvent(String groupName, ConfigItem item) {
 		// Fire to other servers.
-		//wt.handleWrite(PacketTranslater.translate(item));
+		synchronized(otherServers) {
+			for (IPacketWriter wt : otherServers) {
+				wt.handleWrite(PacketTranslater.translate(item));
+			}
+		}
 		// Fire to all clients.
 		fireClientEvent(groupName, item);
 	}
@@ -71,8 +106,14 @@ public class ConfigEventDispatcher {
 	 * @param e
 	 */
 	public void fireClientEvent(String groupName, ConfigItem item) {
-		;
-		//wt.handleWrite(PacketTranslater.translate(item));
+		ConcurrentLinkedQueue<IPacketWriter> queue = clients.get(groupName);
+		if (queue != null) {
+			synchronized(queue) {
+				for (IPacketWriter wt : queue) {
+					wt.handleWrite(PacketTranslater.translate(item));
+				}
+			}
+		}
 	}
 
 }

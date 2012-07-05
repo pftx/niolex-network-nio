@@ -112,4 +112,29 @@ public class BlockingWaiterTest {
 	}
 
 
+	/**
+	 * Test method for {@link org.apache.niolex.network.util.BlockingWaiter#release(java.lang.Object, org.apache.niolex.network.PacketData)}.
+	 */
+	@Test(expected=RuntimeException.class)
+	public void testException() throws Exception {
+		final BlockingWaiter<String> test = new BlockingWaiter<String>();
+		BlockingWaiter<String>.WaitOn on = test.initWait("goodmood");
+		test.release("goodmood", new RuntimeException("@link org.apache.niolex.network.util.Blocking"));
+		String b = on.waitForResult(200);
+		System.out.println("Vt " + b);
+	}
+
+	/**
+	 * Test method for {@link org.apache.niolex.network.util.BlockingWaiter#release(java.lang.Object, org.apache.niolex.network.PacketData)}.
+	 */
+	@Test
+	public void testExceptionRe() throws Exception {
+		final BlockingWaiter<String> test = new BlockingWaiter<String>();
+		BlockingWaiter<String>.WaitOn on = test.initWait("goodmood");
+		test.release("goodmood3", new RuntimeException("@link org.apache.niolex.network.util.Blocking"));
+		String b = on.waitForResult(200);
+		System.out.println("Vt " + b);
+	}
+
+
 }

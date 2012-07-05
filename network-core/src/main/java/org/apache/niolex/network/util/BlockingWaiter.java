@@ -91,6 +91,23 @@ public class BlockingWaiter<E> {
 	}
 
 	/**
+	 * Release the thread waiting on the key with this exception.
+	 *
+	 * @param key
+	 * @param value
+	 * @return true if success to release, false if no thread waiting on it.
+	 */
+	public boolean release(Object key, RuntimeException value) {
+		WaitOn it = waitMap.get(key);
+		if (it != null) {
+			it.release(value);
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
 	 * Use this class to wait for result.
 	 * The internal wait structure.
 	 *
@@ -106,6 +123,7 @@ public class BlockingWaiter<E> {
 		private Object key;
 		private Condition waitOn;
 		private E result;
+		private RuntimeException e;
 
 		/**
 		 * The only constructor.
@@ -133,6 +151,10 @@ public class BlockingWaiter<E> {
 					return result;
 				// Not ready yet, let's wait.
 				waitOn.await(time, TimeUnit.MILLISECONDS);
+				if (e != null) {
+					// Release with exception.
+					throw e;
+				}
 				// Just return, if not ready, will return null.
 				return result;
 			} finally {
@@ -145,6 +167,16 @@ public class BlockingWaiter<E> {
 
 		public void release(E result) {
 			this.result = result;
+			lock.lock();
+			try {
+				waitOn.signal();
+			} finally {
+				lock.unlock();
+			}
+		}
+
+		public void release(RuntimeException result) {
+			this.e = result;
 			lock.lock();
 			try {
 				waitOn.signal();

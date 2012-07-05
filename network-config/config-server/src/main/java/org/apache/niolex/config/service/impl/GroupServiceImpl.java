@@ -162,4 +162,14 @@ public class GroupServiceImpl implements GroupService {
 		}
 	}
 
+	/**
+	 * Override super method
+	 * @see org.apache.niolex.config.service.GroupService#loadGroup(java.lang.String)
+	 */
+	@Override
+	public void loadGroup(String groupName) {
+		// TODO Auto-generated method stub
+
+	}
+
 }
