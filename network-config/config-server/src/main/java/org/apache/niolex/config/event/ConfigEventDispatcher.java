@@ -18,6 +18,7 @@
 package org.apache.niolex.config.event;
 
 import org.apache.niolex.config.bean.ConfigItem;
+import org.apache.niolex.network.IPacketWriter;
 
 /**
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
@@ -31,7 +32,7 @@ public class ConfigEventDispatcher {
 	 * Add an event listener who care this event.
 	 * @param eListener
 	 */
-	public void addListener(String key, ConfigListener listener) {
+	public void addListener(String groupName, IPacketWriter listener) {
 
 	}
 
@@ -39,7 +40,7 @@ public class ConfigEventDispatcher {
 	 * Remove the specified event listener.
 	 * @param eListener
 	 */
-	public void removeListener(String key, ConfigListener listener) {
+	public void removeListener(String groupName, IPacketWriter listener) {
 
 	}
 

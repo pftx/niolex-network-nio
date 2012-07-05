@@ -22,6 +22,8 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
+import org.apache.niolex.commons.codec.StringUtil;
+
 /**
  * The helper class of Packet, handle reads and writes of Packet.
  * @author Xie, Jiyun
@@ -33,6 +35,10 @@ public class PacketData extends Packet {
     // The current handled data position in packet.
     private int dataPos;
 
+    /**
+     * Get the default heart beat packet.
+     * @return
+     */
     public static final PacketData getHeartBeatPacket() {
         return HEART_BEAT;
     }
@@ -45,8 +51,22 @@ public class PacketData extends Packet {
         this.version = 1;
     }
 
+    /**
+     * Create a packet with only packet code.
+     * @param code
+     */
     public PacketData(int code) {
     	this(code, new byte[0]);
+    }
+
+    /**
+     * Create a packet with packet code and String data.
+     * String will be encoded as UTF-8
+     * @param code
+     * @param data
+     */
+    public PacketData(int code, String data) {
+    	this(code, StringUtil.strToUtf8Byte(data));
     }
 
     /**

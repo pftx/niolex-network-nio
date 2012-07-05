@@ -78,6 +78,13 @@ public class PacketTest {
 		assertEquals(34, pc.getCode());
 	}
 
+	@Test
+	public void testStr() {
+		PacketData pc = new PacketData(34, "setReserved(byte)");
+		assertEquals(34, pc.getCode());
+		assertEquals(17, pc.getLength());
+	}
+
 	/**
 	 * Test method for {@link org.apache.niolex.network.Packet#setReserved(byte)}.
 	 * @throws IOException

@@ -1,0 +1,26 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:c="http://www.springframework.org/schema/c"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+     http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+     http://www.springframework.org/schema/context
+     http://www.springframework.org/schema/context/spring-context-3.0.xsd">
+
+	<context:property-placeholder location="classpath:com/foo/jdbc.properties" />
+
+	<!-- This config makes @Autowired work -->
+	<context:annotation-config />
+
+	<!-- This config makes spring to scan classes and make beans -->
+	<context:component-scan base-package="org.apache.niolex.config"/>
+
+	<!-- Store all the configurations in memory. -->
+	<bean id="storage" class="org.apache.niolex.config.core.MemoryStorage" />
+
+	<bean id="myDataSource" class="org.apache.commons.dbcp.BasicDataSource"
+		destroy-method="close" p:driverClassName="com.mysql.jdbc.Driver"
+		p:url="jdbc:mysql://localhost:3306/mydb" p:username="root" p:password="masterkaoli" />
+
+</beans>

@@ -1,5 +1,5 @@
 /**
- * CodeMap.java
+ * AuthenticateService.java
  *
  * Copyright 2012 Niolex, Inc.
  *
@@ -15,34 +15,35 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.niolex.config.core;
+package org.apache.niolex.config.service;
+
+import org.apache.niolex.config.bean.GroupConfig;
+import org.apache.niolex.config.bean.SubscribeBean;
+import org.apache.niolex.network.IPacketWriter;
 
 /**
- * The interface to store all the packet codes.
- *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
- * @Date: 2012-7-3
+ * @Date: 2012-7-5
  */
-public interface CodeMap {
+public interface AuthenticateService {
 
-	// Add.
-	short GROUP_ADD = 1000;
-	// Subscribe.
-	short GROUP_SUB = 1001;
-	// Diff.
-	short GROUP_DIF = 1002;
-	// Sync.
-	short GROUP_SYN = 1003;
-	// Data.
-	short GROUP_DAT = 1004;
-	// Not found.
-	short GROUP_NOF = 1005;
-	// No auth.
-	short GROUP_NOA = 1006;
+	/**
+	 * Use the information in SubscribeBean to do authentication.
+	 * If success, store userid in IPacketWriter.
+	 *
+	 * @param bean
+	 * @param wt
+	 * @return
+	 */
+	public boolean authUser(SubscribeBean bean, IPacketWriter wt);
 
-	// Auth and init subscribe.
-	short AUTH_SUBS = 2000;
-	// Auth failed.
-	short AUTH_FAIL = 2001;
+	/**
+	 * Check whether this client has the right to read this group config.
+	 *
+	 * @param group
+	 * @param wt
+	 * @return
+	 */
+	public boolean hasReadAuth(GroupConfig group, IPacketWriter wt);
 }

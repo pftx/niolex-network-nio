@@ -1,5 +1,5 @@
 /**
- * ConfigListener.java
+ * GroupService.java
  *
  * Copyright 2012 Niolex, Inc.
  *
@@ -15,23 +15,33 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.niolex.config.event;
+package org.apache.niolex.config.service;
 
-import org.apache.niolex.config.bean.ConfigItem;
+import org.apache.niolex.config.bean.SyncBean;
+import org.apache.niolex.network.IPacketWriter;
 
 /**
- * The interface to listen the config change event.
- *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
- * @Date: 2012-7-3
+ * @Date: 2012-7-5
  */
-public interface ConfigListener {
+public interface GroupService {
 
 	/**
-	 * Fire when the interested config item changed.
-	 * @param item
+	 * Try to subscribe this group.
+	 *
+	 * @param groupName
+	 * @param wt
+	 * @return
 	 */
-	public void configChanged(ConfigItem item);
+	public boolean subscribeGroup(String groupName, IPacketWriter wt);
+
+	/**
+	 * Try to synchronize with server central storage.
+	 *
+	 * @param bean
+	 * @param wt
+	 */
+	public void syncGroup(SyncBean bean, IPacketWriter wt);
 
 }
