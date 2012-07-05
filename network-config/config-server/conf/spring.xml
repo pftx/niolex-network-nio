@@ -23,4 +23,20 @@
 		destroy-method="close" p:driverClassName="com.mysql.jdbc.Driver"
 		p:url="jdbc:mysql://localhost:3306/mydb" p:username="root" p:password="masterkaoli" />
 
+	<!-- db -->
+	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource"
+		destroy-method="close">
+		<property name="driverClassName" value="com.mysql.jdbc.Driver" />
+		<property name="url" value="${jdbc.url}" />
+		<property name="username" value="sync" />
+		<property name="password" value="sync-all" />
+	</bean>
+
+	<!-- Template -->
+	<bean id="jdbctemplate" class="org.springframework.jdbc.core.simple.SimpleJdbcTemplate">
+		<constructor-arg>
+			<ref bean="dataSource" />
+		</constructor-arg>
+	</bean>
+
 </beans>

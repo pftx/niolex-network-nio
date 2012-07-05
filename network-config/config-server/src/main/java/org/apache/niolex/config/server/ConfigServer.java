@@ -17,10 +17,16 @@
  */
 package org.apache.niolex.config.server;
 
+import java.net.InetSocketAddress;
+
+import org.apache.niolex.commons.codec.StringUtil;
+import org.apache.niolex.commons.compress.JacksonUtil;
+import org.apache.niolex.commons.download.DownloadUtil;
 import org.apache.niolex.commons.util.Runme;
 import org.apache.niolex.config.core.CodeMap;
 import org.apache.niolex.config.handler.AuthSubscribeHandler;
 import org.apache.niolex.config.handler.GroupSubscribeHandler;
+import org.apache.niolex.config.handler.GroupSyncHandler;
 import org.apache.niolex.network.IServer;
 import org.apache.niolex.network.adapter.HeartBeatAdapter;
 import org.apache.niolex.network.handler.DispatchPacketHandler;
@@ -30,6 +36,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
 /**
+ * The central controller of config server.
+ *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
  * @Date: 2012-6-21
@@ -54,6 +62,10 @@ public class ConfigServer {
 	 */
 	private Runme syncThread;
 
+	private String httpServerAddress;
+
+	private InetSocketAddress[] addresses;
+
 	//---------------------------------------------------------------------
 	// All the packet handlers here.
 	//---------------------------------------------------------------------
@@ -61,6 +73,8 @@ public class ConfigServer {
 	private AuthSubscribeHandler authHandler;
 	@Autowired
 	private GroupSubscribeHandler subsHandler;
+	@Autowired
+	private GroupSyncHandler syncHandler;
 	//---------------------------------------------------------------------
 
 	@Autowired
@@ -72,11 +86,52 @@ public class ConfigServer {
 		// --- register all handlers into dispatch packet handler ---
 		handler.addHandler(CodeMap.AUTH_SUBS, authHandler);
 		handler.addHandler(CodeMap.GROUP_SUB, subsHandler);
+		handler.addHandler(CodeMap.GROUP_SYN, syncHandler);
 		// --------------- end of register --------------------------
 
 		heartBeatAdapter = new HeartBeatAdapter(handler);
 		this.server.setPacketHandler(heartBeatAdapter);
+
+		// Sync server addresses from http server.
+		if (!syncServerAddress(true)) {
+    		// There is nothing we can do, we can not start client without addresses.
+    		return;
+    	}
+
+		// Start clients to connect to other servers for diff.
 	}
+
+
+    /**
+     * Sync server addresses from http server.
+     */
+    private final boolean syncServerAddress(boolean isStart) {
+    	String json;
+		try {
+			json = StringUtil.utf8ByteToStr(DownloadUtil.downloadFile(httpServerAddress));
+		} catch (Exception e) {
+			LOG.error("Failed to download server address from remote.", e);
+			return false;
+		}
+		String[] servers = null;
+		try {
+			servers = JacksonUtil.str2Obj(json, String[].class);
+		} catch (Exception e) {
+			LOG.error("Failed to parse server address as json.", e);
+			return false;
+		}
+    	if (servers.length < 1) {
+    		LOG.error("Server address is empty, init failed.");
+    		return false;
+    	}
+    	addresses = new InetSocketAddress[servers.length];
+    	for (int i = 0; i < servers.length; ++i) {
+    		String str = servers[i];
+    		String[] addrs = str.split(":");
+    		addresses[i] = new InetSocketAddress(addrs[0], Integer.parseInt(addrs[1]));
+    	}
+    	return true;
+    }
 
 	/**
 	 * Start the Server, bind to the Port. Server need to start threads internally to run. This method need to return

@@ -18,9 +18,12 @@
 package org.apache.niolex.config.event;
 
 import org.apache.niolex.config.bean.ConfigItem;
+import org.apache.niolex.config.core.PacketTranslater;
 import org.apache.niolex.network.IPacketWriter;
 
 /**
+ * Dispatch config item changes.
+ *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
  * @Date: 2012-7-3
@@ -50,6 +53,7 @@ public class ConfigEventDispatcher {
 	 */
 	public void fireEvent(ConfigItem item) {
 		;
+		//wt.handleWrite(PacketTranslater.translate(item));
 	}
 
 }

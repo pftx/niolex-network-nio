@@ -1,5 +1,5 @@
 /**
- * AuthenticateService.java
+ * Util.java
  *
  * Copyright 2012 Niolex, Inc.
  *
@@ -15,35 +15,13 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.niolex.config.service;
-
-import org.apache.niolex.config.bean.GroupConfig;
-import org.apache.niolex.config.bean.SubscribeBean;
-import org.apache.niolex.network.IPacketWriter;
+package org.apache.niolex.config.core;
 
 /**
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
  * @Date: 2012-7-5
  */
-public interface AuthenticateService {
+public abstract class Util {
 
-	/**
-	 * Use the information in SubscribeBean to do authentication.
-	 * If success, store userid in IPacketWriter.
-	 *
-	 * @param bean
-	 * @param wt
-	 * @return
-	 */
-	public boolean authUser(SubscribeBean bean, IPacketWriter wt);
-
-	/**
-	 * Check whether this client has the right to read this group config.
-	 *
-	 * @param group
-	 * @param wt
-	 * @return
-	 */
-	public boolean hasReadAuth(GroupConfig group, IPacketWriter wt);
 }

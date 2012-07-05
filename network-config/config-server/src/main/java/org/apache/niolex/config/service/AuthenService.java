@@ -1,5 +1,5 @@
 /**
- * AttachKey.java
+ * AuthenService.java
  *
  * Copyright 2012 Niolex, Inc.
  *
@@ -15,18 +15,35 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.niolex.config.config;
+package org.apache.niolex.config.service;
+
+import org.apache.niolex.config.bean.GroupConfig;
+import org.apache.niolex.config.bean.SubscribeBean;
+import org.apache.niolex.network.IPacketWriter;
 
 /**
- * Define all the attach keys.
- *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
  * @Date: 2012-7-5
  */
-public interface AttachKey {
+public interface AuthenService {
 
-	String GROUP_SET = "CONF_GROUP_SET";
-	String USER_ID = "CONF_USER_ID";
+	/**
+	 * Use the information in SubscribeBean to do authentication.
+	 * If success, store userid in IPacketWriter.
+	 *
+	 * @param bean
+	 * @param wt
+	 * @return
+	 */
+	public boolean authUser(SubscribeBean bean, IPacketWriter wt);
 
+	/**
+	 * Check whether this client has the right to read this group config.
+	 *
+	 * @param group
+	 * @param wt
+	 * @return
+	 */
+	public boolean hasReadAuth(GroupConfig group, IPacketWriter wt);
 }

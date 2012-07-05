@@ -25,7 +25,7 @@ import org.apache.niolex.config.config.AttachKey;
 import org.apache.niolex.config.core.CodeMap;
 import org.apache.niolex.config.core.PacketTranslater;
 import org.apache.niolex.config.event.ConfigEventDispatcher;
-import org.apache.niolex.config.service.AuthenticateService;
+import org.apache.niolex.config.service.AuthenService;
 import org.apache.niolex.config.service.GroupService;
 import org.apache.niolex.network.IPacketHandler;
 import org.apache.niolex.network.IPacketWriter;
@@ -51,7 +51,7 @@ public class AuthSubscribeHandler implements IPacketHandler {
 	 * Do all the authentication works.
 	 */
 	@Autowired
-	private AuthenticateService service;
+	private AuthenService service;
 
 	/**
 	 * Do all the config group works.

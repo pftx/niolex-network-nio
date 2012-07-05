@@ -1,5 +1,5 @@
 /**
- * AuthenticateDao.java
+ * AuthenDao.java
  *
  * Copyright 2012 Niolex, Inc.
  *
@@ -18,11 +18,13 @@
 package org.apache.niolex.config.dao;
 
 /**
+ * Communicate with DB, deal with auth info.
+ *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
  * @Date: 2012-7-5
  */
-public interface AuthenticateDao {
+public interface AuthenDao {
 
 	/**
 	 * Authenticate user.
@@ -34,6 +36,25 @@ public interface AuthenticateDao {
 	public long authUser(String username, String disgest);
 
 	/**
+	 * Add this user into DB.
+	 *
+	 * @param username
+	 * @param disgest
+	 * @param role
+	 * @return
+	 */
+	public boolean addUser(String username, String disgest, String role);
+
+	/**
+	 * Update this user information.
+	 * @param userid
+	 * @param disgest
+	 * @param role
+	 * @return
+	 */
+	public boolean updateUser(long userid, String disgest, String role);
+
+	/**
 	 * Check whether this user has the right to read the specified group config.
 	 * @param userid
 	 * @param groupId
@@ -41,4 +62,19 @@ public interface AuthenticateDao {
 	 */
 	public boolean hasReadAuth(long userid, long groupId);
 
+	/**
+	 * Add the read authorize to this user.
+	 * @param userid
+	 * @param groupId
+	 * @return
+	 */
+	public boolean addReadAuth(long userid, long groupId);
+
+	/**
+	 * Delete read authorize from this user.
+	 * @param userid
+	 * @param groupId
+	 * @return
+	 */
+	public boolean delReadAuth(long userid, long groupId);
 }

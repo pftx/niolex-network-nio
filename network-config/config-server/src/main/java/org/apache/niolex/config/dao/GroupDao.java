@@ -1,5 +1,5 @@
 /**
- * AttachKey.java
+ * GroupDao.java
  *
  * Copyright 2012 Niolex, Inc.
  *
@@ -15,18 +15,42 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.niolex.config.config;
+package org.apache.niolex.config.dao;
+
+import org.apache.niolex.config.bean.ConfigItem;
 
 /**
- * Define all the attach keys.
+ * Communicate with DB, deal with Group and Config.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
  * @Date: 2012-7-5
  */
-public interface AttachKey {
+public interface GroupDao {
 
-	String GROUP_SET = "CONF_GROUP_SET";
-	String USER_ID = "CONF_USER_ID";
+	/**
+	 * Update this config.
+	 * We only update when groupId, key and updateTime are all the same.
+	 *
+	 * @param item
+	 * @return true if update success.
+	 */
+	public boolean updateConfig(ConfigItem item);
 
+	/**
+	 * Add this config.
+	 * We only add this item when the groupId and key pair not exist.
+	 *
+	 * @param item
+	 * @return true if added into DB.
+	 */
+	public boolean AddConfig(ConfigItem item);
+
+	/**
+	 * Add this group into DB.
+	 *
+	 * @param groupName
+	 * @return true if added into DB.
+	 */
+	public boolean AddGroup(String groupName);
 }
