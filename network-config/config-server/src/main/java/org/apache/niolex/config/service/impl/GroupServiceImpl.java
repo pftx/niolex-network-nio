@@ -18,6 +18,7 @@
 package org.apache.niolex.config.service.impl;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -41,6 +42,11 @@ import org.springframework.beans.factory.annotation.Autowired;
  * @Date: 2012-7-5
  */
 public class GroupServiceImpl implements GroupService {
+
+	/**
+	 * Use this field to sync with DB.
+	 */
+	private long lastSyncTime = 0;
 
 	/**
 	 * Dispatch event to clients.
@@ -126,6 +132,33 @@ public class GroupServiceImpl implements GroupService {
 		} else {
 			// Group not found.
 			wt.handleWrite(new PacketData(CodeMap.GROUP_NOF, groupName));
+		}
+	}
+
+	/**
+	 * Override super method
+	 * @see org.apache.niolex.config.service.GroupService#loadAllGroups()
+	 */
+	@Override
+	public List<GroupConfig> loadAllGroups() {
+		// TODO Auto-generated method stub
+		//lastSyncTime = ..
+		return null;
+	}
+
+	/**
+	 * Override super method
+	 * @see org.apache.niolex.config.service.GroupService#handleDiff(org.apache.niolex.config.bean.ConfigItem)
+	 */
+	@Override
+	public void handleDiff(ConfigItem diff) {
+		String groupName = storage.findGroupName(diff.getGroupId());
+		if (groupName != null) {
+			boolean b = storage.updateConfigItem(groupName, diff);
+			if (b) {
+				// This is from other server, so we will not fire it to any server.
+				dispatcher.fireClientEvent(groupName, diff);
+			}
 		}
 	}
 

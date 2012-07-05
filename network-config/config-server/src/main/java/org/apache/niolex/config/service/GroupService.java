@@ -17,6 +17,10 @@
  */
 package org.apache.niolex.config.service;
 
+import java.util.List;
+
+import org.apache.niolex.config.bean.ConfigItem;
+import org.apache.niolex.config.bean.GroupConfig;
 import org.apache.niolex.config.bean.SyncBean;
 import org.apache.niolex.network.IPacketWriter;
 
@@ -43,5 +47,23 @@ public interface GroupService {
 	 * @param wt
 	 */
 	public void syncGroup(SyncBean bean, IPacketWriter wt);
+
+	/**
+	 * Load all config groups from DB.
+	 * @return
+	 */
+	public List<GroupConfig> loadAllGroups();
+
+	/**
+	 * Update this diff packet into memory storage.
+	 * @param diff
+	 */
+	public void handleDiff(ConfigItem diff);
+
+	/**
+	 * Load group with this group name into memory storage.
+	 * @param groupName
+	 */
+	public void loadGroup(String groupName);
 
 }

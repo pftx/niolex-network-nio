@@ -18,21 +18,30 @@
 package org.apache.niolex.config.server;
 
 import java.net.InetSocketAddress;
+import java.util.List;
 
 import org.apache.niolex.commons.codec.StringUtil;
 import org.apache.niolex.commons.compress.JacksonUtil;
 import org.apache.niolex.commons.download.DownloadUtil;
 import org.apache.niolex.commons.util.Runme;
+import org.apache.niolex.config.bean.ConfigItem;
+import org.apache.niolex.config.bean.GroupConfig;
 import org.apache.niolex.config.core.CodeMap;
+import org.apache.niolex.config.core.MemoryStorage;
+import org.apache.niolex.config.event.ConfigEventDispatcher;
 import org.apache.niolex.config.handler.AuthSubscribeHandler;
+import org.apache.niolex.config.handler.GroupAddHandler;
+import org.apache.niolex.config.handler.GroupDiffHandler;
 import org.apache.niolex.config.handler.GroupSubscribeHandler;
 import org.apache.niolex.config.handler.GroupSyncHandler;
+import org.apache.niolex.config.service.GroupService;
 import org.apache.niolex.network.IServer;
 import org.apache.niolex.network.adapter.HeartBeatAdapter;
 import org.apache.niolex.network.handler.DispatchPacketHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Required;
 import org.springframework.stereotype.Controller;
 
 /**
@@ -64,7 +73,27 @@ public class ConfigServer {
 
 	private String httpServerAddress;
 
+	private long syncSleepInterval;
+
 	private InetSocketAddress[] addresses;
+
+	/**
+	 * Do all the config group works.
+	 */
+	@Autowired
+	private GroupService groupService;
+
+	/**
+	 * Store all the configurations.
+	 */
+	@Autowired
+	private MemoryStorage storage;
+
+	/**
+	 * Dispatch event to clients.
+	 */
+	@Autowired
+	private ConfigEventDispatcher dispatcher;
 
 	//---------------------------------------------------------------------
 	// All the packet handlers here.
@@ -75,6 +104,10 @@ public class ConfigServer {
 	private GroupSubscribeHandler subsHandler;
 	@Autowired
 	private GroupSyncHandler syncHandler;
+	@Autowired
+	private GroupDiffHandler diffHandler;
+	@Autowired
+	private GroupAddHandler addHandler;
 	//---------------------------------------------------------------------
 
 	@Autowired
@@ -87,25 +120,28 @@ public class ConfigServer {
 		handler.addHandler(CodeMap.AUTH_SUBS, authHandler);
 		handler.addHandler(CodeMap.GROUP_SUB, subsHandler);
 		handler.addHandler(CodeMap.GROUP_SYN, syncHandler);
+		handler.addHandler(CodeMap.GROUP_DIF, diffHandler);
+		handler.addHandler(CodeMap.GROUP_ADD, addHandler);
 		// --------------- end of register --------------------------
 
 		heartBeatAdapter = new HeartBeatAdapter(handler);
 		this.server.setPacketHandler(heartBeatAdapter);
 
 		// Sync server addresses from http server.
-		if (!syncServerAddress(true)) {
+		syncWithDB();
+		if (addresses == null || addresses.length == 0) {
     		// There is nothing we can do, we can not start client without addresses.
     		return;
     	}
 
-		// Start clients to connect to other servers for diff.
+		//TODO Start clients to connect to other servers for diff.
 	}
 
 
     /**
      * Sync server addresses from http server.
      */
-    private final boolean syncServerAddress(boolean isStart) {
+    private final boolean syncServerAddress() {
     	String json;
 		try {
 			json = StringUtil.utf8ByteToStr(DownloadUtil.downloadFile(httpServerAddress));
@@ -124,12 +160,13 @@ public class ConfigServer {
     		LOG.error("Server address is empty, init failed.");
     		return false;
     	}
-    	addresses = new InetSocketAddress[servers.length];
+    	InetSocketAddress[] tmp = new InetSocketAddress[servers.length];
     	for (int i = 0; i < servers.length; ++i) {
     		String str = servers[i];
     		String[] addrs = str.split(":");
-    		addresses[i] = new InetSocketAddress(addrs[0], Integer.parseInt(addrs[1]));
+    		tmp[i] = new InetSocketAddress(addrs[0], Integer.parseInt(addrs[1]));
     	}
+    	addresses = tmp;
     	return true;
     }
 
@@ -149,16 +186,33 @@ public class ConfigServer {
 				}
 
 			};
-			syncThread.setSleepInterval(5000);
+			syncThread.setSleepInterval(syncSleepInterval);
 			syncThread.setInitialSleep(true);
 			syncThread.start();
 		}
 		return false;
 	}
 
+	/**
+	 * Sync with DB periodically.
+	 */
 	private void syncWithDB() {
 		LOG.info("System will try to sync with DB now.");
-		// TODO Auto-generated method stub
+		List<GroupConfig> list = groupService.loadAllGroups();
+
+		// Store new groups into memory storage.
+		for (GroupConfig conf : list) {
+			List<ConfigItem>  clist = storage.store(conf);
+			if (clist != null) {
+				// Fire event to notify clients.
+				for (ConfigItem item : clist) {
+					dispatcher.fireEvent(conf.getGroupName(), item);
+				}
+			}
+		}
+
+		// Sync server addresses from http server.
+		syncServerAddress();
 	}
 
 	/**
@@ -168,6 +222,17 @@ public class ConfigServer {
 		server.stop();
 		heartBeatAdapter.stop();
 		syncThread.stopMe();
+	}
+
+	@Required
+	public void setHttpServerAddress(String httpServerAddress) {
+		this.httpServerAddress = httpServerAddress;
+	}
+
+
+	@Required
+	public void setSyncSleepInterval(long syncSleepInterval) {
+		this.syncSleepInterval = syncSleepInterval;
 	}
 
 }

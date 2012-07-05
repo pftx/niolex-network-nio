@@ -48,10 +48,29 @@ public class ConfigEventDispatcher {
 	}
 
 	/**
+	 * Add other server under control, which is interested to all events.
+	 * @param listener
+	 */
+	public void addOtherServer(IPacketWriter listener) {
+		;
+	}
+
+	/**
 	 * Fire the specified event to all the listeners registered to this dispatcher.
 	 * @param e
 	 */
-	public void fireEvent(ConfigItem item) {
+	public void fireEvent(String groupName, ConfigItem item) {
+		// Fire to other servers.
+		//wt.handleWrite(PacketTranslater.translate(item));
+		// Fire to all clients.
+		fireClientEvent(groupName, item);
+	}
+
+	/**
+	 * Fire the specified event to all the listeners registered to this dispatcher.
+	 * @param e
+	 */
+	public void fireClientEvent(String groupName, ConfigItem item) {
 		;
 		//wt.handleWrite(PacketTranslater.translate(item));
 	}

@@ -171,12 +171,13 @@ public class ConfigClient {
     		LOG.error("Server address is empty, init failed.");
     		return false;
     	}
-    	ADDRESSES = new InetSocketAddress[servers.length];
+    	InetSocketAddress[] tmp = new InetSocketAddress[servers.length];
     	for (int i = 0; i < servers.length; ++i) {
     		String str = servers[i];
     		String[] addrs = str.split(":");
-    		ADDRESSES[i] = new InetSocketAddress(addrs[0], Integer.parseInt(addrs[1]));
+    		tmp[i] = new InetSocketAddress(addrs[0], Integer.parseInt(addrs[1]));
     	}
+    	ADDRESSES = tmp;
     	return true;
     }
 
@@ -266,6 +267,20 @@ public class ConfigClient {
     			// Store this item into memory storage.
     			String groupName = findGroupName(item);
     			updateConfigItem(groupName, item);
+    			break;
+    		case CodeMap.GROUP_NOA:
+    			groupName = StringUtil.utf8ByteToStr(sc.getData());
+    			// Notify anyone waiting for this.
+    			WAITER.release(groupName, new ConfigException("You are not authorised to read this group."));
+    			break;
+    		case CodeMap.GROUP_NOF:
+    			groupName = StringUtil.utf8ByteToStr(sc.getData());
+    			// Notify anyone waiting for this.
+    			WAITER.release(groupName, new ConfigException("Group not found."));
+    			break;
+    		case CodeMap.AUTH_FAIL:
+    			LOG.error("Authentication failure, config client will stop.");
+    			CLIENT.stop();
     			break;
     		default:
     			LOG.warn("Packet received for code [{}] have no handler, just ignored.", sc.getCode());
