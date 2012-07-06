@@ -60,7 +60,7 @@ public class ConfigServer {
 	/**
 	 * Send out heart beat packet.
 	 */
-	private final HeartBeatAdapter heartBeatAdapter;
+	private HeartBeatAdapter heartBeatAdapter;
 
 	/**
 	 * Use this thread to sync configurations with DB.
@@ -102,18 +102,6 @@ public class ConfigServer {
 	public ConfigServer(IServer server) {
 		super();
 		this.server = server;
-		DispatchPacketHandler handler = new DispatchPacketHandler();
-
-		// --- register all handlers into dispatch packet handler ---
-		handler.addHandler(CodeMap.AUTH_SUBS, authHandler);
-		handler.addHandler(CodeMap.GROUP_SUB, subsHandler);
-		handler.addHandler(CodeMap.GROUP_SYN, syncHandler);
-		handler.addHandler(CodeMap.GROUP_DIF, diffHandler);
-		handler.addHandler(CodeMap.GROUP_ADD, addHandler);
-		// --------------- end of register --------------------------
-
-		heartBeatAdapter = new HeartBeatAdapter(handler);
-		this.server.setPacketHandler(heartBeatAdapter);
 	}
 
 
@@ -122,6 +110,21 @@ public class ConfigServer {
 	 * after this server is started.
 	 */
 	public boolean start() {
+		if (heartBeatAdapter == null) {
+			DispatchPacketHandler handler = new DispatchPacketHandler();
+
+			// --- register all handlers into dispatch packet handler ---
+			handler.addHandler(CodeMap.AUTH_SUBS, authHandler);
+			handler.addHandler(CodeMap.GROUP_SUB, subsHandler);
+			handler.addHandler(CodeMap.GROUP_SYN, syncHandler);
+			handler.addHandler(CodeMap.GROUP_DIF, diffHandler);
+			handler.addHandler(CodeMap.GROUP_ADD, addHandler);
+			// --------------- end of register --------------------------
+
+			heartBeatAdapter = new HeartBeatAdapter(handler);
+			this.server.setPacketHandler(heartBeatAdapter);
+		}
+
 		// Sync server addresses from http server.
 		syncServerData();
 

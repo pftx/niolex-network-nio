@@ -17,6 +17,7 @@
  */
 package org.apache.niolex.config.bean;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -41,7 +42,7 @@ public class SubscribeBean {
 	/**
 	 * The group list this node interested.
 	 */
-	private List<String> groupList;
+	private List<String> groupList = new ArrayList<String>();
 
 	//---------------------- GETTER & SETTER ---------------------------------
 

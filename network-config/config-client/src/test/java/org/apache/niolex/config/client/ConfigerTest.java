@@ -33,8 +33,8 @@ public class ConfigerTest {
 	 */
 	@Test
 	public void testConfiger() {
-		Configer conf = new Configer("follower");
-		String s = conf.getString("abc");
+		Configer conf = new Configer("configserver.test.demo");
+		String s = conf.getString("demo.key");
 		System.out.println(s);
 	}
 
