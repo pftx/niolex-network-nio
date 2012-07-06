@@ -94,6 +94,7 @@ public class ConfigClient {
     private static String SERVER_ADDRESS;
     private static InetSocketAddress[] ADDRESSES;
     private static int SERVER_IDX;
+    private static boolean CONN_STARTED = false;
 
     static {
     	try {
@@ -104,29 +105,27 @@ public class ConfigClient {
     	SERVER_ADDRESS = PropUtil.getProperty("server.address", "http://configserver:8780/configserver/server.json");
     	USERNAME = PropUtil.getProperty("auth.username", "node");
     	PASSWORD = PropUtil.getProperty("auth.password", "nodepasswd");
+    	BEAN.setUserName(USERNAME);
+    	BEAN.setPassword(PASSWORD);
     	CONNECT_TIMEOUT = PropUtil.getInteger("server.contimeout", 30000);
+    	CLIENT.setConnectTimeout(CONNECT_TIMEOUT);
+    	CLIENT.setPacketHandler(new ClientHandler());
     	// Default to 6 hours.
     	REFRESH_INTERVAL = PropUtil.getLong("server.refresh.interval", 21600000);
     	STORAGE_PATH = PropUtil.getProperty("local.storage.path", "/data/follower/config/storage");
     	FileUtil.mkdirsIfAbsent(STORAGE_PATH);
-    	initConnection();
+    	// Start to init connection in another thread.
+    	new Thread() { public void run() {initConnection();} }.start();
     }
 
     /**
      * Init server properties and connect to server.
      */
     private static final void initConnection() {
-    	if (!syncServerAddress(true)) {
-    		// There is nothing we can do, we can not start client without addresses.
-    		return;
-    	}
-    	SERVER_IDX = (int) (System.nanoTime() % ADDRESSES.length);
-    	CLIENT.setConnectTimeout(CONNECT_TIMEOUT);
-    	CLIENT.setPacketHandler(new ClientHandler());
-    	BEAN.setUserName(USERNAME);
-    	BEAN.setPassword(PASSWORD);
-    	// Connect with server.
-    	connect();
+    	// Sync with server at startup, if can not connect to http server,
+    	// system will try local file at this time.
+    	syncServerAddress(true);
+
     	// Sync with server periodically.
     	Runme me = new Runme() {
 
@@ -168,6 +167,7 @@ public class ConfigClient {
 			return false;
 		}
     	if (servers.length < 1) {
+    		// There is nothing we can do, we can not start client without addresses.
     		LOG.error("Server address is empty, init failed.");
     		return false;
     	}
@@ -178,6 +178,12 @@ public class ConfigClient {
     		tmp[i] = new InetSocketAddress(addrs[0], Integer.parseInt(addrs[1]));
     	}
     	ADDRESSES = tmp;
+    	if (!CONN_STARTED) {
+    		// Client is not working, try to start a connect.
+        	SERVER_IDX = (int) (System.nanoTime() % ADDRESSES.length);
+    		// Connect with server.
+    		connect();
+    	}
     	return true;
     }
 
