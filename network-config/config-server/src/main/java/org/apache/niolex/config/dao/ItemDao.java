@@ -46,4 +46,31 @@ public interface ItemDao {
 	 */
 	public List<ConfigItem> loadGroupItems(int groupId);
 
+	/**
+	 * Update this config.
+	 * We only update when groupId, key and updateTime are all the same.
+	 *
+	 * @param item
+	 * @return true if update success.
+	 */
+	public boolean updateConfig(ConfigItem item);
+
+
+	/**
+	 * Add this config.
+	 * We only add this item when the groupId and key pair not exist.
+	 *
+	 * @param item
+	 * @return true if added into DB.
+	 */
+	public boolean addConfig(ConfigItem item);
+
+	/**
+	 * Get the config item with this groupId and key.
+	 *
+	 * @param groupId
+	 * @param key
+	 * @return null if not found.
+	 */
+	public ConfigItem getConfig(int groupId, String key);
 }

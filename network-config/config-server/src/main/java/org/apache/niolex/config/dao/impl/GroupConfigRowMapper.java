@@ -1,5 +1,5 @@
 /**
- * GroupDao.java
+ * GroupConfigRowMapper.java
  *
  * Copyright 2012 Niolex, Inc.
  *
@@ -15,47 +15,33 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.niolex.config.dao;
+package org.apache.niolex.config.dao.impl;
 
-import java.util.List;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 import org.apache.niolex.config.bean.GroupConfig;
+import org.springframework.jdbc.core.RowMapper;
 
 /**
- * Communicate with DB, deal with Group and Config.
- *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
- * @Date: 2012-7-5
+ * @Date: 2012-7-6
  */
-public interface GroupDao {
+public class GroupConfigRowMapper implements RowMapper<GroupConfig> {
+
+	public static final GroupConfigRowMapper INSTANCE = new GroupConfigRowMapper();
 
 	/**
-	 * Add this group into DB.
-	 *
-	 * @param groupName
-	 * @return true if added into DB.
+	 * Override super method
+	 * @see org.springframework.jdbc.core.RowMapper#mapRow(java.sql.ResultSet, int)
 	 */
-	public boolean addGroup(String groupName);
+	@Override
+	public GroupConfig mapRow(ResultSet rs, int rowNum) throws SQLException {
+		GroupConfig config = new GroupConfig();
+		config.setGroupId(rs.getInt("groupid"));
+		config.setGroupName(rs.getString("groupname"));
+		return config;
+	}
 
-	/**
-	 * Get all the config groups from DB.
-	 * Notice! Just groups, no config item.
-	 * The list must order by groupId.
-	 * @return
-	 */
-	public List<GroupConfig> loadAllGroups();
-
-	/**
-	 * Load the current DB time for mark laster update time.
-	 * @return
-	 */
-	public long loadDBTime();
-
-	/**
-	 * Load the group config with this group name.
-	 * @param groupName
-	 * @return null if group not found.
-	 */
-	public GroupConfig loadGroup(String groupName);
 }

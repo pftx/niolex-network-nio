@@ -114,9 +114,6 @@ public class ConfigServer {
 
 		heartBeatAdapter = new HeartBeatAdapter(handler);
 		this.server.setPacketHandler(heartBeatAdapter);
-
-		// Sync server addresses from http server.
-		syncServerData();
 	}
 
 
@@ -125,6 +122,9 @@ public class ConfigServer {
 	 * after this server is started.
 	 */
 	public boolean start() {
+		// Sync server addresses from http server.
+		syncServerData();
+
 		if (server.start()) {
 			heartBeatAdapter.start();
 			syncThread = new Runme() {
