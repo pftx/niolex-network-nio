@@ -18,23 +18,19 @@
 package org.apache.niolex.config.server;
 
 import java.net.InetSocketAddress;
-import java.util.List;
 
 import org.apache.niolex.commons.codec.StringUtil;
 import org.apache.niolex.commons.compress.JacksonUtil;
 import org.apache.niolex.commons.download.DownloadUtil;
 import org.apache.niolex.commons.util.Runme;
-import org.apache.niolex.config.bean.ConfigItem;
-import org.apache.niolex.config.bean.GroupConfig;
 import org.apache.niolex.config.core.CodeMap;
-import org.apache.niolex.config.core.MemoryStorage;
-import org.apache.niolex.config.event.ConfigEventDispatcher;
 import org.apache.niolex.config.handler.AuthSubscribeHandler;
 import org.apache.niolex.config.handler.GroupAddHandler;
 import org.apache.niolex.config.handler.GroupDiffHandler;
 import org.apache.niolex.config.handler.GroupSubscribeHandler;
 import org.apache.niolex.config.handler.GroupSyncHandler;
 import org.apache.niolex.config.service.GroupService;
+import org.apache.niolex.config.service.ReplicaService;
 import org.apache.niolex.network.IServer;
 import org.apache.niolex.network.adapter.HeartBeatAdapter;
 import org.apache.niolex.network.handler.DispatchPacketHandler;
@@ -75,8 +71,6 @@ public class ConfigServer {
 
 	private long syncSleepInterval;
 
-	private InetSocketAddress[] addresses;
-
 	/**
 	 * Do all the config group works.
 	 */
@@ -84,16 +78,10 @@ public class ConfigServer {
 	private GroupService groupService;
 
 	/**
-	 * Store all the configurations.
+	 * Manage connections to other servers.
 	 */
 	@Autowired
-	private MemoryStorage storage;
-
-	/**
-	 * Dispatch event to clients.
-	 */
-	@Autowired
-	private ConfigEventDispatcher dispatcher;
+	private ReplicaService replicaService;
 
 	//---------------------------------------------------------------------
 	// All the packet handlers here.
@@ -128,13 +116,43 @@ public class ConfigServer {
 		this.server.setPacketHandler(heartBeatAdapter);
 
 		// Sync server addresses from http server.
-		syncWithDB();
-		if (addresses == null || addresses.length == 0) {
-    		// There is nothing we can do, we can not start client without addresses.
-    		return;
-    	}
+		syncServerData();
+	}
 
-		//TODO Start clients to connect to other servers for diff.
+
+	/**
+	 * Start the Server, bind to the Port. Server need to start threads internally to run. This method need to return
+	 * after this server is started.
+	 */
+	public boolean start() {
+		if (server.start()) {
+			heartBeatAdapter.start();
+			syncThread = new Runme() {
+
+				@Override
+				public void runMe() {
+					// sync from DB
+					syncServerData();
+				}
+
+			};
+			syncThread.setSleepInterval(syncSleepInterval);
+			syncThread.setInitialSleep(true);
+			syncThread.start();
+		}
+		return false;
+	}
+
+
+	/**
+	 * Sync with DB periodically and get server address list from http server.
+	 */
+	private void syncServerData() {
+		LOG.info("System will try to sync with DB now.");
+		groupService.syncAllGroupsWithDB();
+
+		// Sync server addresses from http server.
+		syncServerAddress();
 	}
 
 
@@ -160,60 +178,24 @@ public class ConfigServer {
     		LOG.error("Server address is empty, init failed.");
     		return false;
     	}
-    	InetSocketAddress[] tmp = new InetSocketAddress[servers.length];
+    	InetSocketAddress[] addresses = new InetSocketAddress[servers.length];
     	for (int i = 0; i < servers.length; ++i) {
     		String str = servers[i];
     		String[] addrs = str.split(":");
-    		tmp[i] = new InetSocketAddress(addrs[0], Integer.parseInt(addrs[1]));
+    		addresses[i] = new InetSocketAddress(addrs[0], Integer.parseInt(addrs[1]));
     	}
-    	addresses = tmp;
-    	return true;
-    }
 
-	/**
-	 * Start the Server, bind to the Port. Server need to start threads internally to run. This method need to return
-	 * after this server is started.
-	 */
-	public boolean start() {
-		if (server.start()) {
-			heartBeatAdapter.start();
-			syncThread = new Runme() {
-
-				@Override
-				public void runMe() {
-					// sync from DB
-					syncWithDB();
-				}
-
-			};
-			syncThread.setSleepInterval(syncSleepInterval);
-			syncThread.setInitialSleep(true);
-			syncThread.start();
-		}
-		return false;
-	}
-
-	/**
-	 * Sync with DB periodically.
-	 */
-	private void syncWithDB() {
-		LOG.info("System will try to sync with DB now.");
-		List<GroupConfig> list = groupService.loadAllGroups();
-
-		// Store new groups into memory storage.
-		for (GroupConfig conf : list) {
-			List<ConfigItem>  clist = storage.store(conf);
-			if (clist != null) {
-				// Fire event to notify clients.
-				for (ConfigItem item : clist) {
-					dispatcher.fireEvent(conf.getGroupName(), item);
-				}
-			}
+    	// Start clients to connect to other servers for diff.
+		if (addresses == null || addresses.length == 0) {
+			// There is nothing we can do, we can not start client without addresses.
+			return false;
 		}
 
-		// Sync server addresses from http server.
-		syncServerAddress();
+		// One connection per server.
+		replicaService.connectToOtherServers(addresses);
+		return true;
 	}
+
 
 	/**
 	 * Stop this server. After stop, the internal threads need to be stopped.

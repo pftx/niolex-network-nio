@@ -1,5 +1,5 @@
 /**
- * AuthenService.java
+ * ItemDao.java
  *
  * Copyright 2012 Niolex, Inc.
  *
@@ -15,37 +15,35 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.niolex.config.service;
+package org.apache.niolex.config.dao;
 
-import org.apache.niolex.config.bean.GroupConfig;
-import org.apache.niolex.config.bean.SubscribeBean;
-import org.apache.niolex.network.IPacketWriter;
+import java.util.List;
+
+import org.apache.niolex.config.bean.ConfigItem;
 
 /**
- * Authentication Service.
+ * Communicate with DB, deal with config item operations.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
  * @Date: 2012-7-5
  */
-public interface AuthenService {
+public interface ItemDao {
+
 
 	/**
-	 * Use the information in SubscribeBean to do authentication.
-	 * If success, store userid in IPacketWriter.
-	 *
-	 * @param bean
-	 * @param wt
+	 * Get all the config items from DB.
+	 * Notice! Only load items older than the specified time.
+	 * The list must order by groupId.
 	 * @return
 	 */
-	public boolean authUser(SubscribeBean bean, IPacketWriter wt);
+	public List<ConfigItem> loadAllConfigItems(long startTime);
 
 	/**
-	 * Check whether this client has the right to read this group config.
-	 *
-	 * @param group
-	 * @param wt
+	 * Load all the config items for this group.
+	 * @param groupId
 	 * @return
 	 */
-	public boolean hasReadAuth(GroupConfig group, IPacketWriter wt);
+	public List<ConfigItem> loadGroupItems(int groupId);
+
 }

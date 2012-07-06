@@ -1,5 +1,5 @@
 /**
- * AuthenService.java
+ * ReplicaServiceImpl.java
  *
  * Copyright 2012 Niolex, Inc.
  *
@@ -15,37 +15,30 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.niolex.config.service;
+package org.apache.niolex.config.service.impl;
 
-import org.apache.niolex.config.bean.GroupConfig;
-import org.apache.niolex.config.bean.SubscribeBean;
-import org.apache.niolex.network.IPacketWriter;
+import java.net.InetSocketAddress;
+import java.util.Arrays;
+
+import org.apache.niolex.config.service.ReplicaService;
+import org.springframework.stereotype.Service;
 
 /**
- * Authentication Service.
- *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
- * @Date: 2012-7-5
+ * @Date: 2012-7-6
  */
-public interface AuthenService {
+@Service
+public class ReplicaServiceImpl implements ReplicaService {
 
 	/**
-	 * Use the information in SubscribeBean to do authentication.
-	 * If success, store userid in IPacketWriter.
-	 *
-	 * @param bean
-	 * @param wt
-	 * @return
+	 * Override super method
+	 * @see org.apache.niolex.config.service.ReplicaService#connectToOtherServers(java.net.InetSocketAddress[])
 	 */
-	public boolean authUser(SubscribeBean bean, IPacketWriter wt);
+	@Override
+	public void connectToOtherServers(InetSocketAddress[] addresses) {
+		// TODO Auto-generated method stub
+		System.out.println("Want to connect to " + Arrays.toString(addresses));
+	}
 
-	/**
-	 * Check whether this client has the right to read this group config.
-	 *
-	 * @param group
-	 * @param wt
-	 * @return
-	 */
-	public boolean hasReadAuth(GroupConfig group, IPacketWriter wt);
 }

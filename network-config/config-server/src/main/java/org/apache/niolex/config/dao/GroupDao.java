@@ -17,7 +17,10 @@
  */
 package org.apache.niolex.config.dao;
 
+import java.util.List;
+
 import org.apache.niolex.config.bean.ConfigItem;
+import org.apache.niolex.config.bean.GroupConfig;
 
 /**
  * Communicate with DB, deal with Group and Config.
@@ -44,7 +47,7 @@ public interface GroupDao {
 	 * @param item
 	 * @return true if added into DB.
 	 */
-	public boolean AddConfig(ConfigItem item);
+	public boolean addConfig(ConfigItem item);
 
 	/**
 	 * Add this group into DB.
@@ -52,5 +55,26 @@ public interface GroupDao {
 	 * @param groupName
 	 * @return true if added into DB.
 	 */
-	public boolean AddGroup(String groupName);
+	public boolean addGroup(String groupName);
+
+	/**
+	 * Get all the config groups from DB.
+	 * Notice! Just groups, no config item.
+	 * The list must order by groupId.
+	 * @return
+	 */
+	public List<GroupConfig> loadAllGroups();
+
+	/**
+	 * Load the current DB time for mark laster update time.
+	 * @return
+	 */
+	public long loadDBTime();
+
+	/**
+	 * Load the group config with this group name.
+	 * @param groupName
+	 * @return null if group not found.
+	 */
+	public GroupConfig loadGroup(String groupName);
 }

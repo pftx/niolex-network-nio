@@ -18,6 +18,7 @@
 package org.apache.niolex.config.bean;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
@@ -43,11 +44,6 @@ public class GroupConfig {
 	private String groupName;
 
 	/**
-	 * Last update time.
-	 */
-	private long updateTime;
-
-	/**
 	 * The update lock.
 	 */
 	private transient final Lock lock = new ReentrantLock();
@@ -55,7 +51,7 @@ public class GroupConfig {
 	/**
 	 * The group config data.
 	 */
-	private Map<String, ConfigItem> groupData;
+	private Map<String, ConfigItem> groupData = new HashMap<String, ConfigItem>();
 
 	/**
 	 * Update the internal config item.
@@ -68,9 +64,6 @@ public class GroupConfig {
 			ConfigItem tmp = groupData.get(item.getKey());
 			if (tmp == null || tmp.getUpdateTime() < item.getUpdateTime()) {
 				groupData.put(item.getKey(), item);
-				if (updateTime < item.getUpdateTime()) {
-					updateTime = item.getUpdateTime();
-				}
 				return true;
 			}
 			return false;
@@ -88,10 +81,6 @@ public class GroupConfig {
 		List<ConfigItem> list = new ArrayList<ConfigItem>();
 		lock.lock();
 		try {
-			if (updateTime < config.getUpdateTime()) {
-				// If current time stamp is old, just replace it.
-				updateTime = config.updateTime;
-			}
 			// We need to update config one by one, to get change list.
 			for (ConfigItem item : config.groupData.values()) {
 				ConfigItem tmp = groupData.get(item.getKey());
@@ -122,14 +111,6 @@ public class GroupConfig {
 
 	public void setGroupName(String groupName) {
 		this.groupName = groupName;
-	}
-
-	public long getUpdateTime() {
-		return updateTime;
-	}
-
-	public void setUpdateTime(long updateTime) {
-		this.updateTime = updateTime;
 	}
 
 	public Map<String, ConfigItem> getGroupData() {

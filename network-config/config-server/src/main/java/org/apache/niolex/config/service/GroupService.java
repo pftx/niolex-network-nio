@@ -17,14 +17,14 @@
  */
 package org.apache.niolex.config.service;
 
-import java.util.List;
 
 import org.apache.niolex.config.bean.ConfigItem;
-import org.apache.niolex.config.bean.GroupConfig;
 import org.apache.niolex.config.bean.SyncBean;
 import org.apache.niolex.network.IPacketWriter;
 
 /**
+ * Group Config Operation Service.
+ *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
  * @Date: 2012-7-5
@@ -49,10 +49,10 @@ public interface GroupService {
 	public void syncGroup(SyncBean bean, IPacketWriter wt);
 
 	/**
-	 * Load all config groups from DB.
+	 * Load all config groups from DB and store them into memory.
 	 * @return
 	 */
-	public List<GroupConfig> loadAllGroups();
+	public void syncAllGroupsWithDB();
 
 	/**
 	 * Update this diff packet into memory storage.

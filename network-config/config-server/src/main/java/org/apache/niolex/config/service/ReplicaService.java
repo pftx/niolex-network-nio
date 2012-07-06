@@ -1,5 +1,5 @@
 /**
- * AuthenService.java
+ * ReplicaService.java
  *
  * Copyright 2012 Niolex, Inc.
  *
@@ -17,35 +17,17 @@
  */
 package org.apache.niolex.config.service;
 
-import org.apache.niolex.config.bean.GroupConfig;
-import org.apache.niolex.config.bean.SubscribeBean;
-import org.apache.niolex.network.IPacketWriter;
+import java.net.InetSocketAddress;
 
 /**
- * Authentication Service.
+ * Manage connections to other servers.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
- * @Date: 2012-7-5
+ * @Date: 2012-7-6
  */
-public interface AuthenService {
+public interface ReplicaService {
 
-	/**
-	 * Use the information in SubscribeBean to do authentication.
-	 * If success, store userid in IPacketWriter.
-	 *
-	 * @param bean
-	 * @param wt
-	 * @return
-	 */
-	public boolean authUser(SubscribeBean bean, IPacketWriter wt);
+	public void connectToOtherServers(InetSocketAddress[] addresses);
 
-	/**
-	 * Check whether this client has the right to read this group config.
-	 *
-	 * @param group
-	 * @param wt
-	 * @return
-	 */
-	public boolean hasReadAuth(GroupConfig group, IPacketWriter wt);
 }

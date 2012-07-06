@@ -29,18 +29,22 @@ import org.apache.niolex.config.config.AttachKey;
 import org.apache.niolex.config.core.CodeMap;
 import org.apache.niolex.config.core.MemoryStorage;
 import org.apache.niolex.config.core.PacketTranslater;
+import org.apache.niolex.config.dao.GroupDao;
+import org.apache.niolex.config.dao.ItemDao;
 import org.apache.niolex.config.event.ConfigEventDispatcher;
 import org.apache.niolex.config.service.AuthenService;
 import org.apache.niolex.config.service.GroupService;
 import org.apache.niolex.network.IPacketWriter;
 import org.apache.niolex.network.PacketData;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
  * @Date: 2012-7-5
  */
+@Service
 public class GroupServiceImpl implements GroupService {
 
 	/**
@@ -65,6 +69,18 @@ public class GroupServiceImpl implements GroupService {
 	 */
 	@Autowired
 	private AuthenService service;
+
+	/**
+	 * The Dao managing config groups.
+	 */
+	@Autowired
+	private GroupDao groupDao;
+
+	/**
+	 * The Dao managing config items.
+	 */
+	@Autowired
+	private ItemDao itemDao;
 
 	/**
 	 * Override super method
@@ -95,6 +111,11 @@ public class GroupServiceImpl implements GroupService {
 		return false;
 	}
 
+	/**
+	 * Get the cached config group set from writer.
+	 * @param wt
+	 * @return
+	 */
 	private Set<String> getCachedGroupSet(IPacketWriter wt) {
 		// This client may already has some groups, so we merge them.
 		Set<String> set = wt.getAttached(AttachKey.GROUP_SET);
@@ -137,13 +158,60 @@ public class GroupServiceImpl implements GroupService {
 
 	/**
 	 * Override super method
-	 * @see org.apache.niolex.config.service.GroupService#loadAllGroups()
+	 * @see org.apache.niolex.config.service.GroupService#syncAllGroupsWithDB()
 	 */
 	@Override
-	public List<GroupConfig> loadAllGroups() {
-		// TODO Auto-generated method stub
-		//lastSyncTime = ..
-		return null;
+	public void syncAllGroupsWithDB() {
+		// Load all the group names.
+		List<GroupConfig> allGroups = groupDao.loadAllGroups();
+		// Store the current DB time.
+		long tmpTime = groupDao.loadDBTime();
+		List<ConfigItem> allItems = itemDao.loadAllConfigItems(lastSyncTime);
+		// Renew last sync time.
+		lastSyncTime = tmpTime;
+		allGroups = assembleGroups(allGroups, allItems);
+
+		// Store new groups into memory storage.
+		for (GroupConfig conf : allGroups) {
+			storeGroup(conf);
+		}
+	}
+
+	/**
+	 * Assemble config items into group config.
+	 * @param allGroups
+	 * @param allItems
+	 * @return
+	 */
+	private List<GroupConfig> assembleGroups(List<GroupConfig> allGroups, List<ConfigItem> allItems) {
+		int j = 0, groupId = 0;
+		GroupConfig gConf = null;
+		Map<String, ConfigItem> groupData = null;
+		// item list must order by groupId
+		for (ConfigItem item : allItems) {
+			// group list must order by groupId
+			if (item.getGroupId() != groupId) {
+				// Find the correct group.
+				while (j < allGroups.size()) {
+					gConf = allGroups.get(j);
+					// In case we can not found that group, that Id will be jumped.
+					if (gConf.getGroupId() >= item.getGroupId()) {
+						break;
+					}
+					++j;
+				}
+				// Check whether we find it.
+				if (gConf.getGroupId() == item.getGroupId()) {
+					groupId = gConf.getGroupId();
+					groupData = gConf.getGroupData();
+				} else {
+					// We can not find the group for this item at all.
+					continue;
+				}
+			}
+			groupData.put(item.getKey(), item);
+		}
+		return allGroups;
 	}
 
 	/**
@@ -168,8 +236,31 @@ public class GroupServiceImpl implements GroupService {
 	 */
 	@Override
 	public void loadGroup(String groupName) {
-		// TODO Auto-generated method stub
+		GroupConfig group = groupDao.loadGroup(groupName);
+		if (group != null) {
+			List<ConfigItem> allItems = itemDao.loadGroupItems(group.getGroupId());
+			if (allItems != null && allItems.size() != 0) {
+				Map<String, ConfigItem> groupData = group.getGroupData();
+				for (ConfigItem item : allItems) {
+					groupData.put(item.getKey(), item);
+				}
+			}
+			storeGroup(group);
+		}
+	}
 
+	/**
+	 * Store this group config into memory storage.
+	 * @param group
+	 */
+	private void storeGroup(GroupConfig conf) {
+		List<ConfigItem>  clist = storage.store(conf);
+		if (clist != null) {
+			// Fire event to notify clients.
+			for (ConfigItem item : clist) {
+				dispatcher.fireEvent(conf.getGroupName(), item);
+			}
+		}
 	}
 
 }
