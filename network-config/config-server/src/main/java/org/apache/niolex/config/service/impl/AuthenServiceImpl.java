@@ -20,6 +20,7 @@ package org.apache.niolex.config.service.impl;
 import org.apache.niolex.commons.codec.SHAUtil;
 import org.apache.niolex.config.bean.GroupConfig;
 import org.apache.niolex.config.bean.SubscribeBean;
+import org.apache.niolex.config.bean.UserInfo;
 import org.apache.niolex.config.config.AttachKey;
 import org.apache.niolex.config.dao.AuthenDao;
 import org.apache.niolex.config.service.AuthenService;
@@ -56,11 +57,11 @@ public class AuthenServiceImpl implements AuthenService {
 			LOG.error("Failed to generate password digest.", e);
 			return false;
 		}
-		long userId = authenDao.authUser(bean.getUserName(), digest);
-		if (userId < 0) {
+		UserInfo info = authenDao.authUser(bean.getUserName(), digest);
+		if (info == null) {
 			return false;
 		}
-		wt.attachData(AttachKey.USER_ID, userId);
+		wt.attachData(AttachKey.USER_INFO, info);
 		return true;
 	}
 
@@ -70,12 +71,12 @@ public class AuthenServiceImpl implements AuthenService {
 	 */
 	@Override
 	public boolean hasReadAuth(GroupConfig group, IPacketWriter wt) {
-		Long userId = wt.getAttached(AttachKey.USER_ID);
-		if (userId == null) {
+		UserInfo info = wt.getAttached(AttachKey.USER_INFO);
+		if (info == null) {
 			return false;
 		}
 
-		return authenDao.hasReadAuth(userId, group.getGroupId());
+		return authenDao.hasReadAuth(info.getUserId(), group.getGroupId());
 	}
 
 }

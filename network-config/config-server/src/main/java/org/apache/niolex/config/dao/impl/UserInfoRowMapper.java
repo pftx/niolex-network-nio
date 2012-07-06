@@ -1,5 +1,5 @@
 /**
- * AttachKey.java
+ * UserInfoRowMapper.java
  *
  * Copyright 2012 Niolex, Inc.
  *
@@ -15,18 +15,33 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.niolex.config.config;
+package org.apache.niolex.config.dao.impl;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+import org.apache.niolex.config.bean.UserInfo;
+import org.springframework.jdbc.core.RowMapper;
 
 /**
- * Define all the attach keys.
- *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
- * @Date: 2012-7-5
+ * @Date: 2012-7-6
  */
-public interface AttachKey {
+public class UserInfoRowMapper implements RowMapper<UserInfo> {
 
-	String GROUP_SET = "CONF_GROUP_SET";
-	String USER_INFO = "CONF_USER_INFO";
+	public static final UserInfoRowMapper INSTANCE = new UserInfoRowMapper();
+
+	/**
+	 * Override super method
+	 * @see org.springframework.jdbc.core.RowMapper#mapRow(java.sql.ResultSet, int)
+	 */
+	@Override
+	public UserInfo mapRow(ResultSet rs, int rowNum) throws SQLException {
+		UserInfo info = new UserInfo();
+		info.setUserId(rs.getInt("urid"));
+		info.setUserRole(rs.getString("urole"));
+		return info;
+	}
 
 }

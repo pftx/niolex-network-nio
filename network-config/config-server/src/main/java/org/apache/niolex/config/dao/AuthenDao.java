@@ -17,6 +17,8 @@
  */
 package org.apache.niolex.config.dao;
 
+import org.apache.niolex.config.bean.UserInfo;
+
 /**
  * Communicate with DB, deal with auth info.
  *
@@ -30,29 +32,29 @@ public interface AuthenDao {
 	 * Authenticate user.
 	 *
 	 * @param username
-	 * @param disgest
+	 * @param digest
 	 * @return userid if success, -1 otherwise.
 	 */
-	public long authUser(String username, String disgest);
+	public UserInfo authUser(String username, String digest);
 
 	/**
 	 * Add this user into DB.
 	 *
 	 * @param username
-	 * @param disgest
+	 * @param digest
 	 * @param role
 	 * @return
 	 */
-	public boolean addUser(String username, String disgest, String role);
+	public boolean addUser(String username, String digest, String role);
 
 	/**
 	 * Update this user information.
 	 * @param userid
-	 * @param disgest
+	 * @param digest
 	 * @param role
 	 * @return
 	 */
-	public boolean updateUser(long userid, String disgest, String role);
+	public boolean updateUser(String username, String digest, String role);
 
 	/**
 	 * Check whether this user has the right to read the specified group config.

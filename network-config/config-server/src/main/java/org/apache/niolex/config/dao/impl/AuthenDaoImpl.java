@@ -17,7 +17,13 @@
  */
 package org.apache.niolex.config.dao.impl;
 
+import java.util.List;
+
+import javax.annotation.Resource;
+
+import org.apache.niolex.config.bean.UserInfo;
 import org.apache.niolex.config.dao.AuthenDao;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -28,14 +34,25 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class AuthenDaoImpl implements AuthenDao {
 
+
+	@Resource
+	private JdbcTemplate template;
+
 	/**
 	 * Override super method
 	 * @see org.apache.niolex.config.dao.AuthenDao#authUser(java.lang.String, java.lang.String)
 	 */
 	@Override
-	public long authUser(String username, String disgest) {
-		// TODO Auto-generated method stub
-		return 0;
+	public UserInfo authUser(String username, String disgest) {
+		final String sql = "select urid, urole from user_info where urname = ? and digest = ?";
+		List<UserInfo> list = template.query(sql, new Object[] {username, disgest}, UserInfoRowMapper.INSTANCE);
+		if (list != null && list.size() > 0) {
+			UserInfo info = list.get(0);
+			info.setUserName(username);
+			info.setPassword(disgest);
+			return info;
+		}
+		return null;
 	}
 
 	/**
@@ -43,9 +60,14 @@ public class AuthenDaoImpl implements AuthenDao {
 	 * @see org.apache.niolex.config.dao.AuthenDao#addUser(java.lang.String, java.lang.String, java.lang.String)
 	 */
 	@Override
-	public boolean addUser(String username, String disgest, String role) {
-		// TODO Auto-generated method stub
-		return false;
+	public boolean addUser(String username, String digest, String role) {
+		final String sql = "insert into user_info (urname, digest, urole) values (?, ?, ?)";
+		try {
+			template.update(sql, username, digest, role);
+			return true;
+		} catch (Exception e) {
+			return false;
+		}
 	}
 
 	/**
@@ -53,9 +75,14 @@ public class AuthenDaoImpl implements AuthenDao {
 	 * @see org.apache.niolex.config.dao.AuthenDao#updateUser(long, java.lang.String, java.lang.String)
 	 */
 	@Override
-	public boolean updateUser(long userid, String disgest, String role) {
-		// TODO Auto-generated method stub
-		return false;
+	public boolean updateUser(String username, String digest, String role) {
+		if (digest == null) {
+			final String sql = "update user_info set urole = ? where urname = ?";
+			return template.update(sql, role, username) > 0;
+		} else {
+			final String sql = "update user_info set digest = ?, urole = ? where urname = ?";
+			return template.update(sql, digest, role, username) > 0;
+		}
 	}
 
 	/**
@@ -64,8 +91,9 @@ public class AuthenDaoImpl implements AuthenDao {
 	 */
 	@Override
 	public boolean hasReadAuth(long userid, long groupId) {
-		// TODO Auto-generated method stub
-		return false;
+		final String sql = "select 1 from auth_info where aurid = ? and groupid = ?";
+		List<Integer> list = template.queryForList(sql, Integer.class, userid, groupId);
+		return list.size() > 0;
 	}
 
 	/**
@@ -74,8 +102,9 @@ public class AuthenDaoImpl implements AuthenDao {
 	 */
 	@Override
 	public boolean addReadAuth(long userid, long groupId) {
-		// TODO Auto-generated method stub
-		return false;
+		final String sql = "replace into auth_info(aurid, groupid) values (?, ?)";
+		template.update(sql, userid, groupId);
+		return true;
 	}
 
 	/**
@@ -84,8 +113,8 @@ public class AuthenDaoImpl implements AuthenDao {
 	 */
 	@Override
 	public boolean delReadAuth(long userid, long groupId) {
-		// TODO Auto-generated method stub
-		return false;
+		final String sql = "delete from auth_info where aurid = ? and groupid = ?";
+		return template.update(sql, userid, groupId) > 0;
 	}
 
 }
