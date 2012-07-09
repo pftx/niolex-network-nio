@@ -22,7 +22,7 @@ import java.util.List;
 
 import javax.annotation.Resource;
 
-import org.apache.niolex.config.bean.GroupConfig;
+import org.apache.niolex.config.bean.ConfigGroup;
 import org.apache.niolex.config.dao.GroupDao;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -59,9 +59,9 @@ public class GroupDaoImpl implements GroupDao {
 	 * @see org.apache.niolex.config.dao.GroupDao#loadAllGroups()
 	 */
 	@Override
-	public List<GroupConfig> loadAllGroups() {
+	public List<ConfigGroup> loadAllGroups() {
 		final String sql = "select groupid, groupname from group_info order by groupid";
-		return template.query(sql, GroupConfigRowMapper.INSTANCE);
+		return template.query(sql, ConfigGroupRowMapper.INSTANCE);
 	}
 
 	/**
@@ -79,10 +79,10 @@ public class GroupDaoImpl implements GroupDao {
 	 * @see org.apache.niolex.config.dao.GroupDao#loadGroup(java.lang.String)
 	 */
 	@Override
-	public GroupConfig loadGroup(String groupName) {
+	public ConfigGroup loadGroup(String groupName) {
 		final String sql = "select groupid, groupname from group_info where groupname = ?";
-		List<GroupConfig> list = template.query(sql,
-				new Object[] {groupName}, GroupConfigRowMapper.INSTANCE);
+		List<ConfigGroup> list = template.query(sql,
+				new Object[] {groupName}, ConfigGroupRowMapper.INSTANCE);
 		return list.size() == 0 ? null : list.get(0);
 	}
 

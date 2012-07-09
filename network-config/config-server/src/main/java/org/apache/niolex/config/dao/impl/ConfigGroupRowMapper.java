@@ -1,5 +1,5 @@
 /**
- * GroupConfigRowMapper.java
+ * ConfigGroupRowMapper.java
  *
  * Copyright 2012 Niolex, Inc.
  *
@@ -20,7 +20,7 @@ package org.apache.niolex.config.dao.impl;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import org.apache.niolex.config.bean.GroupConfig;
+import org.apache.niolex.config.bean.ConfigGroup;
 import org.springframework.jdbc.core.RowMapper;
 
 /**
@@ -28,17 +28,17 @@ import org.springframework.jdbc.core.RowMapper;
  * @version 1.0.0
  * @Date: 2012-7-6
  */
-public class GroupConfigRowMapper implements RowMapper<GroupConfig> {
+public class ConfigGroupRowMapper implements RowMapper<ConfigGroup> {
 
-	public static final GroupConfigRowMapper INSTANCE = new GroupConfigRowMapper();
+	public static final ConfigGroupRowMapper INSTANCE = new ConfigGroupRowMapper();
 
 	/**
 	 * Override super method
 	 * @see org.springframework.jdbc.core.RowMapper#mapRow(java.sql.ResultSet, int)
 	 */
 	@Override
-	public GroupConfig mapRow(ResultSet rs, int rowNum) throws SQLException {
-		GroupConfig config = new GroupConfig();
+	public ConfigGroup mapRow(ResultSet rs, int rowNum) throws SQLException {
+		ConfigGroup config = new ConfigGroup();
 		config.setGroupId(rs.getInt("groupid"));
 		config.setGroupName(rs.getString("groupname"));
 		return config;

@@ -45,4 +45,26 @@ public interface CodeMap {
 	short AUTH_SUBS = 2000;
 	// Auth failed.
 	short AUTH_FAIL = 2001;
+
+	// Add a new config group.
+	short ADMIN_ADD_GROUP = 3001;
+	// Refresh the data of an existing group.
+	short ADMIN_REFRESH_GROUP = 3004;
+	// Add a new config item.
+	short ADMIN_ADD_CONFIG = 3002;
+	// Update an old config item.
+	short ADMIN_UPDATE_CONFIG = 3003;
+	// Get an existing config item.
+	short ADMIN_GET_CONFIG = 3005;
+	// Add a new user.
+	short ADMIN_ADD_USER = 3006;
+	// Update an existing user.
+	short ADMIN_UPDATE_USER = 3007;
+
+	// The response to add config group request.
+	short RES_ADD_GROUP = 4001;
+	// The response to add config item request.
+	short RES_ADD_ITEM = 4002;
+	// The response to refresh config item request.
+	short RES_UPDATE_ITEM = 4003;
 }

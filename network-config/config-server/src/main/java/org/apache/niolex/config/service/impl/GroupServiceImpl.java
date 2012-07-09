@@ -23,7 +23,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.niolex.config.bean.ConfigItem;
-import org.apache.niolex.config.bean.GroupConfig;
+import org.apache.niolex.config.bean.ConfigGroup;
 import org.apache.niolex.config.bean.SyncBean;
 import org.apache.niolex.config.config.AttachKey;
 import org.apache.niolex.config.core.CodeMap;
@@ -90,7 +90,7 @@ public class GroupServiceImpl implements GroupService {
 	 */
 	@Override
 	public boolean subscribeGroup(String groupName, IPacketWriter wt) {
-		GroupConfig group = storage.get(groupName);
+		ConfigGroup group = storage.get(groupName);
 		if (group != null) {
 			// Authenticate Group Read.
 			if (service.hasReadAuth(group, wt)) {
@@ -134,7 +134,7 @@ public class GroupServiceImpl implements GroupService {
 	@Override
 	public void syncGroup(SyncBean bean, IPacketWriter wt) {
 		String groupName = bean.getGroupName();
-		GroupConfig group = storage.get(groupName);
+		ConfigGroup group = storage.get(groupName);
 		if (group != null) {
 			// Authenticate Group Read.
 			if (service.hasReadAuth(group, wt)) {
@@ -162,17 +162,17 @@ public class GroupServiceImpl implements GroupService {
 	 */
 	@Override
 	public void syncAllGroupsWithDB() {
-		// Load all the group names.
-		List<GroupConfig> allGroups = groupDao.loadAllGroups();
 		// Store the current DB time.
 		long tmpTime = groupDao.loadDBTime();
+		// Load all the group names.
+		List<ConfigGroup> allGroups = groupDao.loadAllGroups();
 		List<ConfigItem> allItems = itemDao.loadAllConfigItems(lastSyncTime);
 		// Renew last sync time.
 		lastSyncTime = tmpTime;
 		allGroups = assembleGroups(allGroups, allItems);
 
 		// Store new groups into memory storage.
-		for (GroupConfig conf : allGroups) {
+		for (ConfigGroup conf : allGroups) {
 			storeGroup(conf);
 		}
 	}
@@ -183,9 +183,9 @@ public class GroupServiceImpl implements GroupService {
 	 * @param allItems
 	 * @return
 	 */
-	private List<GroupConfig> assembleGroups(List<GroupConfig> allGroups, List<ConfigItem> allItems) {
+	private List<ConfigGroup> assembleGroups(List<ConfigGroup> allGroups, List<ConfigItem> allItems) {
 		int j = 0, groupId = 0;
-		GroupConfig gConf = null;
+		ConfigGroup gConf = null;
 		Map<String, ConfigItem> groupData = null;
 		// item list must order by groupId
 		for (ConfigItem item : allItems) {
@@ -236,7 +236,7 @@ public class GroupServiceImpl implements GroupService {
 	 */
 	@Override
 	public void loadGroup(String groupName) {
-		GroupConfig group = groupDao.loadGroup(groupName);
+		ConfigGroup group = groupDao.loadGroup(groupName);
 		if (group != null) {
 			List<ConfigItem> allItems = itemDao.loadGroupItems(group.getGroupId());
 			if (allItems != null && allItems.size() != 0) {
@@ -253,13 +253,68 @@ public class GroupServiceImpl implements GroupService {
 	 * Store this group config into memory storage.
 	 * @param group
 	 */
-	private void storeGroup(GroupConfig conf) {
+	private void storeGroup(ConfigGroup conf) {
 		List<ConfigItem>  clist = storage.store(conf);
 		if (clist != null) {
 			// Fire event to notify clients.
 			for (ConfigItem item : clist) {
 				dispatcher.fireEvent(conf.getGroupName(), item);
 			}
+		}
+	}
+
+	/**
+	 * Override super method
+	 * @see org.apache.niolex.config.service.GroupService#addGroup(java.lang.String)
+	 */
+	@Override
+	public String addGroup(String groupName, IPacketWriter wt) {
+		if (service.hasConfigAuth(wt)) {
+			ConfigGroup group = groupDao.loadGroup(groupName);
+			if (group == null) {
+				// This group not exist, and this user has the right to add.
+				if (groupDao.addGroup(groupName)) {
+					// Group now added into DB, we need to load it into memory.
+					group = groupDao.loadGroup(groupName);
+					storage.store(group);
+					dispatcher.fireAddEvent(groupName);
+					return "Add group success.";
+				} else {
+					return "Failed to add due to DB error.";
+				}
+			} else {
+				return "The group already exist.";
+			}
+		} else {
+			return "You do not have the right to add group.";
+		}
+	}
+
+	/**
+	 * Override super method
+	 * @see org.apache.niolex.config.service.GroupService#addItem(org.apache.niolex.config.bean.ConfigItem, org.apache.niolex.network.IPacketWriter)
+	 */
+	@Override
+	public String addItem(ConfigItem item, IPacketWriter wt) {
+		String groupName = storage.findGroupName(item.getGroupId());
+		if (groupName == null) {
+			return "The group doesn't exist.";
+		}
+		if (service.hasConfigAuth(wt)) {
+			int userId = service.getUserId(wt);
+			item.setcUid(userId);
+			item.setuUid(userId);
+			if (itemDao.addConfig(item)) {
+				// Config Item added into DB now.
+				item = itemDao.getConfig(item.getGroupId(), item.getKey());
+				storage.updateConfigItem(groupName, item);
+				dispatcher.fireEvent(groupName, item);
+				return "Add item success.";
+			} else {
+				return "Failed to add due to DB error.";
+			}
+		} else {
+			return "You do not have the right to add config item.";
 		}
 	}
 

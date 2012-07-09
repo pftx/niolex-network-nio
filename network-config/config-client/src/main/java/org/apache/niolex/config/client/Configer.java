@@ -18,7 +18,7 @@
 package org.apache.niolex.config.client;
 
 import org.apache.niolex.config.bean.ConfigItem;
-import org.apache.niolex.config.bean.GroupConfig;
+import org.apache.niolex.config.bean.ConfigGroup;
 import org.apache.niolex.config.core.ConfigException;
 import org.apache.niolex.config.event.ConfigListener;
 
@@ -36,7 +36,7 @@ public class Configer extends ConfigClient {
 	/**
 	 * The internal group config storage.
 	 */
-    private final GroupConfig config;
+    private final ConfigGroup config;
 
     /**
      * Create a Configer to manage the configuration of this group.
@@ -45,7 +45,9 @@ public class Configer extends ConfigClient {
     public Configer(String groupName) {
 		super();
 		try {
-			this.config = getGroupConfig(groupName);
+			this.config = getConfigGroup(groupName);
+		} catch (ConfigException e) {
+			throw e;
 		} catch (Exception e) {
 			throw new ConfigException("Failed to load group " + groupName, e);
 		}

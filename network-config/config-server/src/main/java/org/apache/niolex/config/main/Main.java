@@ -32,7 +32,10 @@ public class Main {
         ApplicationContext ctx = new FileSystemXmlApplicationContext(
                 "conf/spring.xml");
         ConfigServer cServer = ctx.getBean(ConfigServer.class);
-        cServer.start();
+        if (!cServer.start()) {
+        	System.out.println("Failed to start Config Server, system will exit...");
+        	System.exit(-1);
+        }
 	}
 
 }

@@ -1,5 +1,5 @@
 /**
- * GroupSyncHandler.java
+ * AddConfigHandler.java
  *
  * Copyright 2012 Niolex, Inc.
  *
@@ -15,11 +15,11 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.niolex.config.handler;
+package org.apache.niolex.config.admin;
 
-import java.util.List;
-
-import org.apache.niolex.config.bean.SyncBean;
+import org.apache.niolex.commons.codec.StringUtil;
+import org.apache.niolex.config.bean.ConfigItem;
+import org.apache.niolex.config.core.CodeMap;
 import org.apache.niolex.config.core.PacketTranslater;
 import org.apache.niolex.config.service.GroupService;
 import org.apache.niolex.network.IPacketHandler;
@@ -29,14 +29,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * Handle client want to sync this config group with server.
- *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
- * @Date: 2012-7-5
+ * @Date: 2012-7-9
  */
 @Component
-public class GroupSyncHandler implements IPacketHandler {
+public class AddConfigHandler implements IPacketHandler {
 
 
 	/**
@@ -52,16 +50,10 @@ public class GroupSyncHandler implements IPacketHandler {
 	 */
 	@Override
 	public void handleRead(PacketData sc, IPacketWriter wt) {
-		List<SyncBean> list = PacketTranslater.toSyncBean(sc);
-		if (list == null || list.size() == 0) {
-			return;
-		}
-
-		// Start to try sync group list.
-
-		for (SyncBean bean : list) {
-			groupService.syncGroup(bean, wt);
-		}
+		ConfigItem item = PacketTranslater.toConfigItem(sc);
+		String r = groupService.addItem(item, wt);
+		String s = StringUtil.concat(",", item.getKey(), r);
+		wt.handleWrite(new PacketData(CodeMap.RES_ADD_ITEM, s));
 	}
 
 	/**

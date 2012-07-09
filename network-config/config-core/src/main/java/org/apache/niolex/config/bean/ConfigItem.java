@@ -109,9 +109,9 @@ public class ConfigItem {
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		builder.append("[groupId=").append(groupId).append(", key=").append(key).append(", value=")
+		builder.append("{groupId=").append(groupId).append(", key=").append(key).append(", value=")
 				.append(value).append(", cUid=").append(cUid).append(", uUid=").append(uUid).append(", updateTime=")
-				.append(updateTime).append("]");
+				.append(updateTime).append("}");
 		return builder.toString();
 	}
 

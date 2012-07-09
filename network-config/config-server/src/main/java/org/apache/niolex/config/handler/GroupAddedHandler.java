@@ -1,5 +1,5 @@
 /**
- * GroupAddHandler.java
+ * GroupAddedHandler.java
  *
  * Copyright 2012 Niolex, Inc.
  *
@@ -26,12 +26,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
+ * Handle add config group request from other server.
+ * This means local this group from DB.
+ *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
  * @Date: 2012-7-5
  */
 @Component
-public class GroupAddHandler implements IPacketHandler {
+public class GroupAddedHandler implements IPacketHandler {
 
 
 	/**

@@ -23,7 +23,7 @@ import java.util.List;
 import org.apache.niolex.commons.codec.StringUtil;
 import org.apache.niolex.commons.compress.JacksonUtil;
 import org.apache.niolex.config.bean.ConfigItem;
-import org.apache.niolex.config.bean.GroupConfig;
+import org.apache.niolex.config.bean.ConfigGroup;
 import org.apache.niolex.config.bean.SubscribeBean;
 import org.apache.niolex.config.bean.SyncBean;
 import org.apache.niolex.network.PacketData;
@@ -68,30 +68,30 @@ public class PacketTranslater {
 	}
 
 	/**
-	 * Translate GroupConfig into PacketData
+	 * Translate ConfigGroup into PacketData
 	 * @param bean
 	 * @return
 	 */
-	public static final PacketData translate(GroupConfig conf) {
+	public static final PacketData translate(ConfigGroup conf) {
 		try {
 			byte[] data = StringUtil.strToUtf8Byte(JacksonUtil.obj2Str(conf));
 			return new PacketData(CodeMap.GROUP_DAT, data);
 		} catch (Exception e) {
-			throw new ConfigException("Failed to translate from GroupConfig.", e);
+			throw new ConfigException("Failed to translate from ConfigGroup.", e);
 		}
 	}
 
 	/**
-	 * Translate PacketData into GroupConfig
+	 * Translate PacketData into ConfigGroup
 	 * @param sc
 	 * @return
 	 */
-	public static final GroupConfig toGroupConfig(PacketData sc) {
+	public static final ConfigGroup toConfigGroup(PacketData sc) {
 		try {
 			String s = StringUtil.utf8ByteToStr(sc.getData());
-			return JacksonUtil.str2Obj(s, GroupConfig.class);
+			return JacksonUtil.str2Obj(s, ConfigGroup.class);
 		} catch (Exception e) {
-			throw new ConfigException("Failed to translate to GroupConfig.", e);
+			throw new ConfigException("Failed to translate to ConfigGroup.", e);
 		}
 	}
 

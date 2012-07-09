@@ -70,4 +70,9 @@ public class SubscribeBean {
 		this.groupList = groupList;
 	}
 
+	@Override
+	public String toString() {
+		return "{" + userName + ", " + password + "}";
+	}
+
 }

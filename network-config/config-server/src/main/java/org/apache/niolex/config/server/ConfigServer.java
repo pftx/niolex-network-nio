@@ -23,9 +23,11 @@ import org.apache.niolex.commons.codec.StringUtil;
 import org.apache.niolex.commons.compress.JacksonUtil;
 import org.apache.niolex.commons.download.DownloadUtil;
 import org.apache.niolex.commons.util.Runme;
+import org.apache.niolex.config.admin.AddConfigHandler;
+import org.apache.niolex.config.admin.AddGroupHandler;
 import org.apache.niolex.config.core.CodeMap;
 import org.apache.niolex.config.handler.AuthSubscribeHandler;
-import org.apache.niolex.config.handler.GroupAddHandler;
+import org.apache.niolex.config.handler.GroupAddedHandler;
 import org.apache.niolex.config.handler.GroupDiffHandler;
 import org.apache.niolex.config.handler.GroupSubscribeHandler;
 import org.apache.niolex.config.handler.GroupSyncHandler;
@@ -69,6 +71,9 @@ public class ConfigServer {
 
 	private String httpServerAddress;
 
+	/**
+	 * The time to sleep between each sync with DB in milliseconds.
+	 */
 	private long syncSleepInterval;
 
 	/**
@@ -95,7 +100,11 @@ public class ConfigServer {
 	@Autowired
 	private GroupDiffHandler diffHandler;
 	@Autowired
-	private GroupAddHandler addHandler;
+	private GroupAddedHandler addHandler;
+	@Autowired
+	private AddConfigHandler addConfigHandler;
+	@Autowired
+	private AddGroupHandler addGroupHandler;
 	//---------------------------------------------------------------------
 
 	@Autowired
@@ -119,6 +128,8 @@ public class ConfigServer {
 			handler.addHandler(CodeMap.GROUP_SYN, syncHandler);
 			handler.addHandler(CodeMap.GROUP_DIF, diffHandler);
 			handler.addHandler(CodeMap.GROUP_ADD, addHandler);
+			handler.addHandler(CodeMap.ADMIN_ADD_CONFIG, addConfigHandler);
+			handler.addHandler(CodeMap.ADMIN_ADD_GROUP, addGroupHandler);
 			// --------------- end of register --------------------------
 
 			heartBeatAdapter = new HeartBeatAdapter(handler);
@@ -142,6 +153,7 @@ public class ConfigServer {
 			syncThread.setSleepInterval(syncSleepInterval);
 			syncThread.setInitialSleep(true);
 			syncThread.start();
+			return true;
 		}
 		return false;
 	}

@@ -21,6 +21,10 @@ import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.niolex.commons.codec.StringUtil;
 import org.apache.niolex.commons.compress.JacksonUtil;
@@ -29,7 +33,7 @@ import org.apache.niolex.commons.download.DownloadUtil;
 import org.apache.niolex.commons.file.FileUtil;
 import org.apache.niolex.commons.util.Runme;
 import org.apache.niolex.config.bean.ConfigItem;
-import org.apache.niolex.config.bean.GroupConfig;
+import org.apache.niolex.config.bean.ConfigGroup;
 import org.apache.niolex.config.bean.SubscribeBean;
 import org.apache.niolex.config.bean.SyncBean;
 import org.apache.niolex.config.core.CodeMap;
@@ -48,6 +52,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * Configer client, manage local config files, connecting to config server,
+ * get config data, sync with server periodically.
+ *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
  * @Date: 2012-7-3
@@ -62,6 +69,11 @@ public class ConfigClient {
     private static final String STORAGE_PATH;
 
     /**
+     * The wait for connected lock.
+     */
+    private static final Lock LOCK = new ReentrantLock();
+
+    /**
      * The real packet client do the tcp connection.
      */
     private static final PacketClient CLIENT = new PacketClient();
@@ -74,7 +86,7 @@ public class ConfigClient {
 	/**
 	 * The help class to wait for result.
 	 */
-    private static final BlockingWaiter<GroupConfig> WAITER = new BlockingWaiter<GroupConfig>();
+    private static final BlockingWaiter<ConfigGroup> WAITER = new BlockingWaiter<ConfigGroup>();
 
     /**
      * Store all the configurations in memory.
@@ -95,6 +107,7 @@ public class ConfigClient {
     private static InetSocketAddress[] ADDRESSES;
     private static int SERVER_IDX;
     private static boolean CONN_STARTED = false;
+    private static Condition WAIT_CONNECTED;
 
     static {
     	try {
@@ -110,8 +123,8 @@ public class ConfigClient {
     	CONNECT_TIMEOUT = PropUtil.getInteger("server.contimeout", 30000);
     	CLIENT.setConnectTimeout(CONNECT_TIMEOUT);
     	CLIENT.setPacketHandler(new ClientHandler());
-    	// Default to 6 hours.
-    	REFRESH_INTERVAL = PropUtil.getLong("server.refresh.interval", 21600000);
+    	// Default to 1 hour.
+    	REFRESH_INTERVAL = PropUtil.getLong("server.refresh.interval", 3600000);
     	STORAGE_PATH = PropUtil.getProperty("local.storage.path", "/data/follower/config/storage");
     	FileUtil.mkdirsIfAbsent(STORAGE_PATH);
     	// Start to init connection in another thread.
@@ -179,6 +192,7 @@ public class ConfigClient {
     	}
     	ADDRESSES = tmp;
     	if (!CONN_STARTED) {
+    		CONN_STARTED = true;
     		// Client is not working, try to start a connect.
         	SERVER_IDX = (int) (System.nanoTime() % ADDRESSES.length);
     		// Connect with server.
@@ -191,19 +205,21 @@ public class ConfigClient {
      * Sync all the local groups with server.
      */
     private static final void syncWithServer() {
-    	LOG.info("Start to sync local groups with server.");
-    	List<SyncBean> list = new ArrayList<SyncBean>();
-    	for (GroupConfig tmp : STORAGE.getAll()) {
-    		SyncBean bean = new SyncBean(tmp);
-    		list.add(bean);
-    	}
-    	if (list.size() != 0) {
-    		// Send local sync bean to config server.
-    		PacketData syn = PacketTranslater.translate(list);
-        	CLIENT.handleWrite(syn);
-    	}
     	// Sync server addresses.
     	syncServerAddress(false);
+    	if (CONN_STARTED) {
+	    	LOG.info("Start to sync local groups with server.");
+	    	List<SyncBean> list = new ArrayList<SyncBean>();
+	    	for (ConfigGroup tmp : STORAGE.getAll()) {
+	    		SyncBean bean = new SyncBean(tmp);
+	    		list.add(bean);
+	    	}
+	    	if (list.size() != 0) {
+	    		// Send local sync bean to config server.
+	    		PacketData syn = PacketTranslater.translate(list);
+	        	CLIENT.handleWrite(syn);
+	    	}
+    	}
     }
 
     /**
@@ -254,7 +270,7 @@ public class ConfigClient {
     	switch(sc.getCode()) {
     		case CodeMap.GROUP_DAT:
     			// When group config data arrived, store it into memory storage.
-    			GroupConfig conf = PacketTranslater.toGroupConfig(sc);
+    			ConfigGroup conf = PacketTranslater.toConfigGroup(sc);
     			List<ConfigItem> list = STORAGE.store(conf);
     			// dispatch event.
     			ConfigEventDispatcher disp = DISPATCHER.get(conf.getGroupName());
@@ -266,7 +282,7 @@ public class ConfigClient {
     			// Notify anyone waiting for this.
     			WAITER.release(conf.getGroupName(), conf);
     			// Store this config to local disk.
-    			storeGroupConfigToLocakDisk(STORAGE.get(conf.getGroupName()));
+    			storeConfigGroupToLocakDisk(STORAGE.get(conf.getGroupName()));
     			break;
     		case CodeMap.GROUP_DIF:
     			ConfigItem item = PacketTranslater.toConfigItem(sc);
@@ -298,7 +314,7 @@ public class ConfigClient {
      * Store the group config into local disk.
      * @param conf
      */
-    private static final void storeGroupConfigToLocakDisk(GroupConfig conf) {
+    private static final void storeConfigGroupToLocakDisk(ConfigGroup conf) {
     	FileUtil.setBinaryFileContentToFileSystem(STORAGE_PATH + "/" + conf.getGroupName(),
     			PacketTranslater.translate(conf).getData());
     }
@@ -368,7 +384,24 @@ public class ConfigClient {
 				} catch (InterruptedException e1) {}
 			}
     	}
+    	// Client connected, notify all the waiters.
+    	notifyAllWaiter();
     	initSubscribe();
+    }
+
+    /**
+     * Notify all the waiters that connection is ready now.
+     */
+    private static final void notifyAllWaiter() {
+    	LOCK.lock();
+    	try {
+    		if (WAIT_CONNECTED != null) {
+    			WAIT_CONNECTED.notifyAll();
+    			WAIT_CONNECTED = null;
+    		}
+    	} finally {
+    		LOCK.unlock();
+    	}
     }
 
     /**
@@ -383,21 +416,50 @@ public class ConfigClient {
     }
 
     /**
+     * Wait for this client to connect to any server.
+     * @throws InterruptedException
+     */
+    private static final void waitForConnected() throws InterruptedException {
+    	LOCK.lock();
+    	try {
+    		if (WAIT_CONNECTED == null) {
+    			WAIT_CONNECTED = LOCK.newCondition();
+    		}
+    		WAIT_CONNECTED.await(CONNECT_TIMEOUT, TimeUnit.MILLISECONDS);
+    	} finally {
+    		LOCK.unlock();
+    	}
+    }
+
+    /**
      * Check the connection status.
      */
     private static final void checkConncetion() {
+    	if (CLIENT.isWorking()) {
+    		return;
+    	}
+    	try {
+			waitForConnected();
+		} catch (Exception e) {}
     	if (!CLIENT.isWorking()) {
     		throw new ConfigException("Connection lost from config server, please try again later.");
     	}
     }
 
-    private static final GroupConfig getGroupConfigFromLocakDisk(String groupName) {
+    /**
+     * Load group config from local disk file.
+     * @param groupName
+     * @return
+     */
+    private static final ConfigGroup getConfigGroupFromLocakDisk(String groupName) {
     	try {
     		byte[] arr = FileUtil.getBinaryFileContentFromFileSystem(STORAGE_PATH + "/" + groupName);
     		if (arr != null) {
-    			return JacksonUtil.str2Obj(StringUtil.utf8ByteToStr(arr), GroupConfig.class);
+    			return JacksonUtil.str2Obj(StringUtil.utf8ByteToStr(arr), ConfigGroup.class);
     		}
-		} catch (Exception e) {}
+		} catch (Exception e) {
+			LOG.warn("Error occured when load config from local storage - {}", e.toString());
+		}
     	return null;
     }
 
@@ -411,13 +473,13 @@ public class ConfigClient {
      * @return
      * @throws InterruptedException
      */
-    protected static synchronized final GroupConfig getGroupConfig(String groupName) throws InterruptedException {
+    protected static synchronized final ConfigGroup getConfigGroup(String groupName) throws InterruptedException {
     	// Find data from local memory.
-    	GroupConfig tmp = STORAGE.get(groupName);
+    	ConfigGroup tmp = STORAGE.get(groupName);
     	if (tmp != null)
     		return tmp;
     	// Try to load config from local disk.
-    	tmp = getGroupConfigFromLocakDisk(groupName);
+    	tmp = getConfigGroupFromLocakDisk(groupName);
     	if (tmp != null) {
     		STORAGE.store(tmp);
     		// Add this group name to bean.
@@ -430,7 +492,7 @@ public class ConfigClient {
     	// Add this group name to bean.
     	BEAN.getGroupList().add(groupName);
     	checkConncetion();
-    	BlockingWaiter<GroupConfig>.WaitOn on = WAITER.initWait(groupName);
+    	BlockingWaiter<ConfigGroup>.WaitOn on = WAITER.initWait(groupName);
     	// Send packet to remote server.
     	PacketData sub = new PacketData(CodeMap.GROUP_SUB, StringUtil.strToUtf8Byte(groupName));
     	CLIENT.handleWrite(sub);

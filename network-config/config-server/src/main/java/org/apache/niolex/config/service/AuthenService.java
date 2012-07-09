@@ -17,7 +17,7 @@
  */
 package org.apache.niolex.config.service;
 
-import org.apache.niolex.config.bean.GroupConfig;
+import org.apache.niolex.config.bean.ConfigGroup;
 import org.apache.niolex.config.bean.SubscribeBean;
 import org.apache.niolex.network.IPacketWriter;
 
@@ -47,5 +47,20 @@ public interface AuthenService {
 	 * @param wt
 	 * @return
 	 */
-	public boolean hasReadAuth(GroupConfig group, IPacketWriter wt);
+	public boolean hasReadAuth(ConfigGroup group, IPacketWriter wt);
+
+	/**
+	 * Check whether this client has the right to add and change config.
+	 *
+	 * @param wt
+	 * @return
+	 */
+	public boolean hasConfigAuth(IPacketWriter wt);
+
+	/**
+	 * Get the attached User Id of this client.
+	 * @param wt
+	 * @return -1 if not found.
+	 */
+	public int getUserId(IPacketWriter wt);
 }

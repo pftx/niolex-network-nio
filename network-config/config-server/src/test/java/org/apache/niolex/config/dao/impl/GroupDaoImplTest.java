@@ -21,7 +21,7 @@ import static org.junit.Assert.*;
 
 import java.util.List;
 
-import org.apache.niolex.config.bean.GroupConfig;
+import org.apache.niolex.config.bean.ConfigGroup;
 import org.apache.niolex.config.core.Context;
 import org.junit.Test;
 
@@ -51,10 +51,10 @@ public class GroupDaoImplTest {
 	 */
 	@Test
 	public void testLoadAllGroups() {
-		List<GroupConfig> list = dao.loadAllGroups();
+		List<ConfigGroup> list = dao.loadAllGroups();
 		int cgid = 1;
 		System.out.println("Group size " + list.size());
-		for (GroupConfig gc : list) {
+		for (ConfigGroup gc : list) {
 			assertTrue(cgid <= gc.getGroupId());
 			cgid = gc.getGroupId();
 		}
@@ -77,7 +77,7 @@ public class GroupDaoImplTest {
 	 */
 	@Test
 	public void testLoadGroup() {
-		GroupConfig gc = dao.loadGroup("configserver.test.demo");
+		ConfigGroup gc = dao.loadGroup("configserver.test.demo");
 		assertEquals(gc.getGroupId(), 1);
 		assertEquals(gc.getGroupName(), "configserver.test.demo");
 		gc = dao.loadGroup("configserver.test.donotinsert");

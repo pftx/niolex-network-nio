@@ -66,4 +66,18 @@ public interface GroupService {
 	 */
 	public void loadGroup(String groupName);
 
+	/**
+	 * Add a new config group with this name.
+	 * @param groupName
+	 * @return
+	 */
+	public String addGroup(String groupName, IPacketWriter wt);
+
+	/**
+	 * Add a new config item.
+	 * @param groupName
+	 * @return
+	 */
+	public String addItem(ConfigItem item, IPacketWriter wt);
+
 }

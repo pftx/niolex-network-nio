@@ -1,5 +1,5 @@
 /**
- * GroupConfig.java
+ * ConfigGroup.java
  *
  * Copyright 2012 Niolex, Inc.
  *
@@ -31,7 +31,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * @version 1.0.0
  * @Date: 2012-7-3
  */
-public class GroupConfig {
+public class ConfigGroup {
 
 	/**
 	 * The group id.
@@ -77,7 +77,7 @@ public class GroupConfig {
 	 * @param config
 	 * @return the changed item list
 	 */
-	public List<ConfigItem> replaceConfig(GroupConfig config) {
+	public List<ConfigItem> replaceConfig(ConfigGroup config) {
 		List<ConfigItem> list = new ArrayList<ConfigItem>();
 		lock.lock();
 		try {
@@ -119,6 +119,11 @@ public class GroupConfig {
 
 	public void setGroupData(Map<String, ConfigItem> groupData) {
 		this.groupData = groupData;
+	}
+
+	@Override
+	public String toString() {
+		return "{" + groupId + ", " + groupName + "}";
 	}
 
 }

@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.niolex.config.bean.ConfigItem;
-import org.apache.niolex.config.bean.GroupConfig;
+import org.apache.niolex.config.bean.ConfigGroup;
 
 
 /**
@@ -37,19 +37,21 @@ public class MemoryStorage {
 	/**
 	 * The total storage.
 	 */
-	private final ConcurrentHashMap<String, GroupConfig> mapStorage = new ConcurrentHashMap<String, GroupConfig>();
+	private final ConcurrentHashMap<String, ConfigGroup> mapStorage = new ConcurrentHashMap<String, ConfigGroup>();
+	private final ConcurrentHashMap<Integer, String> nameStorage = new ConcurrentHashMap<Integer, String>();
 
 	/**
-	 * Store the GroupConfig into MemoryStorage.
-	 * If another GroupConfig already exist, we will try to replace old config items.
+	 * Store the ConfigGroup into MemoryStorage.
+	 * If another ConfigGroup already exist, we will try to replace old config items.
 	 *
 	 * This method is synchronized.
 	 *
 	 * @param config
 	 * @return the changed item list if this config already exist.
 	 */
-	public List<ConfigItem> store(GroupConfig config) {
-		GroupConfig tmp = mapStorage.putIfAbsent(config.getGroupName(), config);
+	public List<ConfigItem> store(ConfigGroup config) {
+		ConfigGroup tmp = mapStorage.putIfAbsent(config.getGroupName(), config);
+		nameStorage.put(config.getGroupId(), config.getGroupName());
 		if (tmp != null) {
 			return tmp.replaceConfig(config);
 		}
@@ -62,7 +64,7 @@ public class MemoryStorage {
 	 * @param groupName
 	 * @return null if group not found.
 	 */
-	public GroupConfig get(String groupName) {
+	public ConfigGroup get(String groupName) {
 		return mapStorage.get(groupName);
 	}
 
@@ -70,7 +72,7 @@ public class MemoryStorage {
 	 * Get all the current stored group config(s).
 	 * @return
 	 */
-	public Collection<GroupConfig> getAll() {
+	public Collection<ConfigGroup> getAll() {
 		return mapStorage.values();
 	}
 
@@ -80,12 +82,7 @@ public class MemoryStorage {
 	 * @return null if group not found.
 	 */
 	public String findGroupName(int groupId) {
-		for (GroupConfig tmp : mapStorage.values()) {
-			if (tmp.getGroupId() == groupId) {
-				return tmp.getGroupName();
-			}
-		}
-		return null;
+		return nameStorage.get(groupId);
 	}
 
 	/**
@@ -96,7 +93,7 @@ public class MemoryStorage {
 	 * @return true if the specified config item is replaced, false if not.
 	 */
 	public boolean updateConfigItem(String groupName, ConfigItem item) {
-		GroupConfig tmp = mapStorage.get(groupName);
+		ConfigGroup tmp = mapStorage.get(groupName);
 		if (tmp == null) {
 			return false;
 		} else {

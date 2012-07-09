@@ -18,7 +18,7 @@
 package org.apache.niolex.config.service.impl;
 
 import org.apache.niolex.commons.codec.SHAUtil;
-import org.apache.niolex.config.bean.GroupConfig;
+import org.apache.niolex.config.bean.ConfigGroup;
 import org.apache.niolex.config.bean.SubscribeBean;
 import org.apache.niolex.config.bean.UserInfo;
 import org.apache.niolex.config.config.AttachKey;
@@ -67,16 +67,46 @@ public class AuthenServiceImpl implements AuthenService {
 
 	/**
 	 * Override super method
-	 * @see org.apache.niolex.config.service.AuthenService#hasReadAuth(org.apache.niolex.config.bean.GroupConfig, org.apache.niolex.network.IPacketWriter)
+	 * @see org.apache.niolex.config.service.AuthenService#hasReadAuth(org.apache.niolex.config.bean.ConfigGroup, org.apache.niolex.network.IPacketWriter)
 	 */
 	@Override
-	public boolean hasReadAuth(GroupConfig group, IPacketWriter wt) {
+	public boolean hasReadAuth(ConfigGroup group, IPacketWriter wt) {
 		UserInfo info = wt.getAttached(AttachKey.USER_INFO);
 		if (info == null) {
 			return false;
 		}
-
+		if (info.getUserRole().equalsIgnoreCase("OP")
+				|| info.getUserRole().equalsIgnoreCase("ADMIN")) {
+			return true;
+		}
 		return authenDao.hasReadAuth(info.getUserId(), group.getGroupId());
+	}
+
+	/**
+	 * Override super method
+	 * @see org.apache.niolex.config.service.AuthenService#hasConfigAuth(org.apache.niolex.network.IPacketWriter)
+	 */
+	@Override
+	public boolean hasConfigAuth(IPacketWriter wt) {
+		UserInfo info = wt.getAttached(AttachKey.USER_INFO);
+		if (info == null) {
+			return false;
+		}
+		return info.getUserRole().equalsIgnoreCase("OP")
+				|| info.getUserRole().equalsIgnoreCase("ADMIN");
+	}
+
+	/**
+	 * Override super method
+	 * @see org.apache.niolex.config.service.AuthenService#getUserId(org.apache.niolex.network.IPacketWriter)
+	 */
+	@Override
+	public int getUserId(IPacketWriter wt) {
+		UserInfo info = wt.getAttached(AttachKey.USER_INFO);
+		if (info == null) {
+			return -1;
+		}
+		return info.getUserId();
 	}
 
 }

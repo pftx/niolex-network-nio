@@ -1,5 +1,5 @@
 /**
- * GroupConfigRowMapper.java
+ * ConfigItemRowMapper.java
  *
  * Copyright 2012 Niolex, Inc.
  *

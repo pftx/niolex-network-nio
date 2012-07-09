@@ -21,11 +21,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.apache.niolex.config.bean.ConfigItem;
+import org.apache.niolex.config.core.CodeMap;
 import org.apache.niolex.config.core.PacketTranslater;
 import org.apache.niolex.network.IPacketWriter;
+import org.apache.niolex.network.PacketData;
 import org.springframework.stereotype.Component;
 
 /**
@@ -47,8 +48,8 @@ public class ConfigEventDispatcher {
 	/**
 	 * Store clients.
 	 */
-	private final ConcurrentHashMap<String, ConcurrentLinkedQueue<IPacketWriter>> clients =
-			new ConcurrentHashMap<String, ConcurrentLinkedQueue<IPacketWriter>>();
+	private final ConcurrentHashMap<String, ConcurrentHashMap<IPacketWriter, String>> clients =
+			new ConcurrentHashMap<String, ConcurrentHashMap<IPacketWriter, String>>();
 
 
 	/**
@@ -56,15 +57,15 @@ public class ConfigEventDispatcher {
 	 * @param eListener
 	 */
 	public void addListener(String groupName, IPacketWriter listener) {
-		ConcurrentLinkedQueue<IPacketWriter> queue = clients.get(groupName);
+		ConcurrentHashMap<IPacketWriter, String> queue = clients.get(groupName);
 		if (queue == null) {
-			queue = new ConcurrentLinkedQueue<IPacketWriter>();
-			ConcurrentLinkedQueue<IPacketWriter> tmp = clients.putIfAbsent(groupName, queue);
+			queue = new ConcurrentHashMap<IPacketWriter, String>();
+			ConcurrentHashMap<IPacketWriter, String> tmp = clients.putIfAbsent(groupName, queue);
 			if (tmp != null) {
 				queue = tmp;
 			}
 		}
-		queue.add(listener);
+		queue.put(listener, "");
 	}
 
 	/**
@@ -72,7 +73,7 @@ public class ConfigEventDispatcher {
 	 * @param eListener
 	 */
 	public void removeListener(String groupName, IPacketWriter listener) {
-		ConcurrentLinkedQueue<IPacketWriter> queue = clients.get(groupName);
+		ConcurrentHashMap<IPacketWriter, String> queue = clients.get(groupName);
 		if (queue != null) {
 			queue.remove(listener);
 		}
@@ -106,14 +107,26 @@ public class ConfigEventDispatcher {
 	 * @param e
 	 */
 	public void fireClientEvent(String groupName, ConfigItem item) {
-		ConcurrentLinkedQueue<IPacketWriter> queue = clients.get(groupName);
+		ConcurrentHashMap<IPacketWriter, String> queue = clients.get(groupName);
 		if (queue != null) {
-			synchronized(queue) {
-				for (IPacketWriter wt : queue) {
-					wt.handleWrite(PacketTranslater.translate(item));
-				}
+			for (IPacketWriter wt : queue.keySet()) {
+				wt.handleWrite(PacketTranslater.translate(item));
 			}
 		}
+	}
+
+	/**
+	 * Fire event to other servers to indicate that a new config group is added.
+	 * @param groupName
+	 */
+	public void fireAddEvent(String groupName) {
+		// Fire to other servers.
+		synchronized(otherServers) {
+			for (IPacketWriter wt : otherServers) {
+				wt.handleWrite(new PacketData(CodeMap.GROUP_ADD, groupName));
+			}
+		}
+
 	}
 
 }

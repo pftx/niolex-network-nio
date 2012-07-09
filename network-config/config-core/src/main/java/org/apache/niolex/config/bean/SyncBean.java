@@ -50,7 +50,7 @@ public class SyncBean {
 	 * Create an sync bean to sync this group.
 	 * @param group
 	 */
-	public SyncBean(GroupConfig group) {
+	public SyncBean(ConfigGroup group) {
 		super();
 		this.groupName = group.getGroupName();
 		this.groupData = new HashMap<String, Long>();
