@@ -1,0 +1,8 @@
+---config group related commands---
+add group [groupname]
+refresh group [groupname]
+
+---config item related commands---
+add item [groupname key value]
+update item [groupname key value]
+get item [groupname key]
