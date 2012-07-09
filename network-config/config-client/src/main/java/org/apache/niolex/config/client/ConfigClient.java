@@ -384,9 +384,9 @@ public class ConfigClient {
 				} catch (InterruptedException e1) {}
 			}
     	}
+    	initSubscribe();
     	// Client connected, notify all the waiters.
     	notifyAllWaiter();
-    	initSubscribe();
     }
 
     /**
@@ -396,7 +396,7 @@ public class ConfigClient {
     	LOCK.lock();
     	try {
     		if (WAIT_CONNECTED != null) {
-    			WAIT_CONNECTED.notifyAll();
+    			WAIT_CONNECTED.signalAll();
     			WAIT_CONNECTED = null;
     		}
     	} finally {
@@ -489,9 +489,9 @@ public class ConfigClient {
         	CLIENT.handleWrite(sub);
     		return tmp;
     	}
+    	checkConncetion();
     	// Add this group name to bean.
     	BEAN.getGroupList().add(groupName);
-    	checkConncetion();
     	BlockingWaiter<ConfigGroup>.WaitOn on = WAITER.initWait(groupName);
     	// Send packet to remote server.
     	PacketData sub = new PacketData(CodeMap.GROUP_SUB, StringUtil.strToUtf8Byte(groupName));

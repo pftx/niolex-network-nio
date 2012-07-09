@@ -318,4 +318,36 @@ public class GroupServiceImpl implements GroupService {
 		}
 	}
 
+	/**
+	 * Override super method
+	 * @see org.apache.niolex.config.service.GroupService#updateItem(org.apache.niolex.config.bean.ConfigItem, org.apache.niolex.network.IPacketWriter)
+	 */
+	@Override
+	public String updateItem(ConfigItem item, IPacketWriter wt) {
+		String groupName = storage.findGroupName(item.getGroupId());
+		if (groupName == null) {
+			return "The group doesn't exist.";
+		}
+		if (service.hasConfigAuth(wt)) {
+			int userId = service.getUserId(wt);
+			ConfigItem newitem = storage.get(groupName).getGroupData().get(item.getKey());
+			if (newitem == null) {
+				return "The item key doesn't exist.";
+			}
+			newitem.setuUid(userId);
+			newitem.setValue(item.getValue());
+			if (itemDao.updateConfig(newitem)) {
+				// Config Item added into DB now.
+				item = itemDao.getConfig(item.getGroupId(), item.getKey());
+				storage.updateConfigItem(groupName, item);
+				dispatcher.fireEvent(groupName, item);
+				return "Update item success.";
+			} else {
+				return "Failed to update.";
+			}
+		} else {
+			return "You do not have the right to update config item.";
+		}
+	}
+
 }

@@ -25,6 +25,7 @@ import org.apache.niolex.commons.download.DownloadUtil;
 import org.apache.niolex.commons.util.Runme;
 import org.apache.niolex.config.admin.AddConfigHandler;
 import org.apache.niolex.config.admin.AddGroupHandler;
+import org.apache.niolex.config.admin.UpdateConfigHandler;
 import org.apache.niolex.config.core.CodeMap;
 import org.apache.niolex.config.handler.AuthSubscribeHandler;
 import org.apache.niolex.config.handler.GroupAddedHandler;
@@ -104,6 +105,8 @@ public class ConfigServer {
 	@Autowired
 	private AddConfigHandler addConfigHandler;
 	@Autowired
+	private UpdateConfigHandler updateConfigHandler;
+	@Autowired
 	private AddGroupHandler addGroupHandler;
 	//---------------------------------------------------------------------
 
@@ -129,6 +132,7 @@ public class ConfigServer {
 			handler.addHandler(CodeMap.GROUP_DIF, diffHandler);
 			handler.addHandler(CodeMap.GROUP_ADD, addHandler);
 			handler.addHandler(CodeMap.ADMIN_ADD_CONFIG, addConfigHandler);
+			handler.addHandler(CodeMap.ADMIN_UPDATE_CONFIG, updateConfigHandler);
 			handler.addHandler(CodeMap.ADMIN_ADD_GROUP, addGroupHandler);
 			// --------------- end of register --------------------------
 

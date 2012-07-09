@@ -80,4 +80,11 @@ public interface GroupService {
 	 */
 	public String addItem(ConfigItem item, IPacketWriter wt);
 
+	/**
+	 * Update an existing config item.
+	 * @param groupName
+	 * @return
+	 */
+	public String updateItem(ConfigItem item, IPacketWriter wt);
+
 }
