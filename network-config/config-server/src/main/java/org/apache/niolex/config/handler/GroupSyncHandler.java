@@ -60,7 +60,7 @@ public class GroupSyncHandler implements IPacketHandler {
 		// Start to try sync group list.
 
 		for (SyncBean bean : list) {
-			groupService.syncGroup(bean, wt);
+			groupService.cliSyncGroup(bean, wt);
 		}
 	}
 

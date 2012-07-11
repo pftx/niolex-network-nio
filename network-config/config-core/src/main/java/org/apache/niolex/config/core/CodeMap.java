@@ -60,6 +60,10 @@ public interface CodeMap {
 	short ADMIN_ADD_USER = 3006;
 	// Update an existing user.
 	short ADMIN_UPDATE_USER = 3007;
+	// Add read authorize to user.
+	short ADMIN_ADD_AUTH = 3008;
+	// Remove read authorize from user.
+	short ADMIN_REMOVE_AUTH = 3009;
 
 	// The response to add config group request.
 	short RES_ADD_GROUP = 4001;
@@ -67,4 +71,14 @@ public interface CodeMap {
 	short RES_ADD_ITEM = 4002;
 	// The response to refresh config item request.
 	short RES_UPDATE_ITEM = 4003;
+	// Refresh the group data from DB.
+	short RES_REFRESH_GROUP = 4004;
+	// The response to add user request.
+	short RES_ADD_USER = 4005;
+	// The response to update user request.
+	short RES_UPDATE_USER = 4006;
+	// The response to add read authorization.
+	short RES_ADD_AUTH = 4007;
+	// The response to remove read authorization.
+	short RES_REMOVE_AUTH = 4008;
 }

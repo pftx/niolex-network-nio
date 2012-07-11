@@ -22,6 +22,7 @@ import org.apache.niolex.config.bean.ConfigGroup;
 import org.apache.niolex.config.bean.SubscribeBean;
 import org.apache.niolex.config.bean.UserInfo;
 import org.apache.niolex.config.config.AttachKey;
+import org.apache.niolex.config.core.MemoryStorage;
 import org.apache.niolex.config.dao.AuthenDao;
 import org.apache.niolex.config.service.AuthenService;
 import org.apache.niolex.network.IPacketWriter;
@@ -45,6 +46,12 @@ public class AuthenServiceImpl implements AuthenService {
 	private AuthenDao authenDao;
 
 	/**
+	 * Store all the configurations.
+	 */
+	@Autowired
+	private MemoryStorage storage;
+
+	/**
 	 * Override super method
 	 * @see org.apache.niolex.config.service.AuthenService#authUser(org.apache.niolex.config.bean.SubscribeBean, org.apache.niolex.network.IPacketWriter)
 	 */
@@ -63,6 +70,99 @@ public class AuthenServiceImpl implements AuthenService {
 		}
 		wt.attachData(AttachKey.USER_INFO, info);
 		return true;
+	}
+
+	/**
+	 * Override super method
+	 * @see org.apache.niolex.config.service.AuthenService#getUserId(org.apache.niolex.network.IPacketWriter)
+	 */
+	@Override
+	public int getUserId(IPacketWriter wt) {
+		UserInfo info = wt.getAttached(AttachKey.USER_INFO);
+		if (info == null) {
+			return -1;
+		}
+		return info.getUserId();
+	}
+
+	/**
+	 * Get user role from attached user info.
+	 * @param wt
+	 * @return null if not found.
+	 */
+	public String getUserRole(IPacketWriter wt) {
+		UserInfo info = wt.getAttached(AttachKey.USER_INFO);
+		if (info == null) {
+			return null;
+		}
+		return info.getUserRole();
+	}
+
+	/**
+	 * Override super method
+	 * @see org.apache.niolex.config.service.AuthenService#addUser(org.apache.niolex.config.bean.UserInfo, org.apache.niolex.network.IPacketWriter)
+	 */
+	@Override
+	public String addUser(UserInfo insert, IPacketWriter wt) {
+		String role = getUserRole(wt);
+		if (role == null) {
+			return "You Haven't Loged in Yet.";
+		}
+		if (role.equalsIgnoreCase("OP")) {
+			insert.setUserRole("NODE");
+		} else if (!role.equalsIgnoreCase("ADMIN")) {
+			return "You do not have the right to add User.";
+		}
+		String digest;
+		try {
+			digest = SHAUtil.sha1(PASSWORD_DIG, insert.getPassword());
+		} catch (Exception e) {
+			LOG.error("Failed to generate password digest.", e);
+			return "Failed to encode password.";
+		}
+		boolean b = authenDao.addUser(insert.getUserName(), digest, insert.getUserRole());
+		if (b) {
+			return "Add User Success.";
+		} else {
+			return "User already exist.";
+		}
+	}
+
+	/**
+	 * Override super method
+	 * @see org.apache.niolex.config.service.AuthenService#updateUser(org.apache.niolex.config.bean.UserInfo, org.apache.niolex.network.IPacketWriter)
+	 */
+	@Override
+	public String updateUser(UserInfo insert, IPacketWriter wt) {
+		String role = getUserRole(wt);
+		if (role == null) {
+			return "You Haven't Loged in Yet.";
+		}
+		if (role.equalsIgnoreCase("OP")) {
+			final UserInfo opUser = authenDao.getUser(insert.getUserName());
+			if (opUser == null) {
+				return "The User You want to update not found.";
+			}
+			if (!opUser.getUserRole().equalsIgnoreCase("NODE")) {
+				return "You do not have the right to update this User.";
+			}
+			insert.setUserRole(null);
+		} else if (!role.equalsIgnoreCase("ADMIN")) {
+			return "You do not have the right to update any User.";
+		}
+		String digest;
+		try {
+			digest = SHAUtil.sha1(PASSWORD_DIG, insert.getPassword());
+		} catch (Exception e) {
+			LOG.error("Failed to generate password digest.", e);
+			return "Failed to encode password.";
+		}
+		boolean b = authenDao.updateUser(insert.getUserName(), digest, insert.getUserRole());
+		if (b) {
+			return "Update User Success.";
+		} else {
+			return "The user does not exist.";
+		}
 	}
 
 	/**
@@ -98,15 +198,55 @@ public class AuthenServiceImpl implements AuthenService {
 
 	/**
 	 * Override super method
-	 * @see org.apache.niolex.config.service.AuthenService#getUserId(org.apache.niolex.network.IPacketWriter)
+	 * @see org.apache.niolex.config.service.AuthenService#addReadAuth(java.lang.String, java.lang.String)
 	 */
 	@Override
-	public int getUserId(IPacketWriter wt) {
-		UserInfo info = wt.getAttached(AttachKey.USER_INFO);
-		if (info == null) {
-			return -1;
+	public String addReadAuth(String userName, String groupName, IPacketWriter wt) {
+		if (!hasConfigAuth(wt)) {
+			return "You do not have the right to add read auth.";
 		}
-		return info.getUserId();
+		final UserInfo opUser = authenDao.getUser(userName);
+		if (opUser == null) {
+			return "User not found.";
+		}
+		if (!opUser.getUserRole().equalsIgnoreCase("NODE")) {
+			return "This user is super user, do not need read auth.";
+		}
+		int userid = opUser.getUserId();
+		ConfigGroup group = storage.get(groupName);
+		if (group == null) {
+			return "Group not found.";
+		}
+		int groupid = group.getGroupId();
+		authenDao.addReadAuth(userid, groupid);
+		return "Add read auth success.";
+	}
+
+	/**
+	 * Override super method
+	 * @see org.apache.niolex.config.service.AuthenService#removeReadAuth(java.lang.String, java.lang.String)
+	 */
+	@Override
+	public String removeReadAuth(String userName, String groupName, IPacketWriter wt) {
+		if (!hasConfigAuth(wt)) {
+			return "You do not have the right to remove read auth.";
+		}
+		final UserInfo opUser = authenDao.getUser(userName);
+		if (opUser == null) {
+			return "User not found.";
+		}
+		if (!opUser.getUserRole().equalsIgnoreCase("NODE")) {
+			return "This user is super user, can not remove read auth.";
+		}
+		int userid = opUser.getUserId();
+		ConfigGroup group = storage.get(groupName);
+		if (group == null) {
+			return "Group not found.";
+		}
+		int groupid = group.getGroupId();
+
+		authenDao.delReadAuth(userid, groupid);
+		return "Remove read auth success.";
 	}
 
 }

@@ -51,7 +51,7 @@ public class GroupDiffHandler implements IPacketHandler {
 	@Override
 	public void handleRead(PacketData sc, IPacketWriter wt) {
 		ConfigItem item = PacketTranslater.toConfigItem(sc);
-		groupService.handleDiff(item);
+		groupService.svrSendDiff(item);
 	}
 
 	/**

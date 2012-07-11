@@ -76,13 +76,26 @@ public class AuthenDaoImpl implements AuthenDao {
 	 */
 	@Override
 	public boolean updateUser(String username, String digest, String role) {
-		if (digest == null) {
-			final String sql = "update user_info set urole = ? where urname = ?";
-			return template.update(sql, role, username) > 0;
+		if (role == null) {
+			final String sql = "update user_info set digest = ? where urname = ?";
+			return template.update(sql, digest, username) > 0;
 		} else {
 			final String sql = "update user_info set digest = ?, urole = ? where urname = ?";
 			return template.update(sql, digest, role, username) > 0;
 		}
+	}
+
+	/**
+	 * Override super method
+	 * @see org.apache.niolex.config.dao.AuthenDao#getUser(java.lang.String)
+	 */
+	@Override
+	public UserInfo getUser(String userName) {
+		final String sql = "select urid, urole from user_info where urname = ?";
+		List<UserInfo> list = template.query(sql,  new Object[] {userName}, UserInfoRowMapper.INSTANCE);
+		if (list == null || list.size() == 0)
+			return null;
+		return list.get(0);
 	}
 
 	/**

@@ -22,10 +22,11 @@ import java.util.List;
 
 import org.apache.niolex.commons.codec.StringUtil;
 import org.apache.niolex.commons.compress.JacksonUtil;
-import org.apache.niolex.config.bean.ConfigItem;
 import org.apache.niolex.config.bean.ConfigGroup;
+import org.apache.niolex.config.bean.ConfigItem;
 import org.apache.niolex.config.bean.SubscribeBean;
 import org.apache.niolex.config.bean.SyncBean;
+import org.apache.niolex.config.bean.UserInfo;
 import org.apache.niolex.network.PacketData;
 import org.codehaus.jackson.map.type.TypeFactory;
 
@@ -150,6 +151,34 @@ public class PacketTranslater {
 			return JacksonUtil.str2Obj(s, ConfigItem.class);
 		} catch (Exception e) {
 			throw new ConfigException("Failed to translate to ConfigItem.", e);
+		}
+	}
+
+	/**
+	 * Translate UserInfo into PacketData
+	 * @param bean
+	 * @return
+	 */
+	public static final PacketData translate(UserInfo item) {
+		try {
+			byte[] data = StringUtil.strToUtf8Byte(JacksonUtil.obj2Str(item));
+			return new PacketData(CodeMap.ADMIN_ADD_USER, data);
+		} catch (Exception e) {
+			throw new ConfigException("Failed to translate from UserInfo.", e);
+		}
+	}
+
+	/**
+	 * Translate PacketData into UserInfo
+	 * @param sc
+	 * @return
+	 */
+	public static final UserInfo toUserInfo(PacketData sc) {
+		try {
+			String s = StringUtil.utf8ByteToStr(sc.getData());
+			return JacksonUtil.str2Obj(s, UserInfo.class);
+		} catch (Exception e) {
+			throw new ConfigException("Failed to translate to UserInfo.", e);
 		}
 	}
 }

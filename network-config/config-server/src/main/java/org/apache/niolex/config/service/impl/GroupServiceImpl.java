@@ -22,8 +22,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.niolex.config.bean.ConfigItem;
 import org.apache.niolex.config.bean.ConfigGroup;
+import org.apache.niolex.config.bean.ConfigItem;
 import org.apache.niolex.config.bean.SyncBean;
 import org.apache.niolex.config.config.AttachKey;
 import org.apache.niolex.config.core.CodeMap;
@@ -36,6 +36,8 @@ import org.apache.niolex.config.service.AuthenService;
 import org.apache.niolex.config.service.GroupService;
 import org.apache.niolex.network.IPacketWriter;
 import org.apache.niolex.network.PacketData;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -46,6 +48,8 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class GroupServiceImpl implements GroupService {
+
+	private static final Logger LOG = LoggerFactory.getLogger(GroupServiceImpl.class);
 
 	/**
 	 * Use this field to sync with DB.
@@ -85,11 +89,11 @@ public class GroupServiceImpl implements GroupService {
 	/**
 	 * Override super method
 	 *
-	 * @see org.apache.niolex.config.service.GroupService#subscribeGroup(java.lang.String,
+	 * @see org.apache.niolex.config.service.GroupService#cliSubscribeGroup(java.lang.String,
 	 *      org.apache.niolex.network.IPacketWriter)
 	 */
 	@Override
-	public boolean subscribeGroup(String groupName, IPacketWriter wt) {
+	public boolean cliSubscribeGroup(String groupName, IPacketWriter wt) {
 		ConfigGroup group = storage.get(groupName);
 		if (group != null) {
 			// Authenticate Group Read.
@@ -129,10 +133,10 @@ public class GroupServiceImpl implements GroupService {
 
 	/**
 	 * Override super method
-	 * @see org.apache.niolex.config.service.GroupService#syncGroup(org.apache.niolex.config.bean.SyncBean, org.apache.niolex.network.IPacketWriter)
+	 * @see org.apache.niolex.config.service.GroupService#cliSyncGroup(org.apache.niolex.config.bean.SyncBean, org.apache.niolex.network.IPacketWriter)
 	 */
 	@Override
-	public void syncGroup(SyncBean bean, IPacketWriter wt) {
+	public void cliSyncGroup(SyncBean bean, IPacketWriter wt) {
 		String groupName = bean.getGroupName();
 		ConfigGroup group = storage.get(groupName);
 		if (group != null) {
@@ -173,7 +177,7 @@ public class GroupServiceImpl implements GroupService {
 
 		// Store new groups into memory storage.
 		for (ConfigGroup conf : allGroups) {
-			storeGroup(conf);
+			storeInternalGroup(conf);
 		}
 	}
 
@@ -215,11 +219,26 @@ public class GroupServiceImpl implements GroupService {
 	}
 
 	/**
+	 * Store this group config into memory storage.
+	 * Dispatch event only to clients connected to this server.
+	 * @param group
+	 */
+	private void storeInternalGroup(ConfigGroup conf) {
+		List<ConfigItem>  clist = storage.store(conf);
+		if (clist != null) {
+			// Fire event to notify clients.
+			for (ConfigItem item : clist) {
+				dispatcher.fireClientEvent(conf.getGroupName(), item);
+			}
+		}
+	}
+
+	/**
 	 * Override super method
-	 * @see org.apache.niolex.config.service.GroupService#handleDiff(org.apache.niolex.config.bean.ConfigItem)
+	 * @see org.apache.niolex.config.service.GroupService#svrSendDiff(org.apache.niolex.config.bean.ConfigItem)
 	 */
 	@Override
-	public void handleDiff(ConfigItem diff) {
+	public void svrSendDiff(ConfigItem diff) {
 		String groupName = storage.findGroupName(diff.getGroupId());
 		if (groupName != null) {
 			boolean b = storage.updateConfigItem(groupName, diff);
@@ -227,6 +246,8 @@ public class GroupServiceImpl implements GroupService {
 				// This is from other server, so we will not fire it to any server.
 				dispatcher.fireClientEvent(groupName, diff);
 			}
+		} else {
+			LOG.warn("Config Diff received from other server but not found in local: {}", diff);
 		}
 	}
 
@@ -235,7 +256,7 @@ public class GroupServiceImpl implements GroupService {
 	 * @see org.apache.niolex.config.service.GroupService#loadGroup(java.lang.String)
 	 */
 	@Override
-	public void loadGroup(String groupName) {
+	public void svrSendGroup(String groupName) {
 		ConfigGroup group = groupDao.loadGroup(groupName);
 		if (group != null) {
 			List<ConfigItem> allItems = itemDao.loadGroupItems(group.getGroupId());
@@ -245,7 +266,33 @@ public class GroupServiceImpl implements GroupService {
 					groupData.put(item.getKey(), item);
 				}
 			}
+			storeInternalGroup(group);
+		}
+	}
+
+	/**
+	 * Override super method
+	 * @see org.apache.niolex.config.service.GroupService#loadGroup(java.lang.String)
+	 */
+	@Override
+	public String adminRefreshGroup(String groupName) {
+		String s = null;
+		ConfigGroup group = groupDao.loadGroup(groupName);
+		if (group != null) {
+			List<ConfigItem> allItems = itemDao.loadGroupItems(group.getGroupId());
+			if (allItems != null && allItems.size() != 0) {
+				Map<String, ConfigItem> groupData = group.getGroupData();
+				for (ConfigItem item : allItems) {
+					groupData.put(item.getKey(), item);
+				}
+				s = "Refresh Group Success.";
+			} else {
+				s = "This group has no config item.";
+			}
 			storeGroup(group);
+			return s;
+		} else {
+			return "Group not found.";
 		}
 	}
 

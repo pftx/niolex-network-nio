@@ -23,9 +23,14 @@ import org.apache.niolex.commons.codec.StringUtil;
 import org.apache.niolex.commons.compress.JacksonUtil;
 import org.apache.niolex.commons.download.DownloadUtil;
 import org.apache.niolex.commons.util.Runme;
+import org.apache.niolex.config.admin.AddAuthHandler;
 import org.apache.niolex.config.admin.AddConfigHandler;
 import org.apache.niolex.config.admin.AddGroupHandler;
+import org.apache.niolex.config.admin.AddUserHandler;
+import org.apache.niolex.config.admin.RefreshGroupHandler;
+import org.apache.niolex.config.admin.RemoveAuthHandler;
 import org.apache.niolex.config.admin.UpdateConfigHandler;
+import org.apache.niolex.config.admin.UpdateUserHandler;
 import org.apache.niolex.config.core.CodeMap;
 import org.apache.niolex.config.handler.AuthSubscribeHandler;
 import org.apache.niolex.config.handler.GroupAddedHandler;
@@ -108,6 +113,16 @@ public class ConfigServer {
 	private UpdateConfigHandler updateConfigHandler;
 	@Autowired
 	private AddGroupHandler addGroupHandler;
+	@Autowired
+	private RefreshGroupHandler refreshGroupHandler;
+	@Autowired
+	private AddUserHandler addUserHandler;
+	@Autowired
+	private UpdateUserHandler updateUserHandler;
+	@Autowired
+	private AddAuthHandler addAuthHandler;
+	@Autowired
+	private RemoveAuthHandler removeAuthHandler;
 	//---------------------------------------------------------------------
 
 	@Autowired
@@ -134,6 +149,11 @@ public class ConfigServer {
 			handler.addHandler(CodeMap.ADMIN_ADD_CONFIG, addConfigHandler);
 			handler.addHandler(CodeMap.ADMIN_UPDATE_CONFIG, updateConfigHandler);
 			handler.addHandler(CodeMap.ADMIN_ADD_GROUP, addGroupHandler);
+			handler.addHandler(CodeMap.ADMIN_REFRESH_GROUP, refreshGroupHandler);
+			handler.addHandler(CodeMap.ADMIN_ADD_USER, addUserHandler);
+			handler.addHandler(CodeMap.ADMIN_UPDATE_USER, updateUserHandler);
+			handler.addHandler(CodeMap.ADMIN_ADD_AUTH, addAuthHandler);
+			handler.addHandler(CodeMap.ADMIN_REMOVE_AUTH, removeAuthHandler);
 			// --------------- end of register --------------------------
 
 			heartBeatAdapter = new HeartBeatAdapter(handler);

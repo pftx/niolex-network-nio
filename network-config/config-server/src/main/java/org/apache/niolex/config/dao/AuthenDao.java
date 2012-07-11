@@ -57,6 +57,14 @@ public interface AuthenDao {
 	public boolean updateUser(String username, String digest, String role);
 
 	/**
+	 * Get user info by this user name.
+	 *
+	 * @param userName
+	 * @return
+	 */
+	public UserInfo getUser(String userName);
+
+	/**
 	 * Check whether this user has the right to read the specified group config.
 	 * @param userid
 	 * @param groupId
@@ -79,4 +87,5 @@ public interface AuthenDao {
 	 * @return
 	 */
 	public boolean delReadAuth(long userid, long groupId);
+
 }

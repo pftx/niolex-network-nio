@@ -6,3 +6,12 @@ refresh group [groupname]
 add item [groupname key value]
 update item [groupname key value]
 get item [groupname key]
+
+---user related commands---
+add user [username password role]
+update user [username password role]
+change password [username password]
+
+---authorization related commands---
+add auth [username groupname]
+remove auth [username groupname]

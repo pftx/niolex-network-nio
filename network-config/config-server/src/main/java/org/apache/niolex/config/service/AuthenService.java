@@ -19,6 +19,7 @@ package org.apache.niolex.config.service;
 
 import org.apache.niolex.config.bean.ConfigGroup;
 import org.apache.niolex.config.bean.SubscribeBean;
+import org.apache.niolex.config.bean.UserInfo;
 import org.apache.niolex.network.IPacketWriter;
 
 /**
@@ -32,13 +33,37 @@ public interface AuthenService {
 
 	/**
 	 * Use the information in SubscribeBean to do authentication.
-	 * If success, store userid in IPacketWriter.
+	 * If success, store user info in IPacketWriter.
 	 *
 	 * @param bean
 	 * @param wt
 	 * @return
 	 */
 	public boolean authUser(SubscribeBean bean, IPacketWriter wt);
+
+	/**
+	 * Get the attached User Id of this client.
+	 * @param wt
+	 * @return -1 if not found.
+	 */
+	public int getUserId(IPacketWriter wt);
+
+	/**
+	 * Add a new user into DB.
+	 * Only Admin can add user with user role, Op can only add common user.
+	 * @param info
+	 * @param wt
+	 * @return
+	 */
+	public String addUser(UserInfo info, IPacketWriter wt);
+
+	/**
+	 * Update a user role or password. Only Admin can update user role.
+	 * @param info
+	 * @param wt
+	 * @return
+	 */
+	public String updateUser(UserInfo info, IPacketWriter wt);
 
 	/**
 	 * Check whether this client has the right to read this group config.
@@ -57,10 +82,22 @@ public interface AuthenService {
 	 */
 	public boolean hasConfigAuth(IPacketWriter wt);
 
+
 	/**
-	 * Get the attached User Id of this client.
+	 * Add read authorization of this group to this user.
+	 * @param userName
+	 * @param groupName
 	 * @param wt
-	 * @return -1 if not found.
+	 * @return
 	 */
-	public int getUserId(IPacketWriter wt);
+	public String addReadAuth(String userName, String groupName, IPacketWriter wt);
+
+	/**
+	 * Remove read authorization of this group to this user.
+	 * @param userName
+	 * @param groupName
+	 * @param wt
+	 * @return
+	 */
+	public String removeReadAuth(String userName, String groupName, IPacketWriter wt);
 }

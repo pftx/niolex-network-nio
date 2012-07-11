@@ -51,55 +51,55 @@ public class GroupServiceImplTest {
 		}};
 
 	/**
-	 * Test method for {@link org.apache.niolex.config.service.impl.GroupServiceImpl#subscribeGroup(java.lang.String, org.apache.niolex.network.IPacketWriter)}.
-	 */
-	@Test
-	public void testSubscribeGroup() {
-		sevice.syncAllGroupsWithDB();
-		UserInfo info = new UserInfo();
-		info.setUserId(3);
-		writer.attachData(AttachKey.USER_INFO, info);
-		boolean b= sevice.subscribeGroup("configserver.test.demo", writer);
-		assertTrue(b);
-	}
+		 * Test method for {@link org.apache.niolex.config.service.impl.GroupServiceImpl#cliSubscribeGroup(java.lang.String, org.apache.niolex.network.IPacketWriter)}.
+		 */
+		@Test
+		public void testCliSubscribeGroup() {
+			sevice.syncAllGroupsWithDB();
+			UserInfo info = new UserInfo();
+			info.setUserId(3);
+			writer.attachData(AttachKey.USER_INFO, info);
+			boolean b= sevice.cliSubscribeGroup("configserver.test.demo", writer);
+			assertTrue(b);
+		}
 
 	/**
-	 * Test method for {@link org.apache.niolex.config.service.impl.GroupServiceImpl#subscribeGroup(java.lang.String, org.apache.niolex.network.IPacketWriter)}.
-	 */
-	@Test
-	public void testSubscribeGroupNeg() {
-		UserInfo info = new UserInfo();
-		info.setUserId(5);
-		writer.attachData(AttachKey.USER_INFO, info);
-		boolean b= sevice.subscribeGroup("configserver.test.demo", writer);
-		assertFalse(b);
-	}
+		 * Test method for {@link org.apache.niolex.config.service.impl.GroupServiceImpl#cliSubscribeGroup(java.lang.String, org.apache.niolex.network.IPacketWriter)}.
+		 */
+		@Test
+		public void testCliSubscribeGroupNeg() {
+			UserInfo info = new UserInfo();
+			info.setUserId(5);
+			writer.attachData(AttachKey.USER_INFO, info);
+			boolean b= sevice.cliSubscribeGroup("configserver.test.demo", writer);
+			assertFalse(b);
+		}
 
 	/**
-	 * Test method for {@link org.apache.niolex.config.service.impl.GroupServiceImpl#subscribeGroup(java.lang.String, org.apache.niolex.network.IPacketWriter)}.
-	 */
-	@Test
-	public void testSubscribeGroupNof() {
-		UserInfo info = new UserInfo();
-		info.setUserId(5);
-		writer.attachData(AttachKey.USER_INFO, info);
-		boolean b= sevice.subscribeGroup("configserver.test.demo2", writer);
-		assertFalse(b);
-	}
+		 * Test method for {@link org.apache.niolex.config.service.impl.GroupServiceImpl#cliSubscribeGroup(java.lang.String, org.apache.niolex.network.IPacketWriter)}.
+		 */
+		@Test
+		public void testCliSubscribeGroupNof() {
+			UserInfo info = new UserInfo();
+			info.setUserId(5);
+			writer.attachData(AttachKey.USER_INFO, info);
+			boolean b= sevice.cliSubscribeGroup("configserver.test.demo2", writer);
+			assertFalse(b);
+		}
 
 	/**
-	 * Test method for {@link org.apache.niolex.config.service.impl.GroupServiceImpl#syncGroup(org.apache.niolex.config.bean.SyncBean, org.apache.niolex.network.IPacketWriter)}.
-	 */
-	@Test
-	public void testSyncGroup() {
-		UserInfo info = new UserInfo();
-		info.setUserId(3);
-		SyncBean bean = new SyncBean();
-		bean.setGroupData(new HashMap<String, Long>());
-		bean.setGroupName("configserver.test.demo");
-		writer.attachData(AttachKey.USER_INFO, info);
-		sevice.syncGroup(bean, writer);
-	}
+		 * Test method for {@link org.apache.niolex.config.service.impl.GroupServiceImpl#cliSyncGroup(org.apache.niolex.config.bean.SyncBean, org.apache.niolex.network.IPacketWriter)}.
+		 */
+		@Test
+		public void testCliSyncGroup() {
+			UserInfo info = new UserInfo();
+			info.setUserId(3);
+			SyncBean bean = new SyncBean();
+			bean.setGroupData(new HashMap<String, Long>());
+			bean.setGroupName("configserver.test.demo");
+			writer.attachData(AttachKey.USER_INFO, info);
+			sevice.cliSyncGroup(bean, writer);
+		}
 
 	/**
 	 * Test method for {@link org.apache.niolex.config.service.impl.GroupServiceImpl#syncAllGroupsWithDB()}.
@@ -110,42 +110,42 @@ public class GroupServiceImplTest {
 	}
 
 	/**
-	 * Test method for {@link org.apache.niolex.config.service.impl.GroupServiceImpl#handleDiff(org.apache.niolex.config.bean.ConfigItem)}.
-	 */
-	@Test
-	public void testHandleDiff() {
-		ConfigItem diff = new ConfigItem();
-		diff.setGroupId(1);
-		diff.setKey("demo.key");
-		diff.setValue("unit stset");
-		diff.setUpdateTime(System.currentTimeMillis());
-		sevice.handleDiff(diff);
-		ConfigGroup c = storage.get("configserver.test.demo");
-		ConfigItem item = c.getGroupData().get("demo.key");
-		assertEquals(item.getValue(), "unit stset");
-		item.setUpdateTime(1234L);
-	}
+		 * Test method for {@link org.apache.niolex.config.service.impl.GroupServiceImpl#svrSendDiff(org.apache.niolex.config.bean.ConfigItem)}.
+		 */
+		@Test
+		public void testSvrSendDiff() {
+			ConfigItem diff = new ConfigItem();
+			diff.setGroupId(1);
+			diff.setKey("demo.key");
+			diff.setValue("unit stset");
+			diff.setUpdateTime(System.currentTimeMillis());
+			sevice.svrSendDiff(diff);
+			ConfigGroup c = storage.get("configserver.test.demo");
+			ConfigItem item = c.getGroupData().get("demo.key");
+			assertEquals(item.getValue(), "unit stset");
+			item.setUpdateTime(1234L);
+		}
 
 	/**
-	 * Test method for {@link org.apache.niolex.config.service.impl.GroupServiceImpl#handleDiff(org.apache.niolex.config.bean.ConfigItem)}.
-	 */
-	@Test
-	public void testHandleDiffNeg() {
-		ConfigItem diff = new ConfigItem();
-		diff.setGroupId(1);
-		diff.setKey("demo.key");
-		diff.setValue("unit 352352345");
-		sevice.handleDiff(diff);
-		ConfigGroup c = storage.get("configserver.test.demo");
-		assertNotSame(c.getGroupData().get("demo.key").getValue(), "unit 352352345");
-	}
+		 * Test method for {@link org.apache.niolex.config.service.impl.GroupServiceImpl#svrSendDiff(org.apache.niolex.config.bean.ConfigItem)}.
+		 */
+		@Test
+		public void testSvrSendDiffNeg() {
+			ConfigItem diff = new ConfigItem();
+			diff.setGroupId(1);
+			diff.setKey("demo.key");
+			diff.setValue("unit 352352345");
+			sevice.svrSendDiff(diff);
+			ConfigGroup c = storage.get("configserver.test.demo");
+			assertNotSame(c.getGroupData().get("demo.key").getValue(), "unit 352352345");
+		}
 
 	/**
 	 * Test method for {@link org.apache.niolex.config.service.impl.GroupServiceImpl#loadGroup(java.lang.String)}.
 	 */
 	@Test
 	public void testLoadGroup() {
-		sevice.loadGroup("configserver.test.demo");
+		sevice.svrSendGroup("configserver.test.demo");
 		ConfigGroup c = storage.get("configserver.test.demo");
 		assertEquals(c.getGroupData().get("demo.key").getValue(), "demo.value");
 	}

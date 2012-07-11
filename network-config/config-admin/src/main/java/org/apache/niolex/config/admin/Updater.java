@@ -28,7 +28,7 @@ public interface Updater {
 
 	public String addGroup(String groupName) throws Exception;
 
-	public boolean refreshGroup(String groupName) throws Exception;
+	public String refreshGroup(String groupName) throws Exception;
 
 	public String addItem(String groupName, String key, String value) throws Exception;
 
@@ -36,10 +36,14 @@ public interface Updater {
 
 	public String getItem(String groupName, String key) throws Exception;
 
-	public boolean addUser(String username, String password, String userRole) throws Exception;
+	public String addUser(String username, String password, String userRole) throws Exception;
 
-	public boolean updateUserRole(String username, String userRole) throws Exception;
+	public String changePassword(String username, String password) throws Exception;
 
-	public boolean updateUser(String username, String password, String userRole) throws Exception;
+	public String updateUser(String username, String password, String userRole) throws Exception;
+
+	public String addAuth(String username, String groupName) throws Exception;
+
+	public String removeAuth(String username, String groupName) throws Exception;
 
 }

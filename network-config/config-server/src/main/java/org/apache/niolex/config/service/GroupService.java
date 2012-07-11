@@ -38,33 +38,40 @@ public interface GroupService {
 	 * @param wt
 	 * @return
 	 */
-	public boolean subscribeGroup(String groupName, IPacketWriter wt);
+	public boolean cliSubscribeGroup(String groupName, IPacketWriter wt);
 
 	/**
-	 * Try to synchronize with server central storage.
+	 * Try to synchronize client status with server central storage.
 	 *
 	 * @param bean
 	 * @param wt
 	 */
-	public void syncGroup(SyncBean bean, IPacketWriter wt);
+	public void cliSyncGroup(SyncBean bean, IPacketWriter wt);
 
 	/**
-	 * Load all config groups from DB and store them into memory.
+	 * Load all config groups from DB and sync them with this server memory.
 	 * @return
 	 */
 	public void syncAllGroupsWithDB();
 
 	/**
-	 * Update this diff packet into memory storage.
+	 * Update this diff packet from other server into memory storage.
 	 * @param diff
 	 */
-	public void handleDiff(ConfigItem diff);
+	public void svrSendDiff(ConfigItem diff);
 
 	/**
-	 * Load group with this group name into memory storage.
+	 * Handle the group add request from other server.
 	 * @param groupName
 	 */
-	public void loadGroup(String groupName);
+	public void svrSendGroup(String groupName);
+
+	/**
+	 * Refresh this group data with DB, send changes to other server as well.
+	 *
+	 * @param groupName
+	 */
+	public String adminRefreshGroup(String groupName);
 
 	/**
 	 * Add a new config group with this name.

@@ -88,6 +88,14 @@ public class ConfigEventDispatcher {
 	}
 
 	/**
+	 * Remove other server under control.
+	 * @param listener
+	 */
+	public void removeOtherServer(IPacketWriter listener) {
+		otherServers.remove(listener);
+	}
+
+	/**
 	 * Fire the specified event to all the listeners registered to this dispatcher.
 	 * @param e
 	 */

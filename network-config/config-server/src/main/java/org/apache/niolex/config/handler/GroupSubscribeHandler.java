@@ -50,7 +50,7 @@ public class GroupSubscribeHandler implements IPacketHandler {
 	@Override
 	public void handleRead(PacketData sc, IPacketWriter wt) {
 		String groupName = StringUtil.utf8ByteToStr(sc.getData());
-		groupService.subscribeGroup(groupName, wt);
+		groupService.cliSubscribeGroup(groupName, wt);
 	}
 
 	/**

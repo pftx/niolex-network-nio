@@ -1,5 +1,5 @@
 /**
- * GroupAddedHandler.java
+ * RemoveAuthHandler.java
  *
  * Copyright 2012 Niolex, Inc.
  *
@@ -15,10 +15,11 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.niolex.config.handler;
+package org.apache.niolex.config.admin;
 
 import org.apache.niolex.commons.codec.StringUtil;
-import org.apache.niolex.config.service.GroupService;
+import org.apache.niolex.config.core.CodeMap;
+import org.apache.niolex.config.service.AuthenService;
 import org.apache.niolex.network.IPacketHandler;
 import org.apache.niolex.network.IPacketWriter;
 import org.apache.niolex.network.PacketData;
@@ -26,23 +27,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * Handle add config group request from other server.
- * This means load this group from DB.
- *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
- * @Date: 2012-7-5
+ * @Date: 2012-7-10
  */
 @Component
-public class GroupAddedHandler implements IPacketHandler {
-
+public class RemoveAuthHandler implements IPacketHandler {
 
 	/**
-	 * Do all the config group works.
+	 * Do all the authentication works.
 	 */
 	@Autowired
-	private GroupService groupService;
-
+	private AuthenService service;
 
 	/**
 	 * Override super method
@@ -50,8 +46,9 @@ public class GroupAddedHandler implements IPacketHandler {
 	 */
 	@Override
 	public void handleRead(PacketData sc, IPacketWriter wt) {
-		String groupName = StringUtil.utf8ByteToStr(sc.getData());
-		groupService.svrSendGroup(groupName);
+		String[] args = StringUtil.utf8ByteToStr(sc.getData()).split(",");
+		String s = service.removeReadAuth(args[0], args[1], wt);
+		wt.handleWrite(new PacketData(CodeMap.RES_REMOVE_AUTH, s));
 	}
 
 	/**

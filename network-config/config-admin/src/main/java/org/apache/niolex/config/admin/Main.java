@@ -67,6 +67,18 @@ public class Main {
 					System.out.println(updater.addItem(cmds[2], cmds[3], cmds[4]));
 				} else if (cmds[1].equalsIgnoreCase("user")) {
 					// Add user.
+					if (cmds.length != 5) {
+						System.out.println("Invalid add user format.");
+						continue;
+					}
+					System.out.println(updater.addUser(cmds[2], cmds[3], cmds[4]));
+				} else if (cmds[1].equalsIgnoreCase("auth")) {
+					// Add user.
+					if (cmds.length != 4) {
+						System.out.println("Invalid add auth format.");
+						continue;
+					}
+					System.out.println(updater.addAuth(cmds[2], cmds[3]));
 				} else {
 					System.out.println("Invalid command.");
 					continue;
@@ -81,6 +93,11 @@ public class Main {
 					System.out.println(updater.updateItem(cmds[2], cmds[3], cmds[4]));
 				} else if (cmds[1].equalsIgnoreCase("user")) {
 					// Update user.
+					if (cmds.length != 5) {
+						System.out.println("Invalid update user format.");
+						continue;
+					}
+					System.out.println(updater.updateUser(cmds[2], cmds[3], cmds[4]));
 				} else {
 					System.out.println("Invalid command.");
 					continue;
@@ -89,10 +106,46 @@ public class Main {
 				if (cmds[1].equalsIgnoreCase("item")) {
 					// Get item
 					if (cmds.length != 4) {
-						System.out.println("Invalid update item format.");
+						System.out.println("Invalid get item format.");
 						continue;
 					}
 					System.out.println(updater.getItem(cmds[2], cmds[3]));
+				} else {
+					System.out.println("Invalid command.");
+					continue;
+				}
+			} else if (cmd.equalsIgnoreCase("refresh")) {
+				if (cmds[1].equalsIgnoreCase("group")) {
+					// Refresh group
+					if (cmds.length != 3) {
+						System.out.println("Invalid refresh group format.");
+						continue;
+					}
+					System.out.println(updater.refreshGroup(cmds[2]));
+				} else {
+					System.out.println("Invalid command.");
+					continue;
+				}
+			} else if (cmd.equalsIgnoreCase("change")) {
+				if (cmds[1].equalsIgnoreCase("password")) {
+					// Change password
+					if (cmds.length != 4) {
+						System.out.println("Invalid change password format.");
+						continue;
+					}
+					System.out.println(updater.changePassword(cmds[2], cmds[3]));
+				} else {
+					System.out.println("Invalid command.");
+					continue;
+				}
+			} else if (cmd.equalsIgnoreCase("remove")) {
+				if (cmds[1].equalsIgnoreCase("auth")) {
+					// Remove auth
+					if (cmds.length != 4) {
+						System.out.println("Invalid remove auth format.");
+						continue;
+					}
+					System.out.println(updater.removeAuth(cmds[2], cmds[3]));
 				} else {
 					System.out.println("Invalid command.");
 					continue;
