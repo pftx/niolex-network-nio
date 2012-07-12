@@ -45,7 +45,6 @@ public class Main {
 		while (true) {
 			System.out.print("#> ");
 			String line = scan.nextLine();
-			System.out.println(line);
 			String[] cmds = line.split(" +", 5);
 			if (cmds.length < 3) {
 				if (line.equalsIgnoreCase("exit")) {
