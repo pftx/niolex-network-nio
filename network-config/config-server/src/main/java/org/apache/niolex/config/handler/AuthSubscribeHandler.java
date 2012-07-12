@@ -17,7 +17,6 @@
  */
 package org.apache.niolex.config.handler;
 
-import java.util.List;
 import java.util.Set;
 
 import org.apache.niolex.config.bean.SubscribeBean;
@@ -79,7 +78,7 @@ public class AuthSubscribeHandler implements IPacketHandler {
 			return;
 		}
 		// Step 2. Deal with group subscribe.
-		List<String> list = bean.getGroupList();
+		Set<String> list = bean.getGroupSet();
 		if (list == null || list.size() == 0) {
 			return;
 		}

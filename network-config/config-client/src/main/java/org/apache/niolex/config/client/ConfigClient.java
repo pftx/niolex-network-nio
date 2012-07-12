@@ -31,9 +31,10 @@ import org.apache.niolex.commons.compress.JacksonUtil;
 import org.apache.niolex.commons.config.PropUtil;
 import org.apache.niolex.commons.download.DownloadUtil;
 import org.apache.niolex.commons.file.FileUtil;
+import org.apache.niolex.commons.util.Pair;
 import org.apache.niolex.commons.util.Runme;
-import org.apache.niolex.config.bean.ConfigItem;
 import org.apache.niolex.config.bean.ConfigGroup;
+import org.apache.niolex.config.bean.ConfigItem;
 import org.apache.niolex.config.bean.SubscribeBean;
 import org.apache.niolex.config.bean.SyncBean;
 import org.apache.niolex.config.core.CodeMap;
@@ -106,8 +107,12 @@ public class ConfigClient {
     private static String SERVER_ADDRESS;
     private static InetSocketAddress[] ADDRESSES;
     private static int SERVER_IDX;
-    private static boolean CONN_STARTED = false;
     private static Condition WAIT_CONNECTED;
+    private static InitStatus INIT_STATUS = InitStatus.INIT;
+
+    private static enum InitStatus {
+    	INIT, TRY, CONNECTED, FAILED
+    }
 
     static {
     	try {
@@ -191,8 +196,8 @@ public class ConfigClient {
     		tmp[i] = new InetSocketAddress(addrs[0], Integer.parseInt(addrs[1]));
     	}
     	ADDRESSES = tmp;
-    	if (!CONN_STARTED) {
-    		CONN_STARTED = true;
+    	if (INIT_STATUS == InitStatus.INIT) {
+    		INIT_STATUS = InitStatus.TRY;
     		// Client is not working, try to start a connect.
         	SERVER_IDX = (int) (System.nanoTime() % ADDRESSES.length);
     		// Connect with server.
@@ -207,7 +212,7 @@ public class ConfigClient {
     private static final void syncWithServer() {
     	// Sync server addresses.
     	syncServerAddress(false);
-    	if (CONN_STARTED) {
+    	if (INIT_STATUS == InitStatus.CONNECTED) {
 	    	LOG.info("Start to sync local groups with server.");
 	    	List<SyncBean> list = new ArrayList<SyncBean>();
 	    	for (ConfigGroup tmp : STORAGE.getAll()) {
@@ -248,6 +253,7 @@ public class ConfigClient {
 		@Override
 		public void handleClose(IPacketWriter wt) {
 			// We will try to reconnect to server.
+			INIT_STATUS = InitStatus.FAILED;
 			connect();
 		}
 
@@ -390,11 +396,23 @@ public class ConfigClient {
     }
 
     /**
+     * Init subscribe when client is connected to server.
+     */
+    private static final void initSubscribe() {
+    	// 1. Register heart beat.
+    	CLIENT.handleWrite(new PacketData(Config.CODE_REGR_HBEAT));
+    	PacketData init = PacketTranslater.translate(BEAN);
+    	// 2. Register interested groups.
+    	CLIENT.handleWrite(init);
+    }
+
+    /**
      * Notify all the waiters that connection is ready now.
      */
     private static final void notifyAllWaiter() {
     	LOCK.lock();
     	try {
+    		INIT_STATUS = InitStatus.CONNECTED;
     		if (WAIT_CONNECTED != null) {
     			WAIT_CONNECTED.signalAll();
     			WAIT_CONNECTED = null;
@@ -405,23 +423,15 @@ public class ConfigClient {
     }
 
     /**
-     * Init subscribe when client is connected to server.
-     */
-    private static final void initSubscribe() {
-    	// 1. Register heart beat.
-    	CLIENT.handleWrite(new PacketData(Config.CODE_REGR_HBEAT));
-    	PacketData init = PacketTranslater.translate(BEAN);
-    	// 2. Register interested groups.
-		CLIENT.handleWrite(init);
-    }
-
-    /**
      * Wait for this client to connect to any server.
      * @throws InterruptedException
      */
     private static final void waitForConnected() throws InterruptedException {
     	LOCK.lock();
     	try {
+    		if (INIT_STATUS == InitStatus.CONNECTED) {
+    			return;
+    		}
     		if (WAIT_CONNECTED == null) {
     			WAIT_CONNECTED = LOCK.newCondition();
     		}
@@ -435,13 +445,10 @@ public class ConfigClient {
      * Check the connection status.
      */
     private static final void checkConncetion() {
-    	if (CLIENT.isWorking()) {
-    		return;
-    	}
     	try {
 			waitForConnected();
 		} catch (Exception e) {}
-    	if (!CLIENT.isWorking()) {
+    	if (INIT_STATUS != InitStatus.CONNECTED) {
     		throw new ConfigException("Connection lost from config server, please try again later.");
     	}
     }
@@ -473,7 +480,7 @@ public class ConfigClient {
      * @return
      * @throws InterruptedException
      */
-    protected static synchronized final ConfigGroup getConfigGroup(String groupName) throws InterruptedException {
+    protected static final ConfigGroup getConfigGroup(String groupName) throws InterruptedException {
     	// Find data from local memory.
     	ConfigGroup tmp = STORAGE.get(groupName);
     	if (tmp != null)
@@ -483,19 +490,22 @@ public class ConfigClient {
     	if (tmp != null) {
     		STORAGE.store(tmp);
     		// Add this group name to bean.
-        	BEAN.getGroupList().add(groupName);
-        	// Send packet to remote server.
-        	PacketData sub = new PacketData(CodeMap.GROUP_SUB, StringUtil.strToUtf8Byte(groupName));
-        	CLIENT.handleWrite(sub);
+        	if (BEAN.getGroupSet().add(groupName)) {
+        		// Send packet to remote server.
+        		PacketData sub = new PacketData(CodeMap.GROUP_SUB, StringUtil.strToUtf8Byte(groupName));
+        		CLIENT.handleWrite(sub);
+        	}
     		return tmp;
     	}
     	checkConncetion();
     	// Add this group name to bean.
-    	BEAN.getGroupList().add(groupName);
-    	BlockingWaiter<ConfigGroup>.WaitOn on = WAITER.initWait(groupName);
-    	// Send packet to remote server.
-    	PacketData sub = new PacketData(CodeMap.GROUP_SUB, StringUtil.strToUtf8Byte(groupName));
-    	CLIENT.handleWrite(sub);
-    	return on.waitForResult(CONNECT_TIMEOUT);
+    	BEAN.getGroupSet().add(groupName);
+    	Pair<Boolean, BlockingWaiter<ConfigGroup>.WaitOn> on = WAITER.init(groupName);
+    	if (on.a) {
+    		// Send packet to remote server.
+    		PacketData sub = new PacketData(CodeMap.GROUP_SUB, StringUtil.strToUtf8Byte(groupName));
+    		CLIENT.handleWrite(sub);
+    	}
+    	return on.b.waitForResult(CONNECT_TIMEOUT);
     }
 }

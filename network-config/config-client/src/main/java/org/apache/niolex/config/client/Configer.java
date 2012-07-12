@@ -25,7 +25,6 @@ import org.apache.niolex.config.event.ConfigListener;
 /**
  * Configer是一个用来读取配置中心的工具类
  *
- * @used 暂无项目使用
  * @category niolex-network-config -> 公共库 -> 配置处理
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0

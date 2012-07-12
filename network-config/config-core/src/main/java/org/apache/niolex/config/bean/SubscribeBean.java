@@ -17,8 +17,9 @@
  */
 package org.apache.niolex.config.bean;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * This bean is used to subscribe client to config server.
@@ -42,7 +43,7 @@ public class SubscribeBean {
 	/**
 	 * The group list this node interested.
 	 */
-	private List<String> groupList = new ArrayList<String>();
+	private Set<String> groupSet = Collections.synchronizedSet(new HashSet<String>());
 
 	//---------------------- GETTER & SETTER ---------------------------------
 
@@ -62,12 +63,12 @@ public class SubscribeBean {
 		this.password = password;
 	}
 
-	public List<String> getGroupList() {
-		return groupList;
+	public Set<String> getGroupSet() {
+		return groupSet;
 	}
 
-	public void setGroupList(List<String> groupList) {
-		this.groupList = groupList;
+	public void setGroupSet(Set<String> groupList) {
+		this.groupSet = groupList;
 	}
 
 	@Override

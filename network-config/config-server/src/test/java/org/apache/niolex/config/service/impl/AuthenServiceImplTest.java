@@ -73,6 +73,7 @@ public class AuthenServiceImplTest {
 	public void testHasReadAuth() {
 		UserInfo info = new UserInfo();
 		info.setUserId(3);
+		info.setUserRole("gg");
 		writer.attachData(AttachKey.USER_INFO, info);
 		ConfigGroup group = new ConfigGroup();
 		group.setGroupId(1);
@@ -87,10 +88,55 @@ public class AuthenServiceImplTest {
 	public void testHasReadAuthNeg() {
 		UserInfo info = new UserInfo();
 		info.setUserId(3);
+		info.setUserRole("gg");
 		ConfigGroup group = new ConfigGroup();
 		group.setGroupId(100);
 		boolean b = sevice.hasReadAuth(group, writer);
 		assertFalse(b);
 	}
 
+
+	/**
+	 * Test method for {@link org.apache.niolex.config.service.impl.AuthenServiceImpl#hasReadAuth(org.apache.niolex.config.bean.ConfigGroup, org.apache.niolex.network.IPacketWriter)}.
+	 */
+	@Test
+	public void testGetUserId() {
+		UserInfo info = new UserInfo();
+		info.setUserId(3);
+		writer.attachData(AttachKey.USER_INFO, info);
+		int id = sevice.getUserId(writer);
+		assertEquals(3, id);
+	}
+
+	/**
+	 * Test method for {@link org.apache.niolex.config.service.impl.AuthenServiceImpl#hasReadAuth(org.apache.niolex.config.bean.ConfigGroup, org.apache.niolex.network.IPacketWriter)}.
+	 */
+	@Test
+	public void testGetUserIdNeg() {
+		int id = sevice.getUserId(writer);
+		assertEquals(-1, id);
+	}
+
+
+	/**
+	 * Test method for {@link org.apache.niolex.config.service.impl.AuthenServiceImpl#hasReadAuth(org.apache.niolex.config.bean.ConfigGroup, org.apache.niolex.network.IPacketWriter)}.
+	 */
+	@Test
+	public void testGetUserRol() {
+		UserInfo info = new UserInfo();
+		info.setUserId(3);
+		info.setUserRole("Good");
+		writer.attachData(AttachKey.USER_INFO, info);
+		String role = sevice.getUserRole(writer);
+		assertEquals("Good", role);
+	}
+
+	/**
+	 * Test method for {@link org.apache.niolex.config.service.impl.AuthenServiceImpl#hasReadAuth(org.apache.niolex.config.bean.ConfigGroup, org.apache.niolex.network.IPacketWriter)}.
+	 */
+	@Test
+	public void testGetUserRoleNeg() {
+		String role = sevice.getUserRole(writer);
+		assertEquals(null, role);
+	}
 }

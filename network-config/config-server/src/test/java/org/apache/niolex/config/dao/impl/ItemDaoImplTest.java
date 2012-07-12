@@ -19,6 +19,7 @@ package org.apache.niolex.config.dao.impl;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.text.ParseException;
@@ -105,6 +106,18 @@ public class ItemDaoImplTest {
 		assertFalse(b);
 		item = dao.getConfig(7, key);
 		System.out.println("Insert time: " + item.getUpdateTime());
+	}
+
+
+	/**
+	 * Test method for {@link org.apache.niolex.config.dao.impl.ItemDaoImpl#addConfig(org.apache.niolex.config.bean.ConfigItem)}.
+	 */
+	@Test
+	public void testGetConfig() {
+		ConfigItem item = dao.getConfig(7, "demo");
+		assertNull(item);
+		item = dao.getConfig(1, "demo.key");
+		assertEquals("demo.value", item.getValue());
 	}
 
 }

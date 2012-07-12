@@ -40,11 +40,12 @@ public class Main {
 		}
 		final Updater updater = new UpdaterClient(args[0]);
 		updater.subscribeAuthInfo(args[1], args[2]);
-		final Scanner scan = new Scanner(System.in);
+		final Scanner scan = new Scanner(System.in, "gbk");
 		System.out.println("Welcome to Config management Console.");
 		while (true) {
 			System.out.print("#> ");
 			String line = scan.nextLine();
+			System.out.println(line);
 			String[] cmds = line.split(" +", 5);
 			if (cmds.length < 3) {
 				if (line.equalsIgnoreCase("exit")) {

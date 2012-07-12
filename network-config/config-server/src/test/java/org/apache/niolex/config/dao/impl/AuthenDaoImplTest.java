@@ -80,9 +80,9 @@ public class AuthenDaoImplTest {
 		assertTrue(b);
 		UserInfo info = dao.authUser("node", "123");
 		assertEquals(info.getUserRole(), "TEST");
-		b = dao.updateUser("node", "47e109e43e482e50f87504263e8dd0073a810856", "BB");
+		b = dao.updateUser("node", "47e109e43e482e50f87504263e8dd0073a810856", null);
 		info = dao.authUser("node", "47e109e43e482e50f87504263e8dd0073a810856");
-		assertEquals(info.getUserRole(), "BB");
+		assertEquals(info.getUserRole(), "TEST");
 		assertTrue(b);
 	}
 
@@ -91,7 +91,7 @@ public class AuthenDaoImplTest {
 	 */
 	@Test
 	public void testUpdateUserNoDig() {
-		boolean b = dao.updateUser("node", null, "NODE");
+		boolean b = dao.updateUser("node", "47e109e43e482e50f87504263e8dd0073a810856", "NODE");
 		assertTrue(b);
 		UserInfo info = dao.authUser("node", "47e109e43e482e50f87504263e8dd0073a810856");
 		assertEquals(info.getUserRole(), "NODE");
@@ -124,6 +124,16 @@ public class AuthenDaoImplTest {
 		assertTrue(b);
 		b = dao.hasReadAuth(100, 5);
 		assertFalse(b);
+	}
+
+	/**
+	 * Test method for {@link org.apache.niolex.config.dao.impl.AuthenDaoImpl#addReadAuth(long, long)}.
+	 */
+	@Test
+	public void testGetUser() {
+		UserInfo info = dao.getUser("su");
+		assertEquals("ADMIN", info.getUserRole());
+		assertEquals(1, info.getUserId());
 	}
 
 	/**

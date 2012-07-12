@@ -53,8 +53,8 @@ public class ConfigerTest {
 				System.out.println("value of key [demo] changed: " + value);
 
 			}};
-		conf.addListener("demo", lister );
-		Thread.sleep(300000);
+		conf.addListener("demo", lister);
+		Thread.sleep(300);
 	}
 
 	/**
@@ -62,7 +62,43 @@ public class ConfigerTest {
 	 */
 	@Test
 	public void testGetPropertyString() {
-		fail("Not yet implemented");
+		Configer conf = new Configer("configserver.test.demo");
+		String s = conf.getString("demo.str");
+		System.out.println(s);
+		assertEquals("good morning!", s);
+	}
+
+	/**
+	 * Test method for {@link org.apache.niolex.config.client.Configer#getProperty(java.lang.String)}.
+	 */
+	@Test
+	public void testGetPropertyLong() {
+		Configer conf = new Configer("configserver.test.demo");
+		long s = conf.getLong("demo.long");
+		System.out.println(s);
+		assertEquals(123213123123l, s);
+	}
+
+	/**
+	 * Test method for {@link org.apache.niolex.config.client.Configer#getProperty(java.lang.String)}.
+	 */
+	@Test
+	public void testGetPropertyInt() {
+		Configer conf = new Configer("configserver.test.demo");
+		int s = conf.getInteger("demo.int");
+		System.out.println(s);
+		assertEquals(12345, s);
+	}
+
+	/**
+	 * Test method for {@link org.apache.niolex.config.client.Configer#getProperty(java.lang.String)}.
+	 */
+	@Test
+	public void testGetPropertyBoolean() {
+		Configer conf = new Configer("configserver.test.demo");
+		boolean s = conf.getBoolean("demo.boolean");
+		System.out.println(s);
+		assertEquals(true, s);
 	}
 
 }

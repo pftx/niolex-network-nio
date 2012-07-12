@@ -58,6 +58,7 @@ public class GroupServiceImplTest {
 			sevice.syncAllGroupsWithDB();
 			UserInfo info = new UserInfo();
 			info.setUserId(3);
+			info.setUserRole("NODE");
 			writer.attachData(AttachKey.USER_INFO, info);
 			boolean b= sevice.cliSubscribeGroup("configserver.test.demo", writer);
 			assertTrue(b);
@@ -70,6 +71,7 @@ public class GroupServiceImplTest {
 		public void testCliSubscribeGroupNeg() {
 			UserInfo info = new UserInfo();
 			info.setUserId(5);
+			info.setUserRole("NODE");
 			writer.attachData(AttachKey.USER_INFO, info);
 			boolean b= sevice.cliSubscribeGroup("configserver.test.demo", writer);
 			assertFalse(b);
@@ -82,6 +84,7 @@ public class GroupServiceImplTest {
 		public void testCliSubscribeGroupNof() {
 			UserInfo info = new UserInfo();
 			info.setUserId(5);
+			info.setUserRole("NODE");
 			writer.attachData(AttachKey.USER_INFO, info);
 			boolean b= sevice.cliSubscribeGroup("configserver.test.demo2", writer);
 			assertFalse(b);
@@ -94,6 +97,7 @@ public class GroupServiceImplTest {
 		public void testCliSyncGroup() {
 			UserInfo info = new UserInfo();
 			info.setUserId(3);
+			info.setUserRole("NODE");
 			SyncBean bean = new SyncBean();
 			bean.setGroupData(new HashMap<String, Long>());
 			bean.setGroupName("configserver.test.demo");
@@ -116,6 +120,23 @@ public class GroupServiceImplTest {
 		public void testSvrSendDiff() {
 			ConfigItem diff = new ConfigItem();
 			diff.setGroupId(1);
+			diff.setKey("demo.key");
+			diff.setValue("unit stset");
+			diff.setUpdateTime(System.currentTimeMillis());
+			sevice.svrSendDiff(diff);
+			ConfigGroup c = storage.get("configserver.test.demo");
+			ConfigItem item = c.getGroupData().get("demo.key");
+			assertEquals(item.getValue(), "unit stset");
+			item.setUpdateTime(1234L);
+		}
+
+		/**
+		 * Test method for {@link org.apache.niolex.config.service.impl.GroupServiceImpl#svrSendDiff(org.apache.niolex.config.bean.ConfigItem)}.
+		 */
+		@Test
+		public void testSvrSendDiffNeg2() {
+			ConfigItem diff = new ConfigItem();
+			diff.setGroupId(17);
 			diff.setKey("demo.key");
 			diff.setValue("unit stset");
 			diff.setUpdateTime(System.currentTimeMillis());
