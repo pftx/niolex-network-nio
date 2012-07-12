@@ -49,7 +49,7 @@ public class ConfigClientTest {
 			}};
 		conf1.addListener("demo", ls);
 		conf2.addListener("demo.str", ls);
-		Thread.sleep(3000000);
+		Thread.sleep(3000);
 	}
 
 }

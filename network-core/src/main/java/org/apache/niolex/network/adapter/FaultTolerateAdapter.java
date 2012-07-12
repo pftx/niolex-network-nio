@@ -20,8 +20,8 @@ package org.apache.niolex.network.adapter;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import org.apache.niolex.commons.util.LRUHashMap;
-import org.apache.niolex.commons.util.RRList;
+import org.apache.niolex.commons.collection.LRUHashMap;
+import org.apache.niolex.commons.collection.RRList;
 import org.apache.niolex.network.Config;
 import org.apache.niolex.network.IPacketHandler;
 import org.apache.niolex.network.IPacketWriter;

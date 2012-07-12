@@ -21,6 +21,7 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.apache.niolex.commons.util.Pair;
 import org.junit.Test;
 
 /**
@@ -56,6 +57,43 @@ public class BlockingWaiterTest {
 		System.out.println("St " + b);
 		t.join();
 		assertEquals(1, au.intValue());
+	}
+
+	/**
+	 * Test method for {@link org.apache.niolex.network.util.BlockingWaiter#waitForResult(java.lang.Object, long)}.
+	 */
+	@Test
+	public void testInit() throws Exception {
+		final BlockingWaiter<String> test = new BlockingWaiter<String>();
+		final AtomicInteger au = new AtomicInteger(0);
+		final Thread[] ts = new Thread[10];
+		for (int i = 0; i < 10; ++i) {
+			final int k = i;
+			Thread t = new Thread() {
+				public void run() {
+					try {
+						System.out.println("Init " + k);
+						Pair<Boolean, BlockingWaiter<String>.WaitOn> out = test.init("testWaitForResult");
+						System.out.println("Init " + k + " " + out.a);
+						String s = out.b.waitForResult(100);
+						System.out.println(s);
+						au.incrementAndGet();
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+			};
+			ts[i] = t;
+			t.start();
+		}
+		Thread.sleep(10);
+		System.out.println("Init OK");
+		boolean b = test.release("testWaitForResult", "Not yet implemented");
+		System.out.println("Released Status " + b);
+		for (int i = 0; i < 10; ++i) {
+			ts[i].join();
+		}
+		assertEquals(10, au.intValue());
 	}
 
 	/**

@@ -65,7 +65,7 @@ public class ConfigerTest {
 		Configer conf = new Configer("configserver.test.demo");
 		String s = conf.getString("demo.str");
 		System.out.println(s);
-		assertEquals("good morning!", s);
+		assertEquals("我们最美丽的祖国啊", s);
 	}
 
 	/**

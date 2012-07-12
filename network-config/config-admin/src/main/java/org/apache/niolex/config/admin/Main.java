@@ -40,7 +40,7 @@ public class Main {
 		}
 		final Updater updater = new UpdaterClient(args[0]);
 		updater.subscribeAuthInfo(args[1], args[2]);
-		final Scanner scan = new Scanner(System.in, "gbk");
+		final Scanner scan = new Scanner(System.in);
 		System.out.println("Welcome to Config management Console.");
 		while (true) {
 			System.out.print("#> ");

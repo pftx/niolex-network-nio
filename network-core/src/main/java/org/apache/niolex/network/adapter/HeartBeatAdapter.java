@@ -108,6 +108,7 @@ public class HeartBeatAdapter implements IPacketHandler, WriteEventListener, Run
 		} else {
 			// Attach the current time stamp to the packet writer, and save it to the queue.
 			wt.attachData(KEY, System.currentTimeMillis());
+			wt.addEventListener(this);
 			clientQueue.add(wt);
 			LOG.info("Client {} needs heart beat.", wt.getRemoteName());
 		}

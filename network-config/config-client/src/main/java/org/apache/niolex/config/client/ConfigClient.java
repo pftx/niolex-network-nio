@@ -386,7 +386,7 @@ public class ConfigClient {
 				LOG.info("Error occured when connect to address: {}, client will retry. {}",
 						serverAddress, e.toString());
 				try {
-					Thread.sleep(CONNECT_TIMEOUT / 3);
+					Thread.sleep(3000);
 				} catch (InterruptedException e1) {}
 			}
     	}

@@ -26,7 +26,7 @@ import static org.mockito.Mockito.verify;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import org.apache.niolex.commons.util.RRList;
+import org.apache.niolex.commons.collection.RRList;
 import org.apache.niolex.network.Config;
 import org.apache.niolex.network.IPacketHandler;
 import org.apache.niolex.network.IPacketWriter;

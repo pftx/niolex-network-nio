@@ -17,12 +17,13 @@
  */
 package org.apache.niolex.network.util;
 
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+
+import org.apache.niolex.commons.util.Pair;
 
 /**
  * This is a waiting utility for clients to wait for the response and in the mean time hold the thread.
@@ -40,10 +41,14 @@ public class BlockingWaiter<E> {
 	/**
 	 * The current waiting map.
 	 */
-	private final Map<Object, WaitOn> waitMap = new ConcurrentHashMap<Object, WaitOn>();
+	private final ConcurrentHashMap<Object, WaitOn> waitMap = new ConcurrentHashMap<Object, WaitOn>();
 
 	/**
 	 * Initialize an internal wait structure, and return it.
+	 * When use this method, the application need to make sure only one thread waiting for one key at any time.
+	 * Or the old wait on object will be replaced and that thread can not get result at all.
+	 *
+	 * @see init(Object key)
 	 *
 	 * @param key
 	 * @return
@@ -55,6 +60,33 @@ public class BlockingWaiter<E> {
 			WaitOn value = new WaitOn(key, waitOn);
 			waitMap.put(key, value);
 			return value;
+		} finally {
+			lock.unlock();
+		}
+	}
+
+	/**
+	 * Initialize an internal wait structure, and return it.
+	 * If there is already another one waiting on the same key, that old structure will be returned.
+	 * This method if for anyone want to wait on the same key concurrently.
+	 *
+	 * @param key
+	 * @return Pair.a true if the wait on object is newly created. Pair.b the wait on object.
+	 */
+	public Pair<Boolean, WaitOn> init(Object key) {
+		lock.lock();
+		try {
+			Condition waitOn = lock.newCondition();
+			WaitOn value = new WaitOn(key, waitOn);
+			Pair<Boolean, WaitOn> p = new Pair<Boolean, WaitOn>();
+			p.b = waitMap.putIfAbsent(key, value);
+			if (p.b == null) {
+				p.a = Boolean.TRUE;
+				p.b = value;
+			} else {
+				p.a = Boolean.FALSE;
+			}
+			return p;
 		} finally {
 			lock.unlock();
 		}
@@ -120,8 +152,8 @@ public class BlockingWaiter<E> {
 		/**
 		 * The internal managed wait item.
 		 */
-		private Object key;
-		private Condition waitOn;
+		private final Object key;
+		private final Condition waitOn;
 		private E result;
 		private RuntimeException e;
 
@@ -138,6 +170,7 @@ public class BlockingWaiter<E> {
 		/**
 		 * Wait for result from server.
 		 * If result is not ready after the given time, will return null.
+		 * If there is any exception thrown from the release side, that exception will be thrown.
 		 *
 		 * @param key
 		 * @param time
@@ -149,6 +182,10 @@ public class BlockingWaiter<E> {
 			try {
 				if (result != null)
 					return result;
+				if (e != null) {
+					// Release with exception.
+					throw e;
+				}
 				// Not ready yet, let's wait.
 				waitOn.await(time, TimeUnit.MILLISECONDS);
 				if (e != null) {
@@ -169,7 +206,7 @@ public class BlockingWaiter<E> {
 			this.result = result;
 			lock.lock();
 			try {
-				waitOn.signal();
+				waitOn.signalAll();
 			} finally {
 				lock.unlock();
 			}
@@ -179,7 +216,7 @@ public class BlockingWaiter<E> {
 			this.e = result;
 			lock.lock();
 			try {
-				waitOn.signal();
+				waitOn.signalAll();
 			} finally {
 				lock.unlock();
 			}
