@@ -55,12 +55,13 @@ public class ClassLoaderTest {
 	@Test
 	public void test() throws Throwable {
 		// Class for name will execute.
-		// Class.forName("org.apache.niolex.network.demo.lang.VolatileTest");
+//		Class<?> cls = Class.forName("org.apache.niolex.network.demo.lang.VolatileTest");
 		// Load class will not execute static block.
-		ClassLoaderTest.class.getClassLoader().loadClass("org.apache.niolex.network.demo.lang.VolatileTest");
+		Class<?> cls = ClassLoaderTest.class.getClassLoader().loadClass("org.apache.niolex.network.demo.lang.VolatileTest");
+		System.out.println(cls.getConstructors()[0]);
 
 		Method m = MethodUtil.getMethod(KTestBean.class, "getB", new Class<?>[0]);
-		System.out.println(m);
+		//System.out.println(m);
 		KTestBean test = new KTestBean();
 		test.setB(123);
 

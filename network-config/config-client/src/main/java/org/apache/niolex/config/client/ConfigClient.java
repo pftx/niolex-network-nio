@@ -31,6 +31,7 @@ import org.apache.niolex.commons.compress.JacksonUtil;
 import org.apache.niolex.commons.config.PropUtil;
 import org.apache.niolex.commons.download.DownloadUtil;
 import org.apache.niolex.commons.file.FileUtil;
+import org.apache.niolex.commons.test.MockUtil;
 import org.apache.niolex.commons.util.Pair;
 import org.apache.niolex.commons.util.Runme;
 import org.apache.niolex.config.bean.ConfigGroup;
@@ -189,11 +190,12 @@ public class ConfigClient {
     		LOG.error("Server address is empty, init failed.");
     		return false;
     	}
-    	InetSocketAddress[] tmp = new InetSocketAddress[servers.length];
+    	final InetSocketAddress[] tmp = new InetSocketAddress[servers.length];
+    	final int[] rand = MockUtil.reorderIntArray(servers.length);
     	for (int i = 0; i < servers.length; ++i) {
     		String str = servers[i];
     		String[] addrs = str.split(":");
-    		tmp[i] = new InetSocketAddress(addrs[0], Integer.parseInt(addrs[1]));
+    		tmp[rand[i]] = new InetSocketAddress(addrs[0], Integer.parseInt(addrs[1]));
     	}
     	ADDRESSES = tmp;
     	if (INIT_STATUS == InitStatus.INIT) {
@@ -294,7 +296,9 @@ public class ConfigClient {
     			ConfigItem item = PacketTranslater.toConfigItem(sc);
     			// Store this item into memory storage.
     			String groupName = findGroupName(item);
-    			updateConfigItem(groupName, item);
+    			if (groupName != null) {
+    				updateConfigItem(groupName, item);
+    			}
     			break;
     		case CodeMap.GROUP_NOA:
     			groupName = StringUtil.utf8ByteToStr(sc.getData());

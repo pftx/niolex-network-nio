@@ -39,6 +39,7 @@ public class VolatileTest {
 
 	@Test
 	public void test() {
+		B.test();
 		Runnable r = new Runnable() {
 
 			@Override
@@ -142,4 +143,12 @@ public class VolatileTest {
 		System.out.println("Lock Time: " + t);
 		assertEquals(1200000, size);
 	}
+}
+
+class B {
+	static {
+		System.out.println("Linke Me static");
+	}
+
+	static void test() {}
 }
