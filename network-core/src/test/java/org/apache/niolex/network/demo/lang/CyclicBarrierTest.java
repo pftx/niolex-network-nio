@@ -40,6 +40,12 @@ public class CyclicBarrierTest {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
+	    	 System.out.println("Mid " + myRow);
+	    	 try {
+	    		 cb.await();
+	    	 } catch (Exception e) {
+	    		 e.printStackTrace();
+	    	 }
 	    	 System.out.println("Done " + myRow);
 	     }
 	}
@@ -64,7 +70,7 @@ public class CyclicBarrierTest {
 			new Thread(new Worker(i, cb)).start();
 		}
 		try {
-			Thread.sleep(100);
+			Thread.sleep(200);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}

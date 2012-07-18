@@ -68,7 +68,7 @@ public class TimeTest {
 		t = System.currentTimeMillis() - in;
 		System.out.println("Nano Time: " + t);
 		for (String s : C.BB.foo()) {
-			System.out.println("It: " + s);
+			System.out.println("It‘s: " + s);
 		}
 	}
 

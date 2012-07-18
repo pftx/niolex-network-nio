@@ -34,13 +34,12 @@ public class ConfigClientTest {
 	 */
 	@Test
 	public void testGetConfigGroup() throws Throwable {
+		// 获取配置组
 		Configer conf1 = new Configer("testme");
+		// 获取配置
 		String s1 = conf1.getString("demo.key");
 		System.out.println(s1);
-		Configer conf2 = new Configer("configserver.test.demo");
-		String s2 = conf2.getString("demo.key");
-		System.out.println(s2);
-
+		// 添加监听器
 		ConfigListener ls = new ConfigListener() {
 			@Override
 			public void configChanged(String value, long updateTime) {
@@ -48,6 +47,11 @@ public class ConfigClientTest {
 
 			}};
 		conf1.addListener("demo", ls);
+
+
+		Configer conf2 = new Configer("configserver.test.demo");
+		String s2 = conf2.getString("demo.key");
+		System.out.println(s2);
 		conf2.addListener("demo.str", ls);
 		Thread.sleep(300000);
 	}

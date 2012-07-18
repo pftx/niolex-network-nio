@@ -1,5 +1,5 @@
 /**
- * ClassLoaderTest.java
+ * ReflectionTest.java
  *
  * Copyright 2012 Niolex, Inc.
  *
@@ -17,7 +17,7 @@
  */
 package org.apache.niolex.network.demo.lang;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -33,7 +33,7 @@ import org.junit.Test;
  * @version 1.0.0
  * @Date: 2012-6-18
  */
-public class ClassLoaderTest {
+public class ReflectionTest {
 
 	public interface KTestI {
 		public Integer getB();
@@ -53,26 +53,18 @@ public class ClassLoaderTest {
 	}
 
 	@Test
-	public void test() throws Throwable {
-		// Class for name will execute.
-//		Class<?> cls = Class.forName("org.apache.niolex.network.demo.lang.VolatileTest");
-		// Load class will not execute static block.
-		Class<?> cls = ClassLoaderTest.class.getClassLoader().loadClass("org.apache.niolex.network.demo.lang.VolatileTest");
-		System.out.println(cls.getConstructors()[0]);
-
-		Method m = MethodUtil.getMethod(KTestBean.class, "getB", new Class<?>[0]);
-		//System.out.println(m);
+	public void testReflect() throws Throwable {
 		KTestBean test = new KTestBean();
 		test.setB(123);
-
 		final int SIZE = 2 << 20;
 		final Integer TEST = 123;
 		Object param[] = new Object[0];
+		Method m = MethodUtil.getMethod(KTestBean.class, "getB", new Class<?>[0]);
 
 		long in = System.currentTimeMillis();
 		for (int i = 0; i < SIZE; ++i) {
 			Integer k = (Integer) m.invoke(test, param);
-			assertEquals(k, TEST);
+			assertTrue(k == TEST);
 		}
 
 		long t = System.currentTimeMillis() - in;
@@ -82,7 +74,7 @@ public class ClassLoaderTest {
 		in = System.currentTimeMillis();
 		for (int i = 0; i < SIZE; ++i) {
 			Integer k = (Integer) f.get(test);
-			assertEquals(k, TEST);
+			assertTrue(k == TEST);
 		}
 		t = System.currentTimeMillis() - in;
 		System.out.println("Field Time: " + t);
@@ -90,7 +82,7 @@ public class ClassLoaderTest {
 		in = System.currentTimeMillis();
 		for (int i = 0; i < SIZE; ++i) {
 			Integer k = test.getB();
-			assertEquals(k, TEST);
+			assertTrue(k == TEST);
 		}
 		t = System.currentTimeMillis() - in;
 		System.out.println("Direct m Time: " + t);
@@ -98,36 +90,25 @@ public class ClassLoaderTest {
 		in = System.currentTimeMillis();
 		for (int i = 0; i < SIZE; ++i) {
 			Integer k = test.b;
-			assertEquals(k, TEST);
+			assertTrue(k == TEST);
 		}
 		t = System.currentTimeMillis() - in;
 		System.out.println("Direct f Time: " + t);
 	}
 
-	class A extends B {
-		public int a = 100;
-
-		public A() {
-			super();
-			System.out.println(a);
-			a = 200;
-		}
-
-	}
-
-	class B {
-		public B() {
-			System.out.println(((A) this).a);
-		}
+	public Integer compare(ProxyHandler h, KTestBean test) {
+		h.invokeBefore(test, null, null);
+		Integer i = test.getB();
+		h.invokeAfter(h, null, null, test);
+		return i;
 	}
 
 	@Test
-	public void tem() {
-		System.out.println(new A().a);
+	public void testProxy() {
 		KTestBean test = new KTestBean();
 		test.setB(123);
 
-		final int SIZE = 2 << 20;
+		final int SIZE = 2 << 22;
 		final Integer TEST = 123;
 
 		ProxyHandler h = new ProxyHandler() {
@@ -144,18 +125,25 @@ public class ClassLoaderTest {
 		long in = System.currentTimeMillis();
 		for (int i = 0; i < SIZE; ++i) {
 			Integer k = proxy.getB();
-			assertEquals(k, TEST);
+			assertTrue(k == TEST);
 		}
-
 		long t = System.currentTimeMillis() - in;
-		System.out.println("Method Time: " + t);
+		System.out.println("Proxy Time: " + t);
 
 		in = System.currentTimeMillis();
 		for (int i = 0; i < SIZE; ++i) {
 			Integer k = test.getB();
-			assertEquals(k, TEST);
+			assertTrue(k == TEST);
 		}
 		t = System.currentTimeMillis() - in;
-		System.out.println("Grig M Time: " + t);
+		System.out.println("Direct Time: " + t);
+
+		in = System.currentTimeMillis();
+		for (int i = 0; i < SIZE; ++i) {
+			Integer k = compare(h, test);
+			assertTrue(k == TEST);
+		}
+		t = System.currentTimeMillis() - in;
+		System.out.println("Compare Time: " + t);
 	}
 }
