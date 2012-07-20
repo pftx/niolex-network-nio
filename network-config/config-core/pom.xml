@@ -16,11 +16,6 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-			<version>1.6.4</version>
-		</dependency>
-		<dependency>
 			<groupId>org.apache.niolex</groupId>
 			<artifactId>commons-core</artifactId>
 			<version>1.0.1</version>
@@ -32,14 +27,8 @@
 		</dependency>
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
-			<artifactId>logback-core</artifactId>
-			<version>1.0.3</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
-			<version>1.0.3</version>
+			<version>[1.0.3,2.0.0)</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
