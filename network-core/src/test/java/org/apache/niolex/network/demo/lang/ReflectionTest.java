@@ -22,11 +22,14 @@ import static org.junit.Assert.assertTrue;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
+import org.apache.niolex.commons.reflect.FastFieldUtil;
 import org.apache.niolex.commons.reflect.FieldUtil;
 import org.apache.niolex.commons.reflect.MethodUtil;
 import org.apache.niolex.commons.reflect.ProxyUtil;
 import org.apache.niolex.commons.reflect.ProxyUtil.ProxyHandler;
 import org.junit.Test;
+
+import com.esotericsoftware.reflectasm.FieldAccess;
 
 /**
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
@@ -78,6 +81,16 @@ public class ReflectionTest {
 		}
 		t = System.currentTimeMillis() - in;
 		System.out.println("Field Time: " + t);
+
+		FieldAccess a = FastFieldUtil.getFieldAccess(KTestBean.class);
+		int idx = a.getIndex("b");
+		in = System.currentTimeMillis();
+		for (int i = 0; i < SIZE; ++i) {
+			Integer k = (Integer)a.get(test, idx);
+			assertTrue(k == TEST);
+		}
+		t = System.currentTimeMillis() - in;
+		System.out.println("Fast Field Time: " + t);
 
 		in = System.currentTimeMillis();
 		for (int i = 0; i < SIZE; ++i) {
