@@ -23,10 +23,9 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.niolex.commons.compress.JacksonUtil;
+import org.apache.niolex.commons.stream.JsonProxy;
 import org.apache.niolex.network.PacketData;
-import org.codehaus.jackson.map.type.TypeFactory;
-import org.codehaus.jackson.type.JavaType;
+import org.codehaus.jackson.type.TypeReference;
 
 /**
  * Common utils for Rpc.
@@ -38,16 +37,36 @@ import org.codehaus.jackson.type.JavaType;
 public abstract class RpcUtil {
 
 	/**
+	 * This is the class to return a type.
+	 * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
+	 * @version 1.0.0
+	 * @Date: 2012-7-24
+	 */
+	private static class TypeRe<T> extends TypeReference<T> {
+		private Type type;
+
+		public TypeRe(Type type) {
+			super();
+			this.type = type;
+		}
+
+		@Override
+		public Type getType() {
+			return type;
+		}
+
+	}
+
+	/**
 	 * Decode parameters to JavaType.
 	 *
 	 * @param generic
 	 * @return
 	 */
-	@SuppressWarnings("deprecation")
-	public static final List<JavaType> decodeParams(Type[] generic) {
-		List<JavaType> list = new ArrayList<JavaType>(generic.length);
+	public static final List<TypeRe<?>> decodeParams(Type[] generic) {
+		List<TypeRe<?>> list = new ArrayList<TypeRe<?>>(generic.length);
 		for (Type tp : generic) {
-			list.add(TypeFactory.type(tp));
+			list.add(new TypeRe<String>(tp));
 		}
 		return list;
 	}
@@ -61,11 +80,12 @@ public abstract class RpcUtil {
 	 * @throws IOException
 	 */
 	public static final Object[] prepareParams(byte[] data, Type[] generic) throws IOException {
-		List<JavaType> list = decodeParams(generic);
+		List<TypeRe<?>> list = decodeParams(generic);
 		Object[] ret = new Object[list.size()];
 		ByteArrayInputStream in = new ByteArrayInputStream(data);
+		JsonProxy proxy = new JsonProxy(in);
 		for (int i = 0; i < ret.length; ++i) {
-			ret[i] = JacksonUtil.readObj(in, list.get(i));
+			ret[i] = proxy.readObject(list.get(i));
 		}
 		return ret;
 	}

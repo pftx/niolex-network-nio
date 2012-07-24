@@ -17,7 +17,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.apache.niolex</groupId>
-			<artifactId>commons-core</artifactId>
+			<artifactId>commons-seri</artifactId>
 			<version>1.0.1</version>
 		</dependency>
 		<dependency>
