@@ -53,7 +53,7 @@ public class ConfigClientTest {
 		String s2 = conf2.getString("demo.key");
 		System.out.println(s2);
 		conf2.addListener("demo.str", ls);
-		Thread.sleep(300000);
+		Thread.sleep(10000);
 	}
 
 }
