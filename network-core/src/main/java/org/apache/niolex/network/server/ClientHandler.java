@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
  * @version 1.0.0
  * @Date: 2012-6-11
  */
-public class ClientHandler  extends BasePacketWriter {
+public class ClientHandler extends BasePacketWriter {
 	private static final Logger LOG = LoggerFactory.getLogger(ClientHandler.class);
 
 	/* 缓冲区大小*/
