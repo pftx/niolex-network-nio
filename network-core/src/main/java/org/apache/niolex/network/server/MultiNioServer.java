@@ -23,6 +23,7 @@ import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.util.LinkedList;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -135,6 +136,7 @@ public class MultiNioServer extends NioServer {
 	 */
 	private class RunnableSelector implements Runnable {
 		private LinkedList<SocketChannel> clientQueue = new LinkedList<SocketChannel>();
+		private AtomicBoolean wakenUp = new AtomicBoolean();
 		private Selector selector;
 		private Thread thread;
 
@@ -150,7 +152,9 @@ public class MultiNioServer extends NioServer {
 		 */
 		public void registerClient(SocketChannel client) {
 			clientQueue.add(client);
-			selector.wakeup();
+			if (wakenUp.compareAndSet(false, true)) {
+				selector.wakeup();
+			}
 		}
 
 		/**
@@ -159,13 +163,13 @@ public class MultiNioServer extends NioServer {
 		 * @throws InterruptedException
 		 */
 		public void close() throws IOException, InterruptedException {
-			selector.wakeup();
-			thread.join();
 			for (SelectionKey skey : selector.keys()) {
             	try {
             		skey.channel().close();
             	} catch (Exception e) {}
             }
+			selector.wakeup();
+			thread.join();
 			selector.close();
 		}
 
@@ -177,6 +181,7 @@ public class MultiNioServer extends NioServer {
 		public void run() {
 			try {
 				while (isListening) {
+					wakenUp.set(false);
 					selector.select(acceptTimeOut);
 					Set<SelectionKey> selectionKeys = selector.selectedKeys();
 					for (SelectionKey selectionKey: selectionKeys) {
@@ -186,11 +191,8 @@ public class MultiNioServer extends NioServer {
 
 					// Check the status, if there is any clients need to attach.
 		            if (!clientQueue.isEmpty()) {
-		            	while (true) {
-		            		SocketChannel client = clientQueue.poll();
-		            		if (client == null) {
-		            			break;
-		            		}
+		            	SocketChannel client = null;
+		            	while ((client = clientQueue.poll()) != null) {
 		            		client.register(selector, SelectionKey.OP_READ,
 		            				new ClientHandler(packetHandler, selector, client));
 		            	}

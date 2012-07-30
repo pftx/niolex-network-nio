@@ -235,12 +235,6 @@ public class NioServer implements IServer {
     	// Mark the server as stopped, so main thread will return.
         isListening = false;
         try {
-        	mainSelector.wakeup();
-        	mainThread.join();
-        } catch (Exception e) {
-        	LOG.error("Failed to stop server main thread.", e);
-        }
-        try {
             ss.socket().close();
             ss.close();
             for (SelectionKey skey : mainSelector.keys()) {
@@ -248,12 +242,13 @@ public class NioServer implements IServer {
             		skey.channel().close();
             	} catch (Exception e) {}
             }
+            mainSelector.wakeup();
+            mainThread.join();
             mainSelector.close();
-
+            LOG.info("Server stoped.");
         } catch (Exception e) {
-            LOG.error("Failed to close server port.", e);
+            LOG.error("Failed to stop server main thread.", e);
         }
-        LOG.info("Server stoped.");
     }
 
 
