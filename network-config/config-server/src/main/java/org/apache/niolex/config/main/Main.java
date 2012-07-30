@@ -17,6 +17,10 @@
  */
 package org.apache.niolex.config.main;
 
+import org.apache.niolex.commons.remote.BeanServer;
+import org.apache.niolex.commons.remote.ConnectionWorker;
+import org.apache.niolex.commons.remote.OSInfo;
+import org.apache.niolex.config.core.MemoryStorage;
 import org.apache.niolex.config.server.ConfigServer;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.FileSystemXmlApplicationContext;
@@ -34,6 +38,14 @@ public class Main {
         ConfigServer cServer = ctx.getBean(ConfigServer.class);
         if (!cServer.start()) {
         	System.out.println("Failed to start Config Server, system will exit...");
+        	System.exit(-1);
+        }
+        ConnectionWorker.setAuthInfo("d178b4c149");
+        BeanServer beanS = new BeanServer();
+        beanS.putIfAbsent("os", new OSInfo());
+        beanS.putIfAbsent("conf", ctx.getBean(MemoryStorage.class));
+        if (!beanS.start()) {
+        	System.out.println("Failed to start Bean Server, system will exit...");
         	System.exit(-1);
         }
 	}

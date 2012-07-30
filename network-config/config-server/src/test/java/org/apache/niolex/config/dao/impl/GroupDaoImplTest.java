@@ -78,7 +78,7 @@ public class GroupDaoImplTest {
 	@Test
 	public void testLoadGroup() {
 		ConfigGroup gc = dao.loadGroup("configserver.test.demo");
-		assertEquals(gc.getGroupId(), 1);
+		assertEquals(gc.getGroupId(), 2);
 		assertEquals(gc.getGroupName(), "configserver.test.demo");
 		gc = dao.loadGroup("configserver.test.donotinsert");
 		assertNull(gc);

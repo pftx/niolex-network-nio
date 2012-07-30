@@ -26,7 +26,7 @@
 	<!-- The configuration server. -->
 	<bean id="configServer" class="org.apache.niolex.config.server.ConfigServer"
 		p:syncSleepInterval="300000"
-		p:httpServerAddress="http://10.11.18.41:8780/configserver/server.json" />
+		p:httpServerAddress="${server.httpServerAddress}" />
 
 	<!-- dataSouce -->
 	<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">

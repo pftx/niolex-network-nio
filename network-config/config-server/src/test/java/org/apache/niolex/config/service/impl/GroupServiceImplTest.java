@@ -57,7 +57,7 @@ public class GroupServiceImplTest {
 		public void testCliSubscribeGroup() {
 			sevice.syncAllGroupsWithDB();
 			UserInfo info = new UserInfo();
-			info.setUserId(3);
+			info.setUserId(2);
 			info.setUserRole("NODE");
 			writer.attachData(AttachKey.USER_INFO, info);
 			boolean b= sevice.cliSubscribeGroup("configserver.test.demo", writer);
@@ -83,7 +83,7 @@ public class GroupServiceImplTest {
 		@Test
 		public void testCliSubscribeGroupNof() {
 			UserInfo info = new UserInfo();
-			info.setUserId(5);
+			info.setUserId(2);
 			info.setUserRole("NODE");
 			writer.attachData(AttachKey.USER_INFO, info);
 			boolean b= sevice.cliSubscribeGroup("configserver.test.demo2", writer);
@@ -96,7 +96,7 @@ public class GroupServiceImplTest {
 		@Test
 		public void testCliSyncGroup() {
 			UserInfo info = new UserInfo();
-			info.setUserId(3);
+			info.setUserId(2);
 			info.setUserRole("NODE");
 			SyncBean bean = new SyncBean();
 			bean.setGroupData(new HashMap<String, Long>());
@@ -119,7 +119,7 @@ public class GroupServiceImplTest {
 		@Test
 		public void testSvrSendDiff() {
 			ConfigItem diff = new ConfigItem();
-			diff.setGroupId(1);
+			diff.setGroupId(2);
 			diff.setKey("demo.key");
 			diff.setValue("unit stset");
 			diff.setUpdateTime(System.currentTimeMillis());

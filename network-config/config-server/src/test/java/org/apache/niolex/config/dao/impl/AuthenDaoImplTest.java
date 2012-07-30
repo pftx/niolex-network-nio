@@ -104,7 +104,7 @@ public class AuthenDaoImplTest {
 	 */
 	@Test
 	public void testHasReadAuth() {
-		boolean b = dao.hasReadAuth(3, 5);
+		boolean b = dao.hasReadAuth(2, 2);
 		assertTrue(b);
 		b = dao.hasReadAuth(7, 5);
 		assertFalse(b);

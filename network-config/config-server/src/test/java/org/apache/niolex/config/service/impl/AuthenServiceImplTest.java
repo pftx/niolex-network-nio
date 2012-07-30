@@ -72,7 +72,7 @@ public class AuthenServiceImplTest {
 	@Test
 	public void testHasReadAuth() {
 		UserInfo info = new UserInfo();
-		info.setUserId(3);
+		info.setUserId(2);
 		info.setUserRole("gg");
 		writer.attachData(AttachKey.USER_INFO, info);
 		ConfigGroup group = new ConfigGroup();

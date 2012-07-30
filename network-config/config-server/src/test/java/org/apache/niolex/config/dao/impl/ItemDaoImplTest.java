@@ -68,7 +68,7 @@ public class ItemDaoImplTest {
 	 */
 	@Test
 	public void testLoadGroupItems() {
-		List<ConfigItem> list = dao.loadGroupItems(3);
+		List<ConfigItem> list = dao.loadGroupItems(1);
 		System.out.println("Item " + list);
 		assertEquals(1, list.size());
 	}
@@ -79,7 +79,7 @@ public class ItemDaoImplTest {
 	 */
 	@Test
 	public void testUpdateConfig() throws ParseException {
-		ConfigItem item = dao.loadGroupItems(3).get(0);
+		ConfigItem item = dao.loadGroupItems(1).get(0);
 		item.setValue("This is the value from unit test. " + System.currentTimeMillis());
 		boolean b = dao.updateConfig(item);
 		assertTrue(b);
@@ -116,7 +116,7 @@ public class ItemDaoImplTest {
 	public void testGetConfig() {
 		ConfigItem item = dao.getConfig(7, "demo");
 		assertNull(item);
-		item = dao.getConfig(1, "demo.key");
+		item = dao.getConfig(2, "demo.key");
 		assertEquals("demo.value", item.getValue());
 	}
 
