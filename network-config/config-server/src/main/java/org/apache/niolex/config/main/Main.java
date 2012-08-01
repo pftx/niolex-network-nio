@@ -21,6 +21,7 @@ import org.apache.niolex.commons.remote.BeanServer;
 import org.apache.niolex.commons.remote.ConnectionWorker;
 import org.apache.niolex.commons.remote.OSInfo;
 import org.apache.niolex.config.core.MemoryStorage;
+import org.apache.niolex.config.event.ConfigEventDispatcher;
 import org.apache.niolex.config.server.ConfigServer;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.FileSystemXmlApplicationContext;
@@ -44,6 +45,8 @@ public class Main {
         BeanServer beanS = new BeanServer();
         beanS.putIfAbsent("os", new OSInfo());
         beanS.putIfAbsent("conf", ctx.getBean(MemoryStorage.class));
+        beanS.putIfAbsent("dispatch", ctx.getBean(ConfigEventDispatcher.class));
+        beanS.putIfAbsent("server", cServer);
         if (!beanS.start()) {
         	System.out.println("Failed to start Bean Server, system will exit...");
         	System.exit(-1);

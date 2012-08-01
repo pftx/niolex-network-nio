@@ -87,6 +87,12 @@ public class ConfigGroup {
 				if (tmp == null || tmp.getUpdateTime() < item.getUpdateTime()) {
 					groupData.put(item.getKey(), item);
 					list.add(item);
+				} else if (!tmp.getValue().equals(item.getValue())
+						&& tmp.getUpdateTime() == item.getUpdateTime()) {
+					// At the same time, this value updated twice, we update current.
+					// This will make all data stay the same with DB.
+					groupData.put(item.getKey(), item);
+					list.add(item);
 				}
 			}
 		} finally {

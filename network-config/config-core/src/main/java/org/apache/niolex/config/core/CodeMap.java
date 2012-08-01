@@ -45,6 +45,8 @@ public interface CodeMap {
 	short AUTH_SUBS = 2000;
 	// Auth failed.
 	short AUTH_FAIL = 2001;
+	// Server subscribe.
+	short SERVER_SUBS = 2002;
 
 	// Add a new config group.
 	short ADMIN_ADD_GROUP = 3001;
@@ -81,4 +83,7 @@ public interface CodeMap {
 	short RES_ADD_AUTH = 4007;
 	// The response to remove read authorization.
 	short RES_REMOVE_AUTH = 4008;
+	// The return of server subscribe.
+	short RES_SERVER_SUBS = 4009;
+
 }

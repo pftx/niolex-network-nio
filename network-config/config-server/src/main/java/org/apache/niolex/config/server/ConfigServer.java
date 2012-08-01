@@ -33,10 +33,9 @@ import org.apache.niolex.config.admin.UpdateConfigHandler;
 import org.apache.niolex.config.admin.UpdateUserHandler;
 import org.apache.niolex.config.core.CodeMap;
 import org.apache.niolex.config.handler.AuthSubscribeHandler;
-import org.apache.niolex.config.handler.GroupAddedHandler;
-import org.apache.niolex.config.handler.GroupDiffHandler;
 import org.apache.niolex.config.handler.GroupSubscribeHandler;
 import org.apache.niolex.config.handler.GroupSyncHandler;
+import org.apache.niolex.config.handler.ServerSubscribeHandler;
 import org.apache.niolex.config.service.GroupService;
 import org.apache.niolex.config.service.ReplicaService;
 import org.apache.niolex.network.IServer;
@@ -104,10 +103,6 @@ public class ConfigServer {
 	@Autowired
 	private GroupSyncHandler syncHandler;
 	@Autowired
-	private GroupDiffHandler diffHandler;
-	@Autowired
-	private GroupAddedHandler addHandler;
-	@Autowired
 	private AddConfigHandler addConfigHandler;
 	@Autowired
 	private UpdateConfigHandler updateConfigHandler;
@@ -123,6 +118,8 @@ public class ConfigServer {
 	private AddAuthHandler addAuthHandler;
 	@Autowired
 	private RemoveAuthHandler removeAuthHandler;
+	@Autowired
+	private ServerSubscribeHandler serverSubscribeHandler;
 	//---------------------------------------------------------------------
 
 	@Autowired
@@ -141,11 +138,11 @@ public class ConfigServer {
 			DispatchPacketHandler handler = new DispatchPacketHandler();
 
 			// --- register all handlers into dispatch packet handler ---
+			// Requests from clients.
 			handler.addHandler(CodeMap.AUTH_SUBS, authHandler);
 			handler.addHandler(CodeMap.GROUP_SUB, subsHandler);
 			handler.addHandler(CodeMap.GROUP_SYN, syncHandler);
-			handler.addHandler(CodeMap.GROUP_DIF, diffHandler);
-			handler.addHandler(CodeMap.GROUP_ADD, addHandler);
+			// Requests from administrators.
 			handler.addHandler(CodeMap.ADMIN_ADD_CONFIG, addConfigHandler);
 			handler.addHandler(CodeMap.ADMIN_UPDATE_CONFIG, updateConfigHandler);
 			handler.addHandler(CodeMap.ADMIN_ADD_GROUP, addGroupHandler);
@@ -154,6 +151,8 @@ public class ConfigServer {
 			handler.addHandler(CodeMap.ADMIN_UPDATE_USER, updateUserHandler);
 			handler.addHandler(CodeMap.ADMIN_ADD_AUTH, addAuthHandler);
 			handler.addHandler(CodeMap.ADMIN_REMOVE_AUTH, removeAuthHandler);
+			// Requests from other servers.
+			handler.addHandler(CodeMap.SERVER_SUBS, serverSubscribeHandler);
 			// --------------- end of register --------------------------
 
 			heartBeatAdapter = new HeartBeatAdapter(handler);
