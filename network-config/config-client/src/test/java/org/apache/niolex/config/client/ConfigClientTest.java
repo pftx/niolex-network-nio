@@ -17,7 +17,6 @@
  */
 package org.apache.niolex.config.client;
 
-
 import org.apache.niolex.config.event.ConfigListener;
 import org.junit.Test;
 
@@ -30,10 +29,19 @@ public class ConfigClientTest {
 
 	/**
 	 * Test method for {@link org.apache.niolex.config.client.ConfigClient#getConfigGroup(java.lang.String)}.
+	 *
 	 * @throws Throwable
 	 */
 	@Test
 	public void testGetConfigGroup() throws Throwable {
+		// 获取配置组
+		Configer conf1 = new Configer("testme");
+		// 获取配置
+		String s1 = conf1.getString("demo.key");
+		System.out.println(s1);
+	}
+
+	public static void main(String[] args) throws Throwable {
 		// 获取配置组
 		Configer conf1 = new Configer("testme");
 		// 获取配置
@@ -45,15 +53,15 @@ public class ConfigClientTest {
 			public void configChanged(String value, long updateTime) {
 				System.out.println("value of key [demo] changed: " + value);
 
-			}};
+			}
+		};
 		conf1.addListener("demo", ls);
-
 
 		Configer conf2 = new Configer("configserver.test.demo");
 		String s2 = conf2.getString("demo.key");
 		System.out.println(s2);
 		conf2.addListener("demo.str", ls);
-		Thread.sleep(10000);
+		Thread.sleep(1000000);
 	}
 
 }

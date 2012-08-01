@@ -19,6 +19,10 @@
 	<!-- Store all the configurations in memory. -->
 	<bean id="storage" class="org.apache.niolex.config.core.MemoryStorage" />
 
+	<!-- The replica Service managing connections to other servers. -->
+	<bean id="replicaService" class="org.apache.niolex.config.service.impl.ReplicaServiceImpl"
+		p:localPort="${server.localPort}" />
+
 	<!-- The packets server. -->
 	<bean id="iServer" class="org.apache.niolex.network.server.MultiNioServer"
 		p:port="${server.localPort}" />
