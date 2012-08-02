@@ -33,10 +33,11 @@ public class ConfigerTest {
 	 * Test method for {@link org.apache.niolex.config.client.Configer#Configer(java.lang.String)}.
 	 */
 	@Test
-	public void testConfiger() {
+	public void testConfiger() throws InterruptedException {
 		Configer conf = new Configer("configserver.test.demo");
 		String s = conf.getString("demo.key");
 		System.out.println(s);
+		Thread.sleep(1000);
 	}
 
 	/**
@@ -54,7 +55,7 @@ public class ConfigerTest {
 
 			}};
 		conf.addListener("demo", lister);
-		Thread.sleep(300);
+		Thread.sleep(1000);
 	}
 
 	/**
