@@ -17,11 +17,11 @@
  */
 package org.apache.niolex.network.rpc.util;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLConnection;
 
 import org.apache.niolex.commons.codec.Base64Util;
+import org.apache.niolex.commons.codec.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,13 +44,7 @@ public abstract class AuthUtil {
 	 */
     public static String authHeader(String username, String password) {
         String authString = username + ":" + password;
-        String auth = null;
-        try {
-            auth = "Basic " + Base64Util.byteToBase64(authString.getBytes("UTF-8"));
-        } catch (UnsupportedEncodingException e) {
-            throw new IllegalStateException("Basic Auth Header not set: " + e.toString());
-        }
-        return auth;
+        return "Basic " + Base64Util.byteToBase64(StringUtil.strToUtf8Byte(authString));
     }
 
     /**
@@ -85,6 +79,8 @@ public abstract class AuthUtil {
 			URLConnection proxy = u.openConnection();
 			proxy.setConnectTimeout(connectTimeout);
 			proxy.setReadTimeout(readTimeout);
+			proxy.setDoInput(true);
+			proxy.setDoOutput(false);
 			proxy.connect();
 			if (proxy.getContentLength() <= 1) {
 				LOG.warn("Failed to connect to " + completeUrl + " : Server response too short.");

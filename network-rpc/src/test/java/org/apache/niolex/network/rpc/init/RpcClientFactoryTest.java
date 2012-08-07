@@ -34,6 +34,7 @@ public class RpcClientFactoryTest {
 	 */
 	@Test
 	public void testGetBuilder() {
+		new RpcClientFactory();
 		RpcClientBuilder factory = mock(RpcClientBuilder.class);
 		RpcClientFactory.registerBuilder("network/mock", factory);
 		assertEquals(factory, RpcClientFactory.getBuilder("network/mock"));

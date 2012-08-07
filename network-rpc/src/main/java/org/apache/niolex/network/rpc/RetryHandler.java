@@ -22,9 +22,10 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
-import org.apache.niolex.commons.test.MockUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,6 +45,7 @@ import org.slf4j.LoggerFactory;
 public class RetryHandler implements InvocationHandler {
 	private static final Logger LOG = LoggerFactory.getLogger(RetryHandler.class);
 
+	private final AtomicInteger idx = new AtomicInteger(0);
 	private List<IServiceHandler> handlers;
 	private int retryTimes;
 	private int intervalBetweenRetry;
@@ -58,6 +60,8 @@ public class RetryHandler implements InvocationHandler {
 	 */
 	public RetryHandler(List<IServiceHandler> handlers, int retryTimes, int intervalBetweenRetry) {
 		super();
+		// This will make the handlers order different in every client instance.
+		Collections.shuffle(handlers);
 		this.handlers = handlers;
 		this.handlerNum = handlers.size();
 		this.retryTimes = retryTimes;
@@ -66,7 +70,10 @@ public class RetryHandler implements InvocationHandler {
 
 	@Override
 	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-	    int[] idx = MockUtil.reorderIntArray(handlerNum);
+		// If the idx is too large, we restore it to 0.
+	    if (idx.get() > Integer.MAX_VALUE - 1000) {
+	    	idx.set(0);
+	    }
 	    IServiceHandler handler;
 		Throwable cause = null;
 		long handleStart = 0, handleEnd = intervalBetweenRetry;
@@ -74,7 +81,7 @@ public class RetryHandler implements InvocationHandler {
 		int curTry = 0;
 		while (curTry < retryTimes && anyTried < handlerNum) {
 			// Try this.
-			handler = handlers.get(idx[anyTried]);
+			handler = handlers.get(idx.getAndIncrement() % handlerNum);
 			// Count the tried server number.
 			++anyTried;
 			if (!handler.isReady()) {
