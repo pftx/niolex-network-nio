@@ -19,6 +19,8 @@ package org.apache.niolex.network.demo.rpc;
 
 import java.util.List;
 
+import org.apache.niolex.commons.util.DateTimeUtil;
+
 /**
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
@@ -53,11 +55,20 @@ public class RpcServiceImpl implements RpcService {
 
 	/**
 	 * Override super method
-	 * @see org.apache.niolex.network.demo.rpc.RpcService#tr()
+	 * @see org.apache.niolex.network.demo.rpc.RpcService#throwEx()
 	 */
 	@Override
-	public String tr() {
+	public String throwEx() {
 		throw new RuntimeException("org.apache.niolex.network.demo.rpc.RpcService#tr()");
+	}
+
+	/**
+	 * Override super method
+	 * @see org.apache.niolex.network.demo.rpc.RpcService#concat(java.lang.String, java.lang.String)
+	 */
+	@Override
+	public String concat(String a, String b) {
+		return a + b;
 	}
 
 	/**
@@ -66,7 +77,7 @@ public class RpcServiceImpl implements RpcService {
 	 */
 	@Override
 	public void testMe() {
-		System.out.println("TestMe");
+		System.out.println("TestMe called at " + DateTimeUtil.formatDate2DateTimeStr());
 	}
 
 }

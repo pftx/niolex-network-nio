@@ -17,14 +17,17 @@
  */
 package org.apache.niolex.network.rpc.proto;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
+import java.lang.reflect.Type;
+
+import org.apache.niolex.commons.seri.ProtoUtil;
+import org.apache.niolex.commons.seri.SeriException;
 import org.apache.niolex.network.client.PacketClient;
 import org.apache.niolex.network.demo.proto.PersonProtos.Person;
 import org.apache.niolex.network.demo.proto.PersonProtos.Person.PhoneNumber;
 import org.apache.niolex.network.demo.proto.PersonProtos.Person.PhoneType;
 import org.apache.niolex.network.rpc.PacketInvoker;
-import org.apache.niolex.network.rpc.RpcException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -60,11 +63,11 @@ public class ProtoRpcClientTest {
 				.addPhone(PhoneNumber.newBuilder().setNumber("123122311" + i).setType(PhoneType.WORK).build())
 				.build();
 		byte[] bs = protoRpcClient.serializeParams(new Object[] { p });
-		Person q = Person.parseFrom(bs);
+		Person q = (Person) ProtoUtil.parseMulti(bs, new Type[] { Person.class })[0];
 		assertEquals(p, q);
 	}
 
-	@Test(expected=RpcException.class)
+	@Test(expected=SeriException.class)
 	public void testSerializeInvalidParams() throws Exception {
 		int i = 1231;
 		Person p = Person.newBuilder().setEmail("kjdfjkdf" + i + "@xxx.com").setId(45 + i)

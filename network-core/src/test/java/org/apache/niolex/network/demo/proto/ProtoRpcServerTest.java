@@ -51,12 +51,13 @@ public class ProtoRpcServerTest {
 		qr.toString();
 		PersonServiceImpl impl = new PersonServiceImpl();
 		int i = 982341;
+		PhoneNumber n = PhoneNumber.newBuilder().setNumber("123122311" + i).setType(PhoneType.HOME).build();
 		Person p = Person.newBuilder().setEmail("kjdfjkdf" + i + "@xxx.com").setId(45 + i)
 				.setName("Niolex [" + i + "]")
-				.addPhone(PhoneNumber.newBuilder().setNumber("123122311" + i).setType(PhoneType.HOME).build())
+				.addPhone(n)
 				.build();
-		impl.addPerson(p);
-		impl.getPerson(p);
+		impl.addPerson(p, n);
+		impl.getPerson(n);
 	}
 
 }

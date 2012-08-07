@@ -35,7 +35,10 @@ public interface RpcService {
 	public int size(List<String> arg);
 
 	@RpcMethod(16)
-	public String tr();
+	public String throwEx();
+
+	@RpcMethod(17)
+	public String concat(String a, String b);
 
 	public void testMe();
 }

@@ -46,17 +46,17 @@ public class DemoRpcClient {
 		final RpcService ser = client.getService(RpcService.class);
 
 		int k = ser.add(3, 4, 5, 6, 7, 8, 9);
-		System.out.println("Out => " + k);
+		System.out.println("42 => " + k);
 		List<String> args = new ArrayList<String>();
 		args.add("3");
 		args.add("3");
 		args.add("3");
 		k = ser.size(args);
-		System.out.println("Out => " + k);
+		System.out.println("3 => " + k);
 		k = ser.size(null);
-		System.out.println("Out => " + k);
+		System.out.println("0 => " + k);
 		k = ser.add(3, 4, 5);
-		System.out.println("Out => " + k);
+		System.out.println("12 => " + k);
 
 		Runnable r = new Runnable() {
 
@@ -103,7 +103,8 @@ public class DemoRpcClient {
 			ts[i].join();
 			System.out.println("Join ...");
 		}
-		System.out.println("Done.....");
+		String s = ser.concat("Hello ", "Jiyun!");
+		System.out.println("Done..... " + s);
 		client.stop();
 	}
 

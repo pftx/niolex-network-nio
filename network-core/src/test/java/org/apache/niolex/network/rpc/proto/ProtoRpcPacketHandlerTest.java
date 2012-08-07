@@ -17,11 +17,12 @@
  */
 package org.apache.niolex.network.rpc.proto;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 
 import java.lang.reflect.Type;
 
+import org.apache.niolex.commons.seri.ProtoUtil;
 import org.apache.niolex.network.demo.proto.PersonProtos.Person;
 import org.apache.niolex.network.demo.proto.PersonProtos.Person.PhoneNumber;
 import org.apache.niolex.network.demo.proto.PersonProtos.Person.PhoneType;
@@ -42,8 +43,16 @@ public class ProtoRpcPacketHandlerTest {
 	@Test
 	public void testPrepareParams() throws Exception {
 		ProtoRpcPacketHandler pph = new ProtoRpcPacketHandler();
-		assertNull(pph.prepareParams(null, null));
-		assertNull(pph.prepareParams(null, new Type[0]));
+		int i = 2334;
+		PhoneNumber n = PhoneNumber.newBuilder().setNumber("123122311" + i).setType(PhoneType.HOME).build();
+		Person p = Person.newBuilder().setEmail("kjdfjkdf" + i + "@xxx.com").setId(45 + i)
+				.setName("Niolex [" + i + "]")
+				.addPhone(n)
+				.build();
+		byte arr2[] = ProtoUtil.seriMulti(new Object[] {n, p});
+		Object[] arr = pph.prepareParams(arr2, new Type[] {PhoneNumber.class, Person.class});
+		assertEquals(arr[0], n);
+		assertEquals(arr[1], p);
 	}
 
 	/**
@@ -51,13 +60,14 @@ public class ProtoRpcPacketHandlerTest {
 	 */
 	@Test
 	public void testPrepareParams2() throws Exception {
-		ProtoRpcPacketHandler pph = new ProtoRpcPacketHandler();
+		ProtoRpcPacketHandler pph = new ProtoRpcPacketHandler(5);
 		int i = 2334;
 		Person p = Person.newBuilder().setEmail("kjdfjkdf" + i + "@xxx.com").setId(45 + i)
 				.setName("Niolex [" + i + "]")
 				.addPhone(PhoneNumber.newBuilder().setNumber("123122311" + i).setType(PhoneType.HOME).build())
 				.build();
-		assertNotNull(pph.prepareParams(p.toByteArray(), new Type[] {Person.class}));
+		byte arr2[] = ProtoUtil.seriMulti(new Object[] {p});
+		assertNotNull(pph.prepareParams(arr2, new Type[] {Person.class}));
 	}
 
 	/**
@@ -84,7 +94,7 @@ public class ProtoRpcPacketHandlerTest {
 	@Test
 	public void testHandleError() throws Exception {
 		ProtoRpcPacketHandler pph = new ProtoRpcPacketHandler();
-		byte[] bb = pph.serializeReturn(null);
+		byte[] bb = pph.serializeReturn(new Exception("This is good"));
 		assertNotNull(bb);
 	}
 

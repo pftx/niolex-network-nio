@@ -17,9 +17,9 @@
  */
 package org.apache.niolex.network.rpc.proto;
 
-import java.io.ByteArrayInputStream;
 import java.lang.reflect.Type;
 
+import org.apache.niolex.commons.seri.ProtoUtil;
 import org.apache.niolex.network.rpc.RpcException;
 import org.apache.niolex.network.rpc.RpcPacketHandler;
 
@@ -35,21 +35,23 @@ import com.google.protobuf.GeneratedMessage;
 public class ProtoRpcPacketHandler extends RpcPacketHandler {
 
 	/**
+	 * Override super Constructor
+	 */
+	public ProtoRpcPacketHandler() {
+		super();
+	}
+
+	public ProtoRpcPacketHandler(int threadsNumber) {
+		super(threadsNumber);
+	}
+
+	/**
 	 * Override super method
 	 * @see org.apache.niolex.network.rpc.RpcPacketHandler#prepareParams(byte[], java.lang.reflect.Type[])
 	 */
 	@Override
 	protected Object[] prepareParams(byte[] data, Type[] generic) throws Exception {
-		if (generic == null || generic.length == 0) {
-			return null;
-		}
-		Object[] ret = new Object[generic.length];
-		ByteArrayInputStream in = new ByteArrayInputStream(data);
-		for (int i = 0; i < generic.length; ++i) {
-			Type t = generic[i];
-			ret[i] = ProtoUtil.parseOne(in, t);
-		}
-		return ret;
+		return ProtoUtil.parseMulti(data, generic);
 	}
 
 	/**
@@ -58,12 +60,12 @@ public class ProtoRpcPacketHandler extends RpcPacketHandler {
 	 */
 	@Override
 	protected byte[] serializeReturn(Object ret) throws Exception {
-		if (ret == null) {
-			return new byte[0];
-		}
 		if (ret instanceof GeneratedMessage) {
 			GeneratedMessage gen = (GeneratedMessage) ret;
 			return gen.toByteArray();
+		} else if (ret instanceof Exception) {
+			LOG.warn("ProtoBuffer can not support return Exception. We just log it here.", (Exception)ret);
+			return new byte[0];
 		} else {
 			throw new RpcException("Message is not protobuf type: " + ret.getClass(),
 					RpcException.Type.ERROR_PARSE_PARAMS, null);

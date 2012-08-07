@@ -18,6 +18,7 @@
 package org.apache.niolex.network.demo.proto;
 
 import org.apache.niolex.network.demo.proto.PersonProtos.Person;
+import org.apache.niolex.network.demo.proto.PersonProtos.Person.PhoneNumber;
 import org.apache.niolex.network.rpc.RpcMethod;
 
 /**
@@ -28,9 +29,9 @@ import org.apache.niolex.network.rpc.RpcMethod;
 public interface PersonService {
 
 	@RpcMethod(20)
-	public void addPerson(Person p);
+	public void addPerson(Person p, PhoneNumber number);
 
 	@RpcMethod(21)
-	public Person getPerson(Person p);
+	public Person getPerson(PhoneNumber number);
 
 }

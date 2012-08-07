@@ -43,15 +43,14 @@ public class DemoProtoRpcClient {
 		final PersonService ser = client.getService(PersonService.class);
 
 		for (int i = 0; i < 5; ++i) {
+			PhoneNumber n = PhoneNumber.newBuilder().setNumber("123122311" + i).setType(PhoneType.MOBILE).build();
 			Person p = Person.newBuilder().setEmail("kjdfjkdf" + i + "@xxx.com").setId(45 + i)
-					.setName("Niolex [" + i + "]")
-					.addPhone(PhoneNumber.newBuilder().setNumber("123122311" + i).setType(PhoneType.MOBILE).build())
-					.build();
-			ser.addPerson(p);
+					.setName("Niolex [" + i + "]").addPhone(n).build();
+			ser.addPerson(p, n);
 		}
 		for (int i = 0; i < 5; ++i) {
-			Person p = Person.newBuilder().setId(45 + i).setName("a").build();
-			p = ser.getPerson(p);
+			PhoneNumber n = PhoneNumber.newBuilder().setNumber("123122311" + i).setType(PhoneType.MOBILE).build();
+			Person p = ser.getPerson(n);
 			System.out.println("Join ... " + p);
 		}
 		Runnable r = new Runnable() {
@@ -65,18 +64,20 @@ public class DemoProtoRpcClient {
 				long maxin = 0;
 				while (i-- > 0) {
 					long xin = System.currentTimeMillis();
-					Person p = Person.newBuilder().setId(45).setName("a").build();
-					p = ser.getPerson(p);
+					Person p = null;
+					PhoneNumber n = null;
+					n = PhoneNumber.newBuilder().setNumber("123122311" + 0).setType(PhoneType.MOBILE).build();
+					p = ser.getPerson(n);
 					if (!p.getName().startsWith("Niolex [0]")) {
 						System.out.println("Out => " + p);
 					}
-					p = Person.newBuilder().setId(46).setName("a").build();
-					p = ser.getPerson(p);
+					n = PhoneNumber.newBuilder().setNumber("123122311" + 1).setType(PhoneType.MOBILE).build();
+					p = ser.getPerson(n);
 					if (!p.getName().startsWith("Niolex [1]")) {
 						System.out.println("Out => " + p);
 					}
-					p = Person.newBuilder().setId(47).setName("a").build();
-					p = ser.getPerson(p);
+					n = PhoneNumber.newBuilder().setNumber("123122311" + 2).setType(PhoneType.MOBILE).build();
+					p = ser.getPerson(n);
 					if (!p.getName().startsWith("Niolex [2]")) {
 						System.out.println("Out => " + p);
 					}

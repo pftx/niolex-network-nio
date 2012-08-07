@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
  * @Date: 2012-6-1
  */
 public abstract class RpcPacketHandler implements IPacketHandler {
-	private static final Logger LOG = LoggerFactory.getLogger(RpcPacketHandler.class);
+	protected static final Logger LOG = LoggerFactory.getLogger(RpcPacketHandler.class);
 
 	// The Thread pool size, default to 20, which is the majority configurations on servers.
     private ExecutorService tPool;
@@ -136,7 +136,10 @@ public abstract class RpcPacketHandler implements IPacketHandler {
 			RpcException rep = null;
 			Object[] args = null;
 			try {
-				args = prepareParams(sc.getData(), method.getGenericParameterTypes());
+				Type[] generic = method.getGenericParameterTypes();
+				if (generic != null && generic.length > 0) {
+					args = prepareParams(sc.getData(), generic);
+				}
 			} catch (Exception e1) {
 				rep = new RpcException("Error occured when prepare params.",
 						RpcException.Type.ERROR_PARSE_PARAMS, e1);
@@ -167,7 +170,12 @@ public abstract class RpcPacketHandler implements IPacketHandler {
 	 */
 	private void handleReturn(PacketData sc, IPacketWriter wt, Object data, int exception) {
 		try {
-			byte[] arr = serializeReturn(data);
+			byte[] arr = null;
+			if (data == null) {
+				arr = new byte[0];
+			} else {
+				arr = serializeReturn(data);
+			}
 			PacketData rc = new PacketData(sc.getCode(), arr);
 			rc.setReserved((byte) (sc.getReserved() + exception));
 			rc.setVersion(sc.getVersion());
@@ -210,6 +218,7 @@ public abstract class RpcPacketHandler implements IPacketHandler {
 
 	/**
 	 * Read parameters from the data.
+	 * generic can not be null, we already checked.
 	 *
 	 * @param data
 	 * @param generic
@@ -220,6 +229,7 @@ public abstract class RpcPacketHandler implements IPacketHandler {
 
 	/**
 	 * Serialize returned object into byte array.
+	 * ret can not be null, we already checked.
 	 *
 	 * @param ret
 	 * @return

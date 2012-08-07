@@ -60,9 +60,6 @@ public class JsonRpcPacketHandler extends RpcPacketHandler {
 	 */
 	@Override
 	protected byte[] serializeReturn(Object ret) throws Exception {
-		if (ret == null) {
-			return new byte[0];
-		}
 		return JacksonUtil.obj2Str(ret).getBytes(Config.SERVER_ENCODING);
 	}
 

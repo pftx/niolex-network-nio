@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.niolex.network.demo.proto.PersonProtos.Person;
+import org.apache.niolex.network.demo.proto.PersonProtos.Person.PhoneNumber;
 
 /**
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
@@ -29,15 +30,16 @@ import org.apache.niolex.network.demo.proto.PersonProtos.Person;
  */
 public class PersonServiceImpl implements PersonService {
 
-	private Map<Integer, Person> map = new ConcurrentHashMap<Integer, Person>();
+	private Map<PhoneNumber, Person> map = new ConcurrentHashMap<PhoneNumber, Person>();
 
 	/**
 	 * Override super method
 	 * @see org.apache.niolex.network.demo.proto.PersonService#addPerson(org.apache.niolex.network.demo.proto.PersonProtos.Person)
 	 */
 	@Override
-	public void addPerson(Person p) {
-		map.put(p.getId(), p);
+	public void addPerson(Person p, PhoneNumber number) {
+		map.put(number, p);
+		System.out.println("Persion with id " + p.getId() + " added, phone " + number);
 	}
 
 	/**
@@ -45,8 +47,8 @@ public class PersonServiceImpl implements PersonService {
 	 * @see org.apache.niolex.network.demo.proto.PersonService#getPerson(int)
 	 */
 	@Override
-	public Person getPerson(Person p) {
-		return map.get(p.getId());
+	public Person getPerson(PhoneNumber number) {
+		return map.get(number);
 	}
 
 }

@@ -17,16 +17,14 @@
  */
 package org.apache.niolex.network.rpc.proto;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
-import java.io.ByteArrayInputStream;
-import java.sql.Date;
-
+import org.apache.niolex.commons.seri.ProtoUtil;
+import org.apache.niolex.commons.seri.SeriException;
 import org.apache.niolex.commons.test.MockUtil;
 import org.apache.niolex.network.demo.proto.PersonProtos.Person;
 import org.apache.niolex.network.demo.proto.PersonProtos.Person.PhoneNumber;
 import org.apache.niolex.network.demo.proto.PersonProtos.Person.PhoneType;
-import org.apache.niolex.network.rpc.RpcException;
 import org.junit.Test;
 
 /**
@@ -39,7 +37,7 @@ public class ProtoUtilTest {
 	/**
 	 * Test method for {@link org.apache.niolex.network.rpc.proto.ProtoUtil#parseOne(byte[], java.lang.reflect.Type)}.
 	 */
-	@Test(expected = RpcException.class)
+	@Test(expected = SeriException.class)
 	public void testParseOneByteArrayType() {
 		byte[] ret = MockUtil.randByteArray(12);
 		ProtoUtil.parseOne(ret, null);
@@ -48,7 +46,7 @@ public class ProtoUtilTest {
 	/**
 	 * Test method for {@link org.apache.niolex.network.rpc.proto.ProtoUtil#parseOne(byte[], java.lang.reflect.Type)}.
 	 */
-	@Test(expected = RpcException.class)
+	@Test(expected = SeriException.class)
 	public void testParseOneByteArrayType2() {
 		byte[] ret = MockUtil.randByteArray(12);
 		ProtoUtil.parseOne(ret, String.class);
@@ -67,44 +65,6 @@ public class ProtoUtilTest {
 		byte[] ret = p.toByteArray();
 		Person q = (Person) ProtoUtil.parseOne(ret, Person.class);
 		assertEquals(p, q);
-	}
-
-	/**
-	 * Test method for
-	 * {@link org.apache.niolex.network.rpc.proto.ProtoUtil#parseOne(java.io.InputStream, java.lang.reflect.Type)}.
-	 */
-	@Test(expected = RpcException.class)
-	public void testParseOneInputStreamType() {
-		byte[] ret = MockUtil.randByteArray(12);
-		ByteArrayInputStream in = new ByteArrayInputStream(ret);
-		ProtoUtil.parseOne(in, null);
-	}
-
-	/**
-	 * Test method for
-	 * {@link org.apache.niolex.network.rpc.proto.ProtoUtil#parseOne(java.io.InputStream, java.lang.reflect.Type)}.
-	 */
-	@Test(expected = RpcException.class)
-	public void testParseOneInputStreamType2() {
-		byte[] ret = MockUtil.randByteArray(12);
-		ByteArrayInputStream in = new ByteArrayInputStream(ret);
-		ProtoUtil.parseOne(in, Date.class);
-	}
-
-	/**
-	 * Test method for
-	 * {@link org.apache.niolex.network.rpc.proto.ProtoUtil#parseOne(java.io.InputStream, java.lang.reflect.Type)}.
-	 */
-	@Test
-	public void testParseOneInputStreamType3() {
-		int i = 563432;
-		Person p = Person.newBuilder().setEmail("kjdfjkdf" + i + "@xxx.com").setId(45 + i)
-				.setName("Niolex [" + i + "]")
-				.addPhone(PhoneNumber.newBuilder().setNumber("123122311" + i).setType(PhoneType.MOBILE).build())
-				.build();
-		byte[] ret = p.toByteArray();
-		ByteArrayInputStream in = new ByteArrayInputStream(ret);
-		ProtoUtil.parseOne(in, Person.class);
 	}
 
 }

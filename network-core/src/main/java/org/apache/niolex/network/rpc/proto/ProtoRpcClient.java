@@ -17,15 +17,12 @@
  */
 package org.apache.niolex.network.rpc.proto;
 
-import java.io.ByteArrayOutputStream;
 import java.lang.reflect.Type;
 
+import org.apache.niolex.commons.seri.ProtoUtil;
 import org.apache.niolex.network.IClient;
 import org.apache.niolex.network.rpc.RpcClient;
-import org.apache.niolex.network.rpc.RpcException;
 import org.apache.niolex.network.rpc.RpcInvoker;
-
-import com.google.protobuf.GeneratedMessage;
 
 /**
  * Using Google Protocol Buffer to serialize data.
@@ -51,17 +48,7 @@ public class ProtoRpcClient extends RpcClient {
 	 */
 	@Override
 	protected byte[] serializeParams(Object[] args) throws Exception {
-		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		for (Object o : args) {
-			if (o instanceof GeneratedMessage) {
-				GeneratedMessage gen = (GeneratedMessage)o;
-				gen.writeTo(out);
-			} else {
-				throw new RpcException("Message is not protobuf type: " + o.getClass(),
-						RpcException.Type.ERROR_PARSE_PARAMS, null);
-			}
-		}
-		return out.toByteArray();
+		return ProtoUtil.seriMulti(args);
 	}
 
 	/**

@@ -75,7 +75,7 @@ public class JsonRpcClientTest {
 	 */
 	@Test(expected=RpcException.class)
 	public void testPrepareReturn() {
-		String r = ser.tr();
+		String r = ser.throwEx();
 		fail(r);
 	}
 
