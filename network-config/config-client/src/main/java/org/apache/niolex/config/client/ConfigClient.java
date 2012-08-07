@@ -17,6 +17,7 @@
  */
 package org.apache.niolex.config.client;
 
+import java.io.File;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
@@ -302,8 +303,17 @@ public class ConfigClient {
     			break;
     		case CodeMap.GROUP_NOA:
     			groupName = StringUtil.utf8ByteToStr(sc.getData());
+    			ConfigGroup group = STORAGE.get(groupName);
+    			if (group != null) {
+    				group.getGroupData().clear();
+    				BEAN.getGroupSet().remove(groupName);
+    				deleteConfigGroupFromLocakDisk(group);
+    			}
     			// Notify anyone waiting for this.
-    			WAITER.release(groupName, new ConfigException("You are not authorised to read this group."));
+    			boolean b = WAITER.release(groupName, new ConfigException("You are not authorised to read this group."));
+    			if (!b) {
+    				LOG.error("You are not authorised to read this group: {}.", groupName);
+    			}
     			break;
     		case CodeMap.GROUP_NOF:
     			groupName = StringUtil.utf8ByteToStr(sc.getData());
@@ -317,6 +327,17 @@ public class ConfigClient {
     		default:
     			LOG.warn("Packet received for code [{}] have no handler, just ignored.", sc.getCode());
 				break;
+    	}
+    }
+
+    /**
+     * Delete the group config from local disk.
+     * @param conf
+     */
+    private static final void deleteConfigGroupFromLocakDisk(ConfigGroup conf) {
+    	File f = new File(STORAGE_PATH + "/" + conf.getGroupName());
+    	if (f.exists()) {
+    		f.delete();
     	}
     }
 
