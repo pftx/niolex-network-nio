@@ -2,7 +2,13 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>org.apache.niolex</groupId>
+	<parent>
+		<groupId>org.apache.niolex</groupId>
+		<artifactId>niolex-parent</artifactId>
+		<version>1.0.0</version>
+		<relativePath></relativePath>
+	</parent>
+
 	<artifactId>network-name</artifactId>
 	<version>0.0.5</version>
 	<packaging>jar</packaging>
@@ -10,35 +16,16 @@
 	<name>network-name</name>
 	<url>http://maven.apache.org</url>
 
-	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-	</properties>
-
 	<dependencies>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-			<version>1.6.4</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.niolex</groupId>
-			<artifactId>commons-core</artifactId>
-			<version>1.0.1</version>
-		</dependency>
 		<dependency>
 			<groupId>org.apache.niolex</groupId>
 			<artifactId>network-core</artifactId>
-			<version>0.2.0</version>
-		</dependency>
-		<dependency>
-			<groupId>ch.qos.logback</groupId>
-			<artifactId>logback-core</artifactId>
-			<version>1.0.3</version>
+			<version>0.2.1</version>
 		</dependency>
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
-			<version>1.0.3</version>
+			<version>[1.0.3,2.0.0)</version>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
@@ -54,33 +41,4 @@
 		</dependency>
 	</dependencies>
 
-	<build>
-		<testResources>
-			<testResource>
-				<directory>src/test/java</directory>
-				<includes>
-					<include>**/*.txt</include>
-					<include>**/*.properties</include>
-				</includes>
-			</testResource>
-		</testResources>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<configuration>
-					<source>1.6</source>
-					<target>1.6</target>
-					<encoding>UTF-8</encoding>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-resources-plugin</artifactId>
-				<configuration>
-					<encoding>UTF-8</encoding>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
 </project>
