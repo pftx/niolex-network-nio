@@ -100,7 +100,7 @@
 						<manifest>
 							<addClasspath>true</addClasspath>
 							<classpathPrefix>lib/</classpathPrefix>
-							<mainClass>org.apache.niolex.config.main.Main</mainClass>
+							<mainClass>org.apache.niolex.config.main.ConfigServerMain</mainClass>
 						</manifest>
 					</archive>
 				</configuration>
@@ -118,7 +118,7 @@
 					<archive>
 						<manifest>
 							<addClasspath>true</addClasspath>
-							<mainClass>org.apache.niolex.config.main.Main</mainClass>
+							<mainClass>org.apache.niolex.config.main.ConfigServerMain</mainClass>
 						</manifest>
 					</archive>
 				</configuration>

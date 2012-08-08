@@ -113,9 +113,12 @@ public class ConfigClient {
     private static InitStatus INIT_STATUS = InitStatus.INIT;
 
     private static enum InitStatus {
-    	INIT, TRY, CONNECTED, FAILED
+    	INIT, TRY, CONNECTED, AUTHED, FAILED
     }
 
+    /**
+     * Init properties from config file.
+     */
     static {
     	try {
             PropUtil.loadConfig("/conf-client.properties", ConfigClient.class);
@@ -162,11 +165,15 @@ public class ConfigClient {
 
     /**
      * Sync server addresses from http server.
+     * If parameter is true, we will try to load server addresses from local disk if http server is unavailable.
+     *
+     * @param isStart
      */
     private static final boolean syncServerAddress(boolean isStart) {
     	String json;
 		try {
 			json = StringUtil.utf8ByteToStr(DownloadUtil.downloadFile(SERVER_ADDRESS));
+			// Store json to local disk.
 			FileUtil.setCharacterFileContentToFileSystem(STORAGE_PATH + "/server.json",
 					json, Config.SERVER_ENCODING);
 		} catch (Exception e) {
@@ -215,7 +222,7 @@ public class ConfigClient {
     private static final void syncWithServer() {
     	// Sync server addresses.
     	syncServerAddress(false);
-    	if (INIT_STATUS == InitStatus.CONNECTED) {
+    	if (INIT_STATUS == InitStatus.AUTHED) {
 	    	LOG.info("Start to sync local groups with server.");
 	    	List<SyncBean> list = new ArrayList<SyncBean>();
 	    	for (ConfigGroup tmp : STORAGE.getAll()) {
@@ -305,6 +312,7 @@ public class ConfigClient {
     			groupName = StringUtil.utf8ByteToStr(sc.getData());
     			ConfigGroup group = STORAGE.get(groupName);
     			if (group != null) {
+    				// If the group authentication has been removed, we need to delete if from local disk.
     				group.getGroupData().clear();
     				BEAN.getGroupSet().remove(groupName);
     				deleteConfigGroupFromLocakDisk(group);
@@ -312,6 +320,7 @@ public class ConfigClient {
     			// Notify anyone waiting for this.
     			boolean b = WAITER.release(groupName, new ConfigException("You are not authorised to read this group."));
     			if (!b) {
+    				// Nobody waiting for this, we will write a log.
     				LOG.error("You are not authorised to read this group: {}.", groupName);
     			}
     			break;
@@ -415,6 +424,7 @@ public class ConfigClient {
 				} catch (InterruptedException e1) {}
 			}
     	}
+    	INIT_STATUS = InitStatus.CONNECTED;
     	initSubscribe();
     	// Client connected, notify all the waiters.
     	notifyAllWaiter();
@@ -437,7 +447,7 @@ public class ConfigClient {
     private static final void notifyAllWaiter() {
     	LOCK.lock();
     	try {
-    		INIT_STATUS = InitStatus.CONNECTED;
+    		INIT_STATUS = InitStatus.AUTHED;
     		if (WAIT_CONNECTED != null) {
     			WAIT_CONNECTED.signalAll();
     			WAIT_CONNECTED = null;
@@ -454,7 +464,7 @@ public class ConfigClient {
     private static final void waitForConnected() throws InterruptedException {
     	LOCK.lock();
     	try {
-    		if (INIT_STATUS == InitStatus.CONNECTED) {
+    		if (INIT_STATUS == InitStatus.AUTHED) {
     			return;
     		}
     		if (WAIT_CONNECTED == null) {
@@ -473,7 +483,7 @@ public class ConfigClient {
     	try {
 			waitForConnected();
 		} catch (Exception e) {}
-    	if (INIT_STATUS != InitStatus.CONNECTED) {
+    	if (INIT_STATUS != InitStatus.AUTHED) {
     		throw new ConfigException("Connection lost from config server, please try again later.");
     	}
     }
@@ -513,9 +523,10 @@ public class ConfigClient {
     	// Try to load config from local disk.
     	tmp = getConfigGroupFromLocakDisk(groupName);
     	if (tmp != null) {
+    		// OK, we find config from disk, we store it into memory immediately.
     		STORAGE.store(tmp);
     		// Add this group name to bean.
-        	if (BEAN.getGroupSet().add(groupName)) {
+        	if (BEAN.getGroupSet().add(groupName) && INIT_STATUS == InitStatus.AUTHED) {
         		// Send packet to remote server.
         		PacketData sub = new PacketData(CodeMap.GROUP_SUB, StringUtil.strToUtf8Byte(groupName));
         		CLIENT.handleWrite(sub);

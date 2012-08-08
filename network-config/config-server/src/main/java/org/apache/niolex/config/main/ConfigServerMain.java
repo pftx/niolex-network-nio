@@ -1,5 +1,5 @@
 /**
- * Main.java
+ * ConfigServerMain.java
  *
  * Copyright 2012 Niolex, Inc.
  *
@@ -31,7 +31,7 @@ import org.springframework.context.support.FileSystemXmlApplicationContext;
  * @version 1.0.0
  * @Date: 2012-7-6
  */
-public class Main {
+public class ConfigServerMain {
 
 	public static void main(String[] args) throws Exception {
         ApplicationContext ctx = new FileSystemXmlApplicationContext(

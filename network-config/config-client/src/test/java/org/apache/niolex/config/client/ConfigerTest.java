@@ -17,9 +17,10 @@
  */
 package org.apache.niolex.config.client;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import org.apache.niolex.config.event.ConfigListener;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
@@ -32,12 +33,14 @@ public class ConfigerTest {
 	/**
 	 * Test method for {@link org.apache.niolex.config.client.Configer#Configer(java.lang.String)}.
 	 */
-	@Test
-	public void testConfiger() throws InterruptedException {
+	@BeforeClass
+	public static void testConfiger() throws InterruptedException {
 		Configer conf = new Configer("configserver.test.demo");
 		String s = conf.getString("demo.key");
-		System.out.println(s);
+		System.out.println("Old " + s);
 		Thread.sleep(1000);
+		s = conf.getString("demo.key");
+		System.out.println("New " + s);
 	}
 
 	/**

@@ -34,6 +34,7 @@ import org.junit.Test;
 public class ConfigEventDispatcherTest {
 
 	private static final ConfigEventDispatcher dispather = new ConfigEventDispatcher();
+
 	private static final ConfigListener listn = new ConfigListener() {
 
 		@Override
@@ -41,6 +42,7 @@ public class ConfigEventDispatcherTest {
 			System.out.println("Changed noew " + value + ", " + updateTime);
 			c.inc();
 		}};
+
 	private static final Counter c = new Counter();
 
 	/**
@@ -52,7 +54,7 @@ public class ConfigEventDispatcherTest {
 
 			@Override
 			public void configChanged(String value, long updateTime) {
-				System.out.println("Changed noew " + value + ", " + updateTime);
+				System.out.println("Changed lsit " + value + ", " + updateTime);
 				c.inc();c.inc();
 			}};
 		ConfigListener lsit2 = dispather.addListener("God lick", lsit);

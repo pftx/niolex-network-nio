@@ -22,6 +22,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.niolex.config.bean.ConfigItem;
 
 /**
+ * This is the class to manage listeners listening to config changes.
+ * KEEP IN MIND!!!!!
+ *
+ * One Listener Per Key!!!
+ *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
  * @Date: 2012-7-3
@@ -29,7 +34,7 @@ import org.apache.niolex.config.bean.ConfigItem;
 public class ConfigEventDispatcher {
 
 	/**
-	 * The total storage.
+	 * The total listener storage.
 	 */
 	private final ConcurrentHashMap<String, ConfigListener> mapStorage = new ConcurrentHashMap<String, ConfigListener>();
 
@@ -38,7 +43,7 @@ public class ConfigEventDispatcher {
 	 * Attention! We can only manage one listener for one key.
 	 *
 	 * @param eListener
-	 * @return the old listener.
+	 * @return the old listener. NULL if this is the only one listen to this key.
 	 */
 	public ConfigListener addListener(String key, ConfigListener listener) {
 		return mapStorage.put(key, listener);
