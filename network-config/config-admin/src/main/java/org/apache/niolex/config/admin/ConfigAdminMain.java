@@ -1,5 +1,5 @@
 /**
- * Main.java
+ * ConfigAdminMain.java
  *
  * Copyright 2012 Niolex, Inc.
  *
@@ -26,9 +26,9 @@ import org.apache.niolex.commons.file.FileUtil;
  * @version 1.0.0
  * @Date: 2012-7-9
  */
-public class Main {
+public class ConfigAdminMain {
 
-	private static final String USAGE = FileUtil.getCharacterFileContentFromClassPath("usage.txt", Main.class, "utf8");
+	private static final String USAGE = FileUtil.getCharacterFileContentFromClassPath("usage.txt", ConfigAdminMain.class, "utf8");
 	/**
 	 * @param args
 	 * @throws Exception

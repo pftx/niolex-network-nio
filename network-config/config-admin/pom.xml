@@ -53,7 +53,7 @@
 					<archive>
 						<manifest>
 							<addClasspath>true</addClasspath>
-							<mainClass>org.apache.niolex.config.admin.Main</mainClass>
+							<mainClass>org.apache.niolex.config.admin.ConfigAdminMain</mainClass>
 						</manifest>
 					</archive>
 					<encoding>UTF-8</encoding>
