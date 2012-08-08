@@ -10,7 +10,7 @@
 	</parent>
 
 	<artifactId>network-name</artifactId>
-	<version>0.0.5</version>
+	<version>0.0.6</version>
 	<packaging>jar</packaging>
 
 	<name>network-name</name>
@@ -20,7 +20,7 @@
 		<dependency>
 			<groupId>org.apache.niolex</groupId>
 			<artifactId>network-core</artifactId>
-			<version>0.2.1</version>
+			<version>0.2.2</version>
 		</dependency>
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
