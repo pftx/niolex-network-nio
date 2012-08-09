@@ -42,10 +42,16 @@ public class ConfigAdminMain {
 		updater.subscribeAuthInfo(args[1], args[2]);
 		final Scanner scan = new Scanner(System.in);
 		System.out.println("Welcome to Config management Console.");
+		String[] lastCmds = new String[0];
 		while (true) {
 			System.out.print("#> ");
 			String line = scan.nextLine();
 			String[] cmds = line.split(" +", 5);
+			if (line.equalsIgnoreCase("last")) {
+				cmds = lastCmds;
+			} else {
+				lastCmds = cmds;
+			}
 			if (cmds.length < 3) {
 				if (line.equalsIgnoreCase("exit")) {
 					System.exit(0);

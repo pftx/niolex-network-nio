@@ -1,3 +1,7 @@
+---admin commands---
+exit [exit this commmand]
+last [execute last command]
+
 ---config group related commands---
 add group [groupname]
 refresh group [groupname]
