@@ -187,10 +187,14 @@ public class ConfigServer {
 	 */
 	private void syncServerData() {
 		LOG.info("System will try to sync with DB now.");
-		groupService.syncAllGroupsWithDB();
+		try {
+			groupService.syncAllGroupsWithDB();
 
-		// Sync server addresses from http server.
-		syncServerAddress();
+			// Sync server addresses from http server.
+			syncServerAddress();
+		} catch (Exception e) {
+			LOG.error("Exception occured when sync with DB.", e);
+		}
 	}
 
 
