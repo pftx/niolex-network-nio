@@ -37,7 +37,7 @@ public class DemoRpcClient {
 	 *
 	 * @param args
 	 */
-	public static void main(String[] arg2s) throws Exception {
+	public static void main(String[] args) throws Exception {
 		// PacketClient c = new PacketClient(new InetSocketAddress("10.22.241.233", 8808));
 		PacketClient c = new PacketClient(new InetSocketAddress("localhost", 8808));
 		JsonRpcClient client = new JsonRpcClient(c, new PacketInvoker());
@@ -47,11 +47,11 @@ public class DemoRpcClient {
 
 		int k = ser.add(3, 4, 5, 6, 7, 8, 9);
 		System.out.println("42 => " + k);
-		List<String> args = new ArrayList<String>();
-		args.add("3");
-		args.add("3");
-		args.add("3");
-		k = ser.size(args);
+		List<String> list = new ArrayList<String>();
+		list.add("3");
+		list.add("3");
+		list.add("3");
+		k = ser.size(list);
 		System.out.println("3 => " + k);
 		k = ser.size(null);
 		System.out.println("0 => " + k);

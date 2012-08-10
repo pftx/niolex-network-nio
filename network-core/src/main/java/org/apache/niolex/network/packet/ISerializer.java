@@ -36,6 +36,7 @@ public interface ISerializer<T> {
 
 	/**
 	 * Translate object to byte array.
+	 * @param code
 	 * @param o
 	 * @return
 	 */
@@ -43,7 +44,7 @@ public interface ISerializer<T> {
 
 	/**
 	 * Translate byte array to object.
-	 * @param data
+	 * @param sc
 	 * @return
 	 */
 	public T data2Obj(PacketData sc);

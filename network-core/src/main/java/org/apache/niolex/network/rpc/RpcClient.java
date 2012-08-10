@@ -97,6 +97,7 @@ public abstract class RpcClient implements InvocationHandler, IPacketHandler {
 	 *
 	 * Constructor
 	 * @param client
+	 * @param invoker
 	 */
 	public RpcClient(IClient client, RpcInvoker invoker) {
 		super();
@@ -268,7 +269,7 @@ public abstract class RpcClient implements InvocationHandler, IPacketHandler {
 
 	/**
 	 * Set the Rpc Configs, this method will parse all the configurations and generate execute map.
-	 * @param confs
+	 * @param interfs
 	 */
 	public void addInferface(Class<?> interfs) {
 		Method[] arr = MethodUtil.getMethods(interfs);
@@ -302,8 +303,7 @@ public abstract class RpcClient implements InvocationHandler, IPacketHandler {
 
 	/**
 	 * Serialize arguments objects into byte array.
-	 * @param data
-	 * @param generic
+	 * @param args
 	 * @return
 	 * @throws Exception
 	 */

@@ -172,7 +172,6 @@ public class BlockingWaiter<E> {
 		 * If result is not ready after the given time, will return null.
 		 * If there is any exception thrown from the release side, that exception will be thrown.
 		 *
-		 * @param key
 		 * @param time
 		 * @return
 		 * @throws InterruptedException

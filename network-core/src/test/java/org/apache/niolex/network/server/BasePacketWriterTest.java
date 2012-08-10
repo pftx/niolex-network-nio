@@ -18,6 +18,8 @@
 package org.apache.niolex.network.server;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -45,6 +47,8 @@ public class BasePacketWriterTest {
 	public void testClose() {
 		BasePacketWriter tmp = new TBasePacketWriter ();
 		tmp.handleWrite(PacketData.getHeartBeatPacket());
+		tmp.attachData("a", tmp);
+		assertNotNull(tmp.getAttached("a"));
 		tmp.channelClosed();
 		boolean g = false;
 		try {
@@ -53,7 +57,7 @@ public class BasePacketWriterTest {
 			g = true;
 		}
 		assertTrue(g);
-
+		assertNull(tmp.getAttached("a"));
 		tmp.channelClosed();
 	}
 

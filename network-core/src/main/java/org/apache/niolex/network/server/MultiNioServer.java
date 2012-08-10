@@ -82,7 +82,7 @@ public class MultiNioServer extends NioServer {
 	 * Return multiple selector to super class.
 	 *
 	 * Override super method
-	 * @see org.apache.niolex.network.server.NioServer#getReadSelector()
+	 * @see org.apache.niolex.network.server.NioServer#registerClient(SocketChannel)
 	 */
 	@Override
 	protected void registerClient(SocketChannel client) throws IOException {

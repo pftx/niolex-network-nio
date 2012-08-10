@@ -153,7 +153,6 @@ public class NioServer implements IServer {
      * Sub class can override this method to use there own selector.
      * The default client handler will just process in the main thread.
      * @param client
-     * @return
      */
     protected void registerClient(SocketChannel client) throws IOException {
     	client.register(mainSelector, SelectionKey.OP_READ,

@@ -123,6 +123,9 @@ public abstract class BasePacketWriter implements IPacketWriter {
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T getAttached(String key) {
+		if (isChannelClosed) {
+			return null;
+		}
 		return (T)attachMap.get(key);
 	}
 
