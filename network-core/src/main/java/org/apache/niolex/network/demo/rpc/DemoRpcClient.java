@@ -21,6 +21,7 @@ import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.niolex.commons.test.Counter;
 import org.apache.niolex.network.client.PacketClient;
 import org.apache.niolex.network.rpc.PacketInvoker;
 import org.apache.niolex.network.rpc.json.JsonRpcClient;
@@ -58,6 +59,8 @@ public class DemoRpcClient {
 		k = ser.add(3, 4, 5);
 		System.out.println("12 => " + k);
 
+		final Counter errorCnt = new Counter();
+
 		Runnable r = new Runnable() {
 
 			final int SIZE = 2212;
@@ -71,6 +74,7 @@ public class DemoRpcClient {
 					long xin = System.currentTimeMillis();
 					int k = ser.add(3, 4, 5, 6, 7, 8, 9, i);
 					if (k != 42 + i) {
+						errorCnt.inc();
 						System.out.println("Out => " + k);
 					}
 
@@ -79,6 +83,7 @@ public class DemoRpcClient {
 					args.add("3");
 					k = ser.size(args);
 					if (k != 2) {
+						errorCnt.inc();
 						System.out.println("Out => " + k);
 					}
 					k = ser.size(null);
@@ -104,7 +109,7 @@ public class DemoRpcClient {
 			System.out.println("Join ...");
 		}
 		String s = ser.concat("Hello ", "Jiyun!");
-		System.out.println("Done..... " + s);
+		System.out.println("Done..... " + s + ", error " + errorCnt.cnt());
 		client.stop();
 	}
 
