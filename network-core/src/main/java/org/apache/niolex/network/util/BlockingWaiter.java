@@ -48,10 +48,10 @@ public class BlockingWaiter<E> {
 	 * When use this method, the application need to make sure only one thread waiting for one key at any time.
 	 * Or the old wait on object will be replaced and that thread can not get result at all.
 	 *
-	 * @see init(Object key)
+	 * @see #init(Object)
 	 *
 	 * @param key
-	 * @return
+	 * @return The newly created WaitOn
 	 */
 	public WaitOn initWait(Object key) {
 		lock.lock();
@@ -68,7 +68,7 @@ public class BlockingWaiter<E> {
 	/**
 	 * Initialize an internal wait structure, and return it.
 	 * If there is already another one waiting on the same key, that old structure will be returned.
-	 * This method if for anyone want to wait on the same key concurrently.
+	 * Use this method if for anyone want to wait on the same key concurrently.
 	 *
 	 * @param key
 	 * @return Pair.a true if the wait on object is newly created. Pair.b the wait on object.
@@ -98,7 +98,7 @@ public class BlockingWaiter<E> {
 	 *
 	 * @param key
 	 * @param time
-	 * @return
+	 * @return The result
 	 * @throws InterruptedException
 	 */
 	public E waitForResult(Object key, long time) throws InterruptedException {

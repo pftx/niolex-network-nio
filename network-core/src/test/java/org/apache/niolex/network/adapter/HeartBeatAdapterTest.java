@@ -112,4 +112,19 @@ public class HeartBeatAdapterTest {
 		assertEquals(8123, ada.getHeartBeatInterval());
 	}
 
+	@Test
+	public void testForceHeartBeat() throws Exception {
+		IPacketHandler other = mock(IPacketHandler.class);
+		HeartBeatAdapter ada = new HeartBeatAdapter(other);
+		ada.setHeartBeatInterval(10);
+		ada.setForceHeartBeat(true);
+		// started now.
+		IPacketWriter wt = spy(new TBasePacketWriter());
+		PacketData sc = new PacketData(789, new byte[0]);
+		ada.handleRead(sc, wt);
+		assertEquals(10, ada.getHeartBeatInterval());
+		ada.start();
+		Thread.sleep(100);
+		verify(wt, atLeast(1)).handleWrite(PacketData.getHeartBeatPacket());
+	}
 }

@@ -66,6 +66,11 @@ public class HeartBeatAdapter implements IPacketHandler, WriteEventListener, Run
     private Thread thread;
 
     /**
+     * Whether do we need to send heart beat to all clients.
+     */
+    private boolean forceHeartBeat;
+
+    /**
      * The constructor of this adapter.
      *
      * @param other
@@ -103,16 +108,30 @@ public class HeartBeatAdapter implements IPacketHandler, WriteEventListener, Run
 	 */
 	@Override
 	public void handleRead(PacketData sc, IPacketWriter wt) {
+		// If current is force heart beat, we check every time.
+		if (forceHeartBeat && wt.getAttached(KEY) == null) {
+			registerHeartBeat(wt);
+		}
+		// Process this packet.
 		if (sc.getCode() != Config.CODE_REGR_HBEAT) {
 			other.handleRead(sc, wt);
 		} else {
-			// Attach the current time stamp to the packet writer, and save it to the queue.
-			wt.attachData(KEY, System.currentTimeMillis());
-			wt.addEventListener(this);
-			clientQueue.add(wt);
-			LOG.info("Client {} needs heart beat.", wt.getRemoteName());
+			if (wt.getAttached(KEY) == null) {
+				registerHeartBeat(wt);
+			}
 		}
+	}
 
+	/**
+	 * Register this writer for heart beat.
+	 * @param wt
+	 */
+	public void registerHeartBeat(IPacketWriter wt) {
+		// Attach the current time stamp to the packet writer, and save it to the queue.
+		wt.attachData(KEY, System.currentTimeMillis());
+		wt.addEventListener(this);
+		clientQueue.add(wt);
+		LOG.info("Client {} is registerd for heart beat.", wt.getRemoteName());
 	}
 
 	/**
@@ -188,10 +207,21 @@ public class HeartBeatAdapter implements IPacketHandler, WriteEventListener, Run
 
     /**
 	 * The heartBeatInterval to set
+	 *
+	 * @param heartBeatInterval
 	 */
 	public void setHeartBeatInterval(int heartBeatInterval) {
         this.heartBeatInterval = heartBeatInterval;
     }
+
+	/**
+	 * Whether do we need to send heart beat to all clients.
+	 *
+	 * @param forceHeartBeat
+	 */
+	public void setForceHeartBeat(boolean forceHeartBeat) {
+		this.forceHeartBeat = forceHeartBeat;
+	}
 
 	/**
 	 * Return the status of this adapter

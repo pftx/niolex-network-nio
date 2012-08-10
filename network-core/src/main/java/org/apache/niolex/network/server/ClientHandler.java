@@ -299,7 +299,11 @@ public class ClientHandler extends BasePacketWriter {
         } catch (IOException e) {
             LOG.info("Failed to close client socket: {}", e.getMessage());
         } finally {
-        	packetHandler.handleClose(this);
+        	try {
+        		packetHandler.handleClose(this);
+        	} finally {
+        		super.channelClosed();
+        	}
         }
     }
 

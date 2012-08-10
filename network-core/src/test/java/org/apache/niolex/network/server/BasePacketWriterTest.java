@@ -41,6 +41,22 @@ public class BasePacketWriterTest {
 		bpw = new TBasePacketWriter ();
 	}
 
+	@Test
+	public void testClose() {
+		BasePacketWriter tmp = new TBasePacketWriter ();
+		tmp.handleWrite(PacketData.getHeartBeatPacket());
+		tmp.channelClosed();
+		boolean g = false;
+		try {
+			tmp.handleWrite(PacketData.getHeartBeatPacket());
+		} catch (IllegalStateException e) {
+			g = true;
+		}
+		assertTrue(g);
+
+		tmp.channelClosed();
+	}
+
 	/**
 	 * Test method for {@link org.apache.niolex.network.server.BasePacketWriter#handleWrite(org.apache.niolex.network.PacketData)}.
 	 */

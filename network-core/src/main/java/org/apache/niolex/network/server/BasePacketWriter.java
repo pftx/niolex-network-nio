@@ -53,7 +53,12 @@ public abstract class BasePacketWriter implements IPacketWriter {
 	private ArrayList<WriteEventListener> listenerList = new ArrayList<WriteEventListener>(2);
 
 	/**
-	 * Initialize send iterator here.
+	 * The channel status.
+	 */
+	private boolean isChannelClosed = false;
+
+	/**
+	 * This is an empty constructor.
 	 */
 	public BasePacketWriter() {
 		super();
@@ -61,12 +66,33 @@ public abstract class BasePacketWriter implements IPacketWriter {
 
 	@Override
 	public void handleWrite(PacketData sc) {
+		if (isChannelClosed) {
+			throw new IllegalStateException("This Channel is Closed.");
+		}
 		sendPacketsQueue.add(sc);
 	}
 
 	@Override
 	public void addEventListener(WriteEventListener listener) {
 		listenerList.add(listener);
+	}
+
+	/**
+	 * Sub class need to use this method to clean all the internal
+	 * data structure and mark this channel as closed.
+	 */
+	protected void channelClosed() {
+		if (isChannelClosed) {
+			return;
+		}
+		isChannelClosed = true;
+		attachMap.clear();
+		attachMap = null;
+		// We do not clear this queue, because some adapter might use it.
+		// But we still need to set it to null.
+		sendPacketsQueue = null;
+		listenerList.clear();
+		listenerList = null;
 	}
 
 	/**
@@ -101,7 +127,7 @@ public abstract class BasePacketWriter implements IPacketWriter {
 	}
 
 	/**
-	 * Return whether wht send packets queue is empty or not.
+	 * Return whether the send packets queue is empty or not.
 	 * @return
 	 */
 	public boolean isEmpty() {
