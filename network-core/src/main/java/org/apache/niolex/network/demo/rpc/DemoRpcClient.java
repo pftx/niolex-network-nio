@@ -61,43 +61,8 @@ public class DemoRpcClient {
 
 		final Counter errorCnt = new Counter();
 
-		Runnable r = new Runnable() {
-
-			final int SIZE = 2212;
-
-			@Override
-			public void run() {
-				int i = SIZE;
-				long in = System.currentTimeMillis();
-				long maxin = 0;
-				while (i-- > 0) {
-					long xin = System.currentTimeMillis();
-					int k = ser.add(3, 4, 5, 6, 7, 8, 9, i);
-					if (k != 42 + i) {
-						errorCnt.inc();
-						System.out.println("Out => " + k);
-					}
-
-					List<String> args = new ArrayList<String>();
-					args.add("3");
-					args.add("3");
-					k = ser.size(args);
-					if (k != 2) {
-						errorCnt.inc();
-						System.out.println("Out => " + k);
-					}
-					k = ser.size(null);
-					assert k == 0;
-					long xou = System.currentTimeMillis() - xin;
-					if (xou > maxin) {
-						maxin = xou;
-					}
-				}
-				long t = System.currentTimeMillis() - in;
-				System.out.println("rps => " + (SIZE * 3000 / t) + ", Max " + maxin + ", Avg " + (t / (SIZE * 3)));
-			}
-		};
-		final int THREAD_NUM = 5;
+		Runnable r = 
+		final int THREAD_NUM = 15;
 		Thread[] ts = new Thread[THREAD_NUM];
 		for (int i = 0; i < THREAD_NUM; ++i) {
 			Thread t = new Thread(r);
