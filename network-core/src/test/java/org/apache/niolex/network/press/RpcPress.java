@@ -48,15 +48,12 @@ public class RpcPress {
 	public static void main(String[] args) throws Exception {
 		RpcServer.main(args);
 		Thread[] ts = new Thread[THREAD_NUM];
-		JsonRpcClient[] cs = new JsonRpcClient[THREAD_NUM];
 		for (int i = 0; i < THREAD_NUM; ++i) {
 			JsonRpcClient cli = create();
-			RpcService service = cli.getService(RpcService.class);
-			Rpc r = new Rpc(service, "Hello " + i, " world.");
+			Rpc r = new Rpc(cli, "Hello " + i, " world.");
 			Thread t = new Thread(r);
 			t.start();
 			ts[i] = t;
-			cs[i] = cli;
 		}
 		long in = System.currentTimeMillis();
 		for (int i = 0; i < 1000; ++i) {
@@ -71,16 +68,16 @@ public class RpcPress {
 		}
 		for (int i = 0; i < THREAD_NUM; ++i) {
 			ts[i].join();
-			cs[i].stop();
 			System.out.println("Join ... " + i);
 		}
 		long xou = System.currentTimeMillis() - in;
 		System.out.println("Total Rps => " + ((SIZE * THREAD_NUM * 3000 + 1000) / xou));
 		System.out.println("Done....., error " + ERROR_CNT.cnt());
+		RpcServer.stop();
 	}
 
 	public static JsonRpcClient create() throws IOException {
-		// PacketClient c = new PacketClient(new InetSocketAddress("10.22.241.233", 8808));
+//		 PacketClient c = new PacketClient(new InetSocketAddress("10.11.18.41", 8808));
 		PacketClient c = new PacketClient(new InetSocketAddress("localhost", 8808));
 		JsonRpcClient client = new JsonRpcClient(c, new PacketInvoker());
 		client.connect();
@@ -88,12 +85,14 @@ public class RpcPress {
 	}
 
 	public static class Rpc implements Runnable {
+		JsonRpcClient cli;
 		RpcService service;
 		String a = "hello ", b = "world!";
 
-		public Rpc(RpcService service, String a, String b) {
+		public Rpc(JsonRpcClient cli, String a, String b) {
 			super();
-			this.service = service;
+			this.cli = cli;
+			this.service = cli.getService(RpcService.class);
 			this.a = a;
 			this.b = b;
 		}
@@ -136,6 +135,7 @@ public class RpcPress {
 			}
 			long t = System.currentTimeMillis() - in;
 			System.out.println("rps => " + (SIZE * 3000 / t) + ", Max " + maxin + ", Avg " + (t / (SIZE * 3)));
+			cli.stop();
 		}
 	}
 }

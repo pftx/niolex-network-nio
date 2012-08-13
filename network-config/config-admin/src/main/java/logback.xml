@@ -10,7 +10,6 @@
 <configuration debug="false">
 
     <property name="log_pattern" value="%date{&quot;yyyy-MM-dd HH:mm:ss,SSS&quot;}%6p [%F:%L] - %m%n" />
-    <property name="log_base_dir" value="/home/work/logs/%d{yyyyMMdd}" />
 
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <Target>System.out</Target>
