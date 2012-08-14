@@ -23,6 +23,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.niolex.commons.test.Counter;
+import org.apache.niolex.commons.test.StopWatch;
+import org.apache.niolex.commons.test.StopWatch.Stop;
 import org.apache.niolex.network.client.PacketClient;
 import org.apache.niolex.network.demo.rpc.RpcServer;
 import org.apache.niolex.network.demo.rpc.RpcService;
@@ -36,9 +38,10 @@ import org.apache.niolex.network.rpc.json.JsonRpcClient;
  */
 public class RpcPress {
 
-	static final int SIZE = 2212;
-	static final int THREAD_NUM = 20;
-
+	static int SIZE = 1024;
+	static int THREAD_NUM = 5;
+	static int SHUFFLE_NUM = 50;
+	static final StopWatch stopWatch = new StopWatch(10);
 	static final Counter ERROR_CNT = new Counter();
 
 	/**
@@ -46,7 +49,12 @@ public class RpcPress {
 	 * @throws IOException
 	 */
 	public static void main(String[] args) throws Exception {
-		RpcServer.main(args);
+		if (args != null && args.length != 0) {
+			SIZE = Integer.parseInt(args[0]);
+			THREAD_NUM = Integer.parseInt(args[1]);
+			SHUFFLE_NUM = Integer.parseInt(args[2]);
+        }
+		RpcServer.main(null);
 		Thread[] ts = new Thread[THREAD_NUM];
 		for (int i = 0; i < THREAD_NUM; ++i) {
 			JsonRpcClient cli = create();
@@ -55,11 +63,13 @@ public class RpcPress {
 			t.start();
 			ts[i] = t;
 		}
-		long in = System.currentTimeMillis();
-		for (int i = 0; i < 1000; ++i) {
+		stopWatch.begin();
+		for (int i = 0; i < SHUFFLE_NUM; ++i) {
 			JsonRpcClient cli = create();
 			RpcService service = cli.getService(RpcService.class);
+			Stop s = stopWatch.start();
 			String ok = service.concat("Hello " + i, " world.");
+			s.stop();
 			if (ok.length() < 14) {
 				throw new Exception("OK " + ok + ", i " + i);
 			}
@@ -70,9 +80,9 @@ public class RpcPress {
 			ts[i].join();
 			System.out.println("Join ... " + i);
 		}
-		long xou = System.currentTimeMillis() - in;
-		System.out.println("Total Rps => " + ((SIZE * THREAD_NUM * 3000 + 1000) / xou));
-		System.out.println("Done....., error " + ERROR_CNT.cnt());
+		stopWatch.done();
+		stopWatch.print();
+		System.out.println("Done..... error = " + ERROR_CNT.cnt());
 		RpcServer.stop();
 	}
 
@@ -100,11 +110,10 @@ public class RpcPress {
 		@Override
 		public void run() {
 			int i = SIZE;
-			long in = System.currentTimeMillis();
-			long maxin = 0;
 			while (i-- > 0) {
-				long xin = System.currentTimeMillis();
+				Stop s = stopWatch.start();
 				int k = service.add(3, 4, 5, 6, 7, 8, 9, i);
+				s.stop();
 				if (k != 42 + i) {
 					ERROR_CNT.inc();
 					System.out.println("Out => " + k);
@@ -113,28 +122,26 @@ public class RpcPress {
 				List<String> args = new ArrayList<String>();
 				args.add("3");
 				args.add("3");
+				s = stopWatch.start();
 				k = service.size(args);
+				s.stop();
 				if (k != 2) {
 					ERROR_CNT.inc();
 					System.out.println("Out => " + k);
 				}
 				// -------------------------
+				s = stopWatch.start();
 				String c = service.concat(a, b);
-				if (c.length() < 64000) {
+				s.stop();
+				if (c.length() > 64000) {
 					if (a.length() < b.length()) {
 						a = c;
 					} else {
 						b = c;
 					}
 				}
-				long xou = System.currentTimeMillis() - xin;
-				if (xou > maxin) {
-					maxin = xou;
-				}
 				Thread.yield();
 			}
-			long t = System.currentTimeMillis() - in;
-			System.out.println("rps => " + (SIZE * 3000 / t) + ", Max " + maxin + ", Avg " + (t / (SIZE * 3)));
 			cli.stop();
 		}
 	}
