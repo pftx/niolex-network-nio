@@ -37,7 +37,7 @@ import org.apache.niolex.network.rpc.json.JsonRpcClient;
 public class RpcPress {
 
 	static final int SIZE = 2212;
-	static final int THREAD_NUM = 50;
+	static final int THREAD_NUM = 20;
 
 	static final Counter ERROR_CNT = new Counter();
 
@@ -77,8 +77,8 @@ public class RpcPress {
 	}
 
 	public static JsonRpcClient create() throws IOException {
-//		 PacketClient c = new PacketClient(new InetSocketAddress("10.11.18.41", 8808));
-		PacketClient c = new PacketClient(new InetSocketAddress("localhost", 8808));
+		 PacketClient c = new PacketClient(new InetSocketAddress("10.11.18.41", 8808));
+//		PacketClient c = new PacketClient(new InetSocketAddress("localhost", 8808));
 		JsonRpcClient client = new JsonRpcClient(c, new PacketInvoker());
 		client.connect();
 		return client;

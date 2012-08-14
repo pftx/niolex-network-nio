@@ -59,7 +59,7 @@ public class RpcServiceImpl implements RpcService {
 	 */
 	@Override
 	public String throwEx() {
-		throw new RuntimeException("org.apache.niolex.network.demo.rpc.RpcService#tr()");
+		throw new RuntimeException("org.apache.niolex.network.demo.rpc.RpcService#throwEx()");
 	}
 
 	/**

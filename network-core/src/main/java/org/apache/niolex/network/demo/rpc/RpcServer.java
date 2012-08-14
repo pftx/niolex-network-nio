@@ -22,7 +22,6 @@ import java.io.IOException;
 import org.apache.niolex.network.rpc.RpcConfig;
 import org.apache.niolex.network.rpc.json.JsonRpcPacketHandler;
 import org.apache.niolex.network.server.MultiNioServer;
-import org.apache.niolex.network.server.NioServer;
 
 /**
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
@@ -31,7 +30,7 @@ import org.apache.niolex.network.server.NioServer;
  */
 public class RpcServer {
 
-    private static NioServer s = new MultiNioServer();
+    private static MultiNioServer s = new MultiNioServer();
 
     /**
      * The Server Demo
@@ -39,14 +38,22 @@ public class RpcServer {
      */
     public static void main(String[] args) throws IOException {
         s.setPort(8808);
-        JsonRpcPacketHandler handler = new JsonRpcPacketHandler();
+        JsonRpcPacketHandler handler = null;
+        if (args != null && args.length != 0) {
+        	s.setThreadsNumber(Integer.parseInt(args[0]));
+        	handler = new JsonRpcPacketHandler(Integer.parseInt(args[1]));
+        } else {
+        	handler = new JsonRpcPacketHandler();
+        }
         s.setPacketHandler(handler);
+
         RpcConfig[] confs = new RpcConfig[1];
         RpcConfig c = new RpcConfig();
         c.setInterface(RpcService.class);
         c.setTarget(new RpcServiceImpl());
         confs[0] = c;
 		handler.setRpcConfigs(confs);
+
         s.start();
     }
 

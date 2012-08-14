@@ -71,7 +71,7 @@ public interface Config {
 	/**
 	 * The Rpc packet handler internal thread pool size.
 	 */
-	int RPC_HANDLER_POOL_SIZE = 20;
+	int RPC_HANDLER_POOL_SIZE = 200;
 
 	/**
 	 * Sleep between each retry to connect to rpc server.
