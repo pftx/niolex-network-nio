@@ -89,8 +89,9 @@ public class NioServer implements IServer {
 	public boolean start() {
         try {
             ss = ServerSocketChannel.open();
-            ss.socket().bind(new InetSocketAddress(this.getPort()));
             ss.configureBlocking(false);
+            ss.socket().setReuseAddress(true);
+            ss.socket().bind(new InetSocketAddress(this.getPort()));
             mainSelector = Selector.open();
             ss.register(mainSelector, SelectionKey.OP_ACCEPT);
             isListening = true;
@@ -146,7 +147,7 @@ public class NioServer implements IServer {
     }
 
     /**
-     * handleKey use This method to register the newly created SocketChannel to a worker selector.
+     * #handleKey(SelectionKey) use This method to register the newly created SocketChannel to a worker selector.
      * This method will use the main selector to register READ operation.
      *
      * Any Sub class can override this method to change the default behavior.
@@ -155,8 +156,7 @@ public class NioServer implements IServer {
      * @param client
      */
     protected void registerClient(SocketChannel client) throws IOException {
-    	client.register(mainSelector, SelectionKey.OP_READ,
-    			new ClientHandler(packetHandler, mainSelector, client));
+    	new ClientHandler(packetHandler, mainSelector, client);
     }
 
     /**
@@ -191,7 +191,7 @@ public class NioServer implements IServer {
         	if (e instanceof CancelledKeyException || e instanceof ClosedChannelException) {
         		return;
         	}
-            LOG.info("Failed to handle client socket: {}", e.toString());
+            LOG.info("Failed to handle socket: {}", e.toString());
         }
     }
 

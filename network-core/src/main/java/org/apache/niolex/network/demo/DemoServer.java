@@ -23,7 +23,7 @@ import org.apache.niolex.network.example.EchoPacketHandler;
 import org.apache.niolex.network.handler.DispatchPacketHandler;
 import org.apache.niolex.network.handler.SessionPacketHandler;
 import org.apache.niolex.network.handler.SummaryPacketHandler;
-import org.apache.niolex.network.server.NioServer;
+import org.apache.niolex.network.server.MultiNioServer;
 
 
 /**
@@ -33,7 +33,7 @@ import org.apache.niolex.network.server.NioServer;
  */
 public class DemoServer {
 
-    private static NioServer s = new NioServer();
+    private static MultiNioServer s = new MultiNioServer();
 
     /**
      * The Server Demo
@@ -41,6 +41,9 @@ public class DemoServer {
      */
     public static void main(String[] args) throws IOException {
         s.setPort(8808);
+        if (args != null && args.length != 0) {
+        	s.setThreadsNumber(Integer.parseInt(args[0]));
+        }
         DispatchPacketHandler handler = new DispatchPacketHandler();
         handler.addHandler((short)2, new EchoPacketHandler());
         handler.addHandler((short)3, new SummaryPacketHandler());

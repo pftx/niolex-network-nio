@@ -20,29 +20,43 @@ package org.apache.niolex.network.press;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.niolex.commons.test.Counter;
+import org.apache.niolex.commons.test.MockUtil;
 import org.apache.niolex.commons.test.StopWatch;
 import org.apache.niolex.commons.test.StopWatch.Stop;
+import org.apache.niolex.network.PacketData;
+import org.apache.niolex.network.client.BaseClient;
 import org.apache.niolex.network.client.SocketClient;
 import org.apache.niolex.network.demo.rpc.RpcServer;
-import org.apache.niolex.network.demo.rpc.RpcService;
-import org.apache.niolex.network.rpc.SingleInvoker;
-import org.apache.niolex.network.rpc.json.JsonRpcClient;
+import org.apache.niolex.network.example.SavePacketHandler;
 
 /**
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
  * @Date: 2012-8-11
  */
-public class RpcPress {
+public class DemoPress {
 
 	static int SIZE = 1024;
 	static int THREAD_NUM = 5;
 	static int SHUFFLE_NUM = 50;
 	static final StopWatch stopWatch = new StopWatch(1);
 	static final Counter ERROR_CNT = new Counter();
+
+	public static boolean equals2(PacketData a, PacketData b) {
+		byte[] b1 = a.getData();
+		byte[] b2 = b.getData();
+		if (b1.length == b2.length) {
+			int k = MockUtil.ranInt(b1.length);
+			if (b1[k] == b2[k]) {
+				return true;
+			}
+		}
+		return false;
+	}
 
 	/**
 	 * @param args
@@ -56,20 +70,22 @@ public class RpcPress {
         }
 		RpcServer.main(null);
 		for (int i = 0; i < 10; ++i) {
-			JsonRpcClient cli = create();
-			RpcService service = cli.getService(RpcService.class);
+			BaseClient cli = create();
+			LinkedList<PacketData> list = new LinkedList<PacketData>();
+			cli.setPacketHandler(new SavePacketHandler(list));
 			Stop s = stopWatch.start();
-			String ok = service.concat("Hello " + i, " world.");
+			PacketData pac = new PacketData(2, MockUtil.randByteArray(57));
+			cli.handleWrite(pac);
+			PacketData par = list.poll();
 			s.stop();
-			if (ok.length() < 14) {
-				throw new Exception("OK " + ok + ", i " + i);
+			if (!equals2(pac, par)) {
+				throw new Exception("Not OK!");
 			}
 			cli.stop();
-			Thread.yield();
 		}
 		Thread[] ts = new Thread[THREAD_NUM];
 		for (int i = 0; i < THREAD_NUM; ++i) {
-			JsonRpcClient cli = create();
+			BaseClient cli = create();
 			Rpc r = new Rpc(cli, "Hello " + i, " world.");
 			Thread t = new Thread(r);
 			t.start();
@@ -77,13 +93,16 @@ public class RpcPress {
 		}
 		stopWatch.begin();
 		for (int i = 0; i < SHUFFLE_NUM; ++i) {
-			JsonRpcClient cli = create();
-			RpcService service = cli.getService(RpcService.class);
+			BaseClient cli = create();
+			LinkedList<PacketData> list = new LinkedList<PacketData>();
+			cli.setPacketHandler(new SavePacketHandler(list));
 			Stop s = stopWatch.start();
-			String ok = service.concat("Hello " + i, " world.");
+			PacketData pac = new PacketData(2, MockUtil.randByteArray(57));
+			cli.handleWrite(pac);
+			PacketData par = list.poll();
 			s.stop();
-			if (ok.length() < 14) {
-				throw new Exception("OK " + ok + ", i " + i);
+			if (!equals2(pac, par)) {
+				throw new Exception("Not OK!");
 			}
 			cli.stop();
 			Thread.yield();
@@ -98,23 +117,23 @@ public class RpcPress {
 		RpcServer.stop();
 	}
 
-	public static JsonRpcClient create() throws IOException {
+	public static SocketClient create() throws IOException {
 		SocketClient c = new SocketClient(new InetSocketAddress("10.11.18.41", 8808));
 //		PacketClient c = new PacketClient(new InetSocketAddress("localhost", 8808));
-		JsonRpcClient client = new JsonRpcClient(c, new SingleInvoker());
-		client.connect();
-		return client;
+		c.connect();
+		return c;
 	}
 
 	public static class Rpc implements Runnable {
-		JsonRpcClient cli;
-		RpcService service;
+		BaseClient cli;
+		LinkedList<PacketData> list;
 		String a = "hello ", b = "world!";
 
-		public Rpc(JsonRpcClient cli, String a, String b) {
+		public Rpc(BaseClient cli, String a, String b) {
 			super();
 			this.cli = cli;
-			this.service = cli.getService(RpcService.class);
+			list = new LinkedList<PacketData>();
+			cli.setPacketHandler(new SavePacketHandler(list));
 			this.a = a;
 			this.b = b;
 		}
@@ -124,34 +143,33 @@ public class RpcPress {
 			int i = SIZE;
 			while (i-- > 0) {
 				Stop s = stopWatch.start();
-				int k = service.add(3, 4, 5, 6, 7, 8, 9, i);
+				PacketData pac = new PacketData(2, MockUtil.randByteArray(66));
+				cli.handleWrite(pac);
+				PacketData par = list.poll();
 				s.stop();
-				if (k != 42 + i) {
+				if (!equals2(pac, par)) {
 					ERROR_CNT.inc();
-					System.out.println("Out => " + k);
+					System.out.println("Out => " + 1);
 				}
 				// -------------------------
 				List<String> args = new ArrayList<String>();
 				args.add("3");
 				args.add("3");
 				s = stopWatch.start();
-				k = service.size(args);
+				pac = new PacketData(2, MockUtil.randByteArray(66));
+				cli.handleWrite(pac);
+				par = list.poll();
 				s.stop();
-				if (k != 2) {
+				if (!equals2(pac, par)) {
 					ERROR_CNT.inc();
-					System.out.println("Out => " + k);
+					System.out.println("Out => " + 2);
 				}
 				// -------------------------
 				s = stopWatch.start();
-				String c = service.concat(a, b);
+				pac = new PacketData(2, MockUtil.randByteArray(66));
+				cli.handleWrite(pac);
+				par = list.poll();
 				s.stop();
-				if (c.length() > 64000) {
-					if (a.length() < b.length()) {
-						a = c;
-					} else {
-						b = c;
-					}
-				}
 				Thread.yield();
 			}
 			cli.stop();

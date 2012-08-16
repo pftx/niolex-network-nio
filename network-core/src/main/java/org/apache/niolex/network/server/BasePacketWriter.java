@@ -107,6 +107,7 @@ public abstract class BasePacketWriter implements IPacketWriter {
 			listener.afterSend(wEvent);
 		}
 	}
+
 	/**
 	 * Sub class need to use this method to get packets to send.
 	 * @return

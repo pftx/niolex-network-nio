@@ -30,7 +30,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The blocking implementation of IClient.
+ * The blocking implementation of IClient. This client can only be used in one
+ * thread. If you want to reuse client in multithreading, use #PacketClient
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
@@ -86,6 +87,7 @@ public class SocketClient extends BaseClient {
     		inS.close();
     		outS.close();
     		socket.close();
+    		LOG.info("Client stoped");
     	} catch(Exception e) {
     		LOG.error("Error occured when stop the server.", e);
     	}

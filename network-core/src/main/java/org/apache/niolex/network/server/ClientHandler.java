@@ -22,6 +22,8 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.niolex.network.Config;
 import org.apache.niolex.network.IPacketHandler;
@@ -56,17 +58,22 @@ public class ClientHandler extends BasePacketWriter {
     /**
      * The packet handler.
      */
-    private IPacketHandler packetHandler;
+    private final IPacketHandler packetHandler;
 
     /**
      * The server selector holding this handler.
      */
-    private Selector selector;
+    private final Selector selector;
 
     /**
-     * The socket channel this client handler is handling
+     * The socket channel this client handler is handling.
      */
-    private SocketChannel socketChannel;
+    private final SocketChannel socketChannel;
+
+    /**
+     * The socket selection key of this channel.
+     */
+    private final SelectionKey selectionKey;
 
     /* 发送数据缓冲区*/
     private ByteBuffer sendBuffer = ByteBuffer.allocate(BLOCK);
@@ -78,7 +85,12 @@ public class ClientHandler extends BasePacketWriter {
     /**
      * Current write status. attached to the selector or not.
      */
-    private Boolean writeAttached = Boolean.FALSE;
+    private AtomicBoolean writeAttached = new AtomicBoolean(false);
+
+    /**
+     * Use this lock to modify write attachment key.
+     */
+    private ReentrantLock writeLock = new ReentrantLock();
 
     /**
      * The name of this client socket.
@@ -97,11 +109,13 @@ public class ClientHandler extends BasePacketWriter {
      * @param selector
      * @param client
      */
-    public ClientHandler(IPacketHandler packetHandler, Selector selector, SocketChannel client) {
+    public ClientHandler(IPacketHandler packetHandler, Selector selector,
+    		SocketChannel client) throws IOException {
 		super();
 		this.packetHandler = packetHandler;
 		this.selector = selector;
 		this.socketChannel = client;
+		this.selectionKey = client.register(selector, SelectionKey.OP_READ, this);
 
 		// Initialize local variables.
         sendStatus = Status.NONE;
@@ -123,16 +137,16 @@ public class ClientHandler extends BasePacketWriter {
 	public void handleWrite(PacketData sc) {
 		super.handleWrite(sc);
 		// Signal the selector there is data to write.
-		synchronized (writeAttached) {
-			if (!writeAttached) {
-				try {
-					socketChannel.register(selector, SelectionKey.OP_READ | SelectionKey.OP_WRITE, this);
-					selector.wakeup();
-				} catch (Exception e) {
-					LOG.warn("Failed to attach write to selector, client will stop. " , e.toString());
-					handleClose();
-				}
-				writeAttached = Boolean.TRUE;
+		if (writeAttached.compareAndSet(false, true)) {
+			writeLock.lock();
+			try {
+				selectionKey.interestOps(SelectionKey.OP_READ | SelectionKey.OP_WRITE);
+				selector.wakeup();
+			} catch (Exception e) {
+				LOG.warn("Failed to attach write to selector, client will stop. " , e.toString());
+				handleClose();
+			} finally {
+				writeLock.unlock();
 			}
 		}
 	}
@@ -244,25 +258,28 @@ public class ClientHandler extends BasePacketWriter {
 
         if (sendPacket == null) {
         	// Nothing to send, remove the OP_WRITE from selector.
-        	synchronized (writeAttached) {
-        		if (writeAttached) {
-        			// The second time try to find a packet. If still nothing, then do the remove.
-        			sendPacket = super.handleNext();
-        			if (sendPacket != null) {
-        				return doSendNewPacket();
-        			}
-        			try {
-    					socketChannel.register(selector, SelectionKey.OP_READ, this);
-    				} catch (Exception e) {
-    					LOG.warn("Failed to dettach write from selector, client will stop. " , e.toString());
-    					handleClose();
-    				}
-    				writeAttached = Boolean.FALSE;
-        		}
+    		if (writeAttached.compareAndSet(true, false)) {
+    			writeLock.lock();
+    			try {
+	    			// The second time try to find a packet. If still nothing, then do the remove.
+	    			sendPacket = super.handleNext();
+	    			if (sendPacket != null) {
+	    				return doSendNewPacket();
+	    			}
+	    			try {
+						selectionKey.interestOps(SelectionKey.OP_READ);
+					} catch (Exception e) {
+						LOG.warn("Failed to dettach write from selector, client will stop. " , e.toString());
+						handleClose();
+					}
+    			} finally {
+    				writeLock.unlock();
+    			}
             }
             return false;
+        } else {
+        	return doSendNewPacket();
         }
-        return doSendNewPacket();
     }
 
     /**
