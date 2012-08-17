@@ -21,9 +21,8 @@ import java.io.IOException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
+import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +43,9 @@ public class MultiNioServer extends NioServer {
     private RunnableSelector[] selectors;
 
 
-
+    /**
+     * Create a MultiNioServer with default threads number.
+     */
     public MultiNioServer() {
 		super();
 		this.threadsNumber = Runtime.getRuntime().availableProcessors();
@@ -137,9 +138,8 @@ public class MultiNioServer extends NioServer {
 	 * @version 1.0.0
 	 * @Date: 2012-6-11
 	 */
-	private class RunnableSelector implements Runnable {
+	private class RunnableSelector extends SelectorHolder implements Runnable {
 		private LinkedList<SocketChannel> clientQueue = new LinkedList<SocketChannel>();
-		private AtomicBoolean wakenUp = new AtomicBoolean();
 		private Selector selector;
 		private Thread thread;
 
@@ -148,6 +148,7 @@ public class MultiNioServer extends NioServer {
 			this.selector = Selector.open();
 			this.thread = new Thread(tPool, this);
 			thread.start();
+			setSelectorThread(thread);
 		}
 
 		/**
@@ -155,9 +156,7 @@ public class MultiNioServer extends NioServer {
 		 */
 		public void registerClient(SocketChannel client) {
 			clientQueue.add(client);
-			if (wakenUp.compareAndSet(false, true)) {
-				selector.wakeup();
-			}
+			selector.wakeup();
 		}
 
 		/**
@@ -184,26 +183,32 @@ public class MultiNioServer extends NioServer {
 		public void run() {
 			try {
 				while (isListening) {
-					wakenUp.set(false);
 					selector.select(acceptTimeOut);
-					Set<SelectionKey> selectionKeys = selector.selectedKeys();
-					for (SelectionKey selectionKey: selectionKeys) {
-						handleKey(selectionKey);
-					}
-					selectionKeys.clear();
+					Iterator<SelectionKey> selectedKeyIter = selector.selectedKeys().iterator();
+		            while (isListening && selectedKeyIter.hasNext()) {
+		            	SelectionKey selectionKey = selectedKeyIter.next();
+		            	selectedKeyIter.remove();
+		                handleKey(selectionKey);
+		            }
 
 					// Check the status, if there is any clients need to attach.
 		            if (!clientQueue.isEmpty()) {
 		            	SocketChannel client = null;
 		            	while ((client = clientQueue.poll()) != null) {
-		            		new ClientHandler(packetHandler, selector, client);
+		            		new FastCore(packetHandler, this, client);
 		            	}
 		            }
+		            changeAllInterestOps();
 		        }
 			} catch (Exception e) {
 	            LOG.error("Error occured while server is listening. The server will now shutdown.", e);
 	            stop();
 			}
+		}
+
+		@Override
+		public Selector getSelector() {
+			return selector;
 		}
 
 	}

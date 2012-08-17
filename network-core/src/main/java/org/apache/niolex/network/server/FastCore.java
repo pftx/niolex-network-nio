@@ -1,5 +1,5 @@
 /**
- * ClientHandler.java
+ * FastCore.java
  *
  * Copyright 2012 Niolex, Inc.
  *
@@ -20,39 +20,37 @@ package org.apache.niolex.network.server;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
-import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.locks.ReentrantLock;
 
-import org.apache.niolex.network.Config;
 import org.apache.niolex.network.IPacketHandler;
 import org.apache.niolex.network.PacketData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The basic ClientHandler reads and writes Packet.
+ * This is the fast core of client packet processing component.
+ * This is definitely the core of the whole network server.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
- * @Date: 2012-6-11
+ * @Date: 2012-8-17
  */
-public class ClientHandler extends BasePacketWriter {
-	private static final Logger LOG = LoggerFactory.getLogger(ClientHandler.class);
-
-	/* 缓冲区大小*/
-	private static final int BLOCK = Config.SERVER_NIO_BUFFER_SIZE;
-
+public class FastCore extends BasePacketWriter {
+	private static final Logger LOG = LoggerFactory.getLogger(FastCore.class);
 
     /**
-     * Internal used in ClientHandler. Please ignore.
+     * Internal used in FastCore. Please ignore.
+     * Status indicate the running status of read and write.
+     * NONE -> Not running
+     * HEADER -> Reading(Writing) header
+     * BODY -> Reading(Writing) body
      *
      * @author Xie, Jiyun
      *
      */
     public static enum Status {
-        HEADER, BODY, NONE, DATA, SEND
+        HEADER, BODY, NONE
     }
 
     /**
@@ -63,7 +61,7 @@ public class ClientHandler extends BasePacketWriter {
     /**
      * The server selector holding this handler.
      */
-    private final Selector selector;
+    private final SelectorHolder selector;
 
     /**
      * The socket channel this client handler is handling.
@@ -75,51 +73,46 @@ public class ClientHandler extends BasePacketWriter {
      */
     private final SelectionKey selectionKey;
 
-    /* 发送数据缓冲区*/
-    private ByteBuffer sendBuffer = ByteBuffer.allocate(BLOCK);
-    private Status sendStatus;
-    private PacketData sendPacket;
-    private int sendPos;
-
+    /**
+     * The name of this client socket.
+     */
+    private String remoteName;
 
     /**
      * Current write status. attached to the selector or not.
      */
     private AtomicBoolean writeAttached = new AtomicBoolean(false);
 
-    /**
-     * Use this lock to modify write attachment key.
-     */
-    private ReentrantLock writeLock = new ReentrantLock();
 
-    /**
-     * The name of this client socket.
-     */
-    private String remoteName;
+    /* 发送数据缓冲区*/
+    private ByteBuffer sendBuffer;
+    private Status sendStatus;
+    private PacketData sendPacket;
 
     /* 接收数据缓冲区*/
-    private ByteBuffer receiveBuffer = ByteBuffer.allocate(BLOCK);
+    private ByteBuffer receiveBuffer;
     private Status receiveStatus;
     private PacketData receivePacket;
 
     /**
-     * Constructor of ClientHandler, manage a SocketChannel inside.
+     * Constructor of FastCore, manage a SocketChannel inside.
      *
      * @param packetHandler
      * @param selector
      * @param client
      */
-    public ClientHandler(IPacketHandler packetHandler, Selector selector,
+    public FastCore(IPacketHandler packetHandler, SelectorHolder selector,
     		SocketChannel client) throws IOException {
 		super();
 		this.packetHandler = packetHandler;
 		this.selector = selector;
 		this.socketChannel = client;
-		this.selectionKey = client.register(selector, SelectionKey.OP_READ, this);
+		this.selectionKey = client.register(selector.getSelector(), SelectionKey.OP_READ, this);
 
 		// Initialize local variables.
         sendStatus = Status.NONE;
         receiveStatus = Status.HEADER;
+        receiveBuffer = ByteBuffer.allocate(8);
         remoteName = client.socket().getRemoteSocketAddress().toString();
         StringBuilder sb = new StringBuilder();
         sb.append("Remote Client [").append(remoteName);
@@ -128,6 +121,12 @@ public class ClientHandler extends BasePacketWriter {
         LOG.info(sb.toString());
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * Override super method
+     * @see org.apache.niolex.network.IPacketWriter#getRemoteName()
+     */
     @Override
     public String getRemoteName() {
         return remoteName;
@@ -138,20 +137,11 @@ public class ClientHandler extends BasePacketWriter {
 		super.handleWrite(sc);
 		// Signal the selector there is data to write.
 		if (writeAttached.compareAndSet(false, true)) {
-			writeLock.lock();
-			try {
-				selectionKey.interestOps(SelectionKey.OP_READ | SelectionKey.OP_WRITE);
-				selector.wakeup();
-			} catch (Exception e) {
-				LOG.warn("Failed to attach write to selector, client will stop. " , e.toString());
-				handleClose();
-			} finally {
-				writeLock.unlock();
-			}
+			selector.changeInterestOps(selectionKey);
 		}
 	}
 
-	/**
+    /**
      * handle read request. called by NIO selector.
      * This method will read packet over and over again. Never stop.
      *
@@ -168,33 +158,20 @@ public class ClientHandler extends BasePacketWriter {
             	handleClose();
             	return false;
             }
-            if (receiveBuffer.position() > 0) {
-                if (receiveStatus == Status.HEADER && receiveBuffer.position() < 8) {
-                    return false;
-                }
+            if (!receiveBuffer.hasRemaining()) {
                 receiveBuffer.flip();
-
                 if (receiveStatus == Status.HEADER) {
-                    receivePacket = new PacketData();
-                    if (receivePacket.parseHeader(receiveBuffer)) {
-                    	LOG.debug("Packet received. desc {}, size {}.", receivePacket.descriptor(), receivePacket.getLength());
-                        packetHandler.handleRead(receivePacket, this);
-                        receiveBuffer.compact();
-                        return true;
-                    } else {
-                        receiveBuffer.clear();
-                        receiveStatus = Status.BODY;
-                    }
+                	receivePacket = new PacketData();
+                	receivePacket.parseHeader(receiveBuffer);
+                	receiveBuffer = ByteBuffer.wrap(receivePacket.getData());
+                	receiveStatus = Status.BODY;
+                	return true;
                 } else {
-                    if (receivePacket.parseBody(receiveBuffer)) {
-                    	LOG.debug("Packet received. desc {}, size {}.", receivePacket.descriptor(), receivePacket.getLength());
-                        packetHandler.handleRead(receivePacket, this);
-                        receiveStatus = Status.HEADER;
-                        receiveBuffer.compact();
-                        return true;
-                    } else {
-                        receiveBuffer.clear();
-                    }
+                	LOG.debug("Packet received. desc {}, size {}.", receivePacket.descriptor(), receivePacket.getLength());
+                	packetHandler.handleRead(receivePacket, this);
+                	receiveStatus = Status.HEADER;
+                	receiveBuffer = ByteBuffer.allocate(8);
+                	return true;
                 }
             }
         } catch (Exception e) {
@@ -210,8 +187,8 @@ public class ClientHandler extends BasePacketWriter {
      *
      * Status change summary:
      * NONE -> Nothing is sending now
-     * DATA -> Sending a packet, not finished yet, need to fill buffer again
-     * SEND -> Sending a packet, all in the buffer. If buffer sent, can start new
+     * HEADER -> Sending a packet, header now
+     * BODY -> Sending a packet body
      *
      */
     public boolean handleWrite() {
@@ -219,25 +196,21 @@ public class ClientHandler extends BasePacketWriter {
             if (sendStatus == Status.NONE) {
                 return sendNewPacket();
             } else {
-                if (sendPos != sendBuffer.limit()) {
-                    sendPos += socketChannel.write(sendBuffer);
-                    return sendPos == sendBuffer.limit();
+                if (sendBuffer.hasRemaining()) {
+                    socketChannel.write(sendBuffer);
+                    return !sendBuffer.hasRemaining();
                 } else {
-                    if (sendStatus == Status.SEND) {
-                    	sendStatus = Status.NONE;
+                    if (sendStatus == Status.HEADER) {
+                    	sendStatus = Status.BODY;
+                    	sendBuffer = ByteBuffer.wrap(sendPacket.getData());
+                    	socketChannel.write(sendBuffer);
+                        return !sendBuffer.hasRemaining();
+                    } else {
                     	// Tell listener this packet has been send now.
                     	this.fireSendEvent(sendPacket);
-
+                    	sendStatus = Status.NONE;
                     	LOG.debug("Packet sent. desc {}, size {}.", sendPacket.descriptor(), sendPacket.getLength());
-                        return sendNewPacket();
-                    } else {
-                    	sendBuffer.clear();
-                        if (sendPacket.generateData(sendBuffer)) {
-                            sendStatus = Status.SEND;
-                        }
-                        sendBuffer.flip();
-                        sendPos = socketChannel.write(sendBuffer);
-                        return sendPos == sendBuffer.limit();
+                    	return sendNewPacket();
                     }
                 }
             }
@@ -250,7 +223,9 @@ public class ClientHandler extends BasePacketWriter {
 
 
     /**
-     * Start to send a new packet, or send the heart beat packet.
+     * Start to send a new packet.
+     * If there is nothing to send, we will detach the write operation from selection key.
+     *
      * @throws IOException
      */
     private boolean sendNewPacket() throws IOException {
@@ -259,22 +234,12 @@ public class ClientHandler extends BasePacketWriter {
         if (sendPacket == null) {
         	// Nothing to send, remove the OP_WRITE from selector.
     		if (writeAttached.compareAndSet(true, false)) {
-    			writeLock.lock();
     			try {
-	    			// The second time try to find a packet. If still nothing, then do the remove.
-	    			sendPacket = super.handleNext();
-	    			if (sendPacket != null) {
-	    				return doSendNewPacket();
-	    			}
-	    			try {
-						selectionKey.interestOps(SelectionKey.OP_READ);
-					} catch (Exception e) {
-						LOG.warn("Failed to dettach write from selector, client will stop. " , e.toString());
-						handleClose();
-					}
-    			} finally {
-    				writeLock.unlock();
-    			}
+					selectionKey.interestOps(SelectionKey.OP_READ);
+				} catch (Exception e) {
+					LOG.warn("Failed to dettach write from selector, client will stop. " , e.toString());
+					handleClose();
+				}
             }
             return false;
         } else {
@@ -288,14 +253,17 @@ public class ClientHandler extends BasePacketWriter {
      * @throws IOException
      */
     private boolean doSendNewPacket() throws IOException {
-        sendStatus = Status.DATA;
-        sendBuffer.clear();
-        if (sendPacket.generateData(sendBuffer)) {
-            sendStatus = Status.SEND;
-        }
+        sendStatus = Status.HEADER;
+        sendBuffer = ByteBuffer.allocate(8);
+        sendPacket.putHeader(sendBuffer);
         sendBuffer.flip();
-        sendPos = socketChannel.write(sendBuffer);
-        return sendPos == sendBuffer.limit();
+        socketChannel.write(sendBuffer);
+        if (!sendBuffer.hasRemaining()) {
+	        sendStatus = Status.BODY;
+	    	sendBuffer = ByteBuffer.wrap(sendPacket.getData());
+	    	socketChannel.write(sendBuffer);
+        }
+        return !sendBuffer.hasRemaining();
     }
 
     /**
@@ -323,5 +291,4 @@ public class ClientHandler extends BasePacketWriter {
         	}
         }
     }
-
 }

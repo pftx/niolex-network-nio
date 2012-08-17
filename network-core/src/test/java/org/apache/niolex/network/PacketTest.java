@@ -60,7 +60,7 @@ public class PacketTest {
 		b[7] = b[8] = 10;
 		DataInputStream in = new DataInputStream(new ByteArrayInputStream(b));
 		PacketData p = PacketData.getHeartBeatPacket();
-		p.parseHeader(in);
+		p.parsePacket(in);
 	}
 
 	/**

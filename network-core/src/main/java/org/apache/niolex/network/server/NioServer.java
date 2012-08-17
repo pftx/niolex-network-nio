@@ -25,7 +25,7 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
-import java.util.Set;
+import java.util.Iterator;
 
 import org.apache.niolex.network.Config;
 import org.apache.niolex.network.IPacketHandler;
@@ -40,7 +40,7 @@ import org.slf4j.LoggerFactory;
  * @version 1.0.0
  * @Date: 2012-6-11
  */
-public class NioServer implements IServer {
+public class NioServer extends SelectorHolder implements IServer {
     private static final Logger LOG = LoggerFactory.getLogger(NioServer.class);
 
     /**
@@ -121,6 +121,7 @@ public class NioServer implements IServer {
 					}
                 }
         	});
+        	this.setSelectorThread(mainThread);
         	mainThread.start();
         } catch (Exception e) {
             LOG.error("Error occured while server is listening. The server will now shutdown.", e);
@@ -138,11 +139,13 @@ public class NioServer implements IServer {
             // Setting the timeout for accept method. Avoid that this server can not be shut
             // down when this thread is waiting to accept.
             mainSelector.select(acceptTimeOut);
-            Set<SelectionKey> selectionKeys = mainSelector.selectedKeys();
-            for (SelectionKey selectionKey: selectionKeys) {
+            Iterator<SelectionKey> selectedKeyIter = mainSelector.selectedKeys().iterator();
+            while (isListening && selectedKeyIter.hasNext()) {
+            	SelectionKey selectionKey = selectedKeyIter.next();
+            	selectedKeyIter.remove();
                 handleKey(selectionKey);
             }
-            selectionKeys.clear();
+            changeAllInterestOps();
         }
     }
 
@@ -156,7 +159,7 @@ public class NioServer implements IServer {
      * @param client
      */
     protected void registerClient(SocketChannel client) throws IOException {
-    	new ClientHandler(packetHandler, mainSelector, client);
+    	new FastCore(packetHandler, this, client);
     }
 
     /**
@@ -175,17 +178,12 @@ public class NioServer implements IServer {
                 registerClient(client);
                 return;
             }
-            if (selectionKey.isReadable()) {
-                ClientHandler clientHandler = (ClientHandler) selectionKey.attachment();
-                if (clientHandler != null) {
-                	handleRead(clientHandler);
-                }
+            FastCore fastCore = (FastCore) selectionKey.attachment();
+            if (selectionKey.isValid() && selectionKey.isReadable()) {
+            	handleRead(fastCore);
             }
-            if (selectionKey.isWritable()) {
-            	ClientHandler clientHandler = (ClientHandler) selectionKey.attachment();
-                if (clientHandler != null) {
-                	handleWrite(clientHandler);
-                }
+            if (selectionKey.isValid() && selectionKey.isWritable()) {
+            	handleWrite(fastCore);
             }
         } catch (Exception e) {
         	if (e instanceof CancelledKeyException || e instanceof ClosedChannelException) {
@@ -200,7 +198,7 @@ public class NioServer implements IServer {
      * The default client handler will just process in the main thread.
      * @param clientHandler
      */
-    protected void handleRead(ClientHandler clientHandler) {
+    protected void handleRead(FastCore clientHandler) {
     	// Call clientHandler.handleRead one time will just generate one Packet.
     	// If there are more Packet, we need to call it multiple times.
     	while (clientHandler.handleRead()) {
@@ -213,7 +211,7 @@ public class NioServer implements IServer {
      * The default client handler will just process in the main thread.
      * @param clientHandler
      */
-    protected void handleWrite(ClientHandler clientHandler) {
+    protected void handleWrite(FastCore clientHandler) {
     	// Call clientHandler.handleWrite will just send one buffer.
     	// If that buffer is sent immediately, we need to call it again to send more data.
     	while (clientHandler.handleWrite()) {
@@ -221,8 +219,12 @@ public class NioServer implements IServer {
     	}
     }
 
+    @Override
+	public Selector getSelector() {
+		return mainSelector;
+	}
 
-    /**
+	/**
 	 * Override super method
 	 * @see org.apache.niolex.network.IServer#stop()
 	 */

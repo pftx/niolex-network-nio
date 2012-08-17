@@ -114,7 +114,6 @@ public class FaultTolerateAdapter implements IPacketHandler, WriteEventListener 
 				int end = list.size() > RR_SIZE ? RR_SIZE : list.size();
 				for (int i = 0; i < end; ++i) {
 					sc = list.get(i);
-					sc.setDataPos(0);
 					els.add(sc);
 				}
 			}

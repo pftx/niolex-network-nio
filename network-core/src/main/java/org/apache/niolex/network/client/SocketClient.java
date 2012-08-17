@@ -111,7 +111,7 @@ public class SocketClient extends BaseClient {
 	public void handleRead() throws IOException {
 		PacketData readPacket = new PacketData();
 		while (true) {
-			readPacket.parseHeader(inS);
+			readPacket.parsePacket(inS);
 			LOG.debug("Packet received. desc {}, size {}.", readPacket.descriptor(), readPacket.getLength());
 			if (readPacket.getCode() == Config.CODE_HEART_BEAT) {
             	// Let's ignore the heart beat packet here.

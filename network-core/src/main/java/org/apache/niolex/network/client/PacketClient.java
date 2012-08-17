@@ -137,7 +137,7 @@ public class PacketClient extends BaseClient {
             try {
                 while (isWorking) {
                     PacketData readPacket = new PacketData();
-                    readPacket.parseHeader(in);
+                    readPacket.parsePacket(in);
                     LOG.debug("Packet received. desc {}, size {}.", readPacket.descriptor(), readPacket.getLength());
                     if (readPacket.getCode() == Config.CODE_HEART_BEAT) {
                     	// Let's ignore the heart beat packet here.

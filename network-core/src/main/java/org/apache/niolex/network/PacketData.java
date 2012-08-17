@@ -32,8 +32,6 @@ public class PacketData extends Packet {
     // The HEART_BEAT Packet is for testing server and client being alive
     private static final PacketData HEART_BEAT = new PacketData((short)0, new byte[0]);
     private static final int MAX_SIZE = Config.SERVER_MAX_PACKET_SIZE;
-    // The current handled data position in packet.
-    private int dataPos;
 
     /**
      * Get the default heart beat packet.
@@ -89,7 +87,6 @@ public class PacketData extends Packet {
         this.code = code;
         this.data = data;
         this.length = data.length;
-        this.dataPos = 0;
     }
 
     public PacketData makeCopy() {
@@ -105,21 +102,11 @@ public class PacketData extends Packet {
      * @param bb
      * @return true if the generation is finished.
      */
-    public boolean generateData(ByteBuffer bb) {
-        if (dataPos == 0) {
-            bb.put(version);
-            bb.put(reserved);
-            bb.putShort(code);
-            bb.putInt(length);
-        }
-        int len = bb.remaining();
-        boolean r = (len + dataPos) >= length;
-        if (r) {
-            len = length - dataPos;
-        }
-        bb.put(data, dataPos, len);
-        dataPos += len;
-        return r;
+    public void putHeader(ByteBuffer bb) {
+        bb.put(version);
+        bb.put(reserved);
+        bb.putShort(code);
+        bb.putInt(length);
     }
 
     /**
@@ -139,11 +126,11 @@ public class PacketData extends Packet {
 
     /**
      * Parse Packet header from ByteBuffer
-     * Parse body when there is any data left in the ByteBuffer.
+     *
      * @param bb
      * @return true only if this packet is ready to send.
      */
-    public boolean parseHeader(ByteBuffer bb) {
+    public void parseHeader(ByteBuffer bb) {
         version = bb.get();
         reserved = bb.get();
         code = bb.getShort();
@@ -154,18 +141,16 @@ public class PacketData extends Packet {
         }
 
         data = new byte[length];
-
-        dataPos = 0;
-        return parseBody(bb);
     }
 
     /**
      * Parse Packet from this DataInputStream.
      * Only return when finish parse
+     *
      * @param in
      * @throws IOException
      */
-    public void parseHeader(DataInputStream in) throws IOException {
+    public void parsePacket(DataInputStream in) throws IOException {
         version = in.readByte();
         reserved = in.readByte();
         code = in.readShort();
@@ -177,37 +162,7 @@ public class PacketData extends Packet {
 
         data = new byte[length];
 
-        dataPos = 0;
-        parseBody(in);
-    }
-
-    /**
-     * Parse body from this ByteBuffer
-     * @param bb
-     * @return true when finished
-     */
-    public boolean parseBody(ByteBuffer bb) {
-        int len = bb.limit() - bb.position();
-        boolean r = (len + dataPos) >= length;
-        if (r) {
-            len = length - dataPos;
-        }
-        bb.get(data, dataPos, len);
-        if (r) {
-            dataPos = 0;
-        } else {
-            dataPos += len;
-        }
-        return r;
-    }
-
-    /**
-     * Parse body from this DataInputStream
-     * return when finished, or IOException
-     * @param in
-     * @throws IOException
-     */
-    public void parseBody(DataInputStream in) throws IOException {
+        int dataPos = 0;
         int count = 0;
         while ((count = in.read(data, dataPos, length - dataPos)) >= 0) {
             if (count + dataPos != length) {
@@ -220,9 +175,5 @@ public class PacketData extends Packet {
             throw new IOException("End of stream found, but packet was not finished.");
         }
     }
-
-	public void setDataPos(int dataPos) {
-		this.dataPos = dataPos;
-	}
 
 }
