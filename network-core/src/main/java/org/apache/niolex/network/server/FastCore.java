@@ -165,12 +165,14 @@ public class FastCore extends BasePacketWriter {
                 	receivePacket.parseHeader(receiveBuffer);
                 	receiveBuffer = ByteBuffer.wrap(receivePacket.getData());
                 	receiveStatus = Status.BODY;
-                	return true;
+                	socketChannel.read(receiveBuffer);
+                	if (!receiveBuffer.hasRemaining()) {
+                		readFinished();
+                    	return true;
+                	}
+                	return false;
                 } else {
-                	LOG.debug("Packet received. desc {}, size {}.", receivePacket.descriptor(), receivePacket.getLength());
-                	packetHandler.handleRead(receivePacket, this);
-                	receiveStatus = Status.HEADER;
-                	receiveBuffer = ByteBuffer.allocate(8);
+                	readFinished();
                 	return true;
                 }
             }
@@ -179,6 +181,16 @@ public class FastCore extends BasePacketWriter {
             handleClose();
         }
         return false;
+    }
+
+    /**
+     * Read packet finished, we need to invoke packet handler.
+     */
+    public void readFinished() {
+    	LOG.debug("Packet received. desc {}, size {}.", receivePacket.descriptor(), receivePacket.getLength());
+    	packetHandler.handleRead(receivePacket, this);
+    	receiveStatus = Status.HEADER;
+    	receiveBuffer = ByteBuffer.allocate(8);
     }
 
     /**

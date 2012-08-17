@@ -188,7 +188,14 @@ public class MultiNioServer extends NioServer {
 		            while (isListening && selectedKeyIter.hasNext()) {
 		            	SelectionKey selectionKey = selectedKeyIter.next();
 		            	selectedKeyIter.remove();
-		                handleKey(selectionKey);
+		                if (selectionKey.isValid()) {
+		                	FastCore fastCore = (FastCore) selectionKey.attachment();
+		                	if (selectionKey.isReadable()) {
+		                		fastCore.handleRead();
+		                	} else if (selectionKey.isWritable()) {
+		                		fastCore.handleWrite();
+		                	}
+		                }
 		            }
 
 					// Check the status, if there is any clients need to attach.
