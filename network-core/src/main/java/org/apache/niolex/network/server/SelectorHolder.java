@@ -21,6 +21,7 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * This class hold the selector and selector thread.
@@ -30,12 +31,14 @@ import java.util.Set;
  * @version 1.0.0
  * @Date: 2012-8-17
  */
-public abstract class SelectorHolder {
+public class SelectorHolder {
 
 	/**
 	 * This set store all the interested selection Keys.
 	 */
-	private Set<SelectionKey> selectionKeySet = new HashSet<SelectionKey>();
+	private final Set<SelectionKey> selectionKeySet = new HashSet<SelectionKey>();
+
+	private final AtomicBoolean isAwake = new AtomicBoolean(false);
 
 	/**
 	 * This thread is the thread running the selector.
@@ -43,10 +46,21 @@ public abstract class SelectorHolder {
 	private Thread selectorThread;
 
 	/**
-	 * Return the selector this holder is managing.
-	 * @return
+	 * This is the selector being held.
 	 */
-	public abstract Selector getSelector();
+	private Selector selector;
+
+
+	/**
+	 * The Constructor, must set selector thread and selector itself.
+	 * @param selectorThread
+	 * @param selector
+	 */
+	public SelectorHolder(Thread selectorThread, Selector selector) {
+		super();
+		this.selectorThread = selectorThread;
+		this.selector = selector;
+	}
 
 	/**
 	 * #FastCore use this method to register the wish to change interest operations.
@@ -60,7 +74,17 @@ public abstract class SelectorHolder {
 			synchronized (selectionKeySet) {
 				selectionKeySet.add(selectionKey);
 			}
-			getSelector().wakeup();
+			wakeup();
+		}
+	}
+
+	/**
+	 * Use this method to wake up the selector managed by this holder.
+	 * Holder will eliminate unnecessary multiple wakeups.
+	 */
+	public void wakeup() {
+		if (isAwake.compareAndSet(false, true)) {
+			selector.wakeup();
 		}
 	}
 
@@ -68,6 +92,7 @@ public abstract class SelectorHolder {
 	 * Server use this method of change all the interest operations.
 	 */
 	public void changeAllInterestOps() {
+		isAwake.set(false);
 		if (selectionKeySet.isEmpty()) {
 			return;
 		}
@@ -79,12 +104,11 @@ public abstract class SelectorHolder {
 		}
 	}
 
-	/**
-	 * Set the thread the current selector is running with.
-	 * @param selectorThread
-	 */
-	public void setSelectorThread(Thread selectorThread) {
-		this.selectorThread = selectorThread;
-	}
 
+	/**
+	 * @return  The selector this holder is managing.
+	 */
+	public Selector getSelector() {
+		return selector;
+	}
 }

@@ -21,8 +21,8 @@ import java.io.IOException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
-import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,7 +49,7 @@ public class MultiNioServer extends NioServer {
     public MultiNioServer() {
 		super();
 		this.threadsNumber = Runtime.getRuntime().availableProcessors();
-		if (threadsNumber > 8) {
+		if (threadsNumber < 8) {
 			// Default to 8, which is the majority CPU number on servers.
 			// Setting too many selectors is not good.
 			threadsNumber = 8;
@@ -138,8 +138,9 @@ public class MultiNioServer extends NioServer {
 	 * @version 1.0.0
 	 * @Date: 2012-6-11
 	 */
-	private class RunnableSelector extends SelectorHolder implements Runnable {
+	private class RunnableSelector implements Runnable {
 		private LinkedList<SocketChannel> clientQueue = new LinkedList<SocketChannel>();
+		private SelectorHolder selectorHolder;
 		private Selector selector;
 		private Thread thread;
 
@@ -147,16 +148,20 @@ public class MultiNioServer extends NioServer {
 			super();
 			this.selector = Selector.open();
 			this.thread = new Thread(tPool, this);
+			selectorHolder = new SelectorHolder(thread, selector);
 			thread.start();
-			setSelectorThread(thread);
 		}
 
 		/**
+		 * Register this client to this selector.
+		 *
 		 * @param client
 		 */
 		public void registerClient(SocketChannel client) {
-			clientQueue.add(client);
-			selector.wakeup();
+			synchronized (clientQueue) {
+				clientQueue.add(client);
+			}
+			selectorHolder.wakeup();
 		}
 
 		/**
@@ -184,28 +189,14 @@ public class MultiNioServer extends NioServer {
 			try {
 				while (isListening) {
 					selector.select(acceptTimeOut);
-					Iterator<SelectionKey> selectedKeyIter = selector.selectedKeys().iterator();
-		            while (isListening && selectedKeyIter.hasNext()) {
-		            	SelectionKey selectionKey = selectedKeyIter.next();
-		            	selectedKeyIter.remove();
-		                if (selectionKey.isValid()) {
-		                	FastCore fastCore = (FastCore) selectionKey.attachment();
-		                	if (selectionKey.isReadable()) {
-		                		fastCore.handleRead();
-		                	} else if (selectionKey.isWritable()) {
-		                		fastCore.handleWrite();
-		                	}
-		                }
+					selectorHolder.changeAllInterestOps();
+					Set<SelectionKey> selectedKeys = selector.selectedKeys();
+		            for (SelectionKey selectionKey : selectedKeys) {
+		                handleKey(selectionKey);
 		            }
+		            selectedKeys.clear();
 
-					// Check the status, if there is any clients need to attach.
-		            if (!clientQueue.isEmpty()) {
-		            	SocketChannel client = null;
-		            	while ((client = clientQueue.poll()) != null) {
-		            		new FastCore(packetHandler, this, client);
-		            	}
-		            }
-		            changeAllInterestOps();
+		            addClients();
 		        }
 			} catch (Exception e) {
 	            LOG.error("Error occured while server is listening. The server will now shutdown.", e);
@@ -213,10 +204,21 @@ public class MultiNioServer extends NioServer {
 			}
 		}
 
-		@Override
-		public Selector getSelector() {
-			return selector;
-		}
+		/**
+		 * Add all the clients into this selector now.
+		 * @throws IOException
+		 */
+		public void addClients() throws IOException {
+			// Check the status, if there is any clients need to attach.
+			if (!clientQueue.isEmpty()) {
+				synchronized (clientQueue) {
+					SocketChannel client = null;
+					while ((client = clientQueue.poll()) != null) {
+						new FastCore(packetHandler, selectorHolder, client);
+					}
+				}
+			}
 
+		}
 	}
 }

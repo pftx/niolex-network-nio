@@ -19,13 +19,14 @@ package org.apache.niolex.network.server;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.net.ServerSocket;
 import java.nio.channels.CancelledKeyException;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
-import java.util.Iterator;
+import java.util.Set;
 
 import org.apache.niolex.network.Config;
 import org.apache.niolex.network.IPacketHandler;
@@ -35,12 +36,13 @@ import org.slf4j.LoggerFactory;
 
 /**
  * The base Nonblocking implementation of IServer.
+ * Have only one thread process all the IO operations.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
  * @Date: 2012-6-11
  */
-public class NioServer extends SelectorHolder implements IServer {
+public class NioServer implements IServer {
     private static final Logger LOG = LoggerFactory.getLogger(NioServer.class);
 
     /**
@@ -52,6 +54,11 @@ public class NioServer extends SelectorHolder implements IServer {
      * The server accept and read selector, which is the main selector.
      */
     private Selector mainSelector;
+
+    /**
+     * The selector holder enhance selector.
+     */
+    private SelectorHolder selectorHolder;
 
     /**
      * The listen thread.
@@ -90,8 +97,9 @@ public class NioServer extends SelectorHolder implements IServer {
         try {
             ss = ServerSocketChannel.open();
             ss.configureBlocking(false);
-            ss.socket().setReuseAddress(true);
-            ss.socket().bind(new InetSocketAddress(this.getPort()));
+            ServerSocket so = ss.socket();
+            so.setReuseAddress(true);
+            so.bind(new InetSocketAddress(this.getPort()));
             mainSelector = Selector.open();
             ss.register(mainSelector, SelectionKey.OP_ACCEPT);
             isListening = true;
@@ -121,7 +129,7 @@ public class NioServer extends SelectorHolder implements IServer {
 					}
                 }
         	});
-        	this.setSelectorThread(mainThread);
+        	selectorHolder = new SelectorHolder(mainThread, mainSelector);
         	mainThread.start();
         } catch (Exception e) {
             LOG.error("Error occured while server is listening. The server will now shutdown.", e);
@@ -139,13 +147,12 @@ public class NioServer extends SelectorHolder implements IServer {
             // Setting the timeout for accept method. Avoid that this server can not be shut
             // down when this thread is waiting to accept.
             mainSelector.select(acceptTimeOut);
-            Iterator<SelectionKey> selectedKeyIter = mainSelector.selectedKeys().iterator();
-            while (isListening && selectedKeyIter.hasNext()) {
-            	SelectionKey selectionKey = selectedKeyIter.next();
-            	selectedKeyIter.remove();
+            selectorHolder.changeAllInterestOps();
+            Set<SelectionKey> selectedKeys = mainSelector.selectedKeys();
+            for (SelectionKey selectionKey : selectedKeys) {
                 handleKey(selectionKey);
             }
-            changeAllInterestOps();
+            selectedKeys.clear();
         }
     }
 
@@ -159,7 +166,7 @@ public class NioServer extends SelectorHolder implements IServer {
      * @param client
      */
     protected void registerClient(SocketChannel client) throws IOException {
-    	new FastCore(packetHandler, this, client);
+    	new FastCore(packetHandler, selectorHolder, client);
     }
 
     /**
@@ -170,10 +177,14 @@ public class NioServer extends SelectorHolder implements IServer {
         SocketChannel client = null;
         try {
             if (selectionKey.isAcceptable()) {
-                ServerSocketChannel server = (ServerSocketChannel) selectionKey.channel();
-                client = server.accept();
+                client = ss.accept();
+                // Try to ensure the returned client to be correct.
+                if (client == null) {
+                	return;
+                }
                 client.configureBlocking(false);
                 client.socket().setTcpNoDelay(true);
+                client.socket().setSoLinger(false, 0);
                 // Register this client to a selector.
                 registerClient(client);
                 return;
@@ -218,11 +229,6 @@ public class NioServer extends SelectorHolder implements IServer {
     		continue;
     	}
     }
-
-    @Override
-	public Selector getSelector() {
-		return mainSelector;
-	}
 
 	/**
 	 * Override super method
