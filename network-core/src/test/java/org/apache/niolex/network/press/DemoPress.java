@@ -118,8 +118,8 @@ public class DemoPress {
 	}
 
 	public static SocketClient create() throws IOException {
-		SocketClient c = new SocketClient(new InetSocketAddress("10.11.18.41", 8808));
-//		PacketClient c = new PacketClient(new InetSocketAddress("localhost", 8808));
+//		SocketClient c = new SocketClient(new InetSocketAddress("10.11.18.41", 8808));
+		SocketClient c = new SocketClient(new InetSocketAddress("localhost", 8808));
 		c.connect();
 		return c;
 	}
