@@ -38,7 +38,7 @@ public class JsonRpcServer {
      */
     public static void main(String[] args) throws IOException {
         s.setPort(8808);
-        JsonRpcPacketHandler handler = new JsonRpcPacketHandler();
+        JsonRpcInvoker handler = new JsonRpcInvoker();
         s.setInvoker(handler);
         if (args != null && args.length != 0) {
         	s.setSelectorsNumber(Integer.parseInt(args[0]));

@@ -1,5 +1,5 @@
 /**
- * ProtoRpcPacketHandler.java
+ * ProtoRpcInvoker.java
  *
  * Copyright 2012 Niolex, Inc.
  *
@@ -32,12 +32,12 @@ import com.google.protobuf.GeneratedMessage;
  * @version 1.0.0
  * @Date: 2012-6-5
  */
-public class ProtoRpcPacketHandler extends RpcInvoker {
+public class ProtoRpcInvoker extends RpcInvoker {
 
 	/**
 	 * Override super Constructor
 	 */
-	public ProtoRpcPacketHandler() {
+	public ProtoRpcInvoker() {
 		super();
 	}
 

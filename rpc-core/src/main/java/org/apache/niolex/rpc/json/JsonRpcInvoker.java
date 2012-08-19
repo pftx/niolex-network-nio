@@ -1,5 +1,5 @@
 /**
- * JsonRpcPacketHandler.java
+ * JsonRpcInvoker.java
  *
  * Copyright 2012 Niolex, Inc.
  *
@@ -30,13 +30,13 @@ import org.apache.niolex.rpc.RpcInvoker;
  * @version 1.0.0
  * @Date: 2012-6-1
  */
-public class JsonRpcPacketHandler extends RpcInvoker {
+public class JsonRpcInvoker extends RpcInvoker {
 
 
 	/**
 	 * Override super Constructor
 	 */
-	public JsonRpcPacketHandler() {
+	public JsonRpcInvoker() {
 		super();
 	}
 

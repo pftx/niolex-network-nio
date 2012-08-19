@@ -18,11 +18,11 @@
 package org.apache.niolex.network;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
 
-import org.apache.niolex.rpc.core.Invoker;
 
 /**
+ * The client interface.
+ *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
  * @Date: 2012-6-2
@@ -32,9 +32,20 @@ public interface IClient {
 	/**
 	 * Do real connect action, connect to server.
 	 * This method will return immediately.
+	 *
 	 * @throws IOException
 	 */
 	public void connect() throws IOException;
+
+    /**
+     * Handle the Packet, and return result.
+     *
+     * @param sc The Packet need to be send
+     * @return the Packet returned from server
+     *
+     * @throws IOException
+     */
+    public Packet sendAndReceive(Packet sc) throws IOException;
 
 	/**
 	 * Stop this client.
@@ -48,31 +59,11 @@ public interface IClient {
 	public boolean isWorking();
 
 	/**
-	 * Set the packet handler this client using
-	 * @param packetHandler
-	 */
-	public void setPacketInvoker(Invoker packetInvoker);
-
-	/**
 	 * Set the underline socket connect timeout
 	 * This method must be called before connect()
 	 *
 	 * @param connectTimeout
 	 */
 	public void setConnectTimeout(int connectTimeout);
-
-	/**
-	 * Set the server Internet address this client want to connect
-	 * This method must be called before connect()
-	 *
-	 * @param serverAddress
-	 */
-	public void setServerAddress(InetSocketAddress serverAddress);
-
-	/**
-	 * Get the current Internet address
-	 * @return
-	 */
-	public InetSocketAddress getServerAddress();
 
 }

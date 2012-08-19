@@ -119,7 +119,11 @@ public abstract class RpcInvoker implements Invoker {
 				arr = serializeReturn(data);
 			}
 			Packet rc = new Packet(sc.getCode(), arr);
-			rc.setSerial((short) (sc.getSerial() + exception));
+			if (exception != 0) {
+				rc.setSerial((short) -sc.getSerial());
+			} else {
+				rc.setSerial(sc.getSerial());
+			}
 			return rc;
 		} catch (Exception e) {
 			LOG.warn("Error occured when handle return. {}", e.toString());
