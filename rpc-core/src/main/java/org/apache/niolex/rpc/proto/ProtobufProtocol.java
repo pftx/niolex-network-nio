@@ -1,5 +1,5 @@
 /**
- * ProtoRpcClient.java
+ * ProtobufProtocol.java
  *
  * Copyright 2012 Niolex, Inc.
  *
@@ -20,8 +20,7 @@ package org.apache.niolex.rpc.proto;
 import java.lang.reflect.Type;
 
 import org.apache.niolex.commons.seri.ProtoUtil;
-import org.apache.niolex.network.IClient;
-import org.apache.niolex.rpc.RpcClient;
+import org.apache.niolex.rpc.core.ClientProtocol;
 
 /**
  * Using Google Protocol Buffer to serialize data.
@@ -30,22 +29,14 @@ import org.apache.niolex.rpc.RpcClient;
  * @version 1.0.0
  * @Date: 2012-6-5
  */
-public class ProtoRpcClient extends RpcClient {
-
-	/**
-	 * Implements super constructor
-	 * @param client
-	 */
-	public ProtoRpcClient(IClient client) {
-		super(client);
-	}
+public class ProtobufProtocol implements ClientProtocol {
 
 	/**
 	 * Override super method
 	 * @see org.apache.niolex.network.rpc.RpcClient#serializeParams(java.lang.Object[])
 	 */
 	@Override
-	protected byte[] serializeParams(Object[] args) throws Exception {
+	public byte[] serializeParams(Object[] args) throws Exception {
 		return ProtoUtil.seriMulti(args);
 	}
 
@@ -54,7 +45,7 @@ public class ProtoRpcClient extends RpcClient {
 	 * @see org.apache.niolex.network.rpc.RpcClient#prepareReturn(byte[], java.lang.reflect.Type, int)
 	 */
 	@Override
-	protected Object prepareReturn(byte[] ret, Type type) throws Exception {
+	public Object prepareReturn(byte[] ret, Type type) throws Exception {
 		return ProtoUtil.parseOne(ret, type);
 	}
 

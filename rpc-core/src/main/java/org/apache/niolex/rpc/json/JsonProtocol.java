@@ -1,5 +1,5 @@
 /**
- * JsonRpcClient.java
+ * JsonProtocol.java
  *
  * Copyright 2012 Niolex, Inc.
  *
@@ -22,33 +22,24 @@ import java.io.ByteArrayOutputStream;
 import java.lang.reflect.Type;
 
 import org.apache.niolex.commons.compress.JacksonUtil;
-import org.apache.niolex.network.IClient;
-import org.apache.niolex.rpc.RpcClient;
+import org.apache.niolex.rpc.core.ClientProtocol;
 import org.codehaus.jackson.map.type.TypeFactory;
 
 /**
- * The Json Rpc Client.
+ * The Json Rpc Protocol.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
  * @Date: 2012-6-2
  */
-public class JsonRpcClient extends RpcClient {
-
-	/**
-	 * Implements super Constructor
-	 * @param client
-	 */
-	public JsonRpcClient(IClient client) {
-		super(client);
-	}
+public class JsonProtocol implements ClientProtocol {
 
 	/**
 	 * This is the override of super method.
 	 * @see org.apache.niolex.network.rpc.RpcClient#serializeParams(java.lang.Object[])
 	 */
 	@Override
-	protected byte[] serializeParams(Object[] args) throws Exception {
+	public byte[] serializeParams(Object[] args) throws Exception {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		for (Object o : args) {
 			JacksonUtil.writeObj(out, o);
@@ -62,7 +53,7 @@ public class JsonRpcClient extends RpcClient {
 	 */
 	@SuppressWarnings("deprecation")
 	@Override
-	protected Object prepareReturn(byte[] ret, Type type) throws Exception {
+	public Object prepareReturn(byte[] ret, Type type) throws Exception {
 		ByteArrayInputStream in = new ByteArrayInputStream(ret);
 		Object r = JacksonUtil.readObj(in, TypeFactory.type(type));
 		return r;

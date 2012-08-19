@@ -1,5 +1,5 @@
 /**
- * RpcClient.java
+ * JsonRpcClient.java
  *
  * Copyright 2012 Niolex, Inc.
  *
@@ -21,6 +21,7 @@ import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.niolex.rpc.RpcClient;
 import org.apache.niolex.rpc.client.SocketClient;
 
 /**
@@ -28,7 +29,7 @@ import org.apache.niolex.rpc.client.SocketClient;
  * @version 1.0.0
  * @Date: 2012-6-2
  */
-public class JsonRpcClientDemo {
+public class JsonRpcClient {
 
 	/**
 	 * The Client Demo
@@ -37,7 +38,8 @@ public class JsonRpcClientDemo {
 	 */
 	public static void main(String[] args) throws Exception {
 		SocketClient c = new SocketClient(new InetSocketAddress("localhost", 8808));
-		JsonRpcClient client = new JsonRpcClient(c);
+		RpcClient client = new RpcClient(c);
+		client.setClientProtocol(new JsonProtocol());
 		client.connect();
 
 		final RpcService ser = client.getService(RpcService.class);

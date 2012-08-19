@@ -100,10 +100,16 @@ public class ClientCore {
 
     /**
      * handle client connected request. We will do a log and mark this client ready.
+     * @throws IOException
      */
     public void handleConnect() {
-    	selectionKey.interestOps(0);
-    	socketHolder.ready(this);
+    	try {
+	    	socketChannel.finishConnect();
+	    	selectionKey.interestOps(0);
+	    	socketHolder.ready(this);
+    	} catch (Exception e) {
+    		handleClose();
+    	}
 
     	this.remoteName = socketChannel.socket().getRemoteSocketAddress().toString();
         StringBuilder sb = new StringBuilder();

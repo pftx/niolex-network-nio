@@ -30,6 +30,7 @@ import org.apache.niolex.commons.reflect.MethodUtil;
 import org.apache.niolex.network.Config;
 import org.apache.niolex.network.IClient;
 import org.apache.niolex.network.Packet;
+import org.apache.niolex.rpc.core.ClientProtocol;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,13 +41,18 @@ import org.slf4j.LoggerFactory;
  * @version 1.0.0
  * @Date: 2012-6-1
  */
-public abstract class RpcClient implements InvocationHandler {
+public class RpcClient implements InvocationHandler {
 	private static final Logger LOG = LoggerFactory.getLogger(RpcClient.class);
 
 	/**
 	 * The PacketClient to send and receive Rpc packets.
 	 */
 	private IClient client;
+
+	/**
+	 * The client protocol to serial data.
+	 */
+	private ClientProtocol clientProtocol;
 
 	/**
 	 * Save the execution map.
@@ -151,7 +157,7 @@ public abstract class RpcClient implements InvocationHandler {
 			if (args == null || args.length == 0) {
 				arr = new byte[0];
 			} else {
-				arr = serializeParams(args);
+				arr = clientProtocol.serializeParams(args);
 			}
 			// 2. Create Packet
 			Packet rc = new Packet(rei, arr);
@@ -161,6 +167,9 @@ public abstract class RpcClient implements InvocationHandler {
 			try {
 				sc = client.sendAndReceive(rc);
 			} catch (Exception e) {
+				if (e instanceof RpcException) {
+					throw (RpcException)e;
+				}
 				if (e instanceof SocketTimeoutException) {
 					rep = new RpcException("Timeout for this remote procedure call.", RpcException.Type.TIMEOUT, null);
 					throw rep;
@@ -281,24 +290,16 @@ public abstract class RpcClient implements InvocationHandler {
 		} else if (type == null || type.toString().equalsIgnoreCase("void")) {
 			return null;
 		}
-		return prepareReturn(ret, type);
+		return clientProtocol.prepareReturn(ret, type);
 	}
 
 	/**
-	 * Serialize arguments objects into byte array.
-	 * @param args
-	 * @return
-	 * @throws Exception
+	 * set the client protocol
+	 *
+	 * @param clientProtocol
 	 */
-	protected abstract byte[] serializeParams(Object[] args) throws Exception;
-
-	/**
-	 * De-serialize returned byte array into objects.
-	 * @param ret
-	 * @param type
-	 * @return
-	 * @throws Exception
-	 */
-	protected abstract Object prepareReturn(byte[] ret, Type type) throws Exception;
+	public void setClientProtocol(ClientProtocol clientProtocol) {
+		this.clientProtocol = clientProtocol;
+	}
 
 }
