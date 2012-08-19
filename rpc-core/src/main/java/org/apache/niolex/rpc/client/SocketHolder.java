@@ -1,7 +1,7 @@
 /**
- * Invoker.java
+ * SocketHolder.java
  *
- * Copyright 2011 Niolex, Inc.
+ * Copyright 2012 Niolex, Inc.
  *
  * Niolex licenses this file to you under the Apache License, version 2.0
  * (the "License"); you may not use this file except in compliance with the
@@ -15,24 +15,33 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.niolex.rpc.core;
+package org.apache.niolex.rpc.client;
 
-import org.apache.niolex.network.Packet;
-
+import java.nio.channels.SocketChannel;
 
 /**
- * The Packet Handler Interface.
- * @author Xie, Jiyun
- *
+ * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
+ * @version 1.0.0
+ * @Date: 2012-8-19
  */
-public interface Invoker {
+public class SocketHolder {
 
-    /**
-     * Handle the Packet, and return result.
-     *
-     * @param sc The Packet need to be Handled
-     * @return the result
-     */
-    public Packet process(Packet sc);
+	private SocketChannel channel;
+
+	/**
+	 * @param clientCore
+	 */
+	public void ready(ClientCore clientCore) {
+		// TODO Auto-generated method stub
+
+	}
+
+	/**
+	 * @param clientCore
+	 */
+	public void close(ClientCore clientCore) {
+		// TODO Auto-generated method stub
+
+	}
 
 }

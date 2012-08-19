@@ -190,6 +190,11 @@ public interface Config {
 	short CODE_NAME_DIFF = (short)65506;
 
 	/**
+	 * The error occured in rpc invoker.
+	 */
+	short CODE_RPC_ERROR = (short)65507;
+
+	/**
 	 * Packet not recognized.
 	 */
 	short CODE_NOT_RECOGNIZED = -1;

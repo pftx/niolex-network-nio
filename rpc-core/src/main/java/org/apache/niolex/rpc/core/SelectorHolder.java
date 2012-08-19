@@ -15,7 +15,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.niolex.rpc.server;
+package org.apache.niolex.rpc.core;
 
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
@@ -63,7 +63,7 @@ public class SelectorHolder {
 	}
 
 	/**
-	 * #FastCore use this method to register the wish to change interest operations.
+	 * #RpcCore use this method to register the wish to change interest operations.
 	 *
 	 * @param selectionKey
 	 */
@@ -98,7 +98,7 @@ public class SelectorHolder {
 		}
 		synchronized (selectionKeySet) {
 			for (SelectionKey selectionKey : selectionKeySet) {
-				selectionKey.interestOps(SelectionKey.OP_READ | SelectionKey.OP_WRITE);
+				selectionKey.interestOps(SelectionKey.OP_WRITE);
 			}
 			selectionKeySet.clear();
 		}

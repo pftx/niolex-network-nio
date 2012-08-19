@@ -23,8 +23,14 @@ import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.util.LinkedList;
 import java.util.Set;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
+import org.apache.niolex.rpc.core.Invocation;
 import org.apache.niolex.rpc.core.RpcCore;
+import org.apache.niolex.rpc.core.SelectorHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,10 +43,14 @@ import org.slf4j.LoggerFactory;
 public class MultiNioServer extends NioServer {
 	private static final Logger LOG = LoggerFactory.getLogger(MultiNioServer.class);
 
-	// The Thread pool size
-    private int threadsNumber = 8;
+	// The Selector Thread pool size
+    private int selectorsNumber = 8;
+    private ThreadGroup sPool;
+    // The Invoker Thread pool size
+    private int invokersNumber = 8;
+    private ExecutorService iPool;
+    // The current round robin selector index
     private int currentIdx = 0;
-    private ThreadGroup tPool;
     private RunnableSelector[] selectors;
 
 
@@ -49,12 +59,13 @@ public class MultiNioServer extends NioServer {
      */
     public MultiNioServer() {
 		super();
-		this.threadsNumber = Runtime.getRuntime().availableProcessors();
-		if (threadsNumber < 8) {
+		this.selectorsNumber = Runtime.getRuntime().availableProcessors();
+		if (selectorsNumber < 8) {
 			// Default to 8, which is the majority CPU number on servers.
 			// Setting too many selectors is not good.
-			threadsNumber = 8;
+			selectorsNumber = 8;
 		}
+		this.invokersNumber = selectorsNumber * 4;
 	}
 
 	/**
@@ -66,17 +77,24 @@ public class MultiNioServer extends NioServer {
 		if (!started) {
 			return false;
 		}
-		tPool = new ThreadGroup("Selectors");
-		selectors = new RunnableSelector[threadsNumber];
+		// Init the selectors pool.
+		sPool = new ThreadGroup("Selectors");
+		selectors = new RunnableSelector[selectorsNumber];
 		try {
 			for (int i = 0; i < selectors.length; ++i) {
-				selectors[i] = new RunnableSelector(tPool);
+				selectors[i] = new RunnableSelector(sPool);
 			}
 		} catch (IOException e) {
             LOG.error("Failed to start MultiNioServer.", e);
             return false;
         }
-		LOG.info("MultiNioServer started to work with {} threads.", threadsNumber);
+		// Init the invokers pool.
+		iPool = new ThreadPoolExecutor(invokersNumber, invokersNumber * 2,
+				600L, TimeUnit.SECONDS,
+                new ArrayBlockingQueue<Runnable>(invokersNumber * 2),
+                new InvokerThreadFactory(), new ThreadPoolExecutor.AbortPolicy());
+
+		LOG.info("MultiNioServer started to work with {} selectors and {} invokers.", selectorsNumber, invokersNumber);
 		return true;
 	}
 
@@ -96,6 +114,22 @@ public class MultiNioServer extends NioServer {
 	}
 
 	/**
+	 * Submit this invocation into any thread pool and make it run.
+	 * This method will use a thread pool to run the submitted invocation.
+	 *
+	 * This is the override of super method.
+	 * @see org.apache.niolex.rpc.server.NioServer#submitInvocation(org.apache.niolex.rpc.core.Invocation)
+	 */
+	@Override
+	protected void submitInvocation(Invocation invoc) {
+		try {
+			iPool.submit(invoc);
+		} catch (Exception e) {
+			invoc.prepareError(e);
+		}
+	}
+
+	/**
 	 * Invoke super stop internally.
 	 * Then stop the internal worker pool.
 	 */
@@ -105,6 +139,7 @@ public class MultiNioServer extends NioServer {
     		return;
     	}
 		super.stop();
+		iPool.shutdownNow();
 		try {
 			for (int i = 0; i < selectors.length; ++i) {
 				selectors[i].close();
@@ -115,22 +150,41 @@ public class MultiNioServer extends NioServer {
 	}
 
 	/**
-	 * Get the current threads number.
-	 * @return
+	 * @return the current selectors threads number.
 	 */
-	public int getThreadsNumber() {
-		return threadsNumber;
+	public int getSelectorsNumber() {
+		return selectorsNumber;
 	}
 
 	/**
-	 * Set the internal work pool threads number.
-	 * You need to set this before call the start method,
-	 * or it will be useless.
-	 * @param threadsNumber
+	 * Set the internal selectors pool threads number.
+	 * You need to set this before call the start method, or it will be useless.
+	 * @param selectorsNumber
 	 */
-	public void setThreadsNumber(int threadsNumber) {
-		this.threadsNumber = threadsNumber;
+	public void setSelectorsNumber(int selectorsNumber) {
+		this.selectorsNumber = selectorsNumber;
 	}
+
+	/**
+	 * @return the current invokers threads number.
+	 */
+	public int getInvokersNumber() {
+		return invokersNumber;
+	}
+
+	/**
+	 * Set the internal invokers pool threads number.
+	 * You need to set this before call the start method, or it will be useless.
+	 *
+	 * @param invokersNumber
+	 */
+	public void setInvokersNumber(int invokersNumber) {
+		this.invokersNumber = invokersNumber;
+	}
+
+	// --------------------------------------------------------------------
+	// The RunnableSelector now.
+	// --------------------------------------------------------------------
 
 	/**
 	 * Run the wrapped selector endlessly.
@@ -145,6 +199,11 @@ public class MultiNioServer extends NioServer {
 		private Selector selector;
 		private Thread thread;
 
+		/**
+		 * The Constructor, create a new thread with this thread group and run.
+		 * @param tPool
+		 * @throws IOException
+		 */
 		public RunnableSelector(ThreadGroup tPool) throws IOException {
 			super();
 			this.selector = Selector.open();
@@ -215,7 +274,7 @@ public class MultiNioServer extends NioServer {
 				synchronized (clientQueue) {
 					SocketChannel client = null;
 					while ((client = clientQueue.poll()) != null) {
-						new RpcCore(invoker, selectorHolder, client);
+						new RpcCore(selectorHolder, client);
 					}
 				}
 			}

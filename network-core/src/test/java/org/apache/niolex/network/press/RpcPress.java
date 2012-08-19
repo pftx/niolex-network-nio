@@ -99,8 +99,8 @@ public class RpcPress {
 	}
 
 	public static JsonRpcClient create() throws IOException {
-		SocketClient c = new SocketClient(new InetSocketAddress("10.11.18.41", 8808));
-//		PacketClient c = new PacketClient(new InetSocketAddress("localhost", 8808));
+//		SocketClient c = new SocketClient(new InetSocketAddress("10.11.18.41", 8808));
+		SocketClient c = new SocketClient(new InetSocketAddress("localhost", 8808));
 		JsonRpcClient client = new JsonRpcClient(c, new SingleInvoker());
 		client.connect();
 		return client;

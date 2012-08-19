@@ -55,16 +55,16 @@ public interface IServer {
 	public void setPort(int port);
 
 	/**
-	 * @return the packetHandler
+	 * @return the invoker
 	 */
-	public Invoker getPacketHandler();
+	public Invoker getInvoker();
 
 	/**
 	 * Set the server side packet handler
 	 * This method must be called before start()
-	 * @param packetHandler the packetHandler to set
+	 * @param invoker the invoker to set
 	 */
-	public void setPacketHandler(Invoker packetHandler);
+	public void setInvoker(Invoker invoker);
 
 	/**
 	 * @return the acceptTimeOut

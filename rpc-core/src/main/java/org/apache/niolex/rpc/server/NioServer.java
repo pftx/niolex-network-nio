@@ -30,8 +30,10 @@ import java.util.Set;
 
 import org.apache.niolex.network.Config;
 import org.apache.niolex.network.IServer;
+import org.apache.niolex.rpc.core.Invocation;
 import org.apache.niolex.rpc.core.Invoker;
 import org.apache.niolex.rpc.core.RpcCore;
+import org.apache.niolex.rpc.core.SelectorHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -167,7 +169,7 @@ public class NioServer implements IServer {
      * @param client
      */
     protected void registerClient(SocketChannel client) throws IOException {
-    	new RpcCore(invoker, selectorHolder, client);
+    	new RpcCore(selectorHolder, client);
     }
 
     /**
@@ -192,7 +194,11 @@ public class NioServer implements IServer {
             }
             RpcCore fastCore = (RpcCore) selectionKey.attachment();
             if (selectionKey.isValid() && selectionKey.isReadable()) {
-            	fastCore.handleRead();
+            	if (fastCore.handleRead()) {
+            		// Read packet finished, we need to invoke packet handler
+            		Invocation invoc = new Invocation(fastCore, invoker);
+            		submitInvocation(invoc);
+            	}
             }
             if (selectionKey.isValid() && selectionKey.isWritable()) {
             	fastCore.handleWrite();
@@ -203,6 +209,17 @@ public class NioServer implements IServer {
         	}
             LOG.info("Failed to handle socket: {}", e.toString());
         }
+    }
+
+    /**
+     * Submit this invocation into any thread pool and make it run.
+     * This method will just invoke it in the current thread.
+     * Any Sub class can override this method to change the default behavior.
+     *
+     * @param invoc the one need to be run.
+     */
+    protected void submitInvocation(Invocation invoc) {
+    	invoc.run();
     }
 
 	/**
@@ -254,19 +271,19 @@ public class NioServer implements IServer {
 
     /**
 	 * Override super method
-	 * @see org.apache.niolex.network.IServer#getPacketHandler()
+	 * @see org.apache.niolex.network.IServer#getInvoker()
 	 */
     @Override
-	public Invoker getPacketHandler() {
+	public Invoker getInvoker() {
         return invoker;
     }
 
     /**
 	 * Override super method
-	 * @see org.apache.niolex.network.IServer#setPacketHandler(org.apache.niolex.network.Invoker)
+	 * @see org.apache.niolex.network.IServer#setInvoker(org.apache.niolex.network.Invoker)
 	 */
     @Override
-	public void setPacketHandler(Invoker invoker) {
+	public void setInvoker(Invoker invoker) {
         this.invoker = invoker;
     }
 

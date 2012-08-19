@@ -1,7 +1,7 @@
 /**
- * DemoServer.java
+ * InvokerThreadFactory.java
  *
- * Copyright 2011 Niolex, Inc.
+ * Copyright 2012 Niolex, Inc.
  *
  * Niolex licenses this file to you under the Apache License, version 2.0
  * (the "License"); you may not use this file except in compliance with the
@@ -17,33 +17,26 @@
  */
 package org.apache.niolex.rpc.server;
 
-import java.io.IOException;
-
+import java.util.concurrent.ThreadFactory;
 
 /**
- * DemoServer
- * @author Xie, Jiyun
+ * Create new threads in the invokers thread group.
  *
+ * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
+ * @version 1.0.0
+ * @Date: 2012-8-19
  */
-public class DemoServer {
+public class InvokerThreadFactory implements ThreadFactory {
 
-    private static MultiNioServer s = new MultiNioServer();
+	private ThreadGroup group = new ThreadGroup("Invokers");
 
-    /**
-     * The Server Demo
-     * @param args
-     */
-    public static void main(String[] args) throws IOException {
-        s.setPort(8808);
-        if (args != null && args.length != 0) {
-        	s.setSelectorsNumber(Integer.parseInt(args[0]));
-        	s.setInvokersNumber(Integer.parseInt(args[1]));
-        }
-        s.setInvoker(new EchoInvoker());
-        s.start();
-    }
+	/**
+	 * This is the override of super method.
+	 * @see java.util.concurrent.ThreadFactory#newThread(java.lang.Runnable)
+	 */
+	@Override
+	public Thread newThread(Runnable r) {
+		return new Thread(group, r);
+	}
 
-    public static void stop() {
-        s.stop();
-    }
 }

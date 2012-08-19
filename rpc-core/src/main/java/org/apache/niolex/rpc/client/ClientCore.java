@@ -1,5 +1,5 @@
 /**
- * RpcCore.java
+ * ClientCore.java
  *
  * Copyright 2012 Niolex, Inc.
  *
@@ -15,7 +15,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.niolex.rpc.core;
+package org.apache.niolex.rpc.client;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -24,19 +24,20 @@ import java.nio.channels.SocketChannel;
 
 import org.apache.niolex.network.Packet;
 import org.apache.niolex.network.PacketUtil;
+import org.apache.niolex.rpc.core.SelectorHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This is the Rpc core of server packet processing component.
- * This is definitely the core of the whole network server.
+ * This is the Client core of client packet processing component.
+ * This is definitely the core of the whole non blocking network client.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
  * @Date: 2012-8-17
  */
-public class RpcCore {
-	private static final Logger LOG = LoggerFactory.getLogger(RpcCore.class);
+public class ClientCore {
+	private static final Logger LOG = LoggerFactory.getLogger(ClientCore.class);
 
     /**
      * Internal used in RpcCore. Please ignore.
@@ -62,6 +63,11 @@ public class RpcCore {
     private final SocketChannel socketChannel;
 
     /**
+     * The socket container hold all the sockets.
+     */
+    private final SocketHolder socketHolder;
+
+    /**
      * The socket selection key of this channel.
      */
     private final SelectionKey selectionKey;
@@ -77,73 +83,34 @@ public class RpcCore {
     private Packet packet;
 
     /**
-     * Constructor of RpcCore, manage a SocketChannel inside.
+     * Constructor of ClientCore, manage a SocketChannel inside.
      *
      * @param selector
      * @param client
+     * @param socketHolder
+     * @throws IOException
      */
-    public RpcCore(SelectorHolder selector, SocketChannel client) throws IOException {
+    public ClientCore(SelectorHolder selector, SocketChannel client, SocketHolder socketHolder) throws IOException {
 		super();
 		this.selectorHolder = selector;
 		this.socketChannel = client;
-		this.selectionKey = client.register(selector.getSelector(), SelectionKey.OP_READ, this);
-		this.remoteName = client.socket().getRemoteSocketAddress().toString();
+		this.socketHolder = socketHolder;
+		this.selectionKey = client.register(selector.getSelector(), SelectionKey.OP_CONNECT, this);
+    }
 
-		// Initialize local variables, Prepare to read data.
-        status = Status.RECEVE_HEADER;
-        byteBuffer = ByteBuffer.allocate(8);
+    /**
+     * handle client connected request. We will do a log and mark this client ready.
+     */
+    public void handleConnect() {
+    	selectionKey.interestOps(0);
+    	socketHolder.ready(this);
 
+    	this.remoteName = socketChannel.socket().getRemoteSocketAddress().toString();
         StringBuilder sb = new StringBuilder();
-        sb.append("Remote Client [").append(remoteName);
-        sb.append("] connected to local Port [").append(client.socket().getLocalPort());
+        sb.append("Local socket [").append(socketChannel.socket().getLocalPort());
+        sb.append("] connected to remote address [").append(remoteName);
         sb.append("].");
         LOG.info(sb.toString());
-    }
-
-
-    /**
-     * handle read request. called by NIO selector.
-     *
-     * Read status change summary:
-     * HEADER -> Need read header, means nothing is read by now
-     * BODY -> Header is read, need to read body now
-     *
-     *@return true if read finished.
-     */
-    public boolean handleRead() {
-        try {
-            int k = socketChannel.read(byteBuffer);
-            if (k < 0) {
-            	// This socket is closed now.
-            	handleClose();
-            	return false;
-            }
-            if (!byteBuffer.hasRemaining()) {
-                if (status == Status.RECEVE_HEADER) {
-                	byteBuffer.flip();
-                	packet = PacketUtil.parseHeader(byteBuffer);
-                	byteBuffer = ByteBuffer.wrap(packet.getData());
-                	status = Status.RECEVE_BODY;
-                	socketChannel.read(byteBuffer);
-                	return !byteBuffer.hasRemaining();
-                } else {
-                	return true;
-                }
-            }
-        } catch (Exception e) {
-            LOG.info("Failed to read data from client socket: {}", e.toString());
-            handleClose();
-        }
-        return false;
-    }
-
-    /**
-     * Read packet finished, we will detach this channel from read.
-     */
-    public Packet readFinished() {
-    	LOG.debug("Packet received. desc {}, size {}.", packet.descriptor(), packet.getLength());
-    	selectionKey.interestOps(0);
-    	return packet;
     }
 
     /**
@@ -200,6 +167,61 @@ public class RpcCore {
     }
 
     /**
+     * handle read request. called by NIO selector.
+     *
+     * Read status change summary:
+     * HEADER -> Need read header, means nothing is read by now
+     * BODY -> Header is read, need to read body now
+     *
+     *@return true if read finished.
+     */
+    public boolean handleRead() {
+        try {
+            int k = socketChannel.read(byteBuffer);
+            if (k < 0) {
+            	// This socket is closed now.
+            	handleClose();
+            	return false;
+            }
+            if (!byteBuffer.hasRemaining()) {
+                if (status == Status.RECEVE_HEADER) {
+                	byteBuffer.flip();
+                	packet = PacketUtil.parseHeader(byteBuffer);
+                	byteBuffer = ByteBuffer.wrap(packet.getData());
+                	status = Status.RECEVE_BODY;
+                	socketChannel.read(byteBuffer);
+                	return !byteBuffer.hasRemaining();
+                } else {
+                	return true;
+                }
+            }
+        } catch (Exception e) {
+            LOG.info("Failed to read data from client socket: {}", e.toString());
+            handleClose();
+        }
+        return false;
+    }
+
+    /**
+     * Read packet finished, we will detach this channel from read.
+     */
+    public Packet readFinished() {
+    	LOG.debug("Packet received. desc {}, size {}.", packet.descriptor(), packet.getLength());
+    	selectionKey.interestOps(0);
+    	socketHolder.ready(this);
+    	return packet;
+    }
+
+    /**
+     * Test whether this client core is valid.
+     * @return true if it's valid
+     */
+    public boolean isValid() {
+    	return this.selectionKey.isValid();
+    }
+
+
+    /**
      * Error occurred when read or write.
      * Anyway, socket is closed.
      *
@@ -221,6 +243,8 @@ public class RpcCore {
             LOG.info(sb.toString());
         } catch (IOException e) {
             LOG.info("Failed to close client socket: {}", e.getMessage());
+        } finally {
+        	socketHolder.close(this);
         }
     }
 }
