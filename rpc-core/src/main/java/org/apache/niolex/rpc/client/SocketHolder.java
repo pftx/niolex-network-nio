@@ -18,6 +18,7 @@
 package org.apache.niolex.rpc.client;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * Hold all the ready connections.
@@ -30,6 +31,7 @@ public class SocketHolder {
 
 	private final ConcurrentLinkedQueue<ClientCore> readyQueue = new ConcurrentLinkedQueue<ClientCore>();
 	private NioClient nioClient;
+	private CountDownLatch latch;
 
 	/**
 	 * Create a SocketHolder with this nioClient.
@@ -42,10 +44,27 @@ public class SocketHolder {
 	}
 
 	/**
+	 * Set the number of connections need to be ready.
+	 * @param k
+	 */
+	public void needReady(int k) {
+		latch = new CountDownLatch(k);
+	}
+
+	/**
+	 * Wait for connections to be ready.
+	 * @throws InterruptedException
+	 */
+	public void waitReady() throws InterruptedException {
+		latch.await();
+	}
+
+	/**
 	 * Insert this client into the tail of the ready queue.
 	 * @param clientCore
 	 */
 	public void ready(ClientCore clientCore) {
+		latch.countDown();
 		readyQueue.add(clientCore);
 	}
 

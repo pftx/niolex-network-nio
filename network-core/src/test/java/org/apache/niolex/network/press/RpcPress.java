@@ -26,7 +26,6 @@ import org.apache.niolex.commons.test.Counter;
 import org.apache.niolex.commons.test.StopWatch;
 import org.apache.niolex.commons.test.StopWatch.Stop;
 import org.apache.niolex.network.client.SocketClient;
-import org.apache.niolex.network.demo.rpc.RpcServer;
 import org.apache.niolex.network.demo.rpc.RpcService;
 import org.apache.niolex.network.rpc.SingleInvoker;
 import org.apache.niolex.network.rpc.json.JsonRpcClient;
@@ -38,7 +37,7 @@ import org.apache.niolex.network.rpc.json.JsonRpcClient;
  */
 public class RpcPress {
 
-	static int SIZE = 1024;
+	static int SIZE = 2024;
 	static int THREAD_NUM = 5;
 	static int SHUFFLE_NUM = 50;
 	static final StopWatch stopWatch = new StopWatch(1);
@@ -54,7 +53,6 @@ public class RpcPress {
 			THREAD_NUM = Integer.parseInt(args[1]);
 			SHUFFLE_NUM = Integer.parseInt(args[2]);
         }
-		RpcServer.main(null);
 		for (int i = 0; i < 10; ++i) {
 			JsonRpcClient cli = create();
 			RpcService service = cli.getService(RpcService.class);
@@ -95,7 +93,6 @@ public class RpcPress {
 		stopWatch.done();
 		stopWatch.print();
 		System.out.println("Done..... error = " + ERROR_CNT.cnt());
-		RpcServer.stop();
 	}
 
 	public static JsonRpcClient create() throws IOException {

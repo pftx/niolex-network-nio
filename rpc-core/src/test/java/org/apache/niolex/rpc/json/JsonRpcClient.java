@@ -38,6 +38,9 @@ public class JsonRpcClient {
 	 */
 	public static void main(String[] args) throws Exception {
 		SocketClient c = new SocketClient(new InetSocketAddress("localhost", 8808));
+//		NioClient c = new NioClient();
+//		c.setConnectionNumber(10);
+//		c.setServerAddress("localhost:8808");
 		RpcClient client = new RpcClient(c);
 		client.setClientProtocol(new JsonProtocol());
 		client.connect();

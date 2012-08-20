@@ -93,8 +93,15 @@ public class NioClient implements IClient, Runnable {
 	 */
 	private final SocketHolder socketHolder;
 
+	/**
+	 * The configured server address array.
+	 */
 	private SocketAddress[] serverAddresses;
 
+	/**
+	 * Current address index.
+	 */
+	private int addressIdx = 0;
 
 	/**
 	 * Constructor
@@ -163,8 +170,13 @@ public class NioClient implements IClient, Runnable {
 	 */
 	@Override
 	public void connect() throws IOException {
+		this.isWorking = true;
 		addClientChannels();
+		socketHolder.needReady(connectionNumber / 2);
 		thread.start();
+		try {
+			socketHolder.waitReady();
+		} catch (InterruptedException e) {}
 	}
 
 	/**
@@ -182,8 +194,8 @@ public class NioClient implements IClient, Runnable {
 	 * Add a new client channel.
 	 */
 	public void addNewClientChannel() {
-		SocketAddress remote = null;
-		// TODO
+		SocketAddress remote = serverAddresses[addressIdx];
+		addressIdx = (addressIdx + 1) % serverAddresses.length;
 		try {
 			SocketChannel ch = SocketChannel.open();
 			ch.configureBlocking(false);
@@ -192,7 +204,8 @@ public class NioClient implements IClient, Runnable {
 			ch.connect(remote);
 			new ClientCore(selectorHolder, ch, socketHolder);
 		} catch (IOException e) {
-			e.printStackTrace();
+			validCnt.decrementAndGet();
+			LOG.error("Failed to create channel to address: {}", remote, e);
 		}
 	}
 
@@ -213,13 +226,14 @@ public class NioClient implements IClient, Runnable {
 	 * @return
 	 */
 	public WaitOn<Packet> asyncInvoke(Packet sc) {
+		sc.setSerial((short) 1);
 		ClientCore cli = socketHolder.take();
 		if (cli != null) {
 			WaitOn<Packet> on = blocker.initWait(cli);
 			cli.prepareWrite(sc);
 			return on;
 		} else {
-			throw new RpcException("No more connection.", RpcException.Type.CLIENT_BUSY, null);
+			throw new RpcException("No connection is ready.", RpcException.Type.CLIENT_BUSY, null);
 		}
 	}
 
