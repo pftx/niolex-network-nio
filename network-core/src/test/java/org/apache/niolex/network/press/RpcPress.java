@@ -73,7 +73,7 @@ public class RpcPress {
 			t.start();
 			ts[i] = t;
 		}
-		stopWatch.begin();
+		stopWatch.begin(true);
 		for (int i = 0; i < SHUFFLE_NUM; ++i) {
 			JsonRpcClient cli = create();
 			RpcService service = cli.getService(RpcService.class);

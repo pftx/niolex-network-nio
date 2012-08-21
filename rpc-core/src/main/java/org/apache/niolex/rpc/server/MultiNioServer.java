@@ -23,10 +23,8 @@ import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.util.LinkedList;
 import java.util.Set;
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.Executors;
 
 import org.apache.niolex.rpc.core.Invocation;
 import org.apache.niolex.rpc.core.RpcCore;
@@ -44,10 +42,10 @@ public class MultiNioServer extends NioServer {
 	private static final Logger LOG = LoggerFactory.getLogger(MultiNioServer.class);
 
 	// The Selector Thread pool size
-    private int selectorsNumber = 8;
+    private int selectorsNumber;
     private ThreadGroup sPool;
     // The Invoker Thread pool size
-    private int invokersNumber = 8;
+    private int invokersNumber;
     private ExecutorService iPool;
     // The current round robin selector index
     private int currentIdx = 0;
@@ -81,7 +79,7 @@ public class MultiNioServer extends NioServer {
 		sPool = new ThreadGroup("Selectors");
 		selectors = new RunnableSelector[selectorsNumber];
 		try {
-			for (int i = 0; i < selectors.length; ++i) {
+			for (int i = 0; i < selectorsNumber; ++i) {
 				selectors[i] = new RunnableSelector(sPool);
 			}
 		} catch (IOException e) {
@@ -89,27 +87,24 @@ public class MultiNioServer extends NioServer {
             return false;
         }
 		// Init the invokers pool.
-		iPool = new ThreadPoolExecutor(invokersNumber, invokersNumber * 2,
-				600L, TimeUnit.SECONDS,
-                new ArrayBlockingQueue<Runnable>(invokersNumber * 2),
-                new InvokerThreadFactory(), new ThreadPoolExecutor.AbortPolicy());
+		if (invokersNumber > 0) {
+			iPool = Executors.newFixedThreadPool(invokersNumber, new InvokerThreadFactory());
+		}
 
 		LOG.info("MultiNioServer started to work with {} selectors and {} invokers.", selectorsNumber, invokersNumber);
 		return true;
 	}
 
 	/**
-	 * Return multiple selector to super class.
+	 * Select a selector from multiple selectors to register this client.
 	 *
 	 * Override super method
 	 * @see org.apache.niolex.network.server.NioServer#registerClient(SocketChannel)
 	 */
 	@Override
 	protected void registerClient(SocketChannel client) throws IOException {
-		if (currentIdx > Integer.MAX_VALUE - 123) {
-			currentIdx = 0;
-		}
-		RunnableSelector runSelec = selectors[currentIdx++ % selectors.length];
+		currentIdx = (currentIdx + 1) % selectors.length;
+		RunnableSelector runSelec = selectors[currentIdx];
     	runSelec.registerClient(client);
 	}
 
@@ -123,7 +118,11 @@ public class MultiNioServer extends NioServer {
 	@Override
 	protected void submitInvocation(Invocation invoc) {
 		try {
-			iPool.submit(invoc);
+			if (iPool != null) {
+				iPool.submit(invoc);
+			} else {
+				invoc.run();
+			}
 		} catch (Exception e) {
 			invoc.prepareError(e);
 		}

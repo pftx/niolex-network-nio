@@ -91,7 +91,7 @@ public class DemoPress {
 			t.start();
 			ts[i] = t;
 		}
-		stopWatch.begin();
+		stopWatch.begin(true);
 		for (int i = 0; i < SHUFFLE_NUM; ++i) {
 			BaseClient cli = create();
 			LinkedList<PacketData> list = new LinkedList<PacketData>();
