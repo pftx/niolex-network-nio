@@ -87,10 +87,8 @@ public class MultiNioServer extends NioServer {
 	 */
 	@Override
 	protected void registerClient(SocketChannel client) throws IOException {
-		if (currentIdx > Integer.MAX_VALUE - 123) {
-			currentIdx = 0;
-		}
-		RunnableSelector runSelec = selectors[currentIdx++ % selectors.length];
+		currentIdx = (currentIdx + 1) % selectors.length;
+		RunnableSelector runSelec = selectors[currentIdx];
     	runSelec.registerClient(client);
 	}
 
