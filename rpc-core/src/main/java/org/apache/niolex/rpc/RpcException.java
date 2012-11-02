@@ -19,6 +19,8 @@ package org.apache.niolex.rpc;
 
 /**
  * The Exception thrown in Rpc Invoker.
+ * There is a type field in this class.
+ * One can use it to get the detailed exception type.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
@@ -46,7 +48,7 @@ public class RpcException extends RuntimeException {
 
 
 	/**
-	 * Create a RpcException with a message and a throwable.
+	 * Create a RpcException with a message, a type, and a throwable.
 	 *
 	 * Constructor
 	 * @param message
@@ -65,6 +67,14 @@ public class RpcException extends RuntimeException {
 		this.type = type;
 	}
 
+	/**
+	 * The RpcException type.
+	 * The meaning is in the name.
+	 *
+	 * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
+	 * @version 1.0.0
+	 * @Date: 2012-11-2
+	 */
 	public static enum Type {
 		TIMEOUT, NOT_CONNECTED, CONNECTION_CLOSED, CONNECTION_LOST, METHOD_NOT_FOUND, ERROR_PARSE_PARAMS,
 		ERROR_INVOKE, ERROR_PARSE_RETURN, CLIENT_BUSY, UNKNOWN

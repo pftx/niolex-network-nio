@@ -22,6 +22,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 
+import org.apache.niolex.network.Config;
 import org.apache.niolex.network.Packet;
 import org.apache.niolex.network.PacketUtil;
 import org.apache.niolex.rpc.core.SelectorHolder;
@@ -31,6 +32,8 @@ import org.slf4j.LoggerFactory;
 /**
  * This is the Client core of client packet processing component.
  * This is definitely the core of the whole non blocking network client.
+ * This class handle network problem and reading, writing.
+ * After data is ready, encapsulate it into Packet.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
@@ -39,11 +42,18 @@ import org.slf4j.LoggerFactory;
 public class ClientCore {
 	private static final Logger LOG = LoggerFactory.getLogger(ClientCore.class);
 
+	/**
+	 * The max buffer size. for packets small than this threshold will be send at one time.
+	 */
+	private static final int MAX_BUFFER_SIZE = Config.SERVER_NIO_BUFFER_SIZE;
+
     /**
-     * Internal used in RpcCore. Please ignore.
-     * Status indicate the running status of read and write.
-     * HEADER -> Reading(Writing) header
-     * BODY -> Reading(Writing) body
+     * Internal used in ClientCore. Please ignore.
+     * Status indicate the current running status of read and write.
+     * RECEVE_HEADER -> Waiting to Read header from Remote
+     * SEND_HEADER -> Waiting to Write header into Socket Channel
+     * RECEVE_BODY -> Reading body
+     * SEND_BODY -> Writing body
      *
      * @author Xie, Jiyun
      *
@@ -53,17 +63,17 @@ public class ClientCore {
     }
 
     /**
-     * The server selector holding this handler.
+     * The client channel selector is held in this handler.
      */
     private final SelectorHolder selectorHolder;
 
     /**
-     * The socket channel this client handler is handling.
+     * The socket channel this client core is handling.
      */
     private final SocketChannel socketChannel;
 
     /**
-     * The socket container hold all the sockets.
+     * The socket container hold all the sockets, including this one.
      */
     private final SocketHolder socketHolder;
 
@@ -125,16 +135,24 @@ public class ClientCore {
      */
     public void prepareWrite(Packet pc) {
     	packet = pc;
-    	status = Status.SEND_HEADER;
-    	byteBuffer = ByteBuffer.allocate(8);
-    	PacketUtil.putHeader(packet, byteBuffer);
+    	if (pc.getLength() + 8 <= MAX_BUFFER_SIZE) {
+    		status = Status.SEND_BODY;
+    		byteBuffer = ByteBuffer.allocate(8 + pc.getLength());
+    		PacketUtil.putHeader(packet, byteBuffer);
+    		byteBuffer.put(pc.getData());
+    	} else {
+    		status = Status.SEND_HEADER;
+    		byteBuffer = ByteBuffer.allocate(8);
+    		PacketUtil.putHeader(packet, byteBuffer);
+    	}
+    	// Make buffer ready for read.
     	byteBuffer.flip();
     	selectorHolder.changeInterestOps(selectionKey, SelectionKey.OP_WRITE);
     }
 
     /**
      * Handle write request. called by NIO selector.
-     * Send packets to client.
+     * Send packets to server.
      *
      * Status change summary:
      * HEADER -> Sending a packet, header now
@@ -163,7 +181,7 @@ public class ClientCore {
     }
 
     /**
-     * Packet write finished, we need to try read again.
+     * Packet write finished, we need to try read data from server now.
      */
     public void writeFinished() {
     	// Send OK, try read.
@@ -244,8 +262,8 @@ public class ClientCore {
             socketChannel.close();
             // Write LOG.
             StringBuilder sb = new StringBuilder();
-            sb.append("Remote Client [").append(remoteName);
-            sb.append("] disconnected.");
+            sb.append("Client disconnected from Remote [").append(remoteName);
+            sb.append("].");
             LOG.info(sb.toString());
         } catch (IOException e) {
             LOG.info("Failed to close client socket: {}", e.getMessage());

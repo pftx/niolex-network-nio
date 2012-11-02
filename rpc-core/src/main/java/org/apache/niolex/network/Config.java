@@ -165,31 +165,6 @@ public interface Config {
 	short CODE_REGR_UUID = (short)65501;
 
 	/**
-	 * Register the client Need heart beat.
-	 */
-	short CODE_REGR_HBEAT = (short)65502;
-
-	/**
-	 * Register the name service address.
-	 */
-	short CODE_NAME_PUBLISH = (short)65503;
-
-	/**
-	 * Listen the name service address.
-	 */
-	short CODE_NAME_OBTAIN = (short)65504;
-
-	/**
-	 * The name service address data.
-	 */
-	short CODE_NAME_DATA = (short)65505;
-
-	/**
-	 * The name service address difference increment package.
-	 */
-	short CODE_NAME_DIFF = (short)65506;
-
-	/**
 	 * The error occured in rpc invoker.
 	 */
 	short CODE_RPC_ERROR = (short)65507;

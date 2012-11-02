@@ -21,7 +21,8 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CountDownLatch;
 
 /**
- * Hold all the ready connections.
+ * Hold all the ready connections. Every connection is represented as
+ * a client core instance.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
@@ -77,6 +78,8 @@ public class SocketHolder {
 		while ((core = readyQueue.poll()) != null) {
 			if (core.isValid())
 				return core;
+			else
+				nioClient.closeChannel(core);
 		}
 		return null;
 	}

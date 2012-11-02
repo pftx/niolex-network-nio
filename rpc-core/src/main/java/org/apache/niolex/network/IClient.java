@@ -31,7 +31,7 @@ public interface IClient {
 
 	/**
 	 * Do real connect action, connect to server.
-	 * This method will return immediately.
+	 * This method will return only after we get connected.
 	 *
 	 * @throws IOException
 	 */

@@ -127,13 +127,12 @@ public class Packet {
         int dataPos = 0;
         int count = 0;
         while ((count = in.read(data, dataPos, length - dataPos)) >= 0) {
-            if (count + dataPos != length) {
-                dataPos += count;
-            } else {
+        	dataPos += count;
+            if (dataPos == length) {
                 break;
             }
         }
-        if (count + dataPos != length) {
+        if (dataPos != length) {
             throw new IOException("End of stream found, but packet was not finished.");
         }
     }

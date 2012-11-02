@@ -19,6 +19,7 @@ package org.apache.niolex.rpc;
 
 /**
  * The Rpc configure class. Configure with an interface and a implementation target.
+ * Used in the Rpc server side.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
@@ -35,6 +36,25 @@ public class RpcConfig {
 	 * The implementation target.
 	 */
 	private Object target;
+
+	/**
+	 * Create a blank RpcConfig
+	 */
+	public RpcConfig() {
+		super();
+	}
+
+	/**
+	 * Create a RpcConfig with these parameters
+	 *
+	 * @param interfaces
+	 * @param target
+	 */
+	public RpcConfig(Class<?> interfaces, Object target) {
+		super();
+		this.interfaces = interfaces;
+		this.target = target;
+	}
 
 	public Class<?> getInterface() {
 		return interfaces;

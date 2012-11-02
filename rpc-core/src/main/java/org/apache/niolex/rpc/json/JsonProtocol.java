@@ -22,21 +22,23 @@ import java.io.ByteArrayOutputStream;
 import java.lang.reflect.Type;
 
 import org.apache.niolex.commons.compress.JacksonUtil;
+import org.apache.niolex.network.Config;
 import org.apache.niolex.rpc.core.ClientProtocol;
+import org.apache.niolex.rpc.core.ServerProtocol;
 import org.codehaus.jackson.map.type.TypeFactory;
 
 /**
- * The Json Rpc Protocol.
+ * The Json Rpc Protocol. We implement both side protocol just in one class.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
  * @Date: 2012-6-2
  */
-public class JsonProtocol implements ClientProtocol {
+public class JsonProtocol implements ClientProtocol, ServerProtocol {
 
 	/**
 	 * This is the override of super method.
-	 * @see org.apache.niolex.network.rpc.RpcClient#serializeParams(java.lang.Object[])
+	 * @see org.apache.niolex.rpc.core.ClientProtocol#serializeParams(java.lang.Object[])
 	 */
 	@Override
 	public byte[] serializeParams(Object[] args) throws Exception {
@@ -49,7 +51,7 @@ public class JsonProtocol implements ClientProtocol {
 
 	/**
 	 * This is the override of super method.
-	 * @see org.apache.niolex.network.rpc.RpcClient#prepareReturn(byte[], java.lang.reflect.Type, int)
+	 * @see org.apache.niolex.rpc.core.ClientProtocol#prepareReturn(byte[], java.lang.reflect.Type)
 	 */
 	@SuppressWarnings("deprecation")
 	@Override
@@ -57,6 +59,24 @@ public class JsonProtocol implements ClientProtocol {
 		ByteArrayInputStream in = new ByteArrayInputStream(ret);
 		Object r = JacksonUtil.readObj(in, TypeFactory.type(type));
 		return r;
+	}
+
+	/**
+	 * This is the override of super method.
+	 * @see org.apache.niolex.rpc.core.ServerProtocol#prepareParams(byte[], java.lang.reflect.Type[])
+	 */
+	@Override
+	public Object[] prepareParams(byte[] data, Type[] generic) throws Exception {
+		return JsonUtil.prepareParams(data, generic);
+	}
+
+	/**
+	 * This is the override of super method.
+	 * @see org.apache.niolex.rpc.core.ServerProtocol#serializeReturn(java.lang.Object)
+	 */
+	@Override
+	public byte[] serializeReturn(Object ret) throws Exception {
+		return JacksonUtil.obj2Str(ret).getBytes(Config.SERVER_ENCODING);
 	}
 
 }

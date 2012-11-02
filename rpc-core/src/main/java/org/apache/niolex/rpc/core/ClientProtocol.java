@@ -1,5 +1,5 @@
 /**
- * Protocol.java
+ * ClientProtocol.java
  *
  * Copyright 2012 Niolex, Inc.
  *
@@ -20,6 +20,10 @@ package org.apache.niolex.rpc.core;
 import java.lang.reflect.Type;
 
 /**
+ * This is the interface for client side object serialization protocol.
+ * One can implement this interface to extend the rpc-core to support
+ * new protocols.
+ *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
  * @Date: 2012-8-19

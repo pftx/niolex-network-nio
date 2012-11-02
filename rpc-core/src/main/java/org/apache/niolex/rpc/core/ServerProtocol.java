@@ -20,6 +20,12 @@ package org.apache.niolex.rpc.core;
 import java.lang.reflect.Type;
 
 /**
+ * This is the interface for server side object serialization protocol.
+ * One can implement this interface to extend the rpc-core to support
+ * new protocols.
+ *
+ * @see ClientProtocol
+ *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
  * @Date: 2012-8-19

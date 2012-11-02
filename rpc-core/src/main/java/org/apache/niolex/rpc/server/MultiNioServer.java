@@ -36,6 +36,8 @@ import org.slf4j.LoggerFactory;
 /**
  * The MultiNioServer reads and writes Packet in multiple threads.
  * This is specially for multiple CPU(CORE) server.
+ * For simple test, you can use NioServer instead.
+ *
  * @author Xie, Jiyun
  */
 public class MultiNioServer extends NioServer {
@@ -43,9 +45,11 @@ public class MultiNioServer extends NioServer {
 
 	// The Selector Thread pool size
     private int selectorsNumber;
+    // The selectors thread pool.
     private ThreadGroup sPool;
     // The Invoker Thread pool size
     private int invokersNumber;
+    // The invokers thread pool.
     private ExecutorService iPool;
     // The current round robin selector index
     private int currentIdx = 0;
@@ -54,6 +58,9 @@ public class MultiNioServer extends NioServer {
 
     /**
      * Create a MultiNioServer with default threads number.
+     * Selectors: Default to 8 or processors number.
+     * Invokers: Default to 4 times selectors number.
+     *
      */
     public MultiNioServer() {
 		super();
@@ -64,6 +71,17 @@ public class MultiNioServer extends NioServer {
 			selectorsNumber = 8;
 		}
 		this.invokersNumber = selectorsNumber * 4;
+	}
+
+    /**
+     * Create a MultiNioServer with your specified threads number.
+     * @param selectorsNumber
+     * @param invokersNumber
+     */
+	public MultiNioServer(int selectorsNumber, int invokersNumber) {
+		super();
+		this.selectorsNumber = selectorsNumber;
+		this.invokersNumber = invokersNumber;
 	}
 
 	/**
@@ -99,7 +117,7 @@ public class MultiNioServer extends NioServer {
 	 * Select a selector from multiple selectors to register this client.
 	 *
 	 * Override super method
-	 * @see org.apache.niolex.network.server.NioServer#registerClient(SocketChannel)
+	 * @see org.apache.niolex.rpc.server.NioServer#registerClient(SocketChannel)
 	 */
 	@Override
 	protected void registerClient(SocketChannel client) throws IOException {

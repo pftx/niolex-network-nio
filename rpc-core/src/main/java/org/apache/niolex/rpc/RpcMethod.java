@@ -26,6 +26,8 @@ import java.lang.annotation.Target;
  * The annotation to mark a method as remote procedure call method.
  * the single value is the code to map this method to.
  *
+ * Notion! Please make sure the code is unique in one Rpc server.
+ *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
  * @Date: 2012-6-1

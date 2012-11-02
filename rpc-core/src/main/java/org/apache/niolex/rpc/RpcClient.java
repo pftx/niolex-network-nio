@@ -36,6 +36,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * The based RpcClient, send and receive Rpc packets.
+ * Use getService to Get the Rpc Service Client Stub.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
@@ -96,6 +97,19 @@ public class RpcClient implements InvocationHandler {
 		super();
 		this.client = client;
 		this.connStatus = Status.INNITIAL;
+	}
+
+	/**
+	 * Create a RpcClient with this IClient as the backed communication tool,
+	 * the clientProtocol to do the serialization.
+	 *
+	 * @param client
+	 * @param clientProtocol
+	 */
+	public RpcClient(IClient client, ClientProtocol clientProtocol) {
+		super();
+		this.client = client;
+		this.clientProtocol = clientProtocol;
 	}
 
 	/**
@@ -219,6 +233,10 @@ public class RpcClient implements InvocationHandler {
 		}
 	}
 
+	/**
+	 * Try to re-connect to server, iterate connectRetryTimes
+	 * @return true if connected to server.
+	 */
 	private boolean retryConnect() {
 		for (int i = 0; i < connectRetryTimes; ++i) {
 			try {
@@ -247,14 +265,26 @@ public class RpcClient implements InvocationHandler {
 		return connStatus;
 	}
 
+	/**
+	 * Set the sleep time between retry, default to 1 second.
+	 * @param sleepBetweenRetryTime
+	 */
 	public void setSleepBetweenRetryTime(int sleepBetweenRetryTime) {
 		this.sleepBetweenRetryTime = sleepBetweenRetryTime;
 	}
 
+	/**
+	 * Set the number of times to retry we connection lost from server.
+	 * @param connectRetryTimes
+	 */
 	public void setConnectRetryTimes(int connectRetryTimes) {
 		this.connectRetryTimes = connectRetryTimes;
 	}
 
+	/**
+	 * Set the socket connection timeout, please set before connect.
+	 * @param timeout
+	 */
 	public void setConnectTimeout(int timeout) {
 		this.client.setConnectTimeout(timeout);
 	}
@@ -290,11 +320,14 @@ public class RpcClient implements InvocationHandler {
 		} else if (type == null || type.toString().equalsIgnoreCase("void")) {
 			return null;
 		}
+		if (ret == null || ret.length == 0) {
+			return null;
+		}
 		return clientProtocol.prepareReturn(ret, type);
 	}
 
 	/**
-	 * set the client protocol
+	 * set the client protocol do manage bean serialization.
 	 *
 	 * @param clientProtocol
 	 */

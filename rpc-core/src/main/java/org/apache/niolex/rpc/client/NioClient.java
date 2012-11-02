@@ -40,6 +40,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * The non blocking client.
+ * This client maintains a number of connections by the SocketHolder class.
+ * So it's concurrent enabled.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
@@ -125,12 +127,14 @@ public class NioClient implements IClient, Runnable {
 		try {
 			while (isWorking) {
 				selector.select();
+				// Make all the interest changes happen now.
 				selectorHolder.changeAllInterestOps();
 				Set<SelectionKey> selectedKeys = selector.selectedKeys();
 	            for (SelectionKey selectionKey : selectedKeys) {
 	                handleKey(selectionKey);
 	            }
 	            selectedKeys.clear();
+	            // Add more connections to ensure there are always many connections available.
 	            addClientChannels();
 	        }
 		} catch (Exception e) {

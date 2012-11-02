@@ -46,7 +46,7 @@ public class PacketUtil {
 	}
 
 	/**
-	 * Create a packet with packet code and String data. String will be encoded as UTF-8
+	 * Create a packet with packet code and String data. String will be encoded to UTF-8
 	 *
 	 * @param code
 	 * @param data
@@ -56,7 +56,7 @@ public class PacketUtil {
 	}
 
 	/**
-	 * Create packet by code and data
+	 * Create packet by code and data, data must not be null.
 	 *
 	 * @param code
 	 * @param data
@@ -66,11 +66,13 @@ public class PacketUtil {
 	}
 
 	/**
-	 * Generate Data from this Packet into the ByteBuffer.
+	 * Generate Header Data from this Packet into the ByteBuffer.
+	 * We will only put header information into buffer and will not
+	 * reset buffer in here. So please make sure the buffer is not full.
+	 * The header is 8 bytes.
 	 *
 	 * @param pc
 	 * @param bb
-	 * @return true if the generation is finished.
 	 */
 	public static void putHeader(Packet pc, ByteBuffer bb) {
 		bb.putShort(pc.getSerial());
@@ -79,10 +81,14 @@ public class PacketUtil {
 	}
 
 	/**
-	 * Parse Packet header from ByteBuffer
+	 * Parse Packet header from ByteBuffer.
+	 * We will create a new Packet with the header information parsed from
+	 * the buffer. We will create a byte array and set it into the created
+	 * Packet for put data. So you can just use it.
 	 *
 	 * @param bb
-	 * @return true only if this packet is ready to send.
+	 * @throws IllegalStateException if packet is larger than 10MB
+	 * @return the packet created.
 	 */
 	public static Packet parseHeader(ByteBuffer bb) {
 		Packet pc = new Packet();

@@ -20,6 +20,7 @@ package org.apache.niolex.rpc.json;
 import java.io.IOException;
 
 import org.apache.niolex.rpc.RpcConfig;
+import org.apache.niolex.rpc.RpcInvoker;
 import org.apache.niolex.rpc.server.MultiNioServer;
 
 
@@ -38,7 +39,7 @@ public class JsonRpcServer {
      */
     public static void main(String[] args) throws IOException {
         s.setPort(8808);
-        JsonRpcInvoker handler = new JsonRpcInvoker();
+        RpcInvoker handler = new RpcInvoker(new JsonProtocol());
         s.setInvoker(handler);
         if (args != null && args.length != 0) {
         	s.setSelectorsNumber(Integer.parseInt(args[0]));

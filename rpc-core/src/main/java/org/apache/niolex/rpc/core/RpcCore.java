@@ -22,6 +22,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 
+import org.apache.niolex.network.Config;
 import org.apache.niolex.network.Packet;
 import org.apache.niolex.network.PacketUtil;
 import org.slf4j.Logger;
@@ -30,6 +31,7 @@ import org.slf4j.LoggerFactory;
 /**
  * This is the Rpc core of server packet processing component.
  * This is definitely the core of the whole network server.
+ * There is a {@link #ClientCore} class to handle client side network.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
@@ -38,11 +40,18 @@ import org.slf4j.LoggerFactory;
 public class RpcCore {
 	private static final Logger LOG = LoggerFactory.getLogger(RpcCore.class);
 
+	/**
+	 * The max buffer size. for packets small than this threshold will be send at one time.
+	 */
+	private static final int MAX_BUFFER_SIZE = Config.SERVER_NIO_BUFFER_SIZE;
+
     /**
      * Internal used in RpcCore. Please ignore.
      * Status indicate the running status of read and write.
-     * HEADER -> Reading(Writing) header
-     * BODY -> Reading(Writing) body
+     * RECEVE_HEADER -> Waiting to Read header from Remote
+     * SEND_HEADER -> Waiting to Write header into Socket Channel
+     * RECEVE_BODY -> Reading body
+     * SEND_BODY -> Writing body
      *
      * @author Xie, Jiyun
      *
@@ -67,7 +76,7 @@ public class RpcCore {
     private final SelectionKey selectionKey;
 
     /**
-     * The name of this client socket.
+     * The name of the remote side of this socket.
      */
     private String remoteName;
 
@@ -152,9 +161,17 @@ public class RpcCore {
      */
     public void prepareWrite(Packet pc) {
     	packet = pc;
-    	status = Status.SEND_HEADER;
-    	byteBuffer = ByteBuffer.allocate(8);
-    	PacketUtil.putHeader(packet, byteBuffer);
+    	if (pc.getLength() + 8 <= MAX_BUFFER_SIZE) {
+    		status = Status.SEND_BODY;
+    		byteBuffer = ByteBuffer.allocate(8 + pc.getLength());
+    		PacketUtil.putHeader(packet, byteBuffer);
+    		byteBuffer.put(pc.getData());
+    	} else {
+    		status = Status.SEND_HEADER;
+    		byteBuffer = ByteBuffer.allocate(8);
+    		PacketUtil.putHeader(packet, byteBuffer);
+    	}
+    	// Make buffer ready for read.
     	byteBuffer.flip();
     	selectorHolder.changeInterestOps(selectionKey, SelectionKey.OP_WRITE);
     }

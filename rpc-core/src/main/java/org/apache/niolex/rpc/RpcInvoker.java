@@ -26,20 +26,44 @@ import org.apache.niolex.commons.reflect.MethodUtil;
 import org.apache.niolex.network.Config;
 import org.apache.niolex.network.Packet;
 import org.apache.niolex.rpc.core.Invoker;
+import org.apache.niolex.rpc.core.ServerProtocol;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Server side RPC packet handler.
+ * The base class of Server side RPC packet handler.
+ * One can just use it or extend it for special purpose.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
  * @Date: 2012-6-1
  */
-public abstract class RpcInvoker implements Invoker {
+public class RpcInvoker implements Invoker {
 	protected static final Logger LOG = LoggerFactory.getLogger(RpcInvoker.class);
 
 	private Map<Short, RpcExecuteItem> executeMap = new HashMap<Short, RpcExecuteItem>();
+
+	/**
+	 * The server side protocol to handle serialization.
+	 */
+	private ServerProtocol serverProtocol;
+
+
+	/**
+	 * Create a RpcInvoker without protocol.
+	 */
+	public RpcInvoker() {
+		super();
+	}
+
+	/**
+	 * Create a RpcInvoker with this specified protocol.
+	 * @param serverProtocol
+	 */
+	public RpcInvoker(ServerProtocol serverProtocol) {
+		super();
+		this.serverProtocol = serverProtocol;
+	}
 
 	@Override
 	public Packet process(Packet sc) {
@@ -78,13 +102,17 @@ public abstract class RpcInvoker implements Invoker {
 			this.sc = sc;
 		}
 
+		/**
+		 * Do the method execution.
+		 * @return
+		 */
 		private Packet execute() {
 			RpcException rep = null;
 			Object[] args = null;
 			try {
 				Type[] generic = method.getGenericParameterTypes();
 				if (generic != null && generic.length > 0) {
-					args = prepareParams(sc.getData(), generic);
+					args = serverProtocol.prepareParams(sc.getData(), generic);
 				}
 			} catch (Exception e1) {
 				rep = new RpcException("Error occured when prepare params.",
@@ -116,7 +144,7 @@ public abstract class RpcInvoker implements Invoker {
 			if (data == null) {
 				arr = new byte[0];
 			} else {
-				arr = serializeReturn(data);
+				arr = serverProtocol.serializeReturn(data);
 			}
 			Packet rc = new Packet(sc.getCode(), arr);
 			if (exception != 0) {
@@ -132,7 +160,8 @@ public abstract class RpcInvoker implements Invoker {
 	}
 
 	/**
-	 * Set the Rpc Configs, this method will parse all the configurations and generate execute map.
+	 * Set the Rpc Configs, this method will parse all the configurations and generate the execute map.
+	 * This method can be called multi-times. System will collect all the configurations.
 	 * @param confs
 	 */
 	public void setRpcConfigs(RpcConfig[] confs) {
@@ -154,24 +183,11 @@ public abstract class RpcInvoker implements Invoker {
 	}
 
 	/**
-	 * Read parameters from the data.
-	 * generic can not be null, we already checked.
-	 *
-	 * @param data
-	 * @param generic
-	 * @return
-	 * @throws Exception
+	 * Set the server side serialization protocol.
+	 * @param serverProtocol
 	 */
-	protected abstract Object[] prepareParams(byte[] data, Type[] generic) throws Exception;
-
-	/**
-	 * Serialize returned object into byte array.
-	 * ret can not be null, we already checked.
-	 *
-	 * @param ret
-	 * @return
-	 * @throws Exception
-	 */
-	protected abstract byte[] serializeReturn(Object ret) throws Exception;
+	public void setServerProtocol(ServerProtocol serverProtocol) {
+		this.serverProtocol = serverProtocol;
+	}
 
 }

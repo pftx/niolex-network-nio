@@ -30,8 +30,8 @@ public interface IServer {
 
 	/**
 	 * Start the Server, bind to the Port.
-	 * Server need to start threads internally to run.
 	 * This method need to return after this server is started.
+	 * Server need to start threads internally to run.
 	 */
 	public boolean start();
 
@@ -42,7 +42,7 @@ public interface IServer {
 	public void stop();
 
 	/**
-	 * The current listen port.
+	 * The current listening port.
 	 * @return
 	 */
 	public int getPort();
@@ -55,12 +55,12 @@ public interface IServer {
 	public void setPort(int port);
 
 	/**
-	 * @return the invoker
+	 * @return get the current invoker
 	 */
 	public Invoker getInvoker();
 
 	/**
-	 * Set the server side packet handler
+	 * Set the server side packet invoker
 	 * This method must be called before start()
 	 * @param invoker the invoker to set
 	 */

@@ -21,6 +21,7 @@ import java.lang.reflect.Method;
 
 /**
  * Rpc execute item, internal usage.
+ * Server will execute the method on the target when get invoked.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0

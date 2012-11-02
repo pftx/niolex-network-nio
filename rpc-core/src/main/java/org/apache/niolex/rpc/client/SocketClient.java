@@ -17,6 +17,8 @@
  */
 package org.apache.niolex.rpc.client;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -96,8 +98,8 @@ public class SocketClient implements IClient {
         socket.setTcpNoDelay(true);
         socket.connect(serverAddress);
         this.isWorking = true;
-        inS = new DataInputStream(socket.getInputStream());
-        outS = new DataOutputStream(socket.getOutputStream());
+        inS = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
+        outS = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
         LOG.info("Client connected to address: {}", serverAddress);
 	}
 
@@ -156,7 +158,7 @@ public class SocketClient implements IClient {
     		inS.close();
     		outS.close();
     		socket.close();
-    		LOG.info("Client stoped");
+    		LOG.info("Client stoped.");
     	} catch(Exception e) {
     		LOG.error("Error occured when stop the server.", e);
     	}
