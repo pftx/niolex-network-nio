@@ -20,6 +20,8 @@ package org.apache.niolex.network;
 
 /**
  * The Packet Handler Interface.
+ * This is the main and raw interface user application want to implement.
+ *
  * @author Xie, Jiyun
  *
  */
@@ -27,6 +29,8 @@ public interface IPacketHandler {
 
     /**
      * Handle the Packet, and write results to IPacketWriter if you want.
+     * You can write many results or nothing. [0 .. N]
+     *
      * @param sc The Packet need Handle
      * @param wt Write results
      */
@@ -34,7 +38,12 @@ public interface IPacketHandler {
 
     /**
      * The remote peer identified by this IPacketWriter is broken.
+     * User need to do private data clean here.
+     * It's Guaranteed by the system there will be no more data send to user application
+     * after this method been called.
+     *
      * @param wt
      */
     public void handleClose(IPacketWriter wt);
+
 }

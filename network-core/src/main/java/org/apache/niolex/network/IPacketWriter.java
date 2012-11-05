@@ -22,6 +22,9 @@ import org.apache.niolex.network.event.WriteEventListener;
 
 /**
  * The Packet Writer Interface.
+ * This is the really basic interface for packet handling.
+ * The server side and client side core network components will implement it.
+ *
  * @author Xie, Jiyun
  *
  */
@@ -29,6 +32,7 @@ public interface IPacketWriter {
 
     /**
      * The string representation of the remote peer. i.e. The IP address.
+     *
      * @return
      */
     public String getRemoteName();
@@ -36,12 +40,22 @@ public interface IPacketWriter {
     /**
      * Write Packet to the remote peer.
      * You can write as many packets as you want.
+     * Please do not write any packets after the channel is closed, or the system
+     * Behavior will not be defined.
+     * This method will return immediately after the packet is put into the outgoing
+     * queue. It will not indicate the packet has been sent.
+     *
+     * @see org.apache.niolex.network.event.WriteEventListener
+     *
      * @param sc The Packet to write
      */
     public void handleWrite(PacketData sc);
 
     /**
      * WriteEventListener is the listener fired after packet send to client.
+     * The {@link #handleWrite(PacketData)} method return immediately after the packet is put into
+     * the outgoing queue. This method will tell you the packet is sent by event.
+     *
      * @param listener
      */
     public void addEventListener(WriteEventListener listener);
@@ -49,14 +63,16 @@ public interface IPacketWriter {
     /**
      * Attach some data to this object, please use your unique key, all system internal data key
      * will start will SYS_, please keep away from them.
+     *
      * @param key
      * @param value
-     * @return The current stored object
+     * @return The current stored object, or null if nothing is stored now.
      */
     public Object attachData(String key, Object value);
 
     /**
-     * Get the attached data from this Writer.
+     * Get the attached data from this Writer, or null if nothing is stored.
+     *
      * @param key
      * @return
      */

@@ -21,25 +21,63 @@ import org.apache.niolex.commons.codec.Base16Util;
 
 /**
  * The basic data structure of this framework.
+ * Use #PacketData instead in user application.
+ *
  * @author Xie, Jiyun
  *
  */
 public class Packet {
 
+	/**
+	 * The current version number of this packet, can be used for serial number
+	 * or magic code or something like that.
+	 */
     protected byte version;
+
+    /**
+     * Not used for now. Can be used for serial number
+	 * or magic code or something like that.
+     */
     protected byte reserved;
+
+    /**
+     * The packet code, server use this to judge the content of this packet.
+     */
     protected short code;
+
+    /**
+     * The packet data length.
+     */
     protected int length;
+
+    /**
+     * The real packet content.
+     */
     protected byte[] data;
+
+    /**
+     * The string format packet description, encoded by code, version and reserved.
+     * This field make the packet magic thing human readable.
+     * @see #descriptor()
+     */
     private String desc;
 
     /**
-     * Create an empty Packet
+     * Create an empty Packet.
+     * All fields are not set, set them before use the packet.
      */
     public Packet() {
         super();
     }
 
+    /**
+     * Get The string format packet description, encoded by code, version and reserved.
+     * Format: code[2B] version[1B] reserved[1B] to base16 integer format.
+     * i.e.		3A456B12
+     * This method will cache the result. So if you change the header after call this
+     * method, the string will not change accordingly.
+     * @return
+     */
     public String descriptor() {
     	if (desc == null) {
 	    	byte[] bytes = new byte[4];

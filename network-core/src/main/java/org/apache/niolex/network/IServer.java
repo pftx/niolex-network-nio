@@ -53,6 +53,8 @@ public interface IServer {
 	public void setPort(int port);
 
 	/**
+	 * Get the packet handler set to server.
+	 *
 	 * @return the packetHandler
 	 */
 	public IPacketHandler getPacketHandler();
@@ -60,6 +62,7 @@ public interface IServer {
 	/**
 	 * Set the server side packet handler
 	 * This method must be called before start()
+	 *
 	 * @param packetHandler the packetHandler to set
 	 */
 	public void setPacketHandler(IPacketHandler packetHandler);
@@ -72,6 +75,7 @@ public interface IServer {
 	/**
 	 * Set the server accept timeout
 	 * This method must be called before start()
+	 *
 	 * @param acceptTimeOut the acceptTimeOut to set
 	 */
 	public void setAcceptTimeOut(int acceptTimeOut);

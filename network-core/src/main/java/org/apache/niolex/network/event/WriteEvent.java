@@ -22,6 +22,13 @@ import org.apache.niolex.network.PacketData;
 
 /**
  * Packet write event.
+ * Our system use asynchronization way to send data.
+ * That is, when you call #IPacketWriter.handleWrite, we just put the packet in to
+ * the out going queue. System will send it when network is ready.
+ *
+ * So, how could you be sure that your packet is send? Use event based methods.
+ *
+ * @see IPacketWriter.addEventListener
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
@@ -29,7 +36,14 @@ import org.apache.niolex.network.PacketData;
  */
 public class WriteEvent {
 
+	/**
+	 * The packet writer who send this packet.
+	 */
 	private IPacketWriter packetWriter;
+
+	/**
+	 * The packet just sent to remote peer.
+	 */
 	private PacketData packetData;
 
 	public IPacketWriter getPacketWriter() {

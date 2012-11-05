@@ -21,6 +21,9 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 
 /**
+ * The Client side interface, Define the network control methods.
+ * A Client must be able to write packets, so it extends the #IPacketWriter interface.
+ *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
  * @Date: 2012-6-2
@@ -29,7 +32,7 @@ public interface IClient extends IPacketWriter {
 
 	/**
 	 * Do real connect action, connect to server.
-	 * This method will return immediately.
+	 * This method will return immediately after get connected.
 	 * @throws IOException
 	 */
 	public void connect() throws IOException;
@@ -46,7 +49,7 @@ public interface IClient extends IPacketWriter {
 	public boolean isWorking();
 
 	/**
-	 * Set the packet handler this client using
+	 * Set the packet handler this client going to use
 	 * @param packetHandler
 	 */
 	public void setPacketHandler(IPacketHandler packetHandler);
@@ -68,7 +71,7 @@ public interface IClient extends IPacketWriter {
 	public void setServerAddress(InetSocketAddress serverAddress);
 
 	/**
-	 * Get the current Internet address
+	 * Get the current Internet address of Remote server.
 	 * @return
 	 */
 	public InetSocketAddress getServerAddress();

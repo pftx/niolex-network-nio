@@ -18,12 +18,24 @@
 package org.apache.niolex.network.event;
 
 /**
+ * The interface user need to implement in order to get the event
+ * when packet sent.
+ *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
  * @Date: 2012-6-14
  */
 public interface WriteEventListener {
 
+	/**
+	 * This event is fired just after we send the packet to remote peer.
+	 *
+	 * Notion! We fire this event only indicate that the data is sent to network
+	 * buffer, it will be transfered to remote if no I/O error occur.
+	 * So you can not be 100% sure that the remote will get this packet.
+	 *
+	 * @param wEvent
+	 */
 	public void afterSend(WriteEvent wEvent);
 
 }
