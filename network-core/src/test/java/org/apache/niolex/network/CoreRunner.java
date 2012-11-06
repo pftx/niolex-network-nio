@@ -44,8 +44,10 @@ public class CoreRunner {
 		DispatchPacketHandler handler = new DispatchPacketHandler();
 		handler.addHandler((short) 2, new EchoPacketHandler());
 		handler.addHandler((short) 3, new SummaryPacketHandler());
-		handler.addHandler((short) 4, new SessionPacketHandler(new TLastTalkFactory()));
-		handler.addHandler((short) 5, new SessionPacketHandler(new TLastTalkFactory()));
+		IPacketHandler ssHandler = new SessionPacketHandler(new TLastTalkFactory());
+		handler.addHandler((short) 4, ssHandler);
+		handler.addHandler((short) 5, ssHandler);
+		handler.addHandler((short) 6, ssHandler);
 
 		IPacketHandler finalHandler = new FaultTolerateAdapter(handler);
 		nioServer.setPacketHandler(finalHandler);

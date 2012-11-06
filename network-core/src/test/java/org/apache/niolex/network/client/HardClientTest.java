@@ -15,7 +15,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.niolex.network.demo;
+package org.apache.niolex.network.client;
 
 import static org.junit.Assert.assertArrayEquals;
 
@@ -35,28 +35,30 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
+ * Test the client too many packets.
+ *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
  * @Date: 2012-5-31
  */
 public class HardClientTest {
-	PacketClient c = new PacketClient(new InetSocketAddress("localhost", 8809));
-	List<PacketData> list = new ArrayList<PacketData>();
-	List<PacketData> list2 = new ArrayList<PacketData>();
+	PacketClient c = new PacketClient(new InetSocketAddress("localhost", CoreRunner.PORT));
+	List<PacketData> clientSavePkList = new ArrayList<PacketData>();
+	List<PacketData> clientSendList = new ArrayList<PacketData>();
 
 	@BeforeClass
-	public static void run() throws Exception {
+	public static void start() throws Exception {
 		CoreRunner.createServer();
 	}
 
 	@AfterClass
-	public static void down2() throws Exception {
+	public static void stop() throws Exception {
 		CoreRunner.shutdown();
 	}
 
 	@Before
 	public void setup() throws Exception {
-		c.setPacketHandler(new SavePacketHandler(list));
+		c.setPacketHandler(new SavePacketHandler(clientSavePkList));
 		c.connect();
 	}
 
@@ -67,8 +69,8 @@ public class HardClientTest {
 
 	@Test
 	public void test() throws Exception {
-		list.clear();
-		list2.clear();
+		clientSavePkList.clear();
+		clientSendList.clear();
 		for (int i = 0; i < 5000; ++i) {
 			PacketData sc = new PacketData();
 			sc.setCode((short) 2);
@@ -77,21 +79,27 @@ public class HardClientTest {
 			sc.setLength(data.length);
 			sc.setData(data);
 			c.handleWrite(sc);
-			list2.add(sc);
+			clientSendList.add(sc);
 		}
 		int k = 100;
 		while (k-- > 0) {
-			if (list.size() == 5000)
+			if (clientSavePkList.size() == 5000)
 				break;
 			Thread.sleep(CoreRunner.CO_SLEEP);
 		}
 		for (int i = 0; i < 5000; ++i) {
-			assertArrayEquals(list.get(i).getData(), list2.get(i).getData());
+			assertArrayEquals(clientSavePkList.get(i).getData(), clientSendList.get(i).getData());
 		}
 	}
 
+	/**
+	 * Run too many times as main method.
+	 *
+	 * @param args
+	 * @throws Exception
+	 */
 	public static void main(String args[]) throws Exception {
-		CoreRunner.createServer();
+		start();
 		HardClientTest hdt = new HardClientTest();
 		hdt.setup();
 		for (int i = 0; i < 1000; ++i) {
@@ -99,6 +107,6 @@ public class HardClientTest {
 			System.out.println("Test iter.");
 		}
 		hdt.down();
-		CoreRunner.shutdown();
+		stop();
 	}
 }

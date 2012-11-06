@@ -31,16 +31,18 @@ import org.apache.niolex.network.PacketData;
  */
 public class PrintPacketHandler implements IPacketHandler {
 
-    /* (non-Javadoc)
-     * @see com.renren.ad.datacenter.follower.network.IPacketHandler#handleError()
-     */
+	/**
+	 * Override super method
+	 * @see org.apache.niolex.network.IPacketHandler#handleClose(org.apache.niolex.network.IPacketWriter)
+	 */
     @Override
     public void handleClose(IPacketWriter wt) {
         System.out.println("Error occured, this is from PrintPacketHandler. " + wt.getRemoteName());
     }
 
-    /* (non-Javadoc)
-     * @see com.renren.ad.datacenter.follower.network.IPacketHandler#handleRead(com.renren.ad.datacenter.follower.network.Packet, com.renren.ad.datacenter.follower.network.IPacketWriter)
+    /**
+     * Override super method
+     * @see org.apache.niolex.network.IPacketHandler#handleRead(org.apache.niolex.network.PacketData, org.apache.niolex.network.IPacketWriter)
      */
     @Override
     public void handleRead(PacketData sc, IPacketWriter wt) {

@@ -93,7 +93,7 @@ public class PacketDataTest {
 
 	/**
 	 * Test method for
-	 * {@link org.apache.niolex.network.client.renren.ad.datacenter.follower.network.PacketClient#handleWrite(com.renren.ad.datacenter.follower.network.PacketData)}
+	 * {@link org.apache.niolex.network.client.PacketClient#handleWrite(org.apache.niolex.network.PacketData)}
 	 * .
 	 */
 	@Test

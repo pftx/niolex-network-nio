@@ -44,9 +44,9 @@ public class TLastTalkFactory extends LastTalkFactory {
                 }
                 sc.setData(lastTalk.getBytes());
                 sc.setLength(sc.getData().length);
-                System.out.println("--------------This is read.------------\nLast talk: "
+                System.out.println("Read.------------\nLast talk: "
                 		+ lastTalk + "\nThis talk: " + thisTalk
-                		+ "\n---------------------------------");
+                		+ "\n-----------------");
                 lastTalk = thisTalk;
                 if (sc.getCode() == 5) {
                 	try {
@@ -54,7 +54,11 @@ public class TLastTalkFactory extends LastTalkFactory {
 					} catch (InterruptedException e) {
 					}
                 }
-                System.out.println("--------------This is send.--------------");
+                if (sc.getCode() == 6) {
+                	wt.handleWrite(PacketData.getHeartBeatPacket());
+                	wt.handleWrite(PacketData.getHeartBeatPacket());
+                }
+                System.out.println("Send data now...");
                 wt.handleWrite(sc);
             }
 

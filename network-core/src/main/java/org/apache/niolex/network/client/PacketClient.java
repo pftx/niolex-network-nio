@@ -26,7 +26,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingDeque;
 
 import org.apache.niolex.network.Config;
@@ -48,11 +47,6 @@ public class PacketClient extends BaseClient {
 	 * The queue to store all the out sending packets.
 	 */
 	private final LinkedBlockingDeque<PacketData> sendPacketList = new LinkedBlockingDeque<PacketData>();
-
-	/**
-	 * The latch to make the write thread wait on this.
-	 */
-	private CountDownLatch latch = new CountDownLatch(1);
 
 	/**
 	 * The internal write thread.
@@ -112,7 +106,6 @@ public class PacketClient extends BaseClient {
     @Override
     public void handleWrite(PacketData sc) {
     	sendPacketList.add(sc);
-    	latch.countDown();
     }
 
 	/**
@@ -204,13 +197,16 @@ public class PacketClient extends BaseClient {
             try {
                 while (isWorking) {
                     try {
+
+                    	/**
+                    	 * The write thread wait on this queue till there is data.
+                    	 */
                     	PacketData sendPacket = sendPacketList.takeFirst();
                     	if (sendPacket != null) {
                     		// If nothing to send, let's sleep.
                     		sendNewPacket(sendPacket);
                     	} else {
-                    		latch = new CountDownLatch(1);
-                    		latch.await();
+                    		Thread.yield();
                     	}
                     } catch (InterruptedException e) {
                         // Let's ignore it.

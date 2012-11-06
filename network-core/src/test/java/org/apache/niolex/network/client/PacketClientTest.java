@@ -50,36 +50,36 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-@RunWith(MockitoJUnitRunner.class)
 /**
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
  * @Date: 2012-5-28
  */
+@RunWith(MockitoJUnitRunner.class)
 public class PacketClientTest {
 	private static final Logger LOG = LoggerFactory.getLogger(PacketClientTest.class);
 
 	@Mock
 	private IPacketHandler packetHandler;
-
-	private IPacketHandler packetHandler2;
-
-	private int port = 8808;
-	private NioServer nioServer;
 	private PacketClient packetClient;
+
+	private IPacketHandler serverHandler;
+	private NioServer nioServer;
+
+	private int port = CoreRunner.PORT;
 	private int received = 0;
 
 	@Before
 	public void createPacketClient() throws Exception {
 		packetClient = new PacketClient();
-		packetClient.setServerAddress(new InetSocketAddress("localhost", 8808));
-		packetClient.getServerAddress();
-
+		InetSocketAddress ina = new InetSocketAddress("localhost", port);
+		packetClient.setServerAddress(ina);
+		assertEquals(packetClient.getServerAddress(), ina);
 		packetClient.setPacketHandler(packetHandler);
 
 		nioServer = new NioServer();
-		packetHandler2 = spy(new EchoPacketHandler());
-		nioServer.setPacketHandler(packetHandler2);
+		serverHandler = spy(new EchoPacketHandler());
+		nioServer.setPacketHandler(serverHandler);
 		nioServer.setPort(port);
 		nioServer.start();
 	}
@@ -91,7 +91,7 @@ public class PacketClientTest {
 
 	/**
 	 * Test method for
-	 * {@link org.apache.niolex.network.client.renren.ad.datacenter.follower.network.PacketClient#connect()}.
+	 * {@link org.apache.niolex.network.client.PacketClient#connect()}.
 	 */
 	@Test
 	public void testConnect() throws Exception {
@@ -124,7 +124,7 @@ public class PacketClientTest {
 
 	/**
 	 * Test method for
-	 * {@link org.apache.niolex.network.client.renren.ad.datacenter.follower.network.PacketClient#getRemoteName()}
+	 * {@link org.apache.niolex.network.client.PacketClient#getRemoteName()}
 	 * .
 	 */
 	@Test
@@ -170,7 +170,7 @@ public class PacketClientTest {
 
 	/**
 	 * Test method for
-	 * {@link org.apache.niolex.network.client.renren.ad.datacenter.follower.network.PacketClient#handleWrite(com.renren.ad.datacenter.follower.network.PacketData)}
+	 * {@link org.apache.niolex.network.client.PacketClient#handleWrite(org.apache.niolex.network.PacketData)}
 	 * .
 	 */
 	@Test
