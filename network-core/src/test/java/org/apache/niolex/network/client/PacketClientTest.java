@@ -129,7 +129,7 @@ public class PacketClientTest {
 	 */
 	@Test
 	public void testGetRemoteName() throws Exception {
-		assertEquals("localhost/127.0.0.1:8808-0000", packetClient.getRemoteName());
+		assertEquals("localhost/127.0.0.1:8809-0000", packetClient.getRemoteName());
 		try {
 			packetClient.attachData("adsfasdf", "adsfasdf");
 			assertTrue("Should not attache.", false);
@@ -143,8 +143,10 @@ public class PacketClientTest {
 			;
 		}
 		packetClient.connect();
+		packetClient.handleWrite(PacketData.getHeartBeatPacket());
+		Thread.sleep(CoreRunner.CO_SLEEP);
 		nioServer.stop();
-		Thread.sleep(10 * CoreRunner.CO_SLEEP);
+		Thread.sleep(CoreRunner.CO_SLEEP);
 
 		verify(packetHandler).handleClose(packetClient);
 	}
@@ -174,7 +176,7 @@ public class PacketClientTest {
 	 * .
 	 */
 	@Test
-	public void testHandleWrite_1() throws Exception {
+	public void testHandleWriteLarge() throws Exception {
 		final PacketData sc0 = new PacketData();
 		final PacketData sc1 = new PacketData();
 		final PacketData sc2 = new PacketData();
@@ -245,7 +247,7 @@ public class PacketClientTest {
 		while (i-- > 0) {
 			if (received == 6)
 				break;
-			Thread.sleep(10 * CoreRunner.CO_SLEEP);
+			Thread.sleep(CoreRunner.CO_SLEEP);
 		}
 		packetClient.stop();
 		assertEquals(6, received);

@@ -64,6 +64,7 @@ public class SocketClientTest {
 		sc.setConnectTimeout(90821);
 		sc.setPacketHandler(null);
 		assertEquals(inn, sc.getServerAddress());
+		sc.stop();
 	}
 
 	/**

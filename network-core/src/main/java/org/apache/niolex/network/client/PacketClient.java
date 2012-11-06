@@ -205,8 +205,6 @@ public class PacketClient extends BaseClient {
                     	if (sendPacket != null) {
                     		// If nothing to send, let's sleep.
                     		sendNewPacket(sendPacket);
-                    	} else {
-                    		Thread.yield();
                     	}
                     } catch (InterruptedException e) {
                         // Let's ignore it.
