@@ -25,8 +25,10 @@ import org.apache.niolex.network.demo.LastTalkFactory;
  * @Date: 2012-5-31
  */
 public class TLastTalkFactory extends LastTalkFactory {
+
 	@Override
     public IPacketHandler createHandler(IPacketWriter wt) {
+
         return new IPacketHandler() {
             private String lastTalk;
 

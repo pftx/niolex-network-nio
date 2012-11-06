@@ -17,16 +17,14 @@
  */
 package org.apache.niolex.network;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
-import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
 
 import org.apache.niolex.network.client.PacketClient;
-import org.apache.niolex.network.demo.PrintPacketHandler;
-import org.apache.niolex.network.server.NioServer;
 import org.junit.Test;
 
 /**
@@ -85,19 +83,38 @@ public class PacketTest {
 		assertEquals(17, pc.getLength());
 	}
 
-	/**
-	 * Test method for {@link org.apache.niolex.network.Packet#setReserved(byte)}.
-	 * @throws IOException
-	 */
+	@Test(expected=IOException.class)
+	public void testparsePacket() throws IOException {
+		PacketData pc = new PacketData();
+		ByteBuffer ba = ByteBuffer.allocate(12);
+		ba.putInt(12345);
+		ba.putInt(10485761);
+		ba.putInt(10485761);
+
+		pc.parsePacket(new DataInputStream(new ByteArrayInputStream(ba.array())));
+		assertEquals(10485760, pc.getLength());
+	}
+
 	@Test
-	public void testSetReserved() throws IOException {
-		NioServer nioServer = new NioServer();
-		nioServer.setPort(8808);
-		nioServer.start();
-		PacketClient c = new PacketClient(new InetSocketAddress("localhost", 8808));
-		c.setPacketHandler(new PrintPacketHandler());
-		c.connect();
-		nioServer.stop();
+	public void testparseHeader() {
+		PacketData pc = new PacketData();
+		ByteBuffer ba = ByteBuffer.allocate(8);
+		ba.putInt(12345);
+		ba.putInt(10485760);
+		ba.flip();
+		pc.parseHeader(ba);
+		assertEquals(10485760, pc.getLength());
+	}
+
+	@Test(expected=IllegalStateException.class)
+	public void testparseHeaderErr() {
+		PacketData pc = new PacketData();
+		ByteBuffer ba = ByteBuffer.allocate(8);
+		ba.putInt(12345);
+		ba.putInt(10485761);
+		ba.flip();
+		pc.parseHeader(ba);
+		assertEquals(10485760, pc.getLength());
 	}
 
 }

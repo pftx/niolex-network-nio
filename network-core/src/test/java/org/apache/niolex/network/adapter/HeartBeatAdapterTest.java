@@ -25,6 +25,8 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import java.util.concurrent.CountDownLatch;
+
 import org.apache.niolex.network.Config;
 import org.apache.niolex.network.IPacketHandler;
 import org.apache.niolex.network.IPacketWriter;
@@ -115,7 +117,7 @@ public class HeartBeatAdapterTest {
 	@Test
 	public void testForceHeartBeat() throws Exception {
 		IPacketHandler other = mock(IPacketHandler.class);
-		HeartBeatAdapter ada = new HeartBeatAdapter(other);
+		final HeartBeatAdapter ada = new HeartBeatAdapter(other);
 		ada.setHeartBeatInterval(10);
 		ada.setForceHeartBeat(true);
 		// started now.
@@ -126,5 +128,15 @@ public class HeartBeatAdapterTest {
 		ada.start();
 		Thread.sleep(100);
 		verify(wt, atLeast(1)).handleWrite(PacketData.getHeartBeatPacket());
+		final CountDownLatch latch = new CountDownLatch(1);
+		Thread t = new Thread() {
+			public void run() {
+				latch.countDown();
+				ada.stop();
+			}
+		};
+		t.start();
+		latch.await();
+		t.interrupt();
 	}
 }

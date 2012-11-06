@@ -48,13 +48,13 @@ import org.slf4j.LoggerFactory;
 @RunWith(MockitoJUnitRunner.class)
 public class PacketDataTest {
 	private static final Logger LOG = LoggerFactory.getLogger(PacketDataTest.class);
+	private static final int PORT = 8908;
 
 	@Mock
 	private IPacketHandler packetHandler;
 
 	private IPacketHandler packetHandlerServer;
 
-	private int port = 8808;
 	private NioServer nioServer;
 	private Set<String> received = new HashSet<String>();
 
@@ -63,7 +63,7 @@ public class PacketDataTest {
 		nioServer = new NioServer();
 		packetHandlerServer = spy(new EchoPacketHandler());
 		nioServer.setPacketHandler(packetHandlerServer);
-		nioServer.setPort(port);
+		nioServer.setPort(PORT);
 		nioServer.start();
 	}
 
@@ -97,7 +97,7 @@ public class PacketDataTest {
 	 * .
 	 */
 	@Test
-	public void testHandleWrite_1() throws Exception {
+	public void testHandleWrite() throws Exception {
 		final PacketData sc0 = new PacketData();
 		final PacketData sc1 = new PacketData();
 		final PacketData sc2 = new PacketData();
@@ -132,7 +132,7 @@ public class PacketDataTest {
 					assertArrayEquals(sc5.getData(), sc.getData());
 					break;
 				default:
-					System.out.println("Code: " + sc.getCode());
+					System.out.println("!!!Code Not Expected: " + sc.getCode());
 					break;
 				}
 				IPacketWriter ip = (IPacketWriter)args[1];
@@ -145,13 +145,13 @@ public class PacketDataTest {
 		}).when(packetHandler).handleRead(any(PacketData.class),
 				any(IPacketWriter.class));
 
-		PacketClient packetClient1 = new PacketClient(new InetSocketAddress("localhost", 8808));
+		PacketClient packetClient1 = new PacketClient(new InetSocketAddress("localhost", PORT));
 		packetClient1.setPacketHandler(packetHandler);
-		PacketClient packetClient2 = new PacketClient(new InetSocketAddress("localhost", 8808));
+		PacketClient packetClient2 = new PacketClient(new InetSocketAddress("localhost", PORT));
 		packetClient2.setPacketHandler(packetHandler);
-		PacketClient packetClient3 = new PacketClient(new InetSocketAddress("localhost", 8808));
+		PacketClient packetClient3 = new PacketClient(new InetSocketAddress("localhost", PORT));
 		packetClient3.setPacketHandler(packetHandler);
-		PacketClient packetClient4 = new PacketClient(new InetSocketAddress("localhost", 8808));
+		PacketClient packetClient4 = new PacketClient(new InetSocketAddress("localhost", PORT));
 		packetClient4.setPacketHandler(packetHandler);
 
 		packetClient1.connect();

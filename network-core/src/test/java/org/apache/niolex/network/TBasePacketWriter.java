@@ -36,7 +36,4 @@ public class TBasePacketWriter extends BasePacketWriter {
 		return "Mock";
 	}
 
-	public PacketData handleNext() {
-		return super.handleNext();
-	}
 }
