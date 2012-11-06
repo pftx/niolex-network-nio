@@ -26,7 +26,9 @@ import org.apache.niolex.network.client.PacketClient;
 
 
 /**
- * DemoClient
+ * DemoClient, use PacketClient to connect to localhost, read data from console and send it
+ * to server, print results to console.
+ *
  * @author Xie, Jiyun
  */
 public class DemoClient {
@@ -40,6 +42,8 @@ public class DemoClient {
      */
     public static void main(String[] args) throws Exception {
         PacketClient c = new PacketClient(new InetSocketAddress("localhost", 8808));
+        // Set timeout to 10 minutes.
+        c.setConnectTimeout(600000);
         c.setPacketHandler(new PrintPacketHandler());
         c.connect();
         for (int i = 1; i < 5; ++i) {

@@ -23,15 +23,17 @@ import org.apache.niolex.network.PacketData;
 import org.apache.niolex.network.handler.IHandlerFactory;
 
 /**
- * Create a LastTalk Handler inside.
+ * Create a LastTalk Handler inside. Used in DemoServer.
+ *
  * @author Xie, Jiyun
  *
  */
 public class LastTalkFactory implements IHandlerFactory {
 
-    /* (non-Javadoc)
-     * @see com.renren.ad.datacenter.follower.network.handler.IHandlerFactory#createHandler(com.renren.ad.datacenter.follower.network.IPacketWriter)
-     */
+	/**
+	 * Override super method
+	 * @see org.apache.niolex.network.handler.IHandlerFactory#createHandler(org.apache.niolex.network.IPacketWriter)
+	 */
     @Override
     public IPacketHandler createHandler(IPacketWriter wt) {
         return new IPacketHandler() {
@@ -45,7 +47,7 @@ public class LastTalkFactory implements IHandlerFactory {
             public void handleRead(PacketData sc, IPacketWriter wt) {
                 String thisTalk = new String(sc.getData());
                 if (lastTalk == null) {
-                    lastTalk= "Hello, " + wt.getRemoteName();
+                    lastTalk= "Hello, " + wt.getRemoteName() + ", we will do last talk reply.";
                 }
                 sc.setData(lastTalk.getBytes());
                 sc.setLength(sc.getData().length);

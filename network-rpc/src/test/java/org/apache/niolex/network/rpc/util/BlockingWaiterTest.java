@@ -15,13 +15,15 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.niolex.network.util;
+package org.apache.niolex.network.rpc.util;
 
 import static org.junit.Assert.assertEquals;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.niolex.commons.util.Pair;
+import org.apache.niolex.network.util.BlockingWaiter.WaitOn;
+import org.apache.niolex.network.rpc.util.BlockingWaiter;
 import org.junit.Test;
 
 /**
@@ -32,7 +34,7 @@ import org.junit.Test;
 public class BlockingWaiterTest {
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.util.BlockingWaiter#waitForResult(java.lang.Object, long)}.
+	 * Test method for {@link org.apache.niolex.network.rpc.util.BlockingWaiter#waitForResult(java.lang.Object, long)}.
 	 */
 	@Test
 	public void testWaitForResult() throws Exception {
@@ -60,7 +62,7 @@ public class BlockingWaiterTest {
 	}
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.util.BlockingWaiter#waitForResult(java.lang.Object, long)}.
+	 * Test method for {@link org.apache.niolex.network.rpc.util.BlockingWaiter#waitForResult(java.lang.Object, long)}.
 	 */
 	@Test
 	public void testInit() throws Exception {
@@ -97,7 +99,7 @@ public class BlockingWaiterTest {
 	}
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.util.BlockingWaiter#release(java.lang.Object, org.apache.niolex.network.PacketData)}.
+	 * Test method for {@link org.apache.niolex.network.rpc.util.BlockingWaiter#release(java.lang.Object, org.apache.niolex.network.PacketData)}.
 	 */
 	@Test
 	public void testRelease() throws Exception {
@@ -138,7 +140,7 @@ public class BlockingWaiterTest {
 
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.util.BlockingWaiter#release(java.lang.Object, org.apache.niolex.network.PacketData)}.
+	 * Test method for {@link org.apache.niolex.network.rpc.util.BlockingWaiter#release(java.lang.Object, org.apache.niolex.network.PacketData)}.
 	 */
 	@Test
 	public void testVerse() throws Exception {
@@ -151,7 +153,7 @@ public class BlockingWaiterTest {
 
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.util.BlockingWaiter#release(java.lang.Object, org.apache.niolex.network.PacketData)}.
+	 * Test method for {@link org.apache.niolex.network.rpc.util.BlockingWaiter#release(java.lang.Object, org.apache.niolex.network.PacketData)}.
 	 */
 	@Test(expected=RuntimeException.class)
 	public void testException() throws Exception {
@@ -163,7 +165,7 @@ public class BlockingWaiterTest {
 	}
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.util.BlockingWaiter#release(java.lang.Object, org.apache.niolex.network.PacketData)}.
+	 * Test method for {@link org.apache.niolex.network.rpc.util.BlockingWaiter#release(java.lang.Object, org.apache.niolex.network.PacketData)}.
 	 */
 	@Test
 	public void testExceptionRe() throws Exception {

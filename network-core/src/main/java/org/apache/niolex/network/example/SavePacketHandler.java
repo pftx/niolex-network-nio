@@ -24,7 +24,7 @@ import org.apache.niolex.network.IPacketWriter;
 import org.apache.niolex.network.PacketData;
 
 /**
- * Save read data into the list send in.
+ * Save read data into the list passed in.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
@@ -32,7 +32,7 @@ import org.apache.niolex.network.PacketData;
  */
 public class SavePacketHandler implements IPacketHandler {
 	// The list to save data
-	private List<PacketData> list;
+	private final List<PacketData> list;
 
 	/**
 	 * Set the list to save data

@@ -26,28 +26,31 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Echo the input Packet to the output, just for test.
+ *
  * @author Xie, Jiyun
  *
  */
 public class EchoPacketHandler implements IPacketHandler {
 	private static final Logger LOG = LoggerFactory.getLogger(EchoPacketHandler.class);
 
-    /* (non-Javadoc)
-     * @see com.renren.ad.datacenter.follower.network.IPacketHandler#handleError()
-     */
+	/**
+	 * Override super method
+	 * @see org.apache.niolex.network.IPacketHandler#handleClose(org.apache.niolex.network.IPacketWriter)
+	 */
     @Override
     public void handleClose(IPacketWriter wt) {
     	LOG.warn("Error occured from remote: " + wt.getRemoteName());
     }
 
-    /* (non-Javadoc)
-     * @see com.renren.ad.datacenter.follower.network.IPacketHandler#handleRead(com.renren.ad.datacenter.follower.network.Packet, com.renren.ad.datacenter.follower.network.IPacketWriter)
+    /**
+     * Override super method
+     * @see org.apache.niolex.network.IPacketHandler#handleRead(org.apache.niolex.network.PacketData, org.apache.niolex.network.IPacketWriter)
      */
     @Override
     public void handleRead(PacketData sc, IPacketWriter wt) {
         wt.handleWrite(sc);
-        LOG.info("Packet with code [{}] from remote [{}] echoed back.", sc.getCode()
-        		, wt.getRemoteName());
+        LOG.info("Packet with desc [{}] from remote [{}] echoed back.", sc.descriptor(),
+        		wt.getRemoteName());
     }
 
 }

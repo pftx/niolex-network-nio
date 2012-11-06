@@ -23,7 +23,9 @@ import org.apache.niolex.network.PacketData;
 
 
 /**
- * Print Packet into Console
+ * Print code Packet into Console, and interpret packet body as simple string.
+ * Used in DemoClient.
+ *
  * @author Xie, Jiyun
  *
  */
@@ -42,8 +44,9 @@ public class PrintPacketHandler implements IPacketHandler {
      */
     @Override
     public void handleRead(PacketData sc, IPacketWriter wt) {
-        System.out.print("\n\nPacket with code [" + sc.getCode() + "] received.");
+        System.out.print("Packet with code [" + sc.getCode() + "] received.");
         System.out.println(" body:\n" + new String(sc.getData()));
+        System.out.println();
     }
 
 }

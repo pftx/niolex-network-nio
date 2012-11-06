@@ -27,7 +27,12 @@ import org.apache.niolex.network.server.MultiNioServer;
 
 
 /**
- * DemoServer
+ * DemoServer, use MultiNioServer to start a simple server.
+ * We do some different things for different codes:
+ * 2 -> echo packet back.
+ * 3 -> print the packet summary to log and send the summary back.
+ * 4 -> create a session for each client and do last talk reply.
+ *
  * @author Xie, Jiyun
  *
  */
