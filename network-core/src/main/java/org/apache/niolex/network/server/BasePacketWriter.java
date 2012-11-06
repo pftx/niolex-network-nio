@@ -29,7 +29,7 @@ import org.apache.niolex.network.event.WriteEventListener;
 
 /**
  * The base BasePacketWriter, handle attach and PacketData storage.
- * PacketData will be stored in a ConcurrentLinkedQueue, which is good at many writes.
+ * PacketData will be stored in a ConcurrentLinkedQueue, which is good at concurrent writes.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
@@ -43,7 +43,7 @@ public abstract class BasePacketWriter implements IPacketWriter {
 	protected Map<String, Object> attachMap = new HashMap<String, Object>();
 
 	/**
-	 * Internal variables. Store all the packets need to send.
+	 * Internal variables. Store all the packets need to be sent.
 	 */
 	private ConcurrentLinkedQueue<PacketData> sendPacketsQueue = new ConcurrentLinkedQueue<PacketData>();
 
@@ -64,6 +64,13 @@ public abstract class BasePacketWriter implements IPacketWriter {
 		super();
 	}
 
+	/**
+	 * We put the packet into the internal queue.
+	 * When channel is closed, we forbid user from send data
+	 *
+	 * @throws IllegalStateException When This Channel is Closed.
+	 * @see org.apache.niolex.network.IPacketWriter#handleWrite(org.apache.niolex.network.PacketData)
+	 */
 	@Override
 	public void handleWrite(PacketData sc) {
 		if (isChannelClosed) {
@@ -72,6 +79,10 @@ public abstract class BasePacketWriter implements IPacketWriter {
 		sendPacketsQueue.add(sc);
 	}
 
+	/**
+	 * Override super method
+	 * @see org.apache.niolex.network.IPacketWriter#addEventListener(org.apache.niolex.network.event.WriteEventListener)
+	 */
 	@Override
 	public void addEventListener(WriteEventListener listener) {
 		listenerList.add(listener);
@@ -80,6 +91,8 @@ public abstract class BasePacketWriter implements IPacketWriter {
 	/**
 	 * Sub class need to use this method to clean all the internal
 	 * data structure and mark this channel as closed.
+	 *
+	 * Please invoke super method when you try to override.
 	 */
 	protected void channelClosed() {
 		if (isChannelClosed) {
@@ -89,7 +102,7 @@ public abstract class BasePacketWriter implements IPacketWriter {
 		attachMap.clear();
 		attachMap = null;
 		// We do not clear this queue, because some adapter might use it.
-		// But we still need to set it to null.
+		// But we still need to set it to null to help GC.
 		sendPacketsQueue = null;
 		listenerList.clear();
 		listenerList = null;
@@ -97,6 +110,8 @@ public abstract class BasePacketWriter implements IPacketWriter {
 
 	/**
 	 * Sub class need to use this method to fire send event.
+	 * Please do not override.
+	 *
 	 * @param sc
 	 */
 	protected void fireSendEvent(PacketData sc) {
@@ -110,17 +125,26 @@ public abstract class BasePacketWriter implements IPacketWriter {
 
 	/**
 	 * Sub class need to use this method to get packets to send.
+	 *
 	 * @return
 	 */
 	protected PacketData handleNext() {
 		return sendPacketsQueue.poll();
 	}
 
+	/**
+	 * Override super method
+	 * @see org.apache.niolex.network.IPacketWriter#attachData(java.lang.String, java.lang.Object)
+	 */
 	@Override
 	public Object attachData(String key, Object value) {
 		return attachMap.put(key, value);
 	}
 
+	/**
+	 * Override super method
+	 * @see org.apache.niolex.network.IPacketWriter#getAttached(java.lang.String)
+	 */
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T getAttached(String key) {
@@ -132,6 +156,7 @@ public abstract class BasePacketWriter implements IPacketWriter {
 
 	/**
 	 * Return whether the send packets queue is empty or not.
+	 *
 	 * @return
 	 */
 	public boolean isEmpty() {
@@ -140,6 +165,7 @@ public abstract class BasePacketWriter implements IPacketWriter {
 
 	/**
 	 * Get the current non send packet queue.
+	 *
 	 * @return
 	 */
 	public ConcurrentLinkedQueue<PacketData> getRemainQueue() {
@@ -147,7 +173,10 @@ public abstract class BasePacketWriter implements IPacketWriter {
 	}
 
 	/**
-	 * replace the internal packet queue.
+	 * Replace the internal packet queue. The packets in the old internal queue will
+	 * not be send to client any more.
+	 * Attention!! Please use this with cautious! This might cause packet lost.
+	 *
 	 * @param list
 	 */
 	public void replaceQueue(ConcurrentLinkedQueue<PacketData> list) {

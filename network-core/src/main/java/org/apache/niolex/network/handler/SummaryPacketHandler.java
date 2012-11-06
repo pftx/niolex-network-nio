@@ -28,24 +28,32 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Summary the Packet information to the output, just for test.
+ * This is a demo packet handler.
+ *
  * @author Xie, Jiyun
  *
  */
 public class SummaryPacketHandler implements IPacketHandler {
 	private static final Logger LOG = LoggerFactory.getLogger(SummaryPacketHandler.class);
 
-    /* (non-Javadoc)
-     * @see com.renren.ad.datacenter.follower.network.IPacketHandler#handleError()
-     */
-    @Override
+	/**
+	 * Just do a log.
+	 *
+	 * Override super method
+	 * @see org.apache.niolex.network.IPacketHandler#handleClose(org.apache.niolex.network.IPacketWriter)
+	 */
+	@Override
     public void handleClose(IPacketWriter wt) {
     	LOG.warn("Error occured from remote: {}", wt.getRemoteName());
     }
 
-    /* (non-Javadoc)
-     * @see com.renren.ad.datacenter.follower.network.IPacketHandler#handleRead(com.renren.ad.datacenter.follower.network.Packet, com.renren.ad.datacenter.follower.network.IPacketWriter)
-     */
-    @Override
+	/**
+	 * We both log the packet summary to console and write it back to client.
+	 *
+	 * Override super method
+	 * @see org.apache.niolex.network.IPacketHandler#handleRead(org.apache.niolex.network.PacketData, org.apache.niolex.network.IPacketWriter)
+	 */
+	@Override
     public void handleRead(PacketData sc, IPacketWriter wt) {
         StringBuilder sb = new StringBuilder();
         sb.append("---------------------Packet Summary:----------------------\ncode\t");
@@ -54,7 +62,7 @@ public class SummaryPacketHandler implements IPacketHandler {
         sb.append("\nreceived at\t").append(DateTimeUtil.formatDate2DateTimeStr());
         sb.append("\nfrom\t").append(wt.getRemoteName());
         sb.append("\n--------------------------------------------------------\n");
-        PacketData bc = new PacketData(sc.getCode(), sb.toString().getBytes());
+        PacketData bc = new PacketData(sc.getCode(), sb.toString());
         wt.handleWrite(bc);
         LOG.info("summary sent to remote.\n{}", sb);
     }

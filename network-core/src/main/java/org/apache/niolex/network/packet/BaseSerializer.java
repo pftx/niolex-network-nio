@@ -21,6 +21,7 @@ import org.apache.niolex.network.PacketData;
 
 /**
  * The base class of ISerializer, deal with PacketData and dirty object cast.
+ * User can extend this class to implement their own serializer.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
@@ -48,9 +49,10 @@ public abstract class BaseSerializer<T> implements ISerializer<T> {
 	public abstract byte[] serObj(T t);
 
 	/**
-	 * deserialize byte array to object.
+	 * Deserialize byte array to object.
 	 * @param arr
 	 * @return
 	 */
 	public abstract T deserObj(byte[] arr);
+
 }

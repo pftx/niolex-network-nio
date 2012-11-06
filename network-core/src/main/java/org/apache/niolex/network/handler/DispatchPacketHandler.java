@@ -30,7 +30,9 @@ import org.slf4j.LoggerFactory;
 /**
  * Dispatch Packet by packet code.
  * Every code can be a type of packet, so register a Handler for a kind of Packet.
- * Foe example, code 0 for HeartBeat, code 1 for get description.
+ * For example, code 0 for HeartBeat, code 1 for get description.
+ * We do not support range handler now, so this handler is more demo than useful.
+ *
  * @author Xie, Jiyun
  *
  */
@@ -48,11 +50,11 @@ public class DispatchPacketHandler implements IPacketHandler {
         dispatchMap.put(code, handler);
     }
 
-    /* (non-Javadoc)
-     * @see com.renren.ad.datacenter.follower.network.IPacketHandler#handleError()
-     */
     /**
-     * Every Handler registered will be invoked.
+     * Every Handler registered will be invoked for handleClose.
+     *
+     * Override super method
+     * @see org.apache.niolex.network.IPacketHandler#handleClose(org.apache.niolex.network.IPacketWriter)
      */
     @Override
     public void handleClose(IPacketWriter wt) {
@@ -61,8 +63,12 @@ public class DispatchPacketHandler implements IPacketHandler {
         }
     }
 
-    /* (non-Javadoc)
-     * @see com.renren.ad.datacenter.follower.network.IPacketHandler#handleRead(com.renren.ad.datacenter.follower.network.Packet, com.renren.ad.datacenter.follower.network.IPacketWriter)
+    /**
+     * We will search the correct handler to handle this packet.
+     * If we can not find one, we will do a warning log.
+     *
+     * Override super method
+     * @see org.apache.niolex.network.IPacketHandler#handleRead(org.apache.niolex.network.PacketData, org.apache.niolex.network.IPacketWriter)
      */
     @Override
     public void handleRead(PacketData sc, IPacketWriter wt) {
@@ -75,7 +81,8 @@ public class DispatchPacketHandler implements IPacketHandler {
     }
 
     /**
-     * Return the internal dispatch map size. For unit test.
+     * Return the internal dispatch map size. For user to check.
+     *
      * @return
      */
     protected int getDispatchSize() {

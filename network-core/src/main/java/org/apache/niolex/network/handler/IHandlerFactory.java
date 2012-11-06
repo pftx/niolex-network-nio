@@ -24,15 +24,18 @@ import org.apache.niolex.network.IPacketWriter;
 /**
  * This is the interface used in SessionPacketHandler.
  * SessionPacketHandler will create a new PacketHandler by this factory when needed.
- * @author Xie, Jiyun
  *
+ * @see org.apache.niolex.network.handler.SessionPacketHandler
+ * @author Xie, Jiyun
  */
 public interface IHandlerFactory {
 
     /**
-     * Create a handler instance for this IPacketWriter, used by SessionPacketHandler
-     * @param wt
-     * @return
+     * Create a handler instance for this IPacketWriter
+     *
+     * @param wt the new IPacketWriter
+     * @return the created handler
      */
     public IPacketHandler createHandler(IPacketWriter wt);
+
 }

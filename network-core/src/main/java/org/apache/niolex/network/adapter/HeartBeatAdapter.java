@@ -43,6 +43,8 @@ public class HeartBeatAdapter implements IPacketHandler, WriteEventListener, Run
 
 	/**
 	 * The queue to save all the clients who need heart beat.
+	 * The iterator of this queue will not throw ConcurrentModificationException in multiple
+	 * thread modification.
 	 */
 	private ConcurrentLinkedQueue<IPacketWriter> clientQueue = new ConcurrentLinkedQueue<IPacketWriter>();
 
@@ -216,6 +218,7 @@ public class HeartBeatAdapter implements IPacketHandler, WriteEventListener, Run
 
 	/**
 	 * Whether do we need to send heart beat to all clients.
+	 * If this flag is true, client will not need to register heart beat.
 	 *
 	 * @param forceHeartBeat
 	 */

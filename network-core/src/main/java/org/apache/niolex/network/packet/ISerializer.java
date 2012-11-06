@@ -20,7 +20,9 @@ package org.apache.niolex.network.packet;
 import org.apache.niolex.network.PacketData;
 
 /**
- * Handle the Packet serialization and deserialization.
+ * Handle the Packet serialization and de-serialization.
+ * #PacketTransformer use this interface to manage the user serializer to do
+ * data and object translation.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0

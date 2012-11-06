@@ -38,6 +38,9 @@ public class SelectorHolder {
 	 */
 	private final Set<SelectionKey> selectionKeySet = new HashSet<SelectionKey>();
 
+	/**
+	 * This flag indicates the status of selector, so we will not wake up duplicated.
+	 */
 	private final AtomicBoolean isAwake = new AtomicBoolean(false);
 
 	/**
@@ -53,6 +56,7 @@ public class SelectorHolder {
 
 	/**
 	 * The Constructor, must set selector thread and selector itself.
+	 *
 	 * @param selectorThread
 	 * @param selector
 	 */
@@ -64,6 +68,10 @@ public class SelectorHolder {
 
 	/**
 	 * #FastCore use this method to register the wish to change interest operations.
+	 * We will only change interest operations into both read and write.
+	 *
+	 * If the change is in the same thread as the selector is, we change directly.
+	 * Otherwise, we save it into set and wakeup the selector to register the change.
 	 *
 	 * @param selectionKey
 	 */
@@ -89,7 +97,7 @@ public class SelectorHolder {
 	}
 
 	/**
-	 * Server use this method of change all the interest operations.
+	 * Server use this method to change all the interest operations on hold.
 	 */
 	public void changeAllInterestOps() {
 		isAwake.set(false);

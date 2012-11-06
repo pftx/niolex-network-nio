@@ -46,7 +46,7 @@ public class NioServer implements IServer {
     private static final Logger LOG = LoggerFactory.getLogger(NioServer.class);
 
     /**
-     * The server socket channel, which is there the server listening.
+     * The server socket channel, which is where the server listening.
      */
     private ServerSocketChannel ss;
 
@@ -56,7 +56,7 @@ public class NioServer implements IServer {
     private Selector mainSelector;
 
     /**
-     * The selector holder enhance selector.
+     * The selector holder enhancement, handle selector interests changes.
      */
     private SelectorHolder selectorHolder;
 
@@ -76,12 +76,12 @@ public class NioServer implements IServer {
     protected volatile boolean isListening = false;
 
     /**
-     * The accept timeout, which is not important.
+     * The accept timeout, which is not important, user can leave it as it is.
      */
     protected int acceptTimeOut = Config.SERVER_ACCEPT_TIMEOUT;
 
     /**
-     * The current server port number.
+     * The current server port number. We will asign a default if user do not specify it.
      */
     protected int port = Config.SERVER_DEFAULT_PORT;
 
@@ -205,7 +205,7 @@ public class NioServer implements IServer {
 
     /**
      * Any Sub class can override this method to change the behavior of ClientHandler.
-     * The default client handler will just process in the main thread.
+     * The default client handler will just process in the selector thread.
      * @param clientHandler
      */
     protected void handleRead(FastCore clientHandler) {
@@ -218,7 +218,7 @@ public class NioServer implements IServer {
 
     /**
      * Any Sub class can override this method to change the behavior of ClientHandler.
-     * The default client handler will just process in the main thread.
+     * The default client handler will just process in the selector thread.
      * @param clientHandler
      */
     protected void handleWrite(FastCore clientHandler) {

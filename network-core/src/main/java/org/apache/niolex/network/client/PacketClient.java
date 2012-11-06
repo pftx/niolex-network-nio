@@ -17,6 +17,8 @@
  */
 package org.apache.niolex.network.client;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -24,6 +26,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingDeque;
 
 import org.apache.niolex.network.Config;
@@ -32,7 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The PacketClient connect to NioServer, send and receive packets. In it's
+ * The PacketClient connect to NioServer, send and receive packets in it's
  * own threads. This client can be used in multiple threads.
  *
  * @author Xie, Jiyun
@@ -41,7 +44,15 @@ import org.slf4j.LoggerFactory;
 public class PacketClient extends BaseClient {
 	private static final Logger LOG = LoggerFactory.getLogger(PacketClient.class);
 
-	private LinkedBlockingDeque<PacketData> sendPacketList = new LinkedBlockingDeque<PacketData>();
+	/**
+	 * The queue to store all the out sending packets.
+	 */
+	private final LinkedBlockingDeque<PacketData> sendPacketList = new LinkedBlockingDeque<PacketData>();
+
+	/**
+	 * The latch to make the write thread wait on this.
+	 */
+	private CountDownLatch latch = new CountDownLatch(1);
 
 	/**
 	 * The internal write thread.
@@ -101,10 +112,11 @@ public class PacketClient extends BaseClient {
     @Override
     public void handleWrite(PacketData sc) {
     	sendPacketList.add(sc);
+    	latch.countDown();
     }
 
 	/**
-	 * Return he non-send packets size.
+	 * Return the non-send packets size.
 	 * @return
 	 */
 	public int size() {
@@ -119,7 +131,7 @@ public class PacketClient extends BaseClient {
      *
      */
     public class ReadLoop implements Runnable {
-        private DataInputStream in;
+        private final DataInputStream in;
 
         /**
          * Create read loop by InputStream
@@ -127,7 +139,7 @@ public class PacketClient extends BaseClient {
          */
         public ReadLoop(InputStream in) {
             super();
-            this.in = new DataInputStream(in);
+            this.in = new DataInputStream(new BufferedInputStream(in));
         }
 
         /**
@@ -174,7 +186,7 @@ public class PacketClient extends BaseClient {
      *
      */
     public class WriteLoop implements Runnable {
-        DataOutputStream out;
+    	private final DataOutputStream out;
 
         /**
          * Create a WriteLoop by OutputStream
@@ -182,7 +194,7 @@ public class PacketClient extends BaseClient {
          */
         public WriteLoop(OutputStream out) {
             super();
-            this.out = new DataOutputStream(out);
+            this.out = new DataOutputStream(new BufferedOutputStream(out));
         }
 
         /**
@@ -196,8 +208,10 @@ public class PacketClient extends BaseClient {
                     	if (sendPacket != null) {
                     		// If nothing to send, let's sleep.
                     		sendNewPacket(sendPacket);
+                    	} else {
+                    		latch = new CountDownLatch(1);
+                    		latch.await();
                     	}
-                    	Thread.yield();
                     } catch (InterruptedException e) {
                         // Let's ignore it.
                     }
@@ -219,7 +233,7 @@ public class PacketClient extends BaseClient {
          */
         public void sendNewPacket(PacketData sendPacket) throws IOException {
             sendPacket.generateData(out);
-            LOG.debug("Packet sent. desc {}, queue {}.", sendPacket.descriptor(), PacketClient.this.size());
+            LOG.debug("Packet sent. desc {}, queue size {}.", sendPacket.descriptor(), PacketClient.this.size());
         }
     }
 

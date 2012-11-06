@@ -21,16 +21,19 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
+import org.apache.niolex.network.Config;
 import org.apache.niolex.network.IPacketHandler;
 import org.apache.niolex.network.PacketData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This is the fast core of client packet processing component.
+ * This is the fast core of server side packet processing component.
  * This is definitely the core of the whole network server.
+ * We handle read, write, network error etc all here.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
@@ -38,6 +41,11 @@ import org.slf4j.LoggerFactory;
  */
 public class FastCore extends BasePacketWriter {
 	private static final Logger LOG = LoggerFactory.getLogger(FastCore.class);
+
+	/**
+	 * The max send buffer size.
+	 */
+	private static final int MAX_BUFFER_SIZE = Config.SERVER_NIO_BUFFER_SIZE;
 
     /**
      * Internal used in FastCore. Please ignore.
@@ -74,14 +82,19 @@ public class FastCore extends BasePacketWriter {
     private final SelectionKey selectionKey;
 
     /**
-     * The name of this client socket.
+     * The name of the client side of this socket.
      */
     private String remoteName;
 
     /**
-     * Current write status. attached to the selector or not.
+     * Current socket write status. attached to the selector or not.
      */
-    private AtomicBoolean writeAttached = new AtomicBoolean(false);
+    private boolean writeAttached = false;
+
+    /**
+     * The lock to control socket write attach & detach.
+     */
+    private Lock writeLock = new ReentrantLock();
 
 
     /* 发送数据缓冲区*/
@@ -96,6 +109,7 @@ public class FastCore extends BasePacketWriter {
 
     /**
      * Constructor of FastCore, manage a SocketChannel inside.
+     * We will register read operation to the selector in this method.
      *
      * @param packetHandler
      * @param selector
@@ -132,12 +146,27 @@ public class FastCore extends BasePacketWriter {
         return remoteName;
     }
 
+    /**
+     * Mainly use super method, we will attach the write operation to selector
+     * if it's not attached yet.
+     *
+     * Override super method
+     * @see org.apache.niolex.network.server.BasePacketWriter#handleWrite(org.apache.niolex.network.PacketData)
+     */
     @Override
 	public void handleWrite(PacketData sc) {
 		super.handleWrite(sc);
 		// Signal the selector there is data to write.
-		if (writeAttached.compareAndSet(false, true)) {
-			selector.changeInterestOps(selectionKey);
+		if (!writeAttached) {
+			writeLock.lock();
+			try {
+				if (!writeAttached) {
+					writeAttached = true;
+					selector.changeInterestOps(selectionKey);
+				}
+			} finally {
+				writeLock.unlock();
+			}
 		}
 	}
 
@@ -184,7 +213,8 @@ public class FastCore extends BasePacketWriter {
     }
 
     /**
-     * Read packet finished, we need to invoke packet handler.
+     * Read packet finished, we need to invoke packet handler, and
+     * init another read cycle.
      */
     public void readFinished() {
     	LOG.debug("Packet received. desc {}, size {}.", receivePacket.descriptor(), receivePacket.getLength());
@@ -244,14 +274,21 @@ public class FastCore extends BasePacketWriter {
     	sendPacket = super.handleNext();
 
         if (sendPacket == null) {
-        	// Nothing to send, remove the OP_WRITE from selector.
-    		if (writeAttached.compareAndSet(true, false)) {
-    			try {
+        	writeLock.lock();
+			try {
+				// We will redo the packet handle here.
+				if (super.isEmpty()) {
+					// Nothing to send, remove the OP_WRITE from selector.
+					writeAttached = false;
 					selectionKey.interestOps(SelectionKey.OP_READ);
-				} catch (Exception e) {
-					LOG.warn("Failed to dettach write from selector, client will stop. " , e.toString());
-					handleClose();
+				} else {
+					return true;
 				}
+			} catch (Exception e) {
+				LOG.warn("Failed to detach write from selector, client will stop. ", e.toString());
+				handleClose();
+			} finally {
+				writeLock.unlock();
             }
             return false;
         } else {
@@ -261,20 +298,25 @@ public class FastCore extends BasePacketWriter {
 
     /**
      * Do really send the packet.
+     *
      * @return
      * @throws IOException
      */
     private boolean doSendNewPacket() throws IOException {
-        sendStatus = Status.HEADER;
-        sendBuffer = ByteBuffer.allocate(8);
-        sendPacket.putHeader(sendBuffer);
-        sendBuffer.flip();
-        socketChannel.write(sendBuffer);
-        if (!sendBuffer.hasRemaining()) {
-	        sendStatus = Status.BODY;
-	    	sendBuffer = ByteBuffer.wrap(sendPacket.getData());
-	    	socketChannel.write(sendBuffer);
-        }
+    	if (sendPacket.getLength() + 8 < MAX_BUFFER_SIZE) {
+    		// We send small packets in just one buffer.
+    		sendStatus = Status.BODY;
+    		sendBuffer = ByteBuffer.allocate(sendPacket.getLength() + 8);
+    		sendPacket.putHeader(sendBuffer);
+    		sendBuffer.put(sendPacket.getData());
+    	} else {
+    		// Packet too large, we will send it multiple times.
+    		sendStatus = Status.HEADER;
+    		sendBuffer = ByteBuffer.allocate(8);
+    		sendPacket.putHeader(sendBuffer);
+    	}
+    	sendBuffer.flip();
+    	socketChannel.write(sendBuffer);
         return !sendBuffer.hasRemaining();
     }
 
@@ -303,4 +345,5 @@ public class FastCore extends BasePacketWriter {
         	}
         }
     }
+
 }

@@ -21,7 +21,8 @@ import org.apache.niolex.commons.codec.StringUtil;
 
 
 /**
- * StringSerializer serialize String.
+ * StringSerializer serialize String into byte array and vice-verser.
+ * This is just a demo for user to refer.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
@@ -43,7 +44,9 @@ public class StringSerializer extends BaseSerializer<String> {
 		this.code = code;
 	}
 
-	/* (non-Javadoc)
+
+	/**
+	 * Override super method
 	 * @see org.apache.niolex.network.packet.ISerializer#getCode()
 	 */
 	@Override
@@ -51,7 +54,8 @@ public class StringSerializer extends BaseSerializer<String> {
 		return this.code;
 	}
 
-	/* (non-Javadoc)
+	/**
+	 * Override super method
 	 * @see org.apache.niolex.network.packet.BaseSerializer#serObj(java.lang.Object)
 	 */
 	@Override
@@ -59,7 +63,8 @@ public class StringSerializer extends BaseSerializer<String> {
 		return StringUtil.strToUtf8Byte(t);
 	}
 
-	/* (non-Javadoc)
+	/**
+	 * Override super method
 	 * @see org.apache.niolex.network.packet.BaseSerializer#deserObj(byte[])
 	 */
 	@Override

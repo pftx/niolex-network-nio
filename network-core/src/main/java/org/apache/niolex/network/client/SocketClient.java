@@ -17,6 +17,8 @@
  */
 package org.apache.niolex.network.client;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -32,6 +34,9 @@ import org.slf4j.LoggerFactory;
 /**
  * The blocking implementation of IClient. This client can only be used in one
  * thread. If you want to reuse client in multithreading, use #PacketClient
+ *
+ * We will try to read one packet from remote after send on packet. If you are
+ * in the situation that server will not respond, please use #PacketClient
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
@@ -52,7 +57,7 @@ public class SocketClient extends BaseClient {
 	}
 
 	/**
-	 * Create a SocketClient without any Server Address
+	 * Create a SocketClient with the Server Address
 	 * @param serverAddress
 	 */
 	public SocketClient(InetSocketAddress serverAddress) {
@@ -71,8 +76,8 @@ public class SocketClient extends BaseClient {
         socket.setTcpNoDelay(true);
         socket.connect(serverAddress);
         this.isWorking = true;
-        inS = new DataInputStream(socket.getInputStream());
-        outS = new DataOutputStream(socket.getOutputStream());
+        inS = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
+        outS = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
         LOG.info("Client connected to address: {}", serverAddress);
 	}
 

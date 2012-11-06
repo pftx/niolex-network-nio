@@ -30,7 +30,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * The MultiNioServer reads and writes Packet in multiple threads.
- * This is specially for multiple CPU(CORE) server.
+ * This is specially Fast for multiple CPU(CORE) server.
+ *
  * @author Xie, Jiyun
  */
 public class MultiNioServer extends NioServer {
@@ -45,6 +46,7 @@ public class MultiNioServer extends NioServer {
 
     /**
      * Create a MultiNioServer with default threads number.
+     * User can change the threads number by setter.
      */
     public MultiNioServer() {
 		super();
@@ -54,6 +56,15 @@ public class MultiNioServer extends NioServer {
 			// Setting too many selectors is not good.
 			threadsNumber = 8;
 		}
+	}
+
+    /**
+     * Create a MultiNioServer with your specified threads number.
+     * @param threadsNumber
+     */
+	public MultiNioServer(int threadsNumber) {
+		super();
+		this.threadsNumber = threadsNumber;
 	}
 
 	/**
@@ -80,7 +91,7 @@ public class MultiNioServer extends NioServer {
 	}
 
 	/**
-	 * Return multiple selector to super class.
+	 * Using multiple selectors to handle client sockets.
 	 *
 	 * Override super method
 	 * @see org.apache.niolex.network.server.NioServer#registerClient(SocketChannel)
@@ -130,28 +141,28 @@ public class MultiNioServer extends NioServer {
 	}
 
 	/**
-	 * Run the wrapped selector endlessly.
+	 * Run the wrapped selector endlessly in separate threads.
 	 *
 	 * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
 	 * @version 1.0.0
 	 * @Date: 2012-6-11
 	 */
 	private class RunnableSelector implements Runnable {
-		private LinkedList<SocketChannel> clientQueue = new LinkedList<SocketChannel>();
-		private SelectorHolder selectorHolder;
-		private Selector selector;
-		private Thread thread;
+		private final LinkedList<SocketChannel> clientQueue = new LinkedList<SocketChannel>();
+		private final SelectorHolder selectorHolder;
+		private final Selector selector;
+		private final Thread thread;
 
 		public RunnableSelector(ThreadGroup tPool) throws IOException {
 			super();
 			this.selector = Selector.open();
 			this.thread = new Thread(tPool, this);
-			selectorHolder = new SelectorHolder(thread, selector);
+			this.selectorHolder = new SelectorHolder(thread, selector);
 			thread.start();
 		}
 
 		/**
-		 * Register this client to this selector.
+		 * Register the client to this selector.
 		 *
 		 * @param client
 		 */

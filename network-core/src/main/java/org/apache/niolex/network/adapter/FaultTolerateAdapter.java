@@ -36,6 +36,12 @@ import org.slf4j.LoggerFactory;
 
 /**
  * This is the fault tolerate packet adapter.
+ * This adapter try to save all the non-send packets into internal data structure,
+ * and send them when client re-connected to this server.
+ *
+ * You can use this handler to deduce the rate of packet lose when network is not stable.
+ * The packet order will not be remained after fault toleration.
+ *
  * The difference between handler and adapter is that adapter can be applied on everything and handler
  * only deal with a specific situation.
  *
@@ -49,9 +55,9 @@ import org.slf4j.LoggerFactory;
 public class FaultTolerateAdapter implements IPacketHandler, WriteEventListener {
 	private static final Logger LOG = LoggerFactory.getLogger(FaultTolerateAdapter.class);
 
-	private static final String KEY = Config.ATTACH_KEY_FAULTTO_UUID;
+	private static final String KEY_UUID = Config.ATTACH_KEY_FAULTTO_UUID;
 
-	private static final String KEY_2 = Config.ATTACH_KEY_FAULT_RRLIST;
+	private static final String KEY_RRLIST = Config.ATTACH_KEY_FAULT_RRLIST;
 
 	private static final int RR_SIZE = Config.SERVER_CACHE_TOLERATE_PACKETS_SIZE;
 
@@ -59,9 +65,9 @@ public class FaultTolerateAdapter implements IPacketHandler, WriteEventListener 
 			new LRUHashMap<String, ConcurrentLinkedQueue<PacketData>>(Config.SERVER_FAULT_TOLERATE_MAP_SIZE);
 
 	// The Handler need to be adapted.
-	private IPacketHandler other;
+	private final IPacketHandler other;
 
-	private PacketTransformer transformer;
+	private final PacketTransformer transformer;
 
 	/**
 	 * Implements a constructor, please pass a handler in.
@@ -93,9 +99,9 @@ public class FaultTolerateAdapter implements IPacketHandler, WriteEventListener 
 			}
 
 			// Prepare environment for the next fault tolerate.
-			wt.attachData(KEY, ssid);
+			wt.attachData(KEY_UUID, ssid);
 			RRList<PacketData> list = new RRList<PacketData>(RR_SIZE);
-			wt.attachData(KEY_2, list);
+			wt.attachData(KEY_RRLIST, list);
 			// Attach it self to listen all the write events.
 			wt.addEventListener(this);
 		}
@@ -104,11 +110,17 @@ public class FaultTolerateAdapter implements IPacketHandler, WriteEventListener 
 	@Override
     public void handleClose(IPacketWriter wt) {
 		other.handleClose(wt);
-		String ssid = wt.getAttached(KEY);
+		String ssid = wt.getAttached(KEY_UUID);
 		if (ssid != null && wt instanceof BasePacketWriter) {
 			BasePacketWriter bpw = (BasePacketWriter) wt;
+			// Store the non-send data.
 			ConcurrentLinkedQueue<PacketData> els = bpw.getRemainQueue();
-			RRList<PacketData> list = wt.getAttached(KEY_2);
+			// The rrlist is to store the last N packets send to client.
+			RRList<PacketData> list = wt.getAttached(KEY_RRLIST);
+			/**
+			 * Due to the network buffer, the last N packets may have send to client or
+			 * not. We try to re-send them when client re-connected.
+			 */
 			if (list != null) {
 				PacketData sc;
 				int end = list.size() > RR_SIZE ? RR_SIZE : list.size();
@@ -131,7 +143,7 @@ public class FaultTolerateAdapter implements IPacketHandler, WriteEventListener 
 	@Override
 	public void afterSend(WriteEvent wEvent) {
 		IPacketWriter wt = wEvent.getPacketWriter();
-		RRList<PacketData> list = wt.getAttached(KEY_2);
+		RRList<PacketData> list = wt.getAttached(KEY_RRLIST);
 		if (list != null) {
 			list.add(wEvent.getPacketData());
 		}

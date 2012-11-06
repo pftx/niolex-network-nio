@@ -25,7 +25,8 @@ import org.apache.niolex.network.PacketData;
 /**
  * Transform packet into object according to packet code.
  *
- * The packet code is a 2-bytes short int. The system will use some this code, according to the following map:
+ * The packet code is a 2-bytes short integer.
+ * The system will use some this code, according to the following map:
  * CODE		USAGE
  * 0		Heart Beat
  * 1-65500	User Range
@@ -39,6 +40,14 @@ public class PacketTransformer {
 	private static PacketTransformer INSTANCE = new PacketTransformer();
 
 	private Map<Short, ISerializer<?>> serMap = new HashMap<Short, ISerializer<?>>();
+
+
+	/**
+	 * The private constructor, prevent user from instantiate it.
+	 */
+	private PacketTransformer() {
+		super();
+	}
 
 	/**
 	 * Get the global instance of this class.
@@ -69,6 +78,7 @@ public class PacketTransformer {
 	 * Translate PacketData to Object.
 	 * @param sc
 	 * @return
+	 * @throws IllegalStateException if we can not translate this packet
 	 */
 	@SuppressWarnings("unchecked")
 	public <T> T getDataObject(PacketData sc) {
@@ -84,6 +94,7 @@ public class PacketTransformer {
 	 * @param code
 	 * @param o
 	 * @return
+	 * @throws IllegalStateException if we can not translate this packet
 	 */
 	public PacketData getPacketData(Short code, Object o) {
 		ISerializer<?> ser = serMap.get(code);

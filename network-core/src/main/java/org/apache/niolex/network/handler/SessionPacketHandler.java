@@ -26,7 +26,9 @@ import org.slf4j.LoggerFactory;
 
 
 /**
- * Create a session for every client, send every request to that handler instance.
+ * Create a session for every different client identified by socket connection,
+ * send every request from the connection to that handler instance.
+ *
  * @author Xie, Jiyun
  *
  */
@@ -53,20 +55,30 @@ public class SessionPacketHandler implements IPacketHandler {
         this.factory = factory;
     }
 
-    /* (non-Javadoc)
-     * @see com.renren.ad.datacenter.follower.network.IPacketHandler#handleError(com.renren.ad.datacenter.follower.network.IPacketWriter)
+    /**
+     * We will send this message to the correct handler for this connection.
+     * and we will do a log whether we find a handler or not.
+     *
+     * Override super method
+     * @see org.apache.niolex.network.IPacketHandler#handleClose(org.apache.niolex.network.IPacketWriter)
      */
     @Override
     public void handleClose(IPacketWriter wt) {
         IPacketHandler h = wt.getAttached(KEY);
         if (h != null) {
             h.handleClose(wt);
-            LOG.info("Session removed for remote: {}", wt.getRemoteName());
+            // Help GC to collect that handler.
+            wt.attachData(KEY, null);
         }
+        LOG.info("Session removed for remote: {}", wt.getRemoteName());
     }
 
-    /* (non-Javadoc)
-     * @see com.renren.ad.datacenter.follower.network.IPacketHandler#handleRead(com.renren.ad.datacenter.follower.network.PacketHelper, com.renren.ad.datacenter.follower.network.IPacketWriter)
+    /**
+     * Find a proper handler to handle the packet, if we can not find one,
+     * we will create a new one.
+     *
+     * Override super method
+     * @see org.apache.niolex.network.IPacketHandler#handleRead(org.apache.niolex.network.PacketData, org.apache.niolex.network.IPacketWriter)
      */
     @Override
     public void handleRead(PacketData sc, IPacketWriter wt) {
@@ -80,7 +92,7 @@ public class SessionPacketHandler implements IPacketHandler {
     }
 
     /**
-     * @return the factory
+     * @return the session handler factory
      */
     public IHandlerFactory getFactory() {
         return factory;

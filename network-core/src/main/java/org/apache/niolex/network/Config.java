@@ -45,7 +45,7 @@ public interface Config {
 	 * The fault tolerate map size, which contains all the fault client data.
 	 * Configure this size too much will consume much memory.
 	 */
-	int SERVER_FAULT_TOLERATE_MAP_SIZE = 100;
+	int SERVER_FAULT_TOLERATE_MAP_SIZE = 256;
 
 	/**
 	 * Save this number of sent packets. Nio sent packets asynchronously, so there may

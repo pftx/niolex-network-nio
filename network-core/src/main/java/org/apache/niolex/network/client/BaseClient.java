@@ -26,7 +26,7 @@ import org.apache.niolex.network.IPacketHandler;
 import org.apache.niolex.network.event.WriteEventListener;
 
 /**
- * The base implementation of IClient, please extend this method for convenience
+ * The base implementation of IClient, please extend this class for convenience.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
@@ -52,7 +52,7 @@ public abstract class BaseClient implements IClient {
     /**
      * The status of this client.
      */
-    protected boolean isWorking;
+    protected volatile boolean isWorking;
 
     /**
      * Socket connect timeout.
@@ -78,7 +78,7 @@ public abstract class BaseClient implements IClient {
 	 */
 	@Override
 	public void addEventListener(WriteEventListener listener) {
-		throw new UnsupportedOperationException("This method has not implemented yet.");
+		throw new UnsupportedOperationException("This method is not supported.");
 	}
 
 	/**
@@ -87,7 +87,7 @@ public abstract class BaseClient implements IClient {
 	 */
 	@Override
 	public Object attachData(String key, Object value) {
-		throw new UnsupportedOperationException("This method has not implemented yet.");
+		throw new UnsupportedOperationException("This method is not supported.");
 	}
 
 	/**
@@ -96,7 +96,7 @@ public abstract class BaseClient implements IClient {
 	 */
 	@Override
 	public <T> T getAttached(String key) {
-		throw new UnsupportedOperationException("This method has not implemented yet.");
+		throw new UnsupportedOperationException("This method is not supported.");
 	}
 
     /**
