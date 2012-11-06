@@ -1,5 +1,5 @@
 /**
- * RpcConfig.java
+ * ConfigItem.java
  *
  * Copyright 2012 Niolex, Inc.
  *
@@ -24,7 +24,7 @@ package org.apache.niolex.network.rpc;
  * @version 1.0.0
  * @Date: 2012-6-1
  */
-public class RpcConfig {
+public class ConfigItem {
 
 	/**
 	 * The interface.

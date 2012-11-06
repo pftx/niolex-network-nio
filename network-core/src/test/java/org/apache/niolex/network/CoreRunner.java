@@ -22,7 +22,6 @@ import org.apache.niolex.network.example.EchoPacketHandler;
 import org.apache.niolex.network.handler.DispatchPacketHandler;
 import org.apache.niolex.network.handler.SessionPacketHandler;
 import org.apache.niolex.network.handler.SummaryPacketHandler;
-import org.apache.niolex.network.rpc.RpcUtil;
 import org.apache.niolex.network.server.NioServer;
 
 /**
@@ -60,35 +59,4 @@ public class CoreRunner {
 		isOn = false;
 	}
 
-	public static void main(String[] args) throws Exception {
-		short a = (short) 0xcffc;
-		int q = a << 16;
-		System.out.println(Integer.toHexString(q));
-		byte b = -4;
-		q += (b & 0xFF) << 8;
-		System.out.println(Integer.toHexString(q));
-		byte c = -11;
-		q += (c & 0xFF);
-		System.out.println(Integer.toHexString(q));
-		int l = RpcUtil.generateKey(a, b, c);
-		System.out.println(Integer.toHexString(l));
-
-		byte d = -4;
-		System.out.println(d % 2 == 0);
-		System.out.println(d & 0xFF);
-		if (d % 2 == 0) {
-			--d;
-		}
-		System.out.println(d & 0xFF);
-		System.out.println("--");
-		d = 8;
-		byte x = -1, y = 126;
-		while (d-- > 0) {
-			x = y++;
-			int z = y - x;
-			int s = 1;
-			byte m = (byte) (y + s);
-			System.out.println(y + " " + (z) + " " + (x - y) + " " + (m));
-		}
-	}
 }
