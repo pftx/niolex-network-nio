@@ -20,7 +20,8 @@ package org.apache.niolex.network.demo.stuff;
 import java.io.IOException;
 
 import org.apache.niolex.network.rpc.ConfigItem;
-import org.apache.niolex.network.rpc.prosf.ProtoStuRpcPacketHandler;
+import org.apache.niolex.network.rpc.RpcPacketHandler;
+import org.apache.niolex.network.rpc.ser.ProtoStuffConverter;
 import org.apache.niolex.network.server.MultiNioServer;
 
 /**
@@ -38,14 +39,15 @@ public class StuffRpcServer {
      */
     public static void main(String[] args) throws IOException {
         s.setPort(8808);
-        ProtoStuRpcPacketHandler handler = null;
+        RpcPacketHandler handler = null;
         if (args != null && args.length != 0) {
         	s.setThreadsNumber(Integer.parseInt(args[0]));
-        	handler = new ProtoStuRpcPacketHandler(Integer.parseInt(args[1]));
+        	handler = new RpcPacketHandler(Integer.parseInt(args[1]));
         } else {
-        	handler = new ProtoStuRpcPacketHandler();
+        	handler = new RpcPacketHandler();
         }
         s.setPacketHandler(handler);
+        handler.setConverter(new ProtoStuffConverter());
 
         ConfigItem[] confs = new ConfigItem[1];
         ConfigItem c = new ConfigItem();

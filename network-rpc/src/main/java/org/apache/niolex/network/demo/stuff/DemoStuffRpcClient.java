@@ -22,7 +22,8 @@ import java.net.InetSocketAddress;
 
 import org.apache.niolex.network.client.PacketClient;
 import org.apache.niolex.network.rpc.PacketInvoker;
-import org.apache.niolex.network.rpc.prosf.ProtoStuRpcClient;
+import org.apache.niolex.network.rpc.RpcClient;
+import org.apache.niolex.network.rpc.ser.ProtoStuffConverter;
 
 /**
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
@@ -37,7 +38,7 @@ public class DemoStuffRpcClient {
 	 */
 	public static void main(String[] a) throws IOException {
 		PacketClient c = new PacketClient(new InetSocketAddress("localhost", 8808));
-		ProtoStuRpcClient client = new ProtoStuRpcClient(c, new PacketInvoker());
+		RpcClient client = new RpcClient(c, new PacketInvoker(), new ProtoStuffConverter());
 		client.connect();
 
 		final RpcService service = client.getService(RpcService.class);
