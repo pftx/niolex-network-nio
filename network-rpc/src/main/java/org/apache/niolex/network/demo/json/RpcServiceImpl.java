@@ -15,11 +15,12 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.niolex.network.demo.rpc;
+package org.apache.niolex.network.demo.json;
 
 import java.util.List;
 
 import org.apache.niolex.commons.util.DateTimeUtil;
+import org.apache.niolex.network.demo.rpc.RpcService;
 
 /**
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
@@ -30,7 +31,7 @@ public class RpcServiceImpl implements RpcService {
 
 	/**
 	 * This is the override of super method.
-	 * @see org.apache.niolex.network.demo.rpc.RpcService#add(int[])
+	 * @see org.apache.niolex.network.demo.json.RpcService#add(int[])
 	 */
 	@Override
 	public int add(int... args) {
@@ -43,7 +44,7 @@ public class RpcServiceImpl implements RpcService {
 
 	/**
 	 * This is the override of super method.
-	 * @see org.apache.niolex.network.demo.rpc.RpcService#size(java.util.List)
+	 * @see org.apache.niolex.network.demo.json.RpcService#size(java.util.List)
 	 */
 	@Override
 	public int size(List<String> arg) {
@@ -55,16 +56,16 @@ public class RpcServiceImpl implements RpcService {
 
 	/**
 	 * Override super method
-	 * @see org.apache.niolex.network.demo.rpc.RpcService#throwEx()
+	 * @see org.apache.niolex.network.demo.json.RpcService#throwEx()
 	 */
 	@Override
 	public String throwEx() {
-		throw new RuntimeException("org.apache.niolex.network.demo.rpc.RpcService#throwEx()");
+		throw new RuntimeException("org.apache.niolex.network.demo.json.RpcService#throwEx()");
 	}
 
 	/**
 	 * Override super method
-	 * @see org.apache.niolex.network.demo.rpc.RpcService#concat(java.lang.String, java.lang.String)
+	 * @see org.apache.niolex.network.demo.json.RpcService#concat(java.lang.String, java.lang.String)
 	 */
 	@Override
 	public String concat(String a, String b) {
@@ -73,7 +74,7 @@ public class RpcServiceImpl implements RpcService {
 
 	/**
 	 * Override super method
-	 * @see org.apache.niolex.network.demo.rpc.RpcService#testMe()
+	 * @see org.apache.niolex.network.demo.json.RpcService#testMe()
 	 */
 	@Override
 	public void testMe() {

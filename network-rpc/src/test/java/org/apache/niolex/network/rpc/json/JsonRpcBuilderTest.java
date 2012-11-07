@@ -21,7 +21,7 @@ import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
 
-import org.apache.niolex.network.demo.rpc.RpcService;
+import org.apache.niolex.network.demo.json.RpcService;
 import org.apache.niolex.network.rpc.RpcClient;
 import org.junit.Test;
 

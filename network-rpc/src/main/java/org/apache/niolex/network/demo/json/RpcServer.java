@@ -15,11 +15,13 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.niolex.network.demo.rpc;
+package org.apache.niolex.network.demo.json;
 
 import java.io.IOException;
 
-import org.apache.niolex.network.rpc.RpcConfig;
+import org.apache.niolex.network.demo.rpc.RpcService;
+import org.apache.niolex.network.demo.rpc.RpcServiceImpl;
+import org.apache.niolex.network.rpc.ConfigItem;
 import org.apache.niolex.network.rpc.json.JsonRpcPacketHandler;
 import org.apache.niolex.network.server.MultiNioServer;
 
@@ -47,8 +49,8 @@ public class RpcServer {
         }
         s.setPacketHandler(handler);
 
-        RpcConfig[] confs = new RpcConfig[1];
-        RpcConfig c = new RpcConfig();
+        ConfigItem[] confs = new ConfigItem[1];
+        ConfigItem c = new ConfigItem();
         c.setInterface(RpcService.class);
         c.setTarget(new RpcServiceImpl());
         confs[0] = c;

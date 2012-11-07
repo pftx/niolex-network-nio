@@ -15,12 +15,16 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.niolex.network.demo.rpc;
+package org.apache.niolex.network.demo.json;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 
 import org.apache.niolex.commons.reflect.MethodUtil;
+import org.apache.niolex.network.demo.json.DemoRpcClient;
+import org.apache.niolex.network.demo.json.RpcServer;
+import org.apache.niolex.network.demo.json.RpcServiceImpl;
+import org.apache.niolex.network.demo.json.SingleRpcClient;
 import org.junit.Test;
 
 /**
@@ -31,7 +35,7 @@ import org.junit.Test;
 public class RpcServerTest {
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.demo.rpc.RpcServer#main(java.lang.String[])}.
+	 * Test method for {@link org.apache.niolex.network.demo.json.RpcServer#main(java.lang.String[])}.
 	 * @throws Throwable
 	 */
 	@Test

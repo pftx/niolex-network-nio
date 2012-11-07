@@ -24,7 +24,7 @@ import java.net.InetSocketAddress;
 
 import org.apache.niolex.commons.reflect.MethodUtil;
 import org.apache.niolex.network.client.PacketClient;
-import org.apache.niolex.network.demo.rpc.RpcService;
+import org.apache.niolex.network.demo.json.RpcService;
 import org.apache.niolex.network.rpc.json.JsonRpcClient;
 import org.junit.Test;
 

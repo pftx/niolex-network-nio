@@ -15,7 +15,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.niolex.network.demo.rpc;
+package org.apache.niolex.network.demo.json;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.niolex.network.client.SocketClient;
+import org.apache.niolex.network.demo.rpc.RpcService;
 import org.apache.niolex.network.rpc.SingleInvoker;
 import org.apache.niolex.network.rpc.json.JsonRpcClient;
 

@@ -25,8 +25,8 @@ import java.lang.reflect.Type;
 import org.apache.niolex.network.CoreRunner;
 import org.apache.niolex.network.IPacketWriter;
 import org.apache.niolex.network.PacketData;
-import org.apache.niolex.network.demo.rpc.RpcService;
-import org.apache.niolex.network.demo.rpc.RpcServiceImpl;
+import org.apache.niolex.network.demo.json.RpcService;
+import org.apache.niolex.network.demo.json.RpcServiceImpl;
 import org.apache.niolex.network.rpc.json.JsonRpcPacketHandler;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -58,8 +58,8 @@ public class RpcPacketHandlerTest {
 	@Test
 	public void setConfigs() {
 		RpcPacketHandler rr = new JsonRpcPacketHandler(20);
-		RpcConfig[] confs = new RpcConfig[2];
-		RpcConfig c = new RpcConfig();
+		ConfigItem[] confs = new ConfigItem[2];
+		ConfigItem c = new ConfigItem();
 		c.setInterface(RpcService.class);
 		c.setTarget(new RpcServiceImpl());
 		confs[0] = c;
@@ -104,8 +104,8 @@ public class RpcPacketHandlerTest {
 				return new byte[9];
 			}
 		};
-		RpcConfig[] confs = new RpcConfig[1];
-		RpcConfig c = new RpcConfig();
+		ConfigItem[] confs = new ConfigItem[1];
+		ConfigItem c = new ConfigItem();
 		c.setInterface(RpcService.class);
 		c.setTarget(new RpcServiceImpl());
 		confs[0] = c;

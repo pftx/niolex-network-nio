@@ -48,7 +48,7 @@ public class RpcServiceImpl implements RpcService {
 
 	/**
 	 * This is the override of super method.
-	 * @see org.apache.niolex.network.demo.rpc.RpcService#size(java.util.List)
+	 * @see org.apache.niolex.network.demo.json.RpcService#size(java.util.List)
 	 */
 	@Override
 	public Integer size(StringArray arg) {
@@ -60,16 +60,16 @@ public class RpcServiceImpl implements RpcService {
 
 	/**
 	 * Override super method
-	 * @see org.apache.niolex.network.demo.rpc.RpcService#throwEx()
+	 * @see org.apache.niolex.network.demo.json.RpcService#throwEx()
 	 */
 	@Override
 	public String throwEx() {
-		throw new RuntimeException("org.apache.niolex.network.demo.rpc.RpcService#throwEx()");
+		throw new RuntimeException("org.apache.niolex.network.demo.json.RpcService#throwEx()");
 	}
 
 	/**
 	 * Override super method
-	 * @see org.apache.niolex.network.demo.rpc.RpcService#testMe()
+	 * @see org.apache.niolex.network.demo.json.RpcService#testMe()
 	 */
 	@Override
 	public void testMe() {

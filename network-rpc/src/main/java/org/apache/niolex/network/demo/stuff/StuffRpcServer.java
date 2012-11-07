@@ -19,7 +19,7 @@ package org.apache.niolex.network.demo.stuff;
 
 import java.io.IOException;
 
-import org.apache.niolex.network.rpc.RpcConfig;
+import org.apache.niolex.network.rpc.ConfigItem;
 import org.apache.niolex.network.rpc.prosf.ProtoStuRpcPacketHandler;
 import org.apache.niolex.network.server.MultiNioServer;
 
@@ -47,8 +47,8 @@ public class StuffRpcServer {
         }
         s.setPacketHandler(handler);
 
-        RpcConfig[] confs = new RpcConfig[1];
-        RpcConfig c = new RpcConfig();
+        ConfigItem[] confs = new ConfigItem[1];
+        ConfigItem c = new ConfigItem();
         c.setInterface(RpcService.class);
         c.setTarget(new RpcServiceImpl());
         confs[0] = c;

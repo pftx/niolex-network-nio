@@ -27,7 +27,7 @@ import java.util.Map.Entry;
 import org.apache.niolex.network.rpc.IServiceHandler;
 import org.apache.niolex.network.rpc.RetryHandler;
 import org.apache.niolex.network.rpc.RpcClient;
-import org.apache.niolex.network.rpc.RpcConfig;
+import org.apache.niolex.network.rpc.anno.RpcConfig;
 import org.apache.niolex.network.rpc.conf.BaseConfiger;
 import org.apache.niolex.network.rpc.conf.RpcConfigBean;
 import org.apache.niolex.network.rpc.conf.RpcConfiger;

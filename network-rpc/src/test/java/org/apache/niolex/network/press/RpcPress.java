@@ -26,7 +26,7 @@ import org.apache.niolex.commons.test.Counter;
 import org.apache.niolex.commons.test.StopWatch;
 import org.apache.niolex.commons.test.StopWatch.Stop;
 import org.apache.niolex.network.client.SocketClient;
-import org.apache.niolex.network.demo.rpc.RpcService;
+import org.apache.niolex.network.demo.json.RpcService;
 import org.apache.niolex.network.rpc.SingleInvoker;
 import org.apache.niolex.network.rpc.json.JsonRpcClient;
 

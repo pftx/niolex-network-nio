@@ -198,8 +198,8 @@ public abstract class RpcPacketHandler implements IPacketHandler {
 	 * Set the Rpc Configs, this method will parse all the configurations and generate execute map.
 	 * @param confs
 	 */
-	public void setRpcConfigs(RpcConfig[] confs) {
-		for (RpcConfig conf : confs) {
+	public void setRpcConfigs(ConfigItem[] confs) {
+		for (ConfigItem conf : confs) {
 			Method[] arr = MethodUtil.getMethods(conf.getInterface());
 			for (Method m : arr) {
 				if (m.isAnnotationPresent(RpcMethod.class)) {

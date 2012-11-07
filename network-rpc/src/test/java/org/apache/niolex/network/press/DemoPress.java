@@ -30,7 +30,7 @@ import org.apache.niolex.commons.test.StopWatch.Stop;
 import org.apache.niolex.network.PacketData;
 import org.apache.niolex.network.client.BaseClient;
 import org.apache.niolex.network.client.SocketClient;
-import org.apache.niolex.network.demo.rpc.RpcServer;
+import org.apache.niolex.network.demo.json.RpcServer;
 import org.apache.niolex.network.example.SavePacketHandler;
 
 /**
