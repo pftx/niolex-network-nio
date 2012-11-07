@@ -20,7 +20,8 @@ package org.apache.niolex.network.demo.json;
 import java.io.IOException;
 
 import org.apache.niolex.network.rpc.ConfigItem;
-import org.apache.niolex.network.rpc.json.JsonRpcPacketHandler;
+import org.apache.niolex.network.rpc.RpcPacketHandler;
+import org.apache.niolex.network.rpc.ser.JsonConverter;
 import org.apache.niolex.network.server.MultiNioServer;
 
 /**
@@ -38,13 +39,14 @@ public class DemoJsonRpcServer {
      */
     public static void main(String[] args) throws IOException {
         s.setPort(8808);
-        JsonRpcPacketHandler handler = null;
+        RpcPacketHandler handler = null;
         if (args != null && args.length != 0) {
         	s.setThreadsNumber(Integer.parseInt(args[0]));
-        	handler = new JsonRpcPacketHandler(Integer.parseInt(args[1]));
+        	handler = new RpcPacketHandler(Integer.parseInt(args[1]));
         } else {
-        	handler = new JsonRpcPacketHandler();
+        	handler = new RpcPacketHandler();
         }
+        handler.setConverter(new JsonConverter());
         s.setPacketHandler(handler);
 
         ConfigItem[] confs = new ConfigItem[1];

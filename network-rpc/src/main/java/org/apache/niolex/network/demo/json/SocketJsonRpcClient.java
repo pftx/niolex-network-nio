@@ -23,8 +23,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.niolex.network.client.SocketClient;
+import org.apache.niolex.network.rpc.RpcClient;
 import org.apache.niolex.network.rpc.SingleInvoker;
-import org.apache.niolex.network.rpc.json.JsonRpcClient;
+import org.apache.niolex.network.rpc.ser.JsonConverter;
 
 /**
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
@@ -36,23 +37,23 @@ public class SocketJsonRpcClient {
 
 	public static void main(String[] arg2s) throws IOException, Throwable {
 		SocketClient c = new SocketClient(new InetSocketAddress("localhost", 8808));
-		JsonRpcClient client = new JsonRpcClient(c, new SingleInvoker());
+		RpcClient client = new RpcClient(c, new SingleInvoker(), new JsonConverter());
 		client.connect();
 
 		final RpcService ser = client.getService(RpcService.class);
 
 		int k = ser.add(3, 4, 5, 6, 7, 8, 9);
-		System.out.println("Out => " + k);
+		System.out.println("Out 42 => " + k);
 		List<String> args = new ArrayList<String>();
 		args.add("3");
 		args.add("3");
 		args.add("3");
 		k = ser.size(args);
-		System.out.println("Out => " + k);
+		System.out.println("Out 3 => " + k);
 		k = ser.size(null);
-		System.out.println("Out => " + k);
+		System.out.println("Out 0 => " + k);
 		k = ser.add(3, 4, 5);
-		System.out.println("Out => " + k);
+		System.out.println("Out 12 => " + k);
 
 		Runnable r = new Runnable() {
 
