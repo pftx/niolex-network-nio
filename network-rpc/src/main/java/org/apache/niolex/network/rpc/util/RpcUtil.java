@@ -20,12 +20,18 @@ package org.apache.niolex.network.rpc.util;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.niolex.commons.codec.Base64Util;
+import org.apache.niolex.commons.codec.StringUtil;
 import org.apache.niolex.commons.stream.JsonProxy;
 import org.apache.niolex.network.PacketData;
 import org.codehaus.jackson.type.TypeReference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Common utils for Rpc.
@@ -35,9 +41,11 @@ import org.codehaus.jackson.type.TypeReference;
  * @Date: 2012-6-1
  */
 public abstract class RpcUtil {
+	private static final Logger LOG = LoggerFactory.getLogger(RpcUtil.class);
 
 	/**
 	 * This is the class to return a type.
+	 *
 	 * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
 	 * @version 1.0.0
 	 * @Date: 2012-7-24
@@ -54,7 +62,6 @@ public abstract class RpcUtil {
 		public Type getType() {
 			return type;
 		}
-
 	}
 
 	/**
@@ -79,7 +86,7 @@ public abstract class RpcUtil {
 	 * @return
 	 * @throws IOException
 	 */
-	public static final Object[] prepareParams(byte[] data, Type[] generic) throws IOException {
+	public static final Object[] parseJson(byte[] data, Type[] generic) throws IOException {
 		List<TypeRe<?>> list = decodeParams(generic);
 		Object[] ret = new Object[list.size()];
 		ByteArrayInputStream in = new ByteArrayInputStream(data);
@@ -117,4 +124,69 @@ public abstract class RpcUtil {
 		l += ((b & 0xFF) << 8) + (c & 0xFF);
 		return l;
 	}
+
+	/**
+	 * Generate the HTTP basic Authentication header.
+	 *
+	 * @param username
+	 * @param password
+	 * @return
+	 */
+    public static String authHeader(String username, String password) {
+        String authString = username + ":" + password;
+        return "Basic " + Base64Util.byteToBase64(StringUtil.strToUtf8Byte(authString));
+    }
+
+    /**
+     * Generate a random string as the session ID of this client.
+     *
+     * @param length
+     * @return
+     */
+    public static String genSessionId(int length) {
+        String tempId = "";
+        int curLen = 0;
+        while (curLen < length) {
+            tempId = tempId + Long.toHexString((long) (Math.random() * 1000000000000000L))
+                    + Long.toHexString(System.nanoTime());
+            curLen = tempId.length();
+        }
+
+        return tempId.substring(0, length);
+    }
+
+    /**
+     * Check the connectivity of this url according to the given timeout.
+     *
+     * @param completeUrl
+     * @param connectTimeout
+     * @param readTimeout
+     * @return
+     */
+    public static boolean checkServerStatus(String completeUrl, int connectTimeout, int readTimeout) {
+		try {
+			URL u = new URL(completeUrl);
+			URLConnection proxy = u.openConnection();
+			proxy.setConnectTimeout(connectTimeout);
+			proxy.setReadTimeout(readTimeout);
+			proxy.setDoInput(true);
+			proxy.setDoOutput(false);
+			proxy.connect();
+			if (proxy.getContentLength() <= 1) {
+				LOG.warn("Failed to connect to " + completeUrl + " : Server response too short.");
+				return false;
+			}
+			String serverStatus = proxy.getHeaderField(0);
+			if (serverStatus != null && serverStatus.matches(".*[45][0-9][02-9].*")) {
+				LOG.warn("Failed to connect to " + completeUrl + " : Invalid server response " + serverStatus);
+				return false;
+			}
+			LOG.info("Server [" + completeUrl + "] status: " + serverStatus);
+			return true;
+		} catch (Exception e) {
+			LOG.warn("Failed to connect to " + completeUrl + " : " + e.getMessage());
+			return false;
+		}
+	}
+
 }

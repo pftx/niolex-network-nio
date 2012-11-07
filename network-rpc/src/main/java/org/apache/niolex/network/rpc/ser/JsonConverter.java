@@ -42,7 +42,7 @@ public class JsonConverter implements IConverter {
 	 */
 	@Override
 	public Object[] prepareParams(byte[] data, Type[] generic) throws Exception {
-		return RpcUtil.prepareParams(data, generic);
+		return RpcUtil.parseJson(data, generic);
 	}
 
 	/**

@@ -37,7 +37,7 @@ import org.junit.Test;
 public class ProtoRpcPacketHandlerTest {
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.rpc.proto.ProtoRpcPacketHandler#prepareParams(byte[], java.lang.reflect.Type[])}.
+	 * Test method for {@link org.apache.niolex.network.rpc.proto.ProtoRpcPacketHandler#parseJson(byte[], java.lang.reflect.Type[])}.
 	 * @throws Exception
 	 */
 	@Test
@@ -50,7 +50,7 @@ public class ProtoRpcPacketHandlerTest {
 				.addPhone(n)
 				.build();
 		byte arr2[] = ProtoUtil.seriMulti(new Object[] {n, p});
-		Object[] arr = pph.prepareParams(arr2, new Type[] {PhoneNumber.class, Person.class});
+		Object[] arr = pph.parseJson(arr2, new Type[] {PhoneNumber.class, Person.class});
 		assertEquals(arr[0], n);
 		assertEquals(arr[1], p);
 	}
@@ -67,7 +67,7 @@ public class ProtoRpcPacketHandlerTest {
 				.addPhone(PhoneNumber.newBuilder().setNumber("123122311" + i).setType(PhoneType.HOME).build())
 				.build();
 		byte arr2[] = ProtoUtil.seriMulti(new Object[] {p});
-		assertNotNull(pph.prepareParams(arr2, new Type[] {Person.class}));
+		assertNotNull(pph.parseJson(arr2, new Type[] {Person.class}));
 	}
 
 	/**
