@@ -15,10 +15,11 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.niolex.network.rpc.conf;
+package org.apache.niolex.network.cli.conf;
 
 import static org.junit.Assert.*;
 
+import org.apache.niolex.network.cli.conf.BaseConfigBean;
 import org.junit.Test;
 
 /**
@@ -46,7 +47,7 @@ public class BaseConfigBeanTest {
 	}
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.rpc.conf.BaseConfigBean#getProp(java.lang.String)}.
+	 * Test method for {@link org.apache.niolex.network.cli.conf.BaseConfigBean#getProp(java.lang.String)}.
 	 */
 	@Test
 	public final void testGetPropString() {
@@ -59,7 +60,7 @@ public class BaseConfigBeanTest {
 	}
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.rpc.conf.BaseConfigBean#getHeader(java.lang.String)}.
+	 * Test method for {@link org.apache.niolex.network.cli.conf.BaseConfigBean#getHeader(java.lang.String)}.
 	 */
 	@Test
 	public final void testGetHeaderString() {
@@ -78,7 +79,7 @@ public class BaseConfigBeanTest {
 	}
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.rpc.conf.BaseConfigBean#getHeader()}.
+	 * Test method for {@link org.apache.niolex.network.cli.conf.BaseConfigBean#getHeader()}.
 	 */
 	@Test
 	public final void testGetHeader() {
@@ -90,7 +91,7 @@ public class BaseConfigBeanTest {
 	}
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.rpc.conf.BaseConfigBean#getGroupName()}.
+	 * Test method for {@link org.apache.niolex.network.cli.conf.BaseConfigBean#getGroupName()}.
 	 */
 	@Test
 	public final void testGetGroupName() {

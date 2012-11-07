@@ -15,7 +15,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.niolex.network.rpc.conf;
+package org.apache.niolex.network.cli.conf;
 
 /**
  * RpcConfiger, create RpcConfigBean here.

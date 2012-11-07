@@ -19,10 +19,10 @@ package org.apache.niolex.network.rpc.json;
 
 import java.net.InetSocketAddress;
 
+import org.apache.niolex.network.cli.init.RpcClientBuilder;
 import org.apache.niolex.network.client.PacketClient;
 import org.apache.niolex.network.rpc.PacketInvoker;
 import org.apache.niolex.network.rpc.RpcClient;
-import org.apache.niolex.network.rpc.init.RpcClientBuilder;
 import org.apache.niolex.network.rpc.ser.JsonConverter;
 
 /**
@@ -41,7 +41,7 @@ public class JsonRpcBuilder implements RpcClientBuilder {
 
 	/**
 	 * Override super method
-	 * @see org.apache.niolex.network.rpc.init.RpcClientBuilder#setClientUrl(java.lang.String)
+	 * @see org.apache.niolex.network.cli.init.RpcClientBuilder#setClientUrl(java.lang.String)
 	 */
 	@Override
 	public RpcClientBuilder setClientUrl(String url) {
@@ -51,7 +51,7 @@ public class JsonRpcBuilder implements RpcClientBuilder {
 
 	/**
 	 * Override super method
-	 * @see org.apache.niolex.network.rpc.init.RpcClientBuilder#setConnectTimeout(int)
+	 * @see org.apache.niolex.network.cli.init.RpcClientBuilder#setConnectTimeout(int)
 	 */
 	@Override
 	public RpcClientBuilder setConnectTimeout(int time) {
@@ -61,7 +61,7 @@ public class JsonRpcBuilder implements RpcClientBuilder {
 
 	/**
 	 * Override super method
-	 * @see org.apache.niolex.network.rpc.init.RpcClientBuilder#setRpcHandleTimeout(int)
+	 * @see org.apache.niolex.network.cli.init.RpcClientBuilder#setRpcHandleTimeout(int)
 	 */
 	@Override
 	public RpcClientBuilder setRpcHandleTimeout(int time) {
@@ -71,7 +71,7 @@ public class JsonRpcBuilder implements RpcClientBuilder {
 
 	/**
 	 * Override super method
-	 * @see org.apache.niolex.network.rpc.init.RpcClientBuilder#build()
+	 * @see org.apache.niolex.network.cli.init.RpcClientBuilder#build()
 	 */
 	@Override
 	public RpcClient build() {

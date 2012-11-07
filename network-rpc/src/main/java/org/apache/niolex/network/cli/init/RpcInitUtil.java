@@ -15,7 +15,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.niolex.network.rpc.init;
+package org.apache.niolex.network.cli.init;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,8 +24,8 @@ import java.util.List;
 import org.apache.niolex.network.cli.IServiceHandler;
 import org.apache.niolex.network.cli.RetryHandler;
 import org.apache.niolex.network.cli.RpcConnectionHandler;
+import org.apache.niolex.network.cli.conf.RpcConfigBean;
 import org.apache.niolex.network.rpc.RpcClient;
-import org.apache.niolex.network.rpc.conf.RpcConfigBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

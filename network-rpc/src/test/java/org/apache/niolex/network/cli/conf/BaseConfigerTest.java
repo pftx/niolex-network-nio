@@ -1,5 +1,5 @@
 /**
- * SingleTest.java
+ * BaseConfigerTest.java
  *
  * Copyright 2012 Niolex, Inc.
  *
@@ -15,10 +15,12 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.niolex.network.rpc.conf;
+package org.apache.niolex.network.cli.conf;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
+import org.apache.niolex.network.cli.conf.RpcConfigBean;
+import org.apache.niolex.network.cli.conf.RpcConfiger;
 import org.junit.Test;
 
 /**
@@ -26,16 +28,27 @@ import org.junit.Test;
  * @version 1.0.0
  * @Date: 2012-6-3
  */
-public class SingleTest {
-    static RpcConfiger configer = new RpcConfiger("single.properties");
+public class BaseConfigerTest {
 
-    @Test
-    public void doConfig_Stand_Alone() {
-        RpcConfigBean conf = configer.getConfig();
+	/**
+	 * Test method for {@link org.apache.niolex.network.cli.conf.BaseConfiger#getConfig(java.lang.String)}.
+	 */
+	@Test
+	public final void testGetConfig() {
+		RpcConfiger configer = new RpcConfiger("null.properties");
+		assertEquals(0, configer.getConfigs().size());
+	}
+
+	@Test
+	public void testBaseConfiger() throws Exception {
+		RpcConfiger configer = new RpcConfiger("guess.properties");
+
+		RpcConfigBean conf = configer.getConfig("demo");
         assertEquals(conf.serverList[0], "dy-m-st01.niolex.net:8808");
         assertEquals(conf.serverList[2], "192.168.16.18:8808");
         assertEquals(conf.serviceUrl, "/cgi-bin/services/WdgetService.cgi");
-        assertEquals(conf.readTimeout, 12000);
-        assertEquals(conf.retryTimes, 3);
-    }
+        assertEquals(conf.readTimeout, 7000);
+        assertEquals(conf.retryTimes, 5);
+	}
+
 }

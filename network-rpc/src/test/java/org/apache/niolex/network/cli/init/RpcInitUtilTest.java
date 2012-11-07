@@ -15,11 +15,14 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.niolex.network.rpc.init;
+package org.apache.niolex.network.cli.init;
 
 import static org.mockito.Mockito.mock;
 
-import org.apache.niolex.network.rpc.conf.RpcConfigBean;
+import org.apache.niolex.network.cli.conf.RpcConfigBean;
+import org.apache.niolex.network.cli.init.RpcClientBuilder;
+import org.apache.niolex.network.cli.init.RpcClientFactory;
+import org.apache.niolex.network.cli.init.RpcInitUtil;
 import org.junit.Test;
 
 /**
@@ -30,7 +33,7 @@ import org.junit.Test;
 public class RpcInitUtilTest {
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.rpc.init.RpcInitUtil#buildProxy(org.apache.niolex.network.rpc.conf.RpcConfigBean, org.apache.niolex.network.rpc.init.RpcClientFactory)}.
+	 * Test method for {@link org.apache.niolex.network.cli.init.RpcInitUtil#buildProxy(org.apache.niolex.network.cli.conf.RpcConfigBean, org.apache.niolex.network.cli.init.RpcClientFactory)}.
 	 */
 	@SuppressWarnings("static-access")
 	@Test(expected=IllegalStateException.class)
@@ -44,7 +47,7 @@ public class RpcInitUtilTest {
 	}
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.rpc.init.RpcInitUtil#buildProxy(org.apache.niolex.network.rpc.conf.RpcConfigBean, org.apache.niolex.network.rpc.init.RpcClientFactory)}.
+	 * Test method for {@link org.apache.niolex.network.cli.init.RpcInitUtil#buildProxy(org.apache.niolex.network.cli.conf.RpcConfigBean, org.apache.niolex.network.cli.init.RpcClientFactory)}.
 	 */
 	@SuppressWarnings("static-access")
 	@Test(expected=IllegalStateException.class)

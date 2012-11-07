@@ -15,17 +15,19 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.niolex.network.rpc.init;
+package org.apache.niolex.network.cli.init;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import java.util.List;
 
+import org.apache.niolex.network.cli.conf.BaseConfiger;
+import org.apache.niolex.network.cli.conf.RpcConfiger;
+import org.apache.niolex.network.cli.init.RpcClientFactory;
+import org.apache.niolex.network.cli.init.RpcServiceFactory;
 import org.apache.niolex.network.rpc.RpcConfig;
 import org.apache.niolex.network.rpc.anno.RpcMethod;
-import org.apache.niolex.network.rpc.conf.BaseConfiger;
-import org.apache.niolex.network.rpc.conf.RpcConfiger;
 import org.apache.niolex.network.rpc.json.JsonRpcBuilder;
 import org.junit.Test;
 
@@ -38,7 +40,7 @@ public class RpcServiceFactoryTest {
 
 	/**
 	 * Test method for
-	 * {@link org.apache.niolex.network.rpc.init.RpcServiceFactory#getInstance(java.lang.String, org.apache.niolex.network.rpc.init.RpcClientFactory)}
+	 * {@link org.apache.niolex.network.cli.init.RpcServiceFactory#getInstance(java.lang.String, org.apache.niolex.network.cli.init.RpcClientFactory)}
 	 * .
 	 */
 	@Test(expected = IllegalArgumentException.class)
@@ -51,7 +53,7 @@ public class RpcServiceFactoryTest {
 
 	/**
 	 * Test method for
-	 * {@link org.apache.niolex.network.rpc.init.RpcServiceFactory#getService(java.lang.String, java.lang.Class)}.
+	 * {@link org.apache.niolex.network.cli.init.RpcServiceFactory#getService(java.lang.String, java.lang.Class)}.
 	 */
 	@Test
 	public void testGetServiceStringClassOfT() {
@@ -67,7 +69,7 @@ public class RpcServiceFactoryTest {
 
 	/**
 	 * Test method for
-	 * {@link org.apache.niolex.network.rpc.init.RpcServiceFactory#getService(java.lang.String, java.lang.Class)}.
+	 * {@link org.apache.niolex.network.cli.init.RpcServiceFactory#getService(java.lang.String, java.lang.Class)}.
 	 */
 	@Test
 	public void testGetServiceStringClassOfF() {
@@ -82,7 +84,7 @@ public class RpcServiceFactoryTest {
 	}
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.rpc.init.RpcServiceFactory#getConfiger()}.
+	 * Test method for {@link org.apache.niolex.network.cli.init.RpcServiceFactory#getConfiger()}.
 	 */
 	@Test
 	public void testGetConfiger() {

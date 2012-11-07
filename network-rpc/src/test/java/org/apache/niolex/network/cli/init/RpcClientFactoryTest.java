@@ -15,11 +15,13 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.niolex.network.rpc.init;
+package org.apache.niolex.network.cli.init;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 
+import org.apache.niolex.network.cli.init.RpcClientBuilder;
+import org.apache.niolex.network.cli.init.RpcClientFactory;
 import org.junit.Test;
 
 /**
@@ -30,7 +32,7 @@ import org.junit.Test;
 public class RpcClientFactoryTest {
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.rpc.init.RpcClientFactory#getBuilder(java.lang.String)}.
+	 * Test method for {@link org.apache.niolex.network.cli.init.RpcClientFactory#getBuilder(java.lang.String)}.
 	 */
 	@Test
 	public void testGetBuilder() {
