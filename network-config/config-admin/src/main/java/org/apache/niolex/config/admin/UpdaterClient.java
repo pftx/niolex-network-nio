@@ -212,8 +212,7 @@ public class UpdaterClient implements Updater, IPacketHandler {
 
 	/**
 	 * Override super method
-	 * @throws Exception
-	 * @see org.apache.niolex.config.admin.Updater#updateUserRole(java.lang.String, java.lang.String)
+	 * @see org.apache.niolex.config.admin.Updater#changePassword(java.lang.String, java.lang.String)
 	 */
 	@Override
 	public String changePassword(String username, String password) throws Exception {
