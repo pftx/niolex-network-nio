@@ -82,9 +82,8 @@ public class ConcurrentDispatcher implements IDispatcher {
 	}
 
 	/**
-	 *
 	 * Override super method
-	 * @see org.apache.niolex.network.name.event.IDispatcher#handleClose(org.apache.niolex.network.IPacketWriter)
+	 * @see org.apache.niolex.network.name.event.IDispatcher#handleClose(java.lang.String, org.apache.niolex.network.IPacketWriter)
 	 */
 	@Override
 	public void handleClose(String addressKey, IPacketWriter wt) {
