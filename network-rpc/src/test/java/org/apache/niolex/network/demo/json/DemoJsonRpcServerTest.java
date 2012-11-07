@@ -21,10 +21,10 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 
 import org.apache.niolex.commons.reflect.MethodUtil;
-import org.apache.niolex.network.demo.json.DemoRpcClient;
-import org.apache.niolex.network.demo.json.RpcServer;
+import org.apache.niolex.network.demo.json.DemoJsonRpcClient;
+import org.apache.niolex.network.demo.json.DemoJsonRpcServer;
 import org.apache.niolex.network.demo.json.RpcServiceImpl;
-import org.apache.niolex.network.demo.json.SingleRpcClient;
+import org.apache.niolex.network.demo.json.SocketJsonRpcClient;
 import org.junit.Test;
 
 /**
@@ -32,22 +32,22 @@ import org.junit.Test;
  * @version 1.0.0
  * @Date: 2012-6-4
  */
-public class RpcServerTest {
+public class DemoJsonRpcServerTest {
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.demo.json.RpcServer#main(java.lang.String[])}.
+	 * Test method for {@link org.apache.niolex.network.demo.json.DemoJsonRpcServer#main(java.lang.String[])}.
 	 * @throws Throwable
 	 */
 	@Test
 	@SuppressWarnings("unused")
 	public void testMain() throws Throwable {
-		DemoRpcClient c = new DemoRpcClient();
-		SingleRpcClient g = new SingleRpcClient();
-		RpcServer s = new RpcServer();
-		RpcServer.main(null);
-		DemoRpcClient.main(null);
-		SingleRpcClient.main(null);
-		RpcServer.stop();
+		DemoJsonRpcClient c = new DemoJsonRpcClient();
+		SocketJsonRpcClient g = new SocketJsonRpcClient();
+		DemoJsonRpcServer s = new DemoJsonRpcServer();
+		DemoJsonRpcServer.main(null);
+		DemoJsonRpcClient.main(null);
+		SocketJsonRpcClient.main(null);
+		DemoJsonRpcServer.stop();
 	}
 
 	@Test

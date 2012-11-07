@@ -26,7 +26,7 @@ import java.net.InetSocketAddress;
 import org.apache.niolex.commons.reflect.MethodUtil;
 import org.apache.niolex.network.CoreRunner;
 import org.apache.niolex.network.client.PacketClient;
-import org.apache.niolex.network.demo.json.RpcServer;
+import org.apache.niolex.network.demo.json.DemoJsonRpcServer;
 import org.apache.niolex.network.demo.json.RpcService;
 import org.apache.niolex.network.rpc.RpcClient.Status;
 import org.apache.niolex.network.rpc.PacketInvoker;
@@ -46,7 +46,7 @@ public class JsonRpcClientTest {
 
 	@BeforeClass
 	public static void up() throws IOException {
-		RpcServer.main(null);
+		DemoJsonRpcServer.main(null);
 		PacketClient c = new PacketClient(new InetSocketAddress("localhost", 8808));
         client = new JsonRpcClient(c, new PacketInvoker());
         client.connect();
@@ -57,7 +57,7 @@ public class JsonRpcClientTest {
 	@AfterClass
 	public static void down() {
 		client.stop();
-		RpcServer.stop();
+		DemoJsonRpcServer.stop();
 	}
 	/**
 	 * Test method for {@link org.apache.niolex.network.rpc.json.JsonRpcClient#serializeParams(java.lang.Object[])}.
@@ -93,9 +93,9 @@ public class JsonRpcClientTest {
 	public void testConnect() throws Throwable {
 		client.setSleepBetweenRetryTime(400);
 		client.setConnectRetryTimes(2);
-		RpcServer.stop();
+		DemoJsonRpcServer.stop();
 		Thread.sleep(CoreRunner.CO_SLEEP);
-		RpcServer.main(null);
+		DemoJsonRpcServer.main(null);
 		//client.handleError(null);
 		Thread.sleep(10 * CoreRunner.CO_SLEEP);
 		assertTrue(client.getConnStatus() == Status.CONNECTED);

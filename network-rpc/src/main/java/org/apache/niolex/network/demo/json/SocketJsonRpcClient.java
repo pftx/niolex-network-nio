@@ -1,5 +1,5 @@
 /**
- * SingleRpcClient.java
+ * SocketJsonRpcClient.java
  *
  * Copyright 2012 Niolex, Inc.
  *
@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.niolex.network.client.SocketClient;
-import org.apache.niolex.network.demo.rpc.RpcService;
 import org.apache.niolex.network.rpc.SingleInvoker;
 import org.apache.niolex.network.rpc.json.JsonRpcClient;
 
@@ -32,11 +31,10 @@ import org.apache.niolex.network.rpc.json.JsonRpcClient;
  * @version 1.0.0
  * @Date: 2012-6-13
  */
-public class SingleRpcClient {
+public class SocketJsonRpcClient {
 
 
 	public static void main(String[] arg2s) throws IOException, Throwable {
-		// SocketClient c = new SocketClient(new InetSocketAddress("10.22.241.233", 8808));
 		SocketClient c = new SocketClient(new InetSocketAddress("localhost", 8808));
 		JsonRpcClient client = new JsonRpcClient(c, new SingleInvoker());
 		client.connect();

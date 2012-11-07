@@ -1,5 +1,5 @@
 /**
- * RpcServer.java
+ * DemoJsonRpcServer.java
  *
  * Copyright 2012 Niolex, Inc.
  *
@@ -19,8 +19,6 @@ package org.apache.niolex.network.demo.json;
 
 import java.io.IOException;
 
-import org.apache.niolex.network.demo.rpc.RpcService;
-import org.apache.niolex.network.demo.rpc.RpcServiceImpl;
 import org.apache.niolex.network.rpc.ConfigItem;
 import org.apache.niolex.network.rpc.json.JsonRpcPacketHandler;
 import org.apache.niolex.network.server.MultiNioServer;
@@ -30,7 +28,7 @@ import org.apache.niolex.network.server.MultiNioServer;
  * @version 1.0.0
  * @Date: 2012-6-2
  */
-public class RpcServer {
+public class DemoJsonRpcServer {
 
     private static MultiNioServer s = new MultiNioServer();
 
