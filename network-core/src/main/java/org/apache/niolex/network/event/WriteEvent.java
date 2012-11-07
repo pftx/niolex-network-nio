@@ -28,7 +28,7 @@ import org.apache.niolex.network.PacketData;
  *
  * So, how could you be sure that your packet is send? Use event based methods.
  *
- * @see IPacketWriter.addEventListener
+ * @see org.apache.niolex.network.IPacketWriter#addEventListener(WriteEventListener)
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0

@@ -21,6 +21,8 @@ package org.apache.niolex.network.event;
  * The interface user need to implement in order to get the event
  * when packet sent.
  *
+ * @see org.apache.niolex.network.IPacketWriter#addEventListener(WriteEventListener)
+ *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
  * @Date: 2012-6-14

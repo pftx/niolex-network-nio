@@ -23,11 +23,12 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
+import org.apache.niolex.commons.concurrent.Blocker;
+import org.apache.niolex.commons.concurrent.WaitOn;
 import org.apache.niolex.network.Config;
 import org.apache.niolex.network.PacketData;
 import org.apache.niolex.network.name.bean.AddressRecord;
 import org.apache.niolex.network.name.core.NameClient;
-import org.apache.niolex.network.util.BlockingWaiter;
 
 /**
  * Subscribe to name server to listen address change.
@@ -51,7 +52,7 @@ public class AddressSubscriber extends NameClient {
 	/**
 	 * The help class to wait for result.
 	 */
-	protected final BlockingWaiter<List<String>> waiter = new BlockingWaiter<List<String>>();
+	protected final Blocker<List<String>> waiter = new Blocker<List<String>>();
 
 	/**
 	 * The rpc handle timeout in milliseconds.
@@ -137,7 +138,7 @@ public class AddressSubscriber extends NameClient {
 		// Register this subscriber.
 		PacketData listnName = transformer.getPacketData(Config.CODE_NAME_OBTAIN, serviceKey);
 		list.add(listnName);
-		BlockingWaiter<List<String>>.WaitOn on = waiter.initWait(serviceKey);
+		WaitOn<List<String>> on = waiter.initWait(serviceKey);
 		client.handleWrite(listnName);
 		try {
 			List<String> list = on.waitForResult(rpcHandleTimeout);
