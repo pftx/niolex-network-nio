@@ -107,7 +107,7 @@ public class PacketClientTest {
 		sc.getData()[9] = (byte) 145;
 		sc.getData()[145] = (byte) 63;
 		packetClient.handleWrite(sc);
-		Thread.sleep(5 * CoreRunner.CO_SLEEP);
+		Thread.sleep(2 * CoreRunner.CO_SLEEP);
 		packetClient.stop();
 
 		ArgumentCaptor<PacketData> argument = ArgumentCaptor
@@ -146,6 +146,7 @@ public class PacketClientTest {
 		packetClient.handleWrite(PacketData.getHeartBeatPacket());
 		Thread.sleep(CoreRunner.CO_SLEEP);
 		nioServer.stop();
+		packetClient.handleWrite(PacketData.getHeartBeatPacket());
 		Thread.sleep(CoreRunner.CO_SLEEP);
 
 		verify(packetHandler).handleClose(packetClient);
@@ -159,7 +160,7 @@ public class PacketClientTest {
 
 	private void assertArrayEquals(byte[] a, byte[] b) {
 		if (a.length == b.length) {
-			for (int k = 0; k < a.length; k += a.length / 100 + 1) {
+			for (int k = 0; k < a.length; k += a.length / 157 + 1) {
 				if (a[k] != b[k]) {
 					assertFalse("Index at " + k, true);
 					return;
@@ -238,7 +239,7 @@ public class PacketClientTest {
 				sc.setCode((short) i);
 			}
 			sc.setVersion((byte) 8);
-			int len = (r.nextInt(1024) + 1) * 10240;
+			int len = (r.nextInt(99) + 1) * 102400;
 			sc.setLength(len);
 			sc.setData(generateRandom(len, r));
 			packetClient.handleWrite(sc);

@@ -18,6 +18,7 @@
 package org.apache.niolex.network.server;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -44,8 +45,8 @@ public class BasePacketWriterTest {
 	}
 
 	@Test
-	public void testClose() {
-		BasePacketWriter tmp = new TBasePacketWriter ();
+	public void testCloseAndChannelClose() {
+		BasePacketWriter tmp = new TBasePacketWriter();
 		tmp.handleWrite(PacketData.getHeartBeatPacket());
 		tmp.attachData("a", tmp);
 		assertNotNull(tmp.getAttached("a"));
@@ -72,6 +73,7 @@ public class BasePacketWriterTest {
         sc.setLength(0);
         sc.setData(new byte[0]);
 		bpw.handleWrite(sc);
+		assertFalse(bpw.isEmpty());
 		assertEquals(sc, bpw.handleNext());
 		assertTrue(bpw.isEmpty());
 	}
@@ -83,10 +85,13 @@ public class BasePacketWriterTest {
 	public void testAttachData() {
 		bpw.attachData("IDIJF", "Not yet implemented");
 		assertEquals("Not yet implemented", bpw.getAttached("IDIJF"));
+		PacketData sc = new PacketData();
+		bpw.attachData("IDIJF", sc);
+		assertEquals(sc, bpw.getAttached("IDIJF"));
 	}
 
 	@Test
-	public void testHandleWriteM() throws InterruptedException {
+	public void testQueue() throws InterruptedException {
 		PacketData sc = new PacketData();
         sc.setCode((short)4);
         sc.setVersion((byte)1);
