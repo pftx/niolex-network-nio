@@ -54,7 +54,7 @@ public class MultiNioServerTest {
 
 	@BeforeClass
 	public static void createNioServer() throws Exception {
-		nioServer = new MultiNioServer();
+		nioServer = new MultiNioServer(3);
 		nioServer.setPort(port);
 		nioServer.setAcceptTimeOut(10);
 		nioServer.start();

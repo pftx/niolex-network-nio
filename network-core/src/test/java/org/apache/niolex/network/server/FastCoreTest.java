@@ -85,6 +85,16 @@ public class FastCoreTest {
 		client.close();
 	}
 
+	@Test
+	public void testCannotStart() {
+		MultiNioServer nioServer  = new MultiNioServer(3);
+		nioServer.setPort(-1);
+		nioServer.setAcceptTimeOut(10);
+		nioServer.start();
+		nioServer.stop();
+		nioServer.stop();
+	}
+
 	/**
 	 * Test method for {@link org.apache.niolex.network.server.FastCore#handleWrite(org.apache.niolex.network.PacketData)}.
 	 */
