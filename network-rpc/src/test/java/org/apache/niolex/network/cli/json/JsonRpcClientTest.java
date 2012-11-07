@@ -15,7 +15,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.niolex.network.rpc.json;
+package org.apache.niolex.network.cli.json;
 
 import static org.junit.Assert.*;
 
@@ -60,7 +60,7 @@ public class JsonRpcClientTest {
 		DemoJsonRpcServer.stop();
 	}
 	/**
-	 * Test method for {@link org.apache.niolex.network.rpc.json.JsonRpcClient#serializeParams(java.lang.Object[])}.
+	 * Test method for {@link org.apache.niolex.network.cli.json.JsonRpcClient#serializeParams(java.lang.Object[])}.
 	 */
 	@Test
 	public void testAddInferface() {
@@ -71,7 +71,7 @@ public class JsonRpcClientTest {
 	}
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.rpc.json.JsonRpcClient#prepareReturn(byte[], java.lang.reflect.Type, int)}.
+	 * Test method for {@link org.apache.niolex.network.cli.json.JsonRpcClient#prepareReturn(byte[], java.lang.reflect.Type, int)}.
 	 */
 	@Test(expected=RpcException.class)
 	public void testPrepareReturn() {

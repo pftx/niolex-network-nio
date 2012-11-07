@@ -15,12 +15,13 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.niolex.network.rpc.json;
+package org.apache.niolex.network.cli.json;
 
 import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
 
+import org.apache.niolex.network.cli.json.JsonRpcBuilder;
 import org.apache.niolex.network.demo.json.RpcService;
 import org.apache.niolex.network.rpc.RpcClient;
 import org.junit.Test;
@@ -33,7 +34,7 @@ import org.junit.Test;
 public class JsonRpcBuilderTest {
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.rpc.json.JsonRpcBuilder#getInstance(java.lang.String)}.
+	 * Test method for {@link org.apache.niolex.network.cli.json.JsonRpcBuilder#getInstance(java.lang.String)}.
 	 * @throws IOException
 	 */
 	@Test

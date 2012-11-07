@@ -15,7 +15,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.niolex.network.rpc.json;
+package org.apache.niolex.network.cli.json;
 
 import java.net.InetSocketAddress;
 

@@ -25,10 +25,10 @@ import java.util.List;
 import org.apache.niolex.commons.test.Counter;
 import org.apache.niolex.commons.test.StopWatch;
 import org.apache.niolex.commons.test.StopWatch.Stop;
+import org.apache.niolex.network.cli.json.JsonRpcClient;
 import org.apache.niolex.network.client.SocketClient;
 import org.apache.niolex.network.demo.json.RpcService;
 import org.apache.niolex.network.rpc.SingleInvoker;
-import org.apache.niolex.network.rpc.json.JsonRpcClient;
 
 /**
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
