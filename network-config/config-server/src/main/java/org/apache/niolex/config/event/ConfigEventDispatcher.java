@@ -54,7 +54,8 @@ public class ConfigEventDispatcher {
 
 	/**
 	 * Add an event listener who care this event.
-	 * @param eListener
+	 * @param groupName
+	 * @param listener
 	 */
 	public void addListener(String groupName, IPacketWriter listener) {
 		ConcurrentHashMap<IPacketWriter, String> queue = clients.get(groupName);
@@ -70,7 +71,8 @@ public class ConfigEventDispatcher {
 
 	/**
 	 * Remove the specified event listener.
-	 * @param eListener
+	 * @param groupName
+	 * @param listener
 	 */
 	public void removeListener(String groupName, IPacketWriter listener) {
 		ConcurrentHashMap<IPacketWriter, String> queue = clients.get(groupName);
@@ -97,7 +99,8 @@ public class ConfigEventDispatcher {
 
 	/**
 	 * Fire the specified event to all the listeners registered to this dispatcher.
-	 * @param e
+	 * @param groupName
+	 * @param item
 	 */
 	public void fireEvent(String groupName, ConfigItem item) {
 		// Fire to other servers.
@@ -112,7 +115,8 @@ public class ConfigEventDispatcher {
 
 	/**
 	 * Fire the specified event to all the listeners registered to this dispatcher.
-	 * @param e
+	 * @param groupName
+	 * @param item
 	 */
 	public void fireClientEvent(String groupName, ConfigItem item) {
 		ConcurrentHashMap<IPacketWriter, String> queue = clients.get(groupName);

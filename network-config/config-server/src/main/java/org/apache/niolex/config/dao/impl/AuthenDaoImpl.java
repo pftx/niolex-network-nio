@@ -72,7 +72,7 @@ public class AuthenDaoImpl implements AuthenDao {
 
 	/**
 	 * Override super method
-	 * @see org.apache.niolex.config.dao.AuthenDao#updateUser(long, java.lang.String, java.lang.String)
+	 * @see org.apache.niolex.config.dao.AuthenDao#updateUser(java.lang.String, java.lang.String, java.lang.String)
 	 */
 	@Override
 	public boolean updateUser(String username, String digest, String role) {

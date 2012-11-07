@@ -29,6 +29,8 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.niolex.commons.codec.StringUtil;
 import org.apache.niolex.commons.compress.JacksonUtil;
+import org.apache.niolex.commons.concurrent.Blocker;
+import org.apache.niolex.commons.concurrent.WaitOn;
 import org.apache.niolex.commons.config.PropUtil;
 import org.apache.niolex.commons.download.DownloadUtil;
 import org.apache.niolex.commons.file.FileUtil;
@@ -50,7 +52,6 @@ import org.apache.niolex.network.IPacketHandler;
 import org.apache.niolex.network.IPacketWriter;
 import org.apache.niolex.network.PacketData;
 import org.apache.niolex.network.client.PacketClient;
-import org.apache.niolex.network.util.BlockingWaiter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -89,7 +90,7 @@ public class ConfigClient {
 	/**
 	 * The help class to wait for result.
 	 */
-    private static final BlockingWaiter<ConfigGroup> WAITER = new BlockingWaiter<ConfigGroup>();
+    private static final Blocker<ConfigGroup> WAITER = new Blocker<ConfigGroup>();
 
     /**
      * Store all the configurations in memory.
@@ -513,9 +514,9 @@ public class ConfigClient {
      *
      * @param groupName
      * @return
-     * @throws InterruptedException
+     * @throws Exception
      */
-    protected static final ConfigGroup getConfigGroup(String groupName) throws InterruptedException {
+    protected static final ConfigGroup getConfigGroup(String groupName) throws Exception {
     	// Find data from local memory.
     	ConfigGroup tmp = STORAGE.get(groupName);
     	if (tmp != null)
@@ -536,7 +537,7 @@ public class ConfigClient {
     	checkConncetion();
     	// Add this group name to bean.
     	BEAN.getGroupSet().add(groupName);
-    	Pair<Boolean, BlockingWaiter<ConfigGroup>.WaitOn> on = WAITER.init(groupName);
+    	Pair<Boolean, WaitOn<ConfigGroup>> on = WAITER.init(groupName);
     	if (on.a) {
     		// Send packet to remote server.
     		PacketData sub = new PacketData(CodeMap.GROUP_SUB, StringUtil.strToUtf8Byte(groupName));

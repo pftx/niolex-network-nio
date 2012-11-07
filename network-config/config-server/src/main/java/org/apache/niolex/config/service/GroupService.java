@@ -50,7 +50,6 @@ public interface GroupService {
 
 	/**
 	 * Load all config groups from DB and sync them with this server memory.
-	 * @return
 	 */
 	public void syncAllGroupsWithDB();
 
@@ -82,14 +81,16 @@ public interface GroupService {
 
 	/**
 	 * Add a new config item.
-	 * @param groupName
+	 * @param item
+	 * @param wt
 	 * @return
 	 */
 	public String addItem(ConfigItem item, IPacketWriter wt);
 
 	/**
 	 * Update an existing config item.
-	 * @param groupName
+	 * @param item
+	 * @param wt
 	 * @return
 	 */
 	public String updateItem(ConfigItem item, IPacketWriter wt);

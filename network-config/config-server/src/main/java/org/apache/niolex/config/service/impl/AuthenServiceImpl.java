@@ -198,7 +198,7 @@ public class AuthenServiceImpl implements AuthenService {
 
 	/**
 	 * Override super method
-	 * @see org.apache.niolex.config.service.AuthenService#addReadAuth(java.lang.String, java.lang.String)
+	 * @see org.apache.niolex.config.service.AuthenService#addReadAuth(java.lang.String, java.lang.String, org.apache.niolex.network.IPacketWriter)
 	 */
 	@Override
 	public String addReadAuth(String userName, String groupName, IPacketWriter wt) {
@@ -224,7 +224,7 @@ public class AuthenServiceImpl implements AuthenService {
 
 	/**
 	 * Override super method
-	 * @see org.apache.niolex.config.service.AuthenService#removeReadAuth(java.lang.String, java.lang.String)
+	 * @see org.apache.niolex.config.service.AuthenService#removeReadAuth(java.lang.String, java.lang.String, org.apache.niolex.network.IPacketWriter)
 	 */
 	@Override
 	public String removeReadAuth(String userName, String groupName, IPacketWriter wt) {

@@ -29,7 +29,9 @@ public interface ConfigListener {
 
 	/**
 	 * Fire when the interested config item changed.
-	 * @param item
+	 *
+	 * @param value
+	 * @param updateTime
 	 */
 	public void configChanged(String value, long updateTime);
 

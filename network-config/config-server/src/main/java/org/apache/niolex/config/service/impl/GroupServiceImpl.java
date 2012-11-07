@@ -253,7 +253,7 @@ public class GroupServiceImpl implements GroupService {
 
 	/**
 	 * Override super method
-	 * @see org.apache.niolex.config.service.GroupService#loadGroup(java.lang.String)
+	 * @see org.apache.niolex.config.service.GroupService#svrSendGroup(java.lang.String)
 	 */
 	@Override
 	public void svrSendGroup(String groupName) {
@@ -272,7 +272,7 @@ public class GroupServiceImpl implements GroupService {
 
 	/**
 	 * Override super method
-	 * @see org.apache.niolex.config.service.GroupService#loadGroup(java.lang.String)
+	 * @see org.apache.niolex.config.service.GroupService#adminRefreshGroup(java.lang.String)
 	 */
 	@Override
 	public String adminRefreshGroup(String groupName) {
@@ -312,7 +312,7 @@ public class GroupServiceImpl implements GroupService {
 
 	/**
 	 * Override super method
-	 * @see org.apache.niolex.config.service.GroupService#addGroup(java.lang.String)
+	 * @see org.apache.niolex.config.service.GroupService#addGroup(java.lang.String, org.apache.niolex.network.IPacketWriter)
 	 */
 	@Override
 	public String addGroup(String groupName, IPacketWriter wt) {

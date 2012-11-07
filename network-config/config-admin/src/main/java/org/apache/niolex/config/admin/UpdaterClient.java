@@ -21,6 +21,8 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 
 import org.apache.niolex.commons.codec.StringUtil;
+import org.apache.niolex.commons.concurrent.Blocker;
+import org.apache.niolex.commons.concurrent.WaitOn;
 import org.apache.niolex.config.bean.ConfigGroup;
 import org.apache.niolex.config.bean.ConfigItem;
 import org.apache.niolex.config.bean.SubscribeBean;
@@ -33,7 +35,6 @@ import org.apache.niolex.network.IPacketHandler;
 import org.apache.niolex.network.IPacketWriter;
 import org.apache.niolex.network.PacketData;
 import org.apache.niolex.network.client.PacketClient;
-import org.apache.niolex.network.util.BlockingWaiter;
 
 /**
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
@@ -47,7 +48,7 @@ public class UpdaterClient implements Updater, IPacketHandler {
 	 */
 	final PacketClient client = new PacketClient();
 
-	final BlockingWaiter<String> waiter = new BlockingWaiter<String>();
+	final Blocker<String> waiter = new Blocker<String>();
 
 	final MemoryStorage storage = new MemoryStorage();
 
@@ -83,13 +84,13 @@ public class UpdaterClient implements Updater, IPacketHandler {
 
 	/**
 	 * Override super method
-	 * @throws InterruptedException
+	 * @throws Exception
 	 * @see org.apache.niolex.config.admin.Updater#addGroup(java.lang.String)
 	 */
 	@Override
-	public String addGroup(String groupName) throws InterruptedException {
+	public String addGroup(String groupName) throws Exception {
 		PacketData p = new PacketData(CodeMap.ADMIN_ADD_GROUP, groupName);
-		BlockingWaiter<String>.WaitOn on = waiter.initWait(groupName);
+		WaitOn<String> on = waiter.initWait(groupName);
 		client.handleWrite(p);
 		return on.waitForResult(waitForTimeout);
 	}
@@ -99,21 +100,21 @@ public class UpdaterClient implements Updater, IPacketHandler {
 	 * @see org.apache.niolex.config.admin.Updater#refreshGroup(java.lang.String)
 	 */
 	@Override
-	public String refreshGroup(String groupName) throws InterruptedException {
+	public String refreshGroup(String groupName) throws Exception {
 		PacketData p = new PacketData(CodeMap.ADMIN_REFRESH_GROUP, groupName);
-		BlockingWaiter<String>.WaitOn on = waiter.initWait(groupName);
+		WaitOn<String> on = waiter.initWait(groupName);
 		client.handleWrite(p);
 		return on.waitForResult(waitForTimeout);
 	}
 
 	/**
 	 * Override super method
-	 * @throws InterruptedException
+	 * @throws Exception
 	 * @see org.apache.niolex.config.admin.Updater#addItem(java.lang.String, java.lang.String, java.lang.String)
 	 */
 	@Override
-	public String addItem(String groupName, String key, String value) throws InterruptedException {
-		BlockingWaiter<String>.WaitOn on = waiter.initWait(groupName);
+	public String addItem(String groupName, String key, String value) throws Exception {
+		WaitOn<String> on = waiter.initWait(groupName);
     	// Send packet to remote server.
     	PacketData sub = new PacketData(CodeMap.GROUP_SUB, StringUtil.strToUtf8Byte(groupName));
     	client.handleWrite(sub);
@@ -138,12 +139,12 @@ public class UpdaterClient implements Updater, IPacketHandler {
 
 	/**
 	 * Override super method
-	 * @throws InterruptedException
+	 * @throws Exception
 	 * @see org.apache.niolex.config.admin.Updater#updateItem(java.lang.String, java.lang.String, java.lang.String)
 	 */
 	@Override
-	public String updateItem(String groupName, String key, String value) throws InterruptedException {
-		BlockingWaiter<String>.WaitOn on = waiter.initWait(groupName);
+	public String updateItem(String groupName, String key, String value) throws Exception {
+		WaitOn<String> on = waiter.initWait(groupName);
     	// Send packet to remote server.
     	PacketData sub = new PacketData(CodeMap.GROUP_SUB, StringUtil.strToUtf8Byte(groupName));
     	client.handleWrite(sub);
@@ -165,18 +166,18 @@ public class UpdaterClient implements Updater, IPacketHandler {
 
 	/**
 	 * Override super method
-	 * @throws InterruptedException
+	 * @throws Exception
 	 * @see org.apache.niolex.config.admin.Updater#getItem(java.lang.String, java.lang.String)
 	 */
 	@Override
-	public String getItem(String groupName, String key) throws InterruptedException {
+	public String getItem(String groupName, String key) throws Exception {
 		ConfigGroup config = storage.get(groupName);
 		ConfigItem item = null;
 		if (config != null) {
 			item = config.getGroupData().get(key);
 		}
     	if (item == null) {
-			BlockingWaiter<String>.WaitOn on = waiter.initWait(groupName);
+			WaitOn<String> on = waiter.initWait(groupName);
 	    	// Send packet to remote server.
 	    	PacketData sub = new PacketData(CodeMap.GROUP_SUB, StringUtil.strToUtf8Byte(groupName));
 	    	client.handleWrite(sub);
@@ -194,52 +195,52 @@ public class UpdaterClient implements Updater, IPacketHandler {
 
 	/**
 	 * Override super method
-	 * @throws InterruptedException
+	 * @throws Exception
 	 * @see org.apache.niolex.config.admin.Updater#addUser(java.lang.String, java.lang.String, java.lang.String)
 	 */
 	@Override
-	public String addUser(String username, String password, String userRole) throws InterruptedException {
+	public String addUser(String username, String password, String userRole) throws Exception {
 		UserInfo info = new UserInfo();
 		info.setUserName(username);
 		info.setPassword(password);
 		info.setUserRole(userRole);
 		PacketData p = PacketTranslater.translate(info);
-		BlockingWaiter<String>.WaitOn on = waiter.initWait("adduser");
+		WaitOn<String> on = waiter.initWait("adduser");
 		client.handleWrite(p);
 		return on.waitForResult(waitForTimeout);
 	}
 
 	/**
 	 * Override super method
-	 * @throws InterruptedException
+	 * @throws Exception
 	 * @see org.apache.niolex.config.admin.Updater#updateUserRole(java.lang.String, java.lang.String)
 	 */
 	@Override
-	public String changePassword(String username, String password) throws InterruptedException {
+	public String changePassword(String username, String password) throws Exception {
 		UserInfo info = new UserInfo();
 		info.setUserName(username);
 		info.setPassword(password);
 		PacketData p = PacketTranslater.translate(info);
 		p.setCode(CodeMap.ADMIN_UPDATE_USER);
-		BlockingWaiter<String>.WaitOn on = waiter.initWait("updateuser");
+		WaitOn<String> on = waiter.initWait("updateuser");
 		client.handleWrite(p);
 		return on.waitForResult(waitForTimeout);
 	}
 
 	/**
 	 * Override super method
-	 * @throws InterruptedException
+	 * @throws Exception
 	 * @see org.apache.niolex.config.admin.Updater#updateUser(java.lang.String, java.lang.String, java.lang.String)
 	 */
 	@Override
-	public String updateUser(String username, String password, String userRole) throws InterruptedException {
+	public String updateUser(String username, String password, String userRole) throws Exception {
 		UserInfo info = new UserInfo();
 		info.setUserName(username);
 		info.setPassword(password);
 		info.setUserRole(userRole);
 		PacketData p = PacketTranslater.translate(info);
 		p.setCode(CodeMap.ADMIN_UPDATE_USER);
-		BlockingWaiter<String>.WaitOn on = waiter.initWait("updateuser");
+		WaitOn<String> on = waiter.initWait("updateuser");
 		client.handleWrite(p);
 		return on.waitForResult(waitForTimeout);
 	}
@@ -342,7 +343,7 @@ public class UpdaterClient implements Updater, IPacketHandler {
 	public String addAuth(String username, String groupName) throws Exception {
 		PacketData p = new PacketData(CodeMap.ADMIN_ADD_AUTH,
 				StringUtil.concat(",", username, groupName));
-		BlockingWaiter<String>.WaitOn on = waiter.initWait("addAuth");
+		WaitOn<String> on = waiter.initWait("addAuth");
 		client.handleWrite(p);
 		return on.waitForResult(waitForTimeout);
 	}
@@ -356,7 +357,7 @@ public class UpdaterClient implements Updater, IPacketHandler {
 	public String removeAuth(String username, String groupName) throws Exception {
 		PacketData p = new PacketData(CodeMap.ADMIN_REMOVE_AUTH,
 				StringUtil.concat(",", username, groupName));
-		BlockingWaiter<String>.WaitOn on = waiter.initWait("removeAuth");
+		WaitOn<String> on = waiter.initWait("removeAuth");
 		client.handleWrite(p);
 		return on.waitForResult(waitForTimeout);
 	}

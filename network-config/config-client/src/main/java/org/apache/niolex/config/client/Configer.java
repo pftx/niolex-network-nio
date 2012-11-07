@@ -59,7 +59,8 @@ public class Configer extends ConfigClient {
 	 * Add an event listener who cares the config with this key changes.
 	 * Attention! We can only manage one listener for one key.
 	 *
-	 * @param eListener
+	 * @param key
+	 * @param listener
 	 * @return the old listener.
 	 */
 	public ConfigListener addListener(String key, ConfigListener listener) {
@@ -95,7 +96,7 @@ public class Configer extends ConfigClient {
     /**
      * 从配置中心读取字符串类型的配置
      *
-     * @see public final String getProperty(String key)
+     * @see #getProperty(String)
      * @param key 待读取的配置的键
      * @return 待读取的配置的值，如果配置不存在则返回null
      */
@@ -106,7 +107,7 @@ public class Configer extends ConfigClient {
     /**
      * 从配置中心读取字符串类型的配置
      *
-     * @see public final String getProperty(String key, String defaultValue)
+     * @see #getProperty(String, String)
      * @param key 待读取的配置的键
      * @param defaultValue 待读取的配置的默认值
      * @return 待读取的配置的值，如果配置不存在则返回<code>defaultValue</code>

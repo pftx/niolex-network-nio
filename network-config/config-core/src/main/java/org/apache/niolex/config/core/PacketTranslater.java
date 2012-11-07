@@ -70,7 +70,7 @@ public class PacketTranslater {
 
 	/**
 	 * Translate ConfigGroup into PacketData
-	 * @param bean
+	 * @param conf
 	 * @return
 	 */
 	public static final PacketData translate(ConfigGroup conf) {
@@ -98,7 +98,7 @@ public class PacketTranslater {
 
 	/**
 	 * Translate list of SyncBean into PacketData
-	 * @param bean
+	 * @param list
 	 * @return
 	 */
 	public static final PacketData translate(List<SyncBean> list) {
@@ -128,7 +128,7 @@ public class PacketTranslater {
 
 	/**
 	 * Translate ConfigItem into PacketData
-	 * @param bean
+	 * @param item
 	 * @return
 	 */
 	public static final PacketData translate(ConfigItem item) {
@@ -156,7 +156,7 @@ public class PacketTranslater {
 
 	/**
 	 * Translate UserInfo into PacketData
-	 * @param bean
+	 * @param item
 	 * @return
 	 */
 	public static final PacketData translate(UserInfo item) {

@@ -49,7 +49,7 @@ public interface AuthenDao {
 
 	/**
 	 * Update this user information.
-	 * @param userid
+	 * @param username
 	 * @param digest
 	 * @param role
 	 * @return

@@ -42,7 +42,8 @@ public class ConfigEventDispatcher {
 	 * Add an event listener who care this event.
 	 * Attention! We can only manage one listener for one key.
 	 *
-	 * @param eListener
+	 * @param key
+	 * @param listener
 	 * @return the old listener. NULL if this is the only one listen to this key.
 	 */
 	public ConfigListener addListener(String key, ConfigListener listener) {
@@ -53,7 +54,8 @@ public class ConfigEventDispatcher {
 	 * Remove the specified event listener.
 	 * Attention! We will only remove if the current listener is the specified one.
 	 *
-	 * @param eListener
+	 * @param key
+	 * @param listener
 	 * @return whether the specified listener is removed.
 	 */
 	public boolean removeListener(String key, ConfigListener listener) {
@@ -62,7 +64,7 @@ public class ConfigEventDispatcher {
 
 	/**
 	 * Fire the specified event to the listener registered to this dispatcher.
-	 * @param e
+	 * @param item
 	 */
 	public void fireEvent(ConfigItem item) {
 		ConfigListener listener = mapStorage.get(item.getKey());

@@ -58,10 +58,9 @@ public class ItemDaoImpl implements ItemDao {
 		return template.query(sql, new Object[] {groupId}, ConfigItemRowMapper.INSTANCE);
 	}
 
-
 	/**
 	 * Override super method
-	 * @see org.apache.niolex.config.dao.GroupDao#updateConfig(org.apache.niolex.config.bean.ConfigItem)
+	 * @see org.apache.niolex.config.dao.ItemDao#updateConfig(org.apache.niolex.config.bean.ConfigItem)
 	 */
 	@Override
 	public boolean updateConfig(ConfigItem item) {
@@ -70,11 +69,9 @@ public class ItemDaoImpl implements ItemDao {
 		return template.update(sql, param) > 0;
 	}
 
-
-
 	/**
 	 * Override super method
-	 * @see org.apache.niolex.config.dao.GroupDao#addConfig(org.apache.niolex.config.bean.ConfigItem)
+	 * @see org.apache.niolex.config.dao.ItemDao#addConfig(org.apache.niolex.config.bean.ConfigItem)
 	 */
 	@Override
 	public boolean addConfig(ConfigItem item) {
