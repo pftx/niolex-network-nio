@@ -15,7 +15,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.niolex.network.rpc.client;
+package org.apache.niolex.network.cli;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
@@ -54,7 +54,7 @@ public class RpcConnectionHandler implements IServiceHandler {
 
 	/**
 	 * This is the override of super method.
-	 * @see org.apache.niolex.network.rpc.client.IServiceHandler#getServiceUrl()
+	 * @see org.apache.niolex.network.cli.IServiceHandler#getServiceUrl()
 	 */
 	@Override
 	public String getServiceUrl() {
@@ -63,7 +63,7 @@ public class RpcConnectionHandler implements IServiceHandler {
 
 	/**
 	 * This is the override of super method.
-	 * @see org.apache.niolex.network.rpc.client.IServiceHandler#toString()
+	 * @see org.apache.niolex.network.cli.IServiceHandler#toString()
 	 */
 	@Override
 	public String toString() {
@@ -72,7 +72,7 @@ public class RpcConnectionHandler implements IServiceHandler {
 
 	/**
 	 * This is the override of super method.
-	 * @see org.apache.niolex.network.rpc.client.IServiceHandler#isReady()
+	 * @see org.apache.niolex.network.cli.IServiceHandler#isReady()
 	 */
 	@Override
 	public boolean isReady() {
@@ -81,7 +81,7 @@ public class RpcConnectionHandler implements IServiceHandler {
 
 	/**
 	 * This is the override of super method.
-	 * @see org.apache.niolex.network.rpc.client.IServiceHandler#notReady(java.io.IOException)
+	 * @see org.apache.niolex.network.cli.IServiceHandler#notReady(java.io.IOException)
 	 */
 	@Override
 	public void notReady(IOException ioe) {
@@ -90,7 +90,7 @@ public class RpcConnectionHandler implements IServiceHandler {
 
 	/**
 	 * This is the override of super method.
-	 * @see org.apache.niolex.network.rpc.client.IServiceHandler#getHandler()
+	 * @see org.apache.niolex.network.cli.IServiceHandler#getHandler()
 	 */
 	@Override
 	public InvocationHandler getHandler() {

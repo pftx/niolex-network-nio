@@ -23,6 +23,7 @@ import org.apache.niolex.network.client.PacketClient;
 import org.apache.niolex.network.rpc.PacketInvoker;
 import org.apache.niolex.network.rpc.RpcClient;
 import org.apache.niolex.network.rpc.init.RpcClientBuilder;
+import org.apache.niolex.network.rpc.ser.JsonConverter;
 
 /**
  * The Json Rpc client Factory.
@@ -82,7 +83,7 @@ public class JsonRpcBuilder implements RpcClientBuilder {
 		PacketClient pc = new PacketClient(new InetSocketAddress(arr[0], port));
 		PacketInvoker invoker = new PacketInvoker();
 		invoker.setRpcHandleTimeout(rpcHandleTimeout);
-		RpcClient rc = new JsonRpcClient(pc, invoker);
+		RpcClient rc = new RpcClient(pc, invoker, new JsonConverter());
 		rc.setConnectTimeout(connectTimeout);
 		return rc;
 	}

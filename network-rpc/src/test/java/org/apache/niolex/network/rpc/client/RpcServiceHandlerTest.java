@@ -25,8 +25,8 @@ import java.util.List;
 
 import junit.framework.Assert;
 
-import org.apache.niolex.network.rpc.client.IServiceHandler;
-import org.apache.niolex.network.rpc.client.RpcServiceHandler;
+import org.apache.niolex.network.cli.IServiceHandler;
+import org.apache.niolex.network.cli.RpcServiceHandler;
 import org.junit.Test;
 
 /**

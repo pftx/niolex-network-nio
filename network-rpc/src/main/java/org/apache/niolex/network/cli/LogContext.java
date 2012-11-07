@@ -15,7 +15,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.niolex.network.rpc.client;
+package org.apache.niolex.network.cli;
 
 /**
  * The rpc framework use this class to write log prefix and set current service url.

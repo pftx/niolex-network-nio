@@ -22,7 +22,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import junit.framework.Assert;
 
-import org.apache.niolex.network.rpc.client.LogContext;
+import org.apache.niolex.network.cli.LogContext;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -53,7 +53,7 @@ public class LogContextTest {
 	}
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.rpc.client.LogContext#getLogPrefix()}.
+	 * Test method for {@link org.apache.niolex.network.cli.LogContext#getLogPrefix()}.
 	 */
 	@Test
 	public final void testGetLogPrefix() {
@@ -61,7 +61,7 @@ public class LogContextTest {
 	}
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.rpc.client.LogContext#setServerUrl(java.lang.String)}.
+	 * Test method for {@link org.apache.niolex.network.cli.LogContext#setServerUrl(java.lang.String)}.
 	 */
 	@Test
 	public final void testSetServerUrl() {

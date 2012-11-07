@@ -15,7 +15,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.niolex.network.rpc.client;
+package org.apache.niolex.network.cli;
 
 /**
  * The exception thrown in this Rpc frame work.

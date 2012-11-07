@@ -15,11 +15,11 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.niolex.network.rpc.client;
+package org.apache.niolex.network.cli;
 
 import static org.junit.Assert.*;
 
-import org.apache.niolex.network.rpc.client.RpcInvokeException;
+import org.apache.niolex.network.cli.RpcInvokeException;
 import org.junit.Test;
 
 /**
@@ -30,7 +30,7 @@ import org.junit.Test;
 public class RpcInvokeExceptionTest {
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.rpc.client.RpcInvokeException#RpcInvokeException()}.
+	 * Test method for {@link org.apache.niolex.network.cli.RpcInvokeException#RpcInvokeException()}.
 	 */
 	@Test
 	public final void testRpcInvokeException() {
@@ -39,7 +39,7 @@ public class RpcInvokeExceptionTest {
 	}
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.rpc.client.RpcInvokeException#RpcInvokeException(java.lang.String, java.lang.Throwable)}.
+	 * Test method for {@link org.apache.niolex.network.cli.RpcInvokeException#RpcInvokeException(java.lang.String, java.lang.Throwable)}.
 	 */
 	@Test
 	public final void testRpcInvokeExceptionStringThrowable() {
@@ -50,7 +50,7 @@ public class RpcInvokeExceptionTest {
 	}
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.rpc.client.RpcInvokeException#RpcInvokeException(java.lang.String)}.
+	 * Test method for {@link org.apache.niolex.network.cli.RpcInvokeException#RpcInvokeException(java.lang.String)}.
 	 */
 	@Test
 	public final void testRpcInvokeExceptionString() {
@@ -59,7 +59,7 @@ public class RpcInvokeExceptionTest {
 	}
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.rpc.client.RpcInvokeException#RpcInvokeException(java.lang.Throwable)}.
+	 * Test method for {@link org.apache.niolex.network.cli.RpcInvokeException#RpcInvokeException(java.lang.Throwable)}.
 	 */
 	@Test
 	public final void testRpcInvokeExceptionThrowable() {
