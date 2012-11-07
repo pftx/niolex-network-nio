@@ -1,5 +1,5 @@
 /**
- * RpcWaitItem.java
+ * RpcMethod.java
  *
  * Copyright 2012 Niolex, Inc.
  *
@@ -15,43 +15,30 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.niolex.network.rpc;
+package org.apache.niolex.network.rpc.anno;
 
-import org.apache.niolex.network.PacketData;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * The Rpc Wait Item Class, Used in the RpcClient.
+ * The annotation to mark a method as remote procedure call method.
+ * the single value is the code to map this method to.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
  * @Date: 2012-6-1
  */
-public class RpcWaitItem {
+@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface RpcMethod {
 
 	/**
-	 * The waiting thread.
+	 * This code need to be unique cross one server.
+	 *
+	 * @return The code to map this method to.
 	 */
-	private Thread thread;
-
-	/**
-	 * The received Packet Data.
-	 */
-	private PacketData received;
-
-	public Thread getThread() {
-		return thread;
-	}
-
-	public void setThread(Thread thread) {
-		this.thread = thread;
-	}
-
-	public PacketData getReceived() {
-		return received;
-	}
-
-	public void setReceived(PacketData received) {
-		this.received = received;
-	}
+	short value();
 
 }

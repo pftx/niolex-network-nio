@@ -1,5 +1,5 @@
 /**
- * RpcInvoker.java
+ * RemoteInvoker.java
  *
  * Copyright 2012 Niolex, Inc.
  *
@@ -22,11 +22,14 @@ import org.apache.niolex.network.IPacketHandler;
 import org.apache.niolex.network.PacketData;
 
 /**
+ * This interface send packets to RPC server using the client passed in, and wait for
+ * results from server side.
+ *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
  * @Date: 2012-6-13
  */
-public interface RpcInvoker extends IPacketHandler {
+public interface RemoteInvoker extends IPacketHandler {
 
 	/**
 	 * Invoke the methods in the client, send packet data and receive response.

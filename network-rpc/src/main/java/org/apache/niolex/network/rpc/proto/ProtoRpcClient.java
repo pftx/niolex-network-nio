@@ -21,8 +21,8 @@ import java.lang.reflect.Type;
 
 import org.apache.niolex.commons.seri.ProtoUtil;
 import org.apache.niolex.network.IClient;
+import org.apache.niolex.network.rpc.RemoteInvoker;
 import org.apache.niolex.network.rpc.RpcClient;
-import org.apache.niolex.network.rpc.RpcInvoker;
 
 /**
  * Using Google Protocol Buffer to serialize data.
@@ -38,7 +38,7 @@ public class ProtoRpcClient extends RpcClient {
 	 * @param client
 	 * @param invoker
 	 */
-	public ProtoRpcClient(IClient client, RpcInvoker invoker) {
+	public ProtoRpcClient(IClient client, RemoteInvoker invoker) {
 		super(client, invoker);
 	}
 

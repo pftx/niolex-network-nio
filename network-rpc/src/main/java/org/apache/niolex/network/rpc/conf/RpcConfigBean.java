@@ -19,7 +19,8 @@ package org.apache.niolex.network.rpc.conf;
 
 import java.util.Arrays;
 
-import org.apache.niolex.network.rpc.Constants;
+import org.apache.niolex.network.rpc.client.Constants;
+
 
 
 /**

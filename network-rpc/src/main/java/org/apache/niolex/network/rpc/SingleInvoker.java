@@ -25,11 +25,12 @@ import org.apache.niolex.network.PacketData;
  * This invoker can only handle invoke serially.
  * Please use this invoker with SocketClient only.
  *
+ * @see org.apache.niolex.network.client.SocketClient
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
  * @Date: 2012-6-13
  */
-public class SingleInvoker implements RpcInvoker {
+public class SingleInvoker implements RemoteInvoker {
 	private PacketData res;
 
 	/**
@@ -52,7 +53,7 @@ public class SingleInvoker implements RpcInvoker {
 
 	/**
 	 * Override super method
-	 * @see org.apache.niolex.network.rpc.RpcInvoker#invoke(org.apache.niolex.network.PacketData, org.apache.niolex.network.IClient)
+	 * @see org.apache.niolex.network.rpc.RemoteInvoker#invoke(org.apache.niolex.network.PacketData, org.apache.niolex.network.IClient)
 	 */
 	@Override
 	public PacketData invoke(PacketData packet, IClient client) {

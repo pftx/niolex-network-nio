@@ -24,7 +24,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Configure the annotated interface as an Rpc configed interface.
+ * Configure the annotated interface with the group name.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version @version@, $Date: 2010-10-18$
@@ -35,5 +35,10 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE})
 public @interface RpcConfig {
+
+	/**
+	 * @return The group name used to config the annotated interface
+	 */
     String value();
+
 }

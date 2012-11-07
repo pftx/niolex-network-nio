@@ -23,7 +23,7 @@ import static org.junit.Assert.fail;
 import java.util.List;
 
 import org.apache.niolex.network.rpc.RpcConfig;
-import org.apache.niolex.network.rpc.RpcMethod;
+import org.apache.niolex.network.rpc.anno.RpcMethod;
 import org.apache.niolex.network.rpc.conf.BaseConfiger;
 import org.apache.niolex.network.rpc.conf.RpcConfiger;
 import org.apache.niolex.network.rpc.json.JsonRpcBuilder;

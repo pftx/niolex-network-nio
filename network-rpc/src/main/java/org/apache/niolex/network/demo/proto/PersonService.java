@@ -19,7 +19,7 @@ package org.apache.niolex.network.demo.proto;
 
 import org.apache.niolex.network.demo.proto.PersonProtos.Person;
 import org.apache.niolex.network.demo.proto.PersonProtos.Person.PhoneNumber;
-import org.apache.niolex.network.rpc.RpcMethod;
+import org.apache.niolex.network.rpc.anno.RpcMethod;
 
 /**
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>

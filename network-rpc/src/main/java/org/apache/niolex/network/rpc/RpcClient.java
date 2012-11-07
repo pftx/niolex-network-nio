@@ -32,6 +32,7 @@ import org.apache.niolex.network.IClient;
 import org.apache.niolex.network.IPacketHandler;
 import org.apache.niolex.network.IPacketWriter;
 import org.apache.niolex.network.PacketData;
+import org.apache.niolex.network.rpc.anno.RpcMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,28 +43,18 @@ import org.slf4j.LoggerFactory;
  * @version 1.0.0
  * @Date: 2012-6-1
  */
-public abstract class RpcClient implements InvocationHandler, IPacketHandler {
+public class RpcClient implements InvocationHandler, IPacketHandler {
 	private static final Logger LOG = LoggerFactory.getLogger(RpcClient.class);
-
-	/**
-	 * The PacketClient to send and receive Rpc packets.
-	 */
-	private IClient client;
-
-	/**
-	 * The RPC invoker to do the real method invoke.
-	 */
-	private RpcInvoker invoker;
 
 	/**
 	 * Save the execution map.
 	 */
-	private Map<Method, Short> executeMap = new HashMap<Method, Short>();
+	private final Map<Method, Short> executeMap = new HashMap<Method, Short>();
 
 	/**
 	 * The serial generator.
 	 */
-	private AtomicInteger auto;
+	private final AtomicInteger auto = new AtomicInteger(1);
 
 	/**
 	 * The time to sleep between retry.
@@ -76,12 +67,27 @@ public abstract class RpcClient implements InvocationHandler, IPacketHandler {
 	private int connectRetryTimes = Config.RPC_CONNECT_RETRY_TIMES;
 
 	/**
+	 * The PacketClient to send and receive Rpc packets.
+	 */
+	private IClient client;
+
+	/**
+	 * The RPC invoker to do the real method invoke.
+	 */
+	private RemoteInvoker invoker;
+
+	/**
+	 * The data translator.
+	 */
+	private IConverter converter;
+
+	/**
 	 * The status of this Client.
 	 */
 	private Status connStatus;
 
 	/**
-	 * The connections status of this RpcClient.
+	 * The connection status of this RpcClient.
 	 *
 	 * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
 	 * @version 1.0.0
@@ -92,24 +98,24 @@ public abstract class RpcClient implements InvocationHandler, IPacketHandler {
 	}
 
 	/**
-	 * Create a RpcClient with this PacketClient as the backed communication tool.
+	 * Create a RpcClient with this client as the backed communication tool.
 	 * The PacketClient will be managed internally, please use this.connect() to connect.
 	 *
-	 * Constructor
 	 * @param client
 	 * @param invoker
+	 * @param converter
 	 */
-	public RpcClient(IClient client, RpcInvoker invoker) {
+	public RpcClient(IClient client, RemoteInvoker invoker, IConverter converter) {
 		super();
 		this.client = client;
 		this.invoker = invoker;
+		this.converter = converter;
 		this.client.setPacketHandler(this);
-		this.auto = new AtomicInteger(1);
 		this.connStatus = Status.INNITIAL;
 	}
 
 	/**
-	 * Connect the backed communication PacketClient, and set the internal status.
+	 * Connect the backed communication client, and set the internal status.
 	 * @throws IOException
 	 */
 	public void connect() throws IOException {
@@ -118,7 +124,7 @@ public abstract class RpcClient implements InvocationHandler, IPacketHandler {
 	}
 
 	/**
-	 * Stop this client, and stop the backed communication PacketClient.
+	 * Stop this client, and stop the backed communication client.
 	 */
 	public void stop() {
 		this.connStatus = Status.CLOSED;
@@ -127,8 +133,9 @@ public abstract class RpcClient implements InvocationHandler, IPacketHandler {
 
 	/**
 	 * Get the Rpc Service Client Stub.
-	 * @param c The interface you want to invoke.
-	 * @return
+	 *
+	 * @param c The interface you want to have stub.
+	 * @return the stub
 	 */
 	@SuppressWarnings("unchecked")
     public <T> T getService(Class<T> c) {
@@ -167,25 +174,32 @@ public abstract class RpcClient implements InvocationHandler, IPacketHandler {
 			if (args == null || args.length == 0) {
 				arr = new byte[0];
 			} else {
-				arr = serializeParams(args);
+				arr = converter.serializeParams(args);
 			}
 			// 2. Create PacketData
 			PacketData rc = new PacketData(rei, arr);
 			// 3. Generate serial number
 			serialPacket(rc);
 
-			// 4. Invoke rpc
+			// 4. Invoke, send packet to server and wait for result
 			PacketData sc = invoker.invoke(rc, client);
 
 			// 5. Process result.
 			if (sc == null) {
 				checkStatus();
-				rep = new RpcException("Timeout for this remote procedure call.", RpcException.Type.TIMEOUT, null);
+				rep = new RpcException("Timeout for this remote procedure call.",
+						RpcException.Type.TIMEOUT, null);
 				throw rep;
 			} else {
 				int exp = sc.getReserved() - rc.getReserved();
-				Object ret = prepareReturn(sc.getData(), method.getGenericReturnType(), exp);
+				boolean isEx = false;
+				// 127 + 1 = -128
+				// -128 - 127 = -255
 				if (exp == 1 || exp == -255) {
+					isEx = true;
+				}
+				Object ret = prepareReturn(sc.getData(), method.getGenericReturnType(), isEx);
+				if (isEx) {
 					rep = (RpcException) ret;
 					throw rep;
 				}
@@ -200,6 +214,8 @@ public abstract class RpcClient implements InvocationHandler, IPacketHandler {
 
 	/**
 	 * Generate serial number
+	 * The serial number will be 1, 3, 5, ...
+	 *
 	 * @param rc
 	 */
 	private void serialPacket(PacketData rc) {
@@ -208,17 +224,56 @@ public abstract class RpcClient implements InvocationHandler, IPacketHandler {
 		rc.setVersion((byte) (seri >> 8));
 	}
 
+	/**
+	 * Set the Rpc Configs, this method will parse all the configurations and generate execute map.
+	 * @param interfs
+	 */
+	public void addInferface(Class<?> interfs) {
+		Method[] arr = MethodUtil.getMethods(interfs);
+		for (Method m : arr) {
+			if (m.isAnnotationPresent(RpcMethod.class)) {
+				RpcMethod rp = m.getAnnotation(RpcMethod.class);
+				Short rei = executeMap.put(m, rp.value());
+				if (rei != null) {
+					LOG.warn("Duplicate configuration for code: {}", rp.value());
+				}
+			}
+		} // End of arr
+	}
+
+	/**
+	 * De-serialize returned byte array into objects.
+	 * @param ret
+	 * @param type
+	 * @param isEx
+	 * @return
+	 * @throws Exception
+	 */
+	protected Object prepareReturn(byte[] ret, Type type, boolean isEx) throws Exception {
+		if (isEx) {
+			type = RpcException.class;
+		} else if (type == null || type.toString().equalsIgnoreCase("void")) {
+			return null;
+		}
+		return converter.prepareReturn(ret, type);
+	}
+
 	@Override
 	public void handleRead(PacketData sc, IPacketWriter wt) {
 		this.invoker.handleRead(sc, wt);
 	}
 
+	/**
+	 * We will retry to connect in this method.
+	 *
+	 * Override super method
+	 * @see org.apache.niolex.network.IPacketHandler#handleClose(org.apache.niolex.network.IPacketWriter)
+	 */
 	@Override
 	public void handleClose(IPacketWriter wt) {
 		if (this.connStatus == Status.CLOSED) {
 			return;
 		}
-		// We will retry to connect in this method.
 		client.stop();
 		if (!retryConnect()) {
 			LOG.error("Exception occured when try to re-connect to server.");
@@ -228,6 +283,11 @@ public abstract class RpcClient implements InvocationHandler, IPacketHandler {
 		}
 	}
 
+	/**
+	 * Try to re-connect to server.
+	 *
+	 * @return true if connected
+	 */
 	private boolean retryConnect() {
 		for (int i = 0; i < connectRetryTimes; ++i) {
 			try {
@@ -266,56 +326,5 @@ public abstract class RpcClient implements InvocationHandler, IPacketHandler {
 	public void setConnectTimeout(int timeout) {
 		this.client.setConnectTimeout(timeout);
 	}
-
-	/**
-	 * Set the Rpc Configs, this method will parse all the configurations and generate execute map.
-	 * @param interfs
-	 */
-	public void addInferface(Class<?> interfs) {
-		Method[] arr = MethodUtil.getMethods(interfs);
-		for (Method m : arr) {
-			if (m.isAnnotationPresent(RpcMethod.class)) {
-				RpcMethod rp = m.getAnnotation(RpcMethod.class);
-				Short rei = executeMap.put(m, rp.value());
-				if (rei != null) {
-					LOG.warn("Duplicate configuration for code: {}", rp.value());
-				}
-			}
-		} // End of arr
-	}
-
-	/**
-	 * De-serialize returned byte array into objects.
-	 * @param ret
-	 * @param type
-	 * @param exp 0 for returned objects, 1 for RpcException.
-	 * @return
-	 * @throws Exception
-	 */
-	protected Object prepareReturn(byte[] ret, Type type, int exp) throws Exception {
-		if (exp == 1) {
-			type = RpcException.class;
-		} else if (type == null || type.toString().equalsIgnoreCase("void")) {
-			return null;
-		}
-		return prepareReturn(ret, type);
-	}
-
-	/**
-	 * Serialize arguments objects into byte array.
-	 * @param args
-	 * @return
-	 * @throws Exception
-	 */
-	protected abstract byte[] serializeParams(Object[] args) throws Exception;
-
-	/**
-	 * De-serialize returned byte array into objects.
-	 * @param ret
-	 * @param type
-	 * @return
-	 * @throws Exception
-	 */
-	protected abstract Object prepareReturn(byte[] ret, Type type) throws Exception;
 
 }

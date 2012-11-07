@@ -19,6 +19,7 @@ package org.apache.niolex.network.rpc;
 
 /**
  * The Rpc configure class. Configure with an interface and a implementation target.
+ * This is for server side usage.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
@@ -35,6 +36,25 @@ public class ConfigItem {
 	 * The implementation target.
 	 */
 	private Object target;
+
+	/**
+	 * Create an empty object.
+	 */
+	public ConfigItem() {
+		super();
+	}
+
+	/**
+	 * Create an item with specified parameters.
+	 *
+	 * @param interfaces
+	 * @param target
+	 */
+	public ConfigItem(Class<?> interfaces, Object target) {
+		super();
+		this.interfaces = interfaces;
+		this.target = target;
+	}
 
 	public Class<?> getInterface() {
 		return interfaces;

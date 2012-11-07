@@ -15,13 +15,15 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.niolex.network.rpc;
+package org.apache.niolex.network.rpc.client;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 import java.lang.reflect.Method;
 
+import org.apache.niolex.network.rpc.RpcClient;
+import org.apache.niolex.network.rpc.client.RpcConnectionHandler;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -50,7 +52,7 @@ public class RpcConnectionHandlerTest {
 	}
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.rpc.RpcConnectionHandler#invoke(java.lang.Object, java.lang.reflect.Method, java.lang.Object[])}.
+	 * Test method for {@link org.apache.niolex.network.rpc.client.RpcConnectionHandler#invoke(java.lang.Object, java.lang.reflect.Method, java.lang.Object[])}.
 	 * @throws Throwable
 	 */
 	@Test
@@ -60,7 +62,7 @@ public class RpcConnectionHandlerTest {
 	}
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.rpc.RpcConnectionHandler#getServiceUrl()}.
+	 * Test method for {@link org.apache.niolex.network.rpc.client.RpcConnectionHandler#getServiceUrl()}.
 	 */
 	@Test
 	public final void testGetServiceUrl() {
@@ -68,7 +70,7 @@ public class RpcConnectionHandlerTest {
 	}
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.rpc.RpcConnectionHandler#isReady()}.
+	 * Test method for {@link org.apache.niolex.network.rpc.client.RpcConnectionHandler#isReady()}.
 	 */
 	@Test
 	public final void testIsReady() {
@@ -76,7 +78,7 @@ public class RpcConnectionHandlerTest {
 	}
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.rpc.RpcConnectionHandler#notReady(java.io.IOException)}.
+	 * Test method for {@link org.apache.niolex.network.rpc.client.RpcConnectionHandler#notReady(java.io.IOException)}.
 	 */
 	@Test
 	public final void testNotReady() {
@@ -84,7 +86,7 @@ public class RpcConnectionHandlerTest {
 	}
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.rpc.RpcConnectionHandler#getHandler()}.
+	 * Test method for {@link org.apache.niolex.network.rpc.client.RpcConnectionHandler#getHandler()}.
 	 */
 	@Test
 	public final void testGetHandler() {

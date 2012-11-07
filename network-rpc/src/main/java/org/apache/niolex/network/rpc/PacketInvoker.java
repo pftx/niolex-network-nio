@@ -17,24 +17,27 @@
  */
 package org.apache.niolex.network.rpc;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
+import org.apache.niolex.commons.concurrent.Blocker;
+import org.apache.niolex.commons.concurrent.WaitOn;
 import org.apache.niolex.network.Config;
 import org.apache.niolex.network.IClient;
 import org.apache.niolex.network.IPacketWriter;
 import org.apache.niolex.network.PacketData;
+import org.apache.niolex.network.rpc.util.RpcUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * The packet invoker which is able to handle multiple threads.
+ * Use this invoker along with the PacketClient
+ *
+ * @see org.apache.niolex.network.client.PacketClient
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
  * @Date: 2012-6-13
  */
-public class PacketInvoker implements RpcInvoker {
+public class PacketInvoker implements RemoteInvoker {
 	private static final Logger LOG = LoggerFactory.getLogger(PacketInvoker.class);
 
 
@@ -44,60 +47,47 @@ public class PacketInvoker implements RpcInvoker {
 	private int rpcHandleTimeout = Config.RPC_HANDLE_TIMEOUT;
 
 	/**
-	 * The current waiting map.
+	 * The current waiting blocker.
 	 */
-	private Map<Integer, RpcWaitItem> waitMap = new ConcurrentHashMap<Integer, RpcWaitItem>();
+	private Blocker<PacketData> blocker = new Blocker<PacketData>();
 
 	/**
 	 * Override super method
 	 *
-	 * @see org.apache.niolex.network.rpc.RpcInvoker#invoke(org.apache.niolex.network.PacketData,
+	 * @see org.apache.niolex.network.rpc.RemoteInvoker#invoke(org.apache.niolex.network.PacketData,
 	 *      org.apache.niolex.network.IClient)
 	 */
 	@Override
 	public PacketData invoke(PacketData rc, IClient client) {
-		// 4. Set up the waiting information
-		RpcWaitItem wi = new RpcWaitItem();
-		wi.setThread(Thread.currentThread());
+		// 1. Set up the waiting information
 		Integer key = RpcUtil.generateKey(rc);
-		waitMap.put(key, wi);
-		// 5. Send request to remote server
+		WaitOn<PacketData> waitOn = blocker.initWait(key);
+		// 2. Send request to remote server
 		client.handleWrite(rc);
-		// 6. Wait for result.
-		long in = System.currentTimeMillis();
-		while (System.currentTimeMillis() - in < rpcHandleTimeout) {
-			try {
-				Thread.sleep(1000);
-			} catch (InterruptedException e) {
-				// Do not care.
-			}
-			if (wi.getReceived() != null) {
-				break;
-			}
+		// 3. Wait for result.
+		PacketData res = null;
+		try {
+			res = waitOn.waitForResult(rpcHandleTimeout);
+		} catch (Exception e) {}
+		if (res == null) {
+			// Release the key to prevent memory leak.
+			blocker.release(key, rc);
 		}
-		// 7. Clean the map.
-		waitMap.remove(key);
-		return wi.getReceived();
+		return res;
 	}
 
 	@Override
 	public void handleRead(PacketData sc, IPacketWriter wt) {
-		int key = RpcUtil.generateKey(sc);
-		RpcWaitItem wi = waitMap.get(key);
-		if (wi == null) {
+		Integer key = RpcUtil.generateKey(sc);
+		boolean isOk = blocker.release(key, sc);
+		if (!isOk) {
 			LOG.warn("Packet received for key [{}] have no handler, just ignored.", key);
-		} else {
-			waitMap.remove(key);
-			wi.setReceived(sc);
-			wi.getThread().interrupt();
 		}
 	}
 
 	@Override
 	public void handleClose(IPacketWriter wt) {
-		for (RpcWaitItem wi : waitMap.values()) {
-			wi.getThread().interrupt();
-		}
+		blocker.releaseAll();
 	}
 
 

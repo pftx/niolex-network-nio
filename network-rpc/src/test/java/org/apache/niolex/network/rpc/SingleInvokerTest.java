@@ -21,6 +21,7 @@ import static org.mockito.Mockito.mock;
 
 import org.apache.niolex.network.IClient;
 import org.apache.niolex.network.PacketData;
+import org.apache.niolex.network.rpc.SingleInvoker;
 import org.junit.Test;
 
 /**

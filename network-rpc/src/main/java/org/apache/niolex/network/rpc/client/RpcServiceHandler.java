@@ -15,7 +15,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.niolex.network.rpc;
+package org.apache.niolex.network.rpc.client;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
@@ -50,7 +50,7 @@ public class RpcServiceHandler implements IServiceHandler {
 
 	/**
 	 * This is the override of super method.
-	 * @see org.apache.niolex.network.rpc.IServiceHandler#getServiceUrl()
+	 * @see org.apache.niolex.network.rpc.client.IServiceHandler#getServiceUrl()
 	 */
 	@Override
 	public String getServiceUrl() {
@@ -59,7 +59,7 @@ public class RpcServiceHandler implements IServiceHandler {
 
 	/**
 	 * This is the override of super method.
-	 * @see org.apache.niolex.network.rpc.IServiceHandler#invoke(java.lang.Object, java.lang.reflect.Method, java.lang.Object[])
+	 * @see org.apache.niolex.network.rpc.client.IServiceHandler#invoke(java.lang.Object, java.lang.reflect.Method, java.lang.Object[])
 	 */
 	@Override
 	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
@@ -68,7 +68,7 @@ public class RpcServiceHandler implements IServiceHandler {
 
 	/**
 	 * This is the override of super method.
-	 * @see org.apache.niolex.network.rpc.IServiceHandler#isReady()
+	 * @see org.apache.niolex.network.rpc.client.IServiceHandler#isReady()
 	 */
 	@Override
 	public boolean isReady() {
@@ -80,7 +80,7 @@ public class RpcServiceHandler implements IServiceHandler {
 
 	/**
 	 * This is the override of super method.
-	 * @see org.apache.niolex.network.rpc.IServiceHandler#notReady(java.io.IOException)
+	 * @see org.apache.niolex.network.rpc.client.IServiceHandler#notReady(java.io.IOException)
 	 */
 	@Override
 	public void notReady(IOException ioe) {
@@ -90,7 +90,7 @@ public class RpcServiceHandler implements IServiceHandler {
 
 	/**
 	 * This is the override of super method.
-	 * @see org.apache.niolex.network.rpc.IServiceHandler#toString()
+	 * @see org.apache.niolex.network.rpc.client.IServiceHandler#toString()
 	 */
 	@Override
 	public String toString() {
@@ -100,7 +100,7 @@ public class RpcServiceHandler implements IServiceHandler {
 	/**
 	 * Get the internal handler.
 	 * This is the override of super method.
-	 * @see org.apache.niolex.network.rpc.IServiceHandler#getHandler()
+	 * @see org.apache.niolex.network.rpc.client.IServiceHandler#getHandler()
 	 */
 	@Override
 	public InvocationHandler getHandler() {

@@ -19,7 +19,7 @@ package org.apache.niolex.network.demo.json;
 
 import java.util.List;
 
-import org.apache.niolex.network.rpc.RpcMethod;
+import org.apache.niolex.network.rpc.anno.RpcMethod;
 
 /**
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>

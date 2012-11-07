@@ -15,7 +15,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.niolex.network.rpc;
+package org.apache.niolex.network.rpc.client;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
@@ -25,6 +25,8 @@ import java.util.List;
 
 import junit.framework.Assert;
 
+import org.apache.niolex.network.rpc.client.IServiceHandler;
+import org.apache.niolex.network.rpc.client.RpcServiceHandler;
 import org.junit.Test;
 
 /**

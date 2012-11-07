@@ -21,8 +21,8 @@ import java.lang.reflect.Type;
 
 import org.apache.niolex.commons.seri.ProtoStuffUtil;
 import org.apache.niolex.network.IClient;
+import org.apache.niolex.network.rpc.RemoteInvoker;
 import org.apache.niolex.network.rpc.RpcClient;
-import org.apache.niolex.network.rpc.RpcInvoker;
 
 /**
  * Using god like man protostuff protocol to serialize data.
@@ -39,7 +39,7 @@ public class ProtoStuRpcClient extends RpcClient {
 	 * @param client
 	 * @param invoker
 	 */
-	public ProtoStuRpcClient(IClient client, RpcInvoker invoker) {
+	public ProtoStuRpcClient(IClient client, RemoteInvoker invoker) {
 		super(client, invoker);
 	}
 

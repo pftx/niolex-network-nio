@@ -15,7 +15,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.niolex.network.rpc;
+package org.apache.niolex.network.rpc.util;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -29,6 +29,7 @@ import org.apache.niolex.commons.compress.JacksonUtil;
 import org.apache.niolex.commons.test.Benchmark;
 import org.apache.niolex.commons.test.Benchmark.Bean;
 import org.apache.niolex.network.PacketData;
+import org.apache.niolex.network.rpc.util.RpcUtil;
 import org.junit.Test;
 
 /**
@@ -39,7 +40,7 @@ import org.junit.Test;
 public class RpcUtilTest {
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.rpc.RpcUtil#prepareParams(byte[], java.lang.reflect.Type[])}.
+	 * Test method for {@link org.apache.niolex.network.rpc.util.RpcUtil#prepareParams(byte[], java.lang.reflect.Type[])}.
 	 */
 	@Test
 	public void testPrepareParams() throws Throwable {
@@ -66,7 +67,7 @@ public class RpcUtilTest {
 	}
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.rpc.RpcUtil#generateKey(org.apache.niolex.network.PacketData)}.
+	 * Test method for {@link org.apache.niolex.network.rpc.util.RpcUtil#generateKey(org.apache.niolex.network.PacketData)}.
 	 */
 	@Test
 	public void testGenerateKeyPacketData() {

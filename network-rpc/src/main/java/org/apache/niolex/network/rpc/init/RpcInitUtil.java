@@ -21,10 +21,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.niolex.network.rpc.IServiceHandler;
-import org.apache.niolex.network.rpc.RetryHandler;
 import org.apache.niolex.network.rpc.RpcClient;
-import org.apache.niolex.network.rpc.RpcConnectionHandler;
+import org.apache.niolex.network.rpc.client.IServiceHandler;
+import org.apache.niolex.network.rpc.client.RetryHandler;
+import org.apache.niolex.network.rpc.client.RpcConnectionHandler;
 import org.apache.niolex.network.rpc.conf.RpcConfigBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -30,6 +30,8 @@ import org.apache.niolex.network.Config;
 import org.apache.niolex.network.IPacketHandler;
 import org.apache.niolex.network.IPacketWriter;
 import org.apache.niolex.network.PacketData;
+import org.apache.niolex.network.rpc.anno.RpcMethod;
+import org.apache.niolex.network.rpc.util.RpcUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,19 +42,24 @@ import org.slf4j.LoggerFactory;
  * @version 1.0.0
  * @Date: 2012-6-1
  */
-public abstract class RpcPacketHandler implements IPacketHandler {
+public class RpcPacketHandler implements IPacketHandler {
 	protected static final Logger LOG = LoggerFactory.getLogger(RpcPacketHandler.class);
 
 	// The Thread pool size, default to 20, which is the majority configurations on servers.
-    private ExecutorService tPool;
-	private Map<Short, RpcExecuteItem> executeMap = new HashMap<Short, RpcExecuteItem>();
+    private final ExecutorService tPool;
+
+    // Save all the mapping between packet code and real method instance.
+	private final Map<Short, RpcExecuteItem> executeMap = new HashMap<Short, RpcExecuteItem>();
+
 	// The current queue size.
-	private AtomicInteger queueSize = new AtomicInteger(0);
+	private final AtomicInteger queueSize = new AtomicInteger(0);
+
+	// The data translator.
+	private IConverter converter;
 
 
 	/**
 	 * Create an RpcPacketHandler with default pool size.
-	 * Constructor
 	 */
 	public RpcPacketHandler() {
 		int threadsNumber = Runtime.getRuntime().availableProcessors() * 5;
@@ -65,7 +72,6 @@ public abstract class RpcPacketHandler implements IPacketHandler {
 
 	/**
 	 * Create an RpcPacketHandler with the specified pool size.
-	 * Constructor
 	 * @param threadsNumber
 	 */
 	public RpcPacketHandler(int threadsNumber) {
@@ -94,7 +100,6 @@ public abstract class RpcPacketHandler implements IPacketHandler {
 			rep = new RpcException("The method you want to invoke doesn't exist.",
 					RpcException.Type.METHOD_NOT_FOUND, null);
 			handleReturn(sc, wt, rep, 1);
-			return;
 		}
 	}
 
@@ -128,7 +133,8 @@ public abstract class RpcPacketHandler implements IPacketHandler {
 			try {
 				execute();
 			} finally {
-				LOG.debug("Packet handled. key {}, queue size {}.", RpcUtil.generateKey(sc), queueSize.decrementAndGet());
+				LOG.debug("Packet handled. key {}, queue size {}.", RpcUtil.generateKey(sc),
+						queueSize.decrementAndGet());
 			}
 		}
 
@@ -138,7 +144,7 @@ public abstract class RpcPacketHandler implements IPacketHandler {
 			try {
 				Type[] generic = method.getGenericParameterTypes();
 				if (generic != null && generic.length > 0) {
-					args = prepareParams(sc.getData(), generic);
+					args = converter.prepareParams(sc.getData(), generic);
 				}
 			} catch (Exception e1) {
 				rep = new RpcException("Error occured when prepare params.",
@@ -153,12 +159,9 @@ public abstract class RpcPacketHandler implements IPacketHandler {
 				rep = new RpcException("Error occured when invoke method.",
 						RpcException.Type.ERROR_INVOKE, e1);
 				handleReturn(sc, wt, rep, 1);
-				return;
 			}
 		}
-
-
-	}
+	}// End of RpcExecute
 
 	/**
 	 * Handle how to generate return data and send them to client.
@@ -174,7 +177,7 @@ public abstract class RpcPacketHandler implements IPacketHandler {
 			if (data == null) {
 				arr = new byte[0];
 			} else {
-				arr = serializeReturn(data);
+				arr = converter.serializeReturn(data);
 			}
 			PacketData rc = new PacketData(sc.getCode(), arr);
 			rc.setReserved((byte) (sc.getReserved() + exception));
@@ -191,11 +194,16 @@ public abstract class RpcPacketHandler implements IPacketHandler {
 	 */
 	@Override
 	public void handleClose(IPacketWriter wt) {
-		// Error is not a big deal.
+		/**
+		 * Error is not a big deal.
+		 * Those methods not finished will still finish, but client can not get their answers.
+		 */
 	}
 
 	/**
 	 * Set the Rpc Configs, this method will parse all the configurations and generate execute map.
+	 * One can call this method repeatedly.
+	 *
 	 * @param confs
 	 */
 	public void setRpcConfigs(ConfigItem[] confs) {
@@ -217,24 +225,21 @@ public abstract class RpcPacketHandler implements IPacketHandler {
 	}
 
 	/**
-	 * Read parameters from the data.
-	 * generic can not be null, we already checked.
+	 * Get the number of methods invocations we are handling currently.
 	 *
-	 * @param data
-	 * @param generic
 	 * @return
-	 * @throws Exception
 	 */
-	protected abstract Object[] prepareParams(byte[] data, Type[] generic) throws Exception;
+	public int getQueueSize() {
+		return queueSize.get();
+	}
 
 	/**
-	 * Serialize returned object into byte array.
-	 * ret can not be null, we already checked.
+	 * Set the converter to translate data.
 	 *
-	 * @param ret
-	 * @return
-	 * @throws Exception
+	 * @param converter
 	 */
-	protected abstract byte[] serializeReturn(Object ret) throws Exception;
+	public void setConverter(IConverter converter) {
+		this.converter = converter;
+	}
 
 }

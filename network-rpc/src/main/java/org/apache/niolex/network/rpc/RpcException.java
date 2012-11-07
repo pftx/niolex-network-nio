@@ -18,7 +18,7 @@
 package org.apache.niolex.network.rpc;
 
 /**
- * The Exception thrown in Rpc Packet Handler.
+ * The Base Exception thrown in this Rpc framework.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
@@ -48,8 +48,8 @@ public class RpcException extends RuntimeException {
 	/**
 	 * Create a RpcException with a message and a throwable.
 	 *
-	 * Constructor
 	 * @param message
+	 * @param type
 	 * @param cause
 	 */
 	public RpcException(String message, Type type, Throwable cause) {
