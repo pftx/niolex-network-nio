@@ -22,7 +22,7 @@ import static org.junit.Assert.assertEquals;
 import java.io.IOException;
 
 import org.apache.niolex.network.press.StuffPress;
-import org.apache.niolex.network.rpc.prosf.ProtoStuRpcClient;
+import org.apache.niolex.network.rpc.RpcClient;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -39,7 +39,7 @@ public class RpcServiceTest {
 	 */
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		StuffRpcServer.main(new String[] {"1", "1"});
+		StuffRpcServer.main(new String[] {"1", "3"});
 	}
 
 	/**
@@ -56,7 +56,7 @@ public class RpcServiceTest {
 	 */
 	@Test
 	public void testAdd() throws IOException {
-		ProtoStuRpcClient scli = StuffPress.create();
+		RpcClient scli = StuffPress.create();
 		RpcService r = scli.getService(RpcService.class);
 		IntArray aa = new IntArray();
 		aa.arr = new int[] {3, 4, 5, 6, 7, 8, 9};
@@ -71,7 +71,7 @@ public class RpcServiceTest {
 	 */
 	@Test
 	public void testSize() throws IOException {
-		ProtoStuRpcClient scli = StuffPress.create();
+		RpcClient scli = StuffPress.create();
 		RpcService r = scli.getService(RpcService.class);
 		StringArray sarr = new StringArray();
 		sarr.arr = new String[] {"Hello ", " world.", " God."};

@@ -27,8 +27,9 @@ import org.apache.niolex.network.client.SocketClient;
 import org.apache.niolex.network.demo.stuff.IntArray;
 import org.apache.niolex.network.demo.stuff.RpcService;
 import org.apache.niolex.network.demo.stuff.StringArray;
+import org.apache.niolex.network.rpc.RpcClient;
 import org.apache.niolex.network.rpc.SingleInvoker;
-import org.apache.niolex.network.rpc.prosf.ProtoStuRpcClient;
+import org.apache.niolex.network.rpc.ser.ProtoStuffConverter;
 
 /**
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
@@ -54,7 +55,7 @@ public class StuffPress {
 			SHUFFLE_NUM = Integer.parseInt(args[2]);
         }
 		for (int i = 0; i < 10; ++i) {
-			ProtoStuRpcClient cli = create();
+			RpcClient cli = create();
 			RpcService service = cli.getService(RpcService.class);
 			Stop s = stopWatch.start();
 			IntArray aa = new IntArray();
@@ -69,7 +70,7 @@ public class StuffPress {
 		}
 		Thread[] ts = new Thread[THREAD_NUM];
 		for (int i = 0; i < THREAD_NUM; ++i) {
-			ProtoStuRpcClient cli = create();
+			RpcClient cli = create();
 			Rpc r = new Rpc(cli, "Hello " + i, " world.");
 			Thread t = new Thread(r);
 			t.start();
@@ -77,7 +78,7 @@ public class StuffPress {
 		}
 		stopWatch.begin(true);
 		for (int i = 0; i < SHUFFLE_NUM; ++i) {
-			ProtoStuRpcClient cli = create();
+			RpcClient cli = create();
 			RpcService service = cli.getService(RpcService.class);
 			Stop s = stopWatch.start();
 			StringArray sarr = new StringArray();
@@ -99,20 +100,19 @@ public class StuffPress {
 		System.out.println("Done..... error = " + ERROR_CNT.cnt());
 	}
 
-	public static ProtoStuRpcClient create() throws IOException {
-//		SocketClient c = new SocketClient(new InetSocketAddress("10.11.18.41", 8808));
+	public static RpcClient create() throws IOException {
 		SocketClient c = new SocketClient(new InetSocketAddress("localhost", 8808));
-		ProtoStuRpcClient client = new ProtoStuRpcClient(c, new SingleInvoker());
+		RpcClient client = new RpcClient(c, new SingleInvoker(), new ProtoStuffConverter());
 		client.connect();
 		return client;
 	}
 
 	public static class Rpc implements Runnable {
-		ProtoStuRpcClient cli;
+		RpcClient cli;
 		RpcService service;
 		String a = "hello ", b = "world!";
 
-		public Rpc(ProtoStuRpcClient cli, String a, String b) {
+		public Rpc(RpcClient cli, String a, String b) {
 			super();
 			this.cli = cli;
 			this.service = cli.getService(RpcService.class);
@@ -148,12 +148,8 @@ public class StuffPress {
 				sarr.arr = new String[] {a, b};
 				String c = service.concat(sarr);
 				s.stop();
-				if (c.length() > 64000) {
-					if (a.length() < b.length()) {
-						a = c;
-					} else {
-						b = c;
-					}
+				if (c.length() < 14) {
+					System.out.println("Out3 => " + k);
 				}
 				Thread.yield();
 			}

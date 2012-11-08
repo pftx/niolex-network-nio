@@ -44,7 +44,7 @@ public class DemoJsonRpcServerTest {
 		DemoJsonRpcClient c = new DemoJsonRpcClient();
 		SocketJsonRpcClient g = new SocketJsonRpcClient();
 		DemoJsonRpcServer s = new DemoJsonRpcServer();
-		DemoJsonRpcServer.main(null);
+		DemoJsonRpcServer.main(new String[] {"2", "4"});
 		DemoJsonRpcClient.main(null);
 		SocketJsonRpcClient.main(null);
 		DemoJsonRpcServer.stop();

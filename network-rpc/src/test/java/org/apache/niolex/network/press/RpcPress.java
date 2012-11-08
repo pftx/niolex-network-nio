@@ -25,10 +25,11 @@ import java.util.List;
 import org.apache.niolex.commons.test.Counter;
 import org.apache.niolex.commons.test.StopWatch;
 import org.apache.niolex.commons.test.StopWatch.Stop;
-import org.apache.niolex.network.cli.json.JsonRpcClient;
 import org.apache.niolex.network.client.SocketClient;
 import org.apache.niolex.network.demo.json.RpcService;
+import org.apache.niolex.network.rpc.RpcClient;
 import org.apache.niolex.network.rpc.SingleInvoker;
+import org.apache.niolex.network.rpc.ser.JsonConverter;
 
 /**
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
@@ -54,7 +55,7 @@ public class RpcPress {
 			SHUFFLE_NUM = Integer.parseInt(args[2]);
         }
 		for (int i = 0; i < 10; ++i) {
-			JsonRpcClient cli = create();
+			RpcClient cli = create();
 			RpcService service = cli.getService(RpcService.class);
 			Stop s = stopWatch.start();
 			String ok = service.concat("Hello " + i, " world.");
@@ -67,7 +68,7 @@ public class RpcPress {
 		}
 		Thread[] ts = new Thread[THREAD_NUM];
 		for (int i = 0; i < THREAD_NUM; ++i) {
-			JsonRpcClient cli = create();
+			RpcClient cli = create();
 			Rpc r = new Rpc(cli, "Hello " + i, " world.");
 			Thread t = new Thread(r);
 			t.start();
@@ -75,7 +76,7 @@ public class RpcPress {
 		}
 		stopWatch.begin(true);
 		for (int i = 0; i < SHUFFLE_NUM; ++i) {
-			JsonRpcClient cli = create();
+			RpcClient cli = create();
 			RpcService service = cli.getService(RpcService.class);
 			Stop s = stopWatch.start();
 			String ok = service.concat("Hello " + i, " world.");
@@ -95,20 +96,19 @@ public class RpcPress {
 		System.out.println("Done..... error = " + ERROR_CNT.cnt());
 	}
 
-	public static JsonRpcClient create() throws IOException {
-//		SocketClient c = new SocketClient(new InetSocketAddress("10.11.18.41", 8808));
+	public static RpcClient create() throws IOException {
 		SocketClient c = new SocketClient(new InetSocketAddress("localhost", 8808));
-		JsonRpcClient client = new JsonRpcClient(c, new SingleInvoker());
+		RpcClient client = new RpcClient(c, new SingleInvoker(), new JsonConverter());
 		client.connect();
 		return client;
 	}
 
 	public static class Rpc implements Runnable {
-		JsonRpcClient cli;
+		RpcClient cli;
 		RpcService service;
 		String a = "hello ", b = "world!";
 
-		public Rpc(JsonRpcClient cli, String a, String b) {
+		public Rpc(RpcClient cli, String a, String b) {
 			super();
 			this.cli = cli;
 			this.service = cli.getService(RpcService.class);
@@ -125,7 +125,7 @@ public class RpcPress {
 				s.stop();
 				if (k != 42 + i) {
 					ERROR_CNT.inc();
-					System.out.println("Out => " + k);
+					System.out.println("Out1 => " + k);
 				}
 				// -------------------------
 				List<String> args = new ArrayList<String>();
@@ -136,18 +136,14 @@ public class RpcPress {
 				s.stop();
 				if (k != 2) {
 					ERROR_CNT.inc();
-					System.out.println("Out => " + k);
+					System.out.println("Out2 => " + k);
 				}
 				// -------------------------
 				s = stopWatch.start();
 				String c = service.concat(a, b);
 				s.stop();
-				if (c.length() > 64000) {
-					if (a.length() < b.length()) {
-						a = c;
-					} else {
-						b = c;
-					}
+				if (c.length() < 14) {
+					System.out.println("Out3 => " + k);
 				}
 				Thread.yield();
 			}
