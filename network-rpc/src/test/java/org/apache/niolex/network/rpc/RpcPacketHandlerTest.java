@@ -20,14 +20,12 @@ package org.apache.niolex.network.rpc;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
-import java.lang.reflect.Type;
-
 import org.apache.niolex.network.CoreRunner;
 import org.apache.niolex.network.IPacketWriter;
 import org.apache.niolex.network.PacketData;
-import org.apache.niolex.network.cli.json.JsonRpcPacketHandler;
 import org.apache.niolex.network.demo.json.RpcService;
 import org.apache.niolex.network.demo.json.RpcServiceImpl;
+import org.apache.niolex.network.rpc.ser.JsonConverter;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
@@ -45,7 +43,7 @@ public class RpcPacketHandlerTest {
 	 */
 	@Test
 	public void testHandleRead() {
-		RpcPacketHandler rr = new JsonRpcPacketHandler();
+		RpcPacketHandler rr = new RpcPacketHandler(3, new JsonConverter());
 		IPacketWriter tt = mock(IPacketWriter.class);
 		rr.handleRead(new PacketData(5, new byte[5]), tt);
 		verify(tt).handleWrite(any(PacketData.class));
@@ -57,7 +55,7 @@ public class RpcPacketHandlerTest {
 	 */
 	@Test
 	public void setConfigs() {
-		RpcPacketHandler rr = new JsonRpcPacketHandler(20);
+		RpcPacketHandler rr = new RpcPacketHandler(3, new JsonConverter());
 		ConfigItem[] confs = new ConfigItem[2];
 		ConfigItem c = new ConfigItem();
 		c.setInterface(RpcService.class);
@@ -73,37 +71,26 @@ public class RpcPacketHandlerTest {
 		 */
 		@Test
 		public void testHandleClose() {
-			RpcPacketHandler rr = new JsonRpcPacketHandler();
+			RpcPacketHandler rr = new RpcPacketHandler();
 			rr.handleClose(null);
 		}
 
 	@Test
 	public void testHandleHB() {
-		RpcPacketHandler rr = new JsonRpcPacketHandler();
+		RpcPacketHandler rr = new RpcPacketHandler();
 		rr.handleRead(PacketData.getHeartBeatPacket(), null);
 	}
 
 	@Test
 	public void testHandleNe() {
-		RpcPacketHandler rr = new JsonRpcPacketHandler();
+		RpcPacketHandler rr = new RpcPacketHandler();
 		PacketData p = new PacketData(9, new byte[9]);
 		rr.handleRead(p, null);
 	}
 
 	@Test
 	public void testHandleNeg() throws Exception {
-		RpcPacketHandler rr = new RpcPacketHandler() {
-
-			@Override
-			protected Object[] prepareParams(byte[] data, Type[] generic) throws Exception {
-				throw new Exception("Test");
-			}
-
-			@Override
-			protected byte[] serializeReturn(Object ret) throws Exception {
-				return new byte[9];
-			}
-		};
+		RpcPacketHandler rr = new RpcPacketHandler();
 		ConfigItem[] confs = new ConfigItem[1];
 		ConfigItem c = new ConfigItem();
 		c.setInterface(RpcService.class);

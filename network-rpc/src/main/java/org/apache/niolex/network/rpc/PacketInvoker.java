@@ -76,6 +76,14 @@ public class PacketInvoker implements RemoteInvoker {
 		return res;
 	}
 
+	/**
+	 * Release the waiting thread.
+	 * If there is no thread waiting for this packet, we do a Warn log.
+	 *
+	 * Override super method
+	 * @see org.apache.niolex.network.IPacketHandler#handleRead(org.apache.niolex.network.PacketData,
+	 *  org.apache.niolex.network.IPacketWriter)
+	 */
 	@Override
 	public void handleRead(PacketData sc, IPacketWriter wt) {
 		Integer key = RpcUtil.generateKey(sc);
@@ -85,16 +93,32 @@ public class PacketInvoker implements RemoteInvoker {
 		}
 	}
 
+	/**
+	 * Release all the threads on hold.
+	 *
+	 * Override super method
+	 * @see org.apache.niolex.network.IPacketHandler#handleClose(org.apache.niolex.network.IPacketWriter)
+	 */
 	@Override
 	public void handleClose(IPacketWriter wt) {
 		blocker.releaseAll();
 	}
 
-
+	/**
+	 * Get the current timeout.
+	 *
+	 * @return
+	 */
 	public int getRpcHandleTimeout() {
 		return rpcHandleTimeout;
 	}
 
+	/**
+	 * The rpc holding thread will return null if the result is not ready after
+	 * this time.
+	 *
+	 * @param rpcHandleTimeout
+	 */
 	public void setRpcHandleTimeout(int rpcHandleTimeout) {
 		this.rpcHandleTimeout = rpcHandleTimeout;
 	}

@@ -23,12 +23,12 @@ import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
 
 import org.apache.niolex.commons.reflect.MethodUtil;
-import org.apache.niolex.network.cli.json.JsonRpcClient;
 import org.apache.niolex.network.client.PacketClient;
 import org.apache.niolex.network.demo.json.RpcService;
 import org.apache.niolex.network.rpc.PacketInvoker;
 import org.apache.niolex.network.rpc.RpcClient;
 import org.apache.niolex.network.rpc.RpcException;
+import org.apache.niolex.network.rpc.ser.JsonConverter;
 import org.junit.Test;
 
 /**
@@ -47,7 +47,7 @@ public class RpcClientTest {
 	@Test(expected = RpcException.class)
 	public void testInvoke_1() throws Throwable {
 		PacketClient pc = new PacketClient();
-		RpcClient rr = new JsonRpcClient(pc, new PacketInvoker());
+		RpcClient rr = new RpcClient(pc, new PacketInvoker(), new JsonConverter());
 		Method method = MethodUtil.getMethods(RpcService.class, "add")[0];
 		rr.invoke(rr, method, null);
 		fail("Not yet implemented");
@@ -62,7 +62,7 @@ public class RpcClientTest {
 	@Test(expected = RpcException.class)
 	public void testInvoke_2() throws Throwable {
 		PacketClient pc = new PacketClient();
-		RpcClient rr = new JsonRpcClient(pc, new PacketInvoker());
+		RpcClient rr = new RpcClient(pc, new PacketInvoker(), new JsonConverter());
 		rr.stop();
 		Method method = MethodUtil.getMethods(RpcService.class, "add")[0];
 		rr.invoke(rr, method, null);
@@ -72,7 +72,7 @@ public class RpcClientTest {
 	@Test
 	public void testHandleClose() throws Throwable {
 		PacketClient pc = new PacketClient(new InetSocketAddress("localhost", 8808));
-		RpcClient rr = new JsonRpcClient(pc, new PacketInvoker());
+		RpcClient rr = new RpcClient(pc, new PacketInvoker(), new JsonConverter());
 		rr.handleClose(pc);
 	}
 

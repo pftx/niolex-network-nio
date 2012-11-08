@@ -45,7 +45,7 @@ import org.slf4j.LoggerFactory;
 public class RpcPacketHandler implements IPacketHandler {
 	protected static final Logger LOG = LoggerFactory.getLogger(RpcPacketHandler.class);
 
-	// The Thread pool size, default to 20, which is the majority configurations on servers.
+	// The Thread pool size, default to 5 * CPU, which is the majority configurations on servers.
     private final ExecutorService tPool;
 
     // Save all the mapping between packet code and real method instance.
@@ -77,6 +77,18 @@ public class RpcPacketHandler implements IPacketHandler {
 	public RpcPacketHandler(int threadsNumber) {
 		super();
 		tPool = Executors.newFixedThreadPool(threadsNumber);
+		LOG.info("RpcPacketHandler started to work with {} threads.", threadsNumber);
+	}
+
+	/**
+	 * Create an RpcPacketHandler with the specified pool size & converter.
+	 * @param threadsNumber
+	 * @param converter
+	 */
+	public RpcPacketHandler(int threadsNumber, IConverter converter) {
+		super();
+		this.tPool = Executors.newFixedThreadPool(threadsNumber);
+		this.converter = converter;
 		LOG.info("RpcPacketHandler started to work with {} threads.", threadsNumber);
 	}
 
@@ -116,6 +128,14 @@ public class RpcPacketHandler implements IPacketHandler {
 		private PacketData sc;
 		private IPacketWriter wt;
 
+		/**
+		 * The only constructor.
+		 *
+		 * @param host
+		 * @param method
+		 * @param sc
+		 * @param wt
+		 */
 		public RpcExecute(Object host, Method method, PacketData sc, IPacketWriter wt) {
 			super();
 			this.host = host;
@@ -166,10 +186,10 @@ public class RpcPacketHandler implements IPacketHandler {
 	/**
 	 * Handle how to generate return data and send them to client.
 	 *
-	 * @param sc
-	 * @param wt
-	 * @param data
-	 * @param exception
+	 * @param sc the input packet
+	 * @param wt the packet writer
+	 * @param data the object want to serialize
+	 * @param exception 0 for result, 1 for exception
 	 */
 	private void handleReturn(PacketData sc, IPacketWriter wt, Object data, int exception) {
 		try {
@@ -196,7 +216,7 @@ public class RpcPacketHandler implements IPacketHandler {
 	public void handleClose(IPacketWriter wt) {
 		/**
 		 * Error is not a big deal.
-		 * Those methods not finished will still finish, but client can not get their answers.
+		 * Those methods not finished will still run, but client can not get their answers.
 		 */
 	}
 

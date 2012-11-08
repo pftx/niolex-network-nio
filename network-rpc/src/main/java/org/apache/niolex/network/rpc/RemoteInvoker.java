@@ -22,8 +22,8 @@ import org.apache.niolex.network.IPacketHandler;
 import org.apache.niolex.network.PacketData;
 
 /**
- * This interface send packets to RPC server using the client passed in, and wait for
- * results from server side.
+ * This interface control sending packets to RPC server using the client passed in,
+ * and wait for the results from server side.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
@@ -32,7 +32,8 @@ import org.apache.niolex.network.PacketData;
 public interface RemoteInvoker extends IPacketHandler {
 
 	/**
-	 * Invoke the methods in the client, send packet data and receive response.
+	 * Invoke the write methods in the client, send packet data to server
+	 * and wait for the response.
 	 *
 	 * @param packet
 	 * @param client

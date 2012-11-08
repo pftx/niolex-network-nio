@@ -46,7 +46,7 @@ public class RpcException extends RuntimeException {
 
 
 	/**
-	 * Create a RpcException with a message and a throwable.
+	 * Create a RpcException with a message, an exception type, and a throwable.
 	 *
 	 * @param message
 	 * @param type

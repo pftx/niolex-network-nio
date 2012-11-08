@@ -37,7 +37,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The based RpcClient, send and receive Rpc packets.
+ * The based RpcClient, send and receive Rpc packets, do client stub here too.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
@@ -69,17 +69,17 @@ public class RpcClient implements InvocationHandler, IPacketHandler {
 	/**
 	 * The PacketClient to send and receive Rpc packets.
 	 */
-	private IClient client;
+	private final IClient client;
 
 	/**
 	 * The RPC invoker to do the real method invoke.
 	 */
-	private RemoteInvoker invoker;
+	private final RemoteInvoker invoker;
 
 	/**
 	 * The data translator.
 	 */
-	private IConverter converter;
+	private final IConverter converter;
 
 	/**
 	 * The status of this Client.
@@ -101,9 +101,9 @@ public class RpcClient implements InvocationHandler, IPacketHandler {
 	 * Create a RpcClient with this client as the backed communication tool.
 	 * The PacketClient will be managed internally, please use this.connect() to connect.
 	 *
-	 * @param client
-	 * @param invoker
-	 * @param converter
+	 * @param client the backed communication tool
+	 * @param invoker use this to send packets to server and wait for response
+	 * @param converter use this to serialize data
 	 */
 	public RpcClient(IClient client, RemoteInvoker invoker, IConverter converter) {
 		super();
@@ -132,7 +132,7 @@ public class RpcClient implements InvocationHandler, IPacketHandler {
 	}
 
 	/**
-	 * Get the Rpc Service Client Stub.
+	 * Get the Rpc Service Client Stub powered by this rpc client.
 	 *
 	 * @param c The interface you want to have stub.
 	 * @return the stub
@@ -145,7 +145,7 @@ public class RpcClient implements InvocationHandler, IPacketHandler {
 	}
 
 	/**
-	 * Check the client status before doing remote call.
+	 * Check the client status before doing remote call and after response.
 	 */
 	private void checkStatus() {
 		RpcException rep = null;
@@ -243,6 +243,7 @@ public class RpcClient implements InvocationHandler, IPacketHandler {
 
 	/**
 	 * De-serialize returned byte array into objects.
+	 *
 	 * @param ret
 	 * @param type
 	 * @param isEx
@@ -258,13 +259,19 @@ public class RpcClient implements InvocationHandler, IPacketHandler {
 		return converter.prepareReturn(ret, type);
 	}
 
+	/**
+	 * We delegate all read packets to invoker.
+	 *
+	 * Override super method
+	 * @see org.apache.niolex.network.IPacketHandler#handleRead(org.apache.niolex.network.PacketData, org.apache.niolex.network.IPacketWriter)
+	 */
 	@Override
 	public void handleRead(PacketData sc, IPacketWriter wt) {
 		this.invoker.handleRead(sc, wt);
 	}
 
 	/**
-	 * We will retry to connect in this method.
+	 * We will retry to connect to server in this method.
 	 *
 	 * Override super method
 	 * @see org.apache.niolex.network.IPacketHandler#handleClose(org.apache.niolex.network.IPacketWriter)
@@ -276,7 +283,7 @@ public class RpcClient implements InvocationHandler, IPacketHandler {
 		}
 		client.stop();
 		if (!retryConnect()) {
-			LOG.error("Exception occured when try to re-connect to server.");
+			LOG.error("Exception occured when try to re-connect to server, RpcClient with stop.");
 			// Try to shutdown this Client, inform all the threads.
 			this.connStatus = Status.CLOSED;
 			this.invoker.handleClose(wt);
@@ -308,21 +315,38 @@ public class RpcClient implements InvocationHandler, IPacketHandler {
 	}
 
 	/**
-	 * Get Connection Status of this client.
+	 * Get Connection Status of this rpc client.
 	 * @return
 	 */
 	public Status getConnStatus() {
 		return connStatus;
 	}
 
+	/**
+	 * Set the time in milliseconds that client with sleep between retry to connect
+	 * to server.
+	 *
+	 * @param sleepBetweenRetryTime
+	 */
 	public void setSleepBetweenRetryTime(int sleepBetweenRetryTime) {
 		this.sleepBetweenRetryTime = sleepBetweenRetryTime;
 	}
 
+	/**
+	 * Set retry times.
+	 *
+	 * @param connectRetryTimes
+	 */
 	public void setConnectRetryTimes(int connectRetryTimes) {
 		this.connectRetryTimes = connectRetryTimes;
 	}
 
+	/**
+	 * Set the socket connect timeout.
+	 * This method must be called before {@link #connect()}
+	 *
+	 * @param timeout
+	 */
 	public void setConnectTimeout(int timeout) {
 		this.client.setConnectTimeout(timeout);
 	}
