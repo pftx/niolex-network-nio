@@ -4,7 +4,7 @@
     <!-- network-core log configuration file. upgrade to logback        -->
     <!--                                                                -->
     <!-- For professional support please see                            -->
-    <!--    http://www.qos.ch/shop/products/professionalSupport         -->
+    <!--    http://logback.qos.ch/manual/configuration.html             -->
     <!--                                                                -->
 
 <configuration debug="false">
@@ -40,6 +40,8 @@
             <level>INFO</level>
         </filter>
     </appender>
+
+    <logger name="org.apache.niolex.network.cli" level="DEBUG"/>
 
     <root level="INFO">
         <appender-ref ref="CONSOLE" />

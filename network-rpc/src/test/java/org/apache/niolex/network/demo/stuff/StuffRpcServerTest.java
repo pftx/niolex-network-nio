@@ -36,6 +36,7 @@ public class StuffRpcServerTest {
 	 */
 	@Test
 	public void testMain() throws IOException {
+		new DemoStuffRpcClient();
 		StuffRpcServer.main(null);
 		DemoStuffRpcClient.main(null);
 		StuffRpcServer.stop();

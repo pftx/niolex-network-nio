@@ -41,7 +41,7 @@ public class JsonRpcBuilderTest {
 	public void testGetInstanceString() throws IOException {
 		JsonRpcBuilder factory = new JsonRpcBuilder();
 		factory.setClientUrl("10.22.241.233:8808");
-		factory.setConnectTimeout(5000);
+		factory.setConnectTimeout(5000000);
 		factory.setRpcHandleTimeout(10000);
 		RpcClient cc = factory.build();
 		cc.connect();
