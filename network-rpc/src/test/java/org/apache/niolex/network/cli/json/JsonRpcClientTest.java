@@ -28,9 +28,11 @@ import org.apache.niolex.network.CoreRunner;
 import org.apache.niolex.network.client.PacketClient;
 import org.apache.niolex.network.demo.json.DemoJsonRpcServer;
 import org.apache.niolex.network.demo.json.RpcService;
+import org.apache.niolex.network.rpc.RpcClient;
 import org.apache.niolex.network.rpc.RpcClient.Status;
 import org.apache.niolex.network.rpc.PacketInvoker;
 import org.apache.niolex.network.rpc.RpcException;
+import org.apache.niolex.network.rpc.ser.JsonConverter;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -42,13 +44,13 @@ import org.junit.Test;
  */
 public class JsonRpcClientTest {
 	private static RpcService ser;
-	private static JsonRpcClient client;
+	private static RpcClient client;
 
 	@BeforeClass
 	public static void up() throws IOException {
 		DemoJsonRpcServer.main(null);
 		PacketClient c = new PacketClient(new InetSocketAddress("localhost", 8808));
-        client = new JsonRpcClient(c, new PacketInvoker());
+        client = new RpcClient(c, new PacketInvoker(), new JsonConverter());
         client.connect();
 
         ser = client.getService(RpcService.class);
