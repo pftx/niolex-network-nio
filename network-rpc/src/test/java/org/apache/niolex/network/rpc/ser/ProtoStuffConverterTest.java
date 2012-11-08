@@ -19,6 +19,9 @@ package org.apache.niolex.network.rpc.ser;
 
 import static org.junit.Assert.*;
 
+import java.lang.reflect.Type;
+
+import org.apache.niolex.commons.test.Benchmark;
 import org.junit.Test;
 
 /**
@@ -28,36 +31,31 @@ import org.junit.Test;
  */
 public class ProtoStuffConverterTest {
 
-	/**
-	 * Test method for {@link org.apache.niolex.network.rpc.ser.ProtoStuffConverter#prepareParams(byte[], java.lang.reflect.Type[])}.
-	 */
-	@Test
-	public void testPrepareParams() {
-		fail("Not yet implemented");
-	}
+	ProtoStuffConverter con = new ProtoStuffConverter();
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.rpc.ser.ProtoStuffConverter#serializeParams(java.lang.Object[])}.
+	 * Test method for {@link org.apache.niolex.network.rpc.ser.ProtoStuffConverter#prepareParams(byte[], java.lang.reflect.Type[])}.
+	 * @throws Exception
 	 */
 	@Test
-	public void testSerializeParams() {
-		fail("Not yet implemented");
+	public void testPrepareParams() throws Exception {
+		Benchmark ben = Benchmark.makeBenchmark();
+		JsonConverterTest.Bean ban = new JsonConverterTest.Bean(89127, 'r');
+		byte[] b = con.serializeParams(new Object[] {ben, ban});
+		Object[] res = con.prepareParams(b, new Type[] {Benchmark.class, JsonConverterTest.Bean.class});
+		assertEquals(ben, res[0]);
+		assertEquals(ban, res[1]);
 	}
 
 	/**
 	 * Test method for {@link org.apache.niolex.network.rpc.ser.ProtoStuffConverter#prepareReturn(byte[], java.lang.reflect.Type)}.
+	 * @throws Exception
 	 */
 	@Test
-	public void testPrepareReturn() {
-		fail("Not yet implemented");
-	}
-
-	/**
-	 * Test method for {@link org.apache.niolex.network.rpc.ser.ProtoStuffConverter#serializeReturn(java.lang.Object)}.
-	 */
-	@Test
-	public void testSerializeReturn() {
-		fail("Not yet implemented");
+	public void testPrepareReturn() throws Exception {
+		byte[] b = con.serializeReturn("NIce to have protostuff.");
+		Object r = con.prepareReturn(b, String.class);
+		assertEquals(r, "NIce to have protostuff.");
 	}
 
 }
