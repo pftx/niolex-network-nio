@@ -34,6 +34,7 @@ import org.apache.niolex.commons.reflect.MethodUtil;
 import org.apache.niolex.commons.util.Runner;
 import org.apache.niolex.network.cli.IServiceHandler;
 import org.apache.niolex.network.cli.RpcServiceHandler;
+import org.apache.niolex.network.rpc.RpcException;
 import org.junit.Test;
 
 
@@ -143,7 +144,7 @@ public class RetryHandlerTest {
         System.out.println(name);
     }
 
-    @Test(expected=RpcInvokeException.class)
+    @Test(expected=RpcException.class)
     public void testFail() throws Throwable {
     	List<IServiceHandler> listHandlers = new ArrayList<IServiceHandler>();
         listHandlers.add(new RpcServiceHandler("5", new B("5"), 100, false));
@@ -155,7 +156,7 @@ public class RetryHandlerTest {
         System.out.println(name);
     }
 
-    @Test(expected=RpcInvokeException.class)
+    @Test(expected=RpcException.class)
     public void testFail2() throws Throwable {
     	List<IServiceHandler> listHandlers = new ArrayList<IServiceHandler>();
     	listHandlers.add(new RpcServiceHandler("5", new B("5"), 100, false));

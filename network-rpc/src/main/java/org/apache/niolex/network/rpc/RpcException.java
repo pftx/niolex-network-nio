@@ -65,9 +65,47 @@ public class RpcException extends RuntimeException {
 		this.type = type;
 	}
 
+	/**
+	 * The rpc exception type. User can get the detailed explanation from this enum.
+	 *
+	 * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
+	 * @version 1.0.0
+	 * @Date: 2012-11-8
+	 */
 	public static enum Type {
-		TIMEOUT, NOT_CONNECTED, CONNECTION_CLOSED, METHOD_NOT_FOUND, ERROR_PARSE_PARAMS,
-		ERROR_INVOKE, ERROR_PARSE_RETURN, UNKNOWN
+		TIMEOUT("Rpc timeout, maybe network problem, server busy etc."),
+		NOT_CONNECTED("Client has not connected to server yet."),
+		CONNECTION_CLOSED("Client connection to server is closed due to previous problems."),
+		METHOD_NOT_FOUND("The method client want to invoke is not found on server side."),
+		ERROR_PARSE_PARAMS("Error occured when server try to parse parameters."),
+		ERROR_INVOKE("Error occured when server invoke this method on site."),
+		ERROR_PARSE_RETURN("Error occured when client try to parse the value returned from server."),
+		UNKNOWN("Unknown other error."),
+		NO_SERVER_READY("No rpc server is ready for now."),
+		ERROR_EXCEED_RETRY("We retried the number of times according to config, but still error.");
+
+		/**
+		 * the detailed explanation for error type.
+		 */
+		private final String explanation;
+
+		/**
+		 * Create a type with detailed explanation.
+		 *
+		 * @param explanation
+		 */
+		private Type(String explanation) {
+			this.explanation = explanation;
+		}
+
+		/**
+		 * Get the detailed explanation for error type.
+		 * @return
+		 */
+		public String getExplanation() {
+			return explanation;
+		}
+
 	}
 
 }

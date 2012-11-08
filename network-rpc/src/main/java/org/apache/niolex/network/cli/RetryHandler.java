@@ -26,6 +26,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.apache.niolex.network.rpc.RpcException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -121,9 +122,11 @@ public class RetryHandler implements InvocationHandler {
 				cause = e;
 			}
 		}
-		if (anyTried == handlerNum)
-			throw new RpcInvokeException("Failed to service " + method.getName() + ": No rpc server is ready to work!");
-		throw new RpcInvokeException("Failed to service " + method.getName() + ": exceeds retry time [" + retryTimes + "].", cause);
+		if (anyTried == handlerNum) {
+			throw new RpcException("Failed to service " + method.getName(), RpcException.Type.NO_SERVER_READY, null);
+		}
+		throw new RpcException("Failed to service " + method.getName() + ": exceeds retry time [" + retryTimes + "].",
+				RpcException.Type.ERROR_EXCEED_RETRY, cause);
 	}
 
 	@Override
