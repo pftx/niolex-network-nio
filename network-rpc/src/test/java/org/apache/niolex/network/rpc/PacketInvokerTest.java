@@ -21,6 +21,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
+import java.util.concurrent.CountDownLatch;
+
 import org.apache.niolex.network.IClient;
 import org.apache.niolex.network.PacketData;
 import org.junit.Test;
@@ -41,22 +43,52 @@ public class PacketInvokerTest {
 		in.handleRead(PacketData.getHeartBeatPacket(), null);
 	}
 
+	@Test
+	public void testInvoke() throws Exception {
+		final PacketInvoker in = new PacketInvoker();
+		final PacketData rc = new PacketData(56, new byte[76]);
+		rc.setVersion((byte) 77);
+		rc.setReserved((byte) 127);
+		final IClient client = mock(IClient.class);
+		final CountDownLatch latch = new CountDownLatch(1);
+		final CountDownLatch latch2 = new CountDownLatch(1);
+		final PacketData qq = rc.makeCopy();
+		rc.setReserved((byte)-128);
+		Thread r = new Thread() {
+			public void run() {
+				latch2.countDown();
+				PacketData sc = in.invoke(rc, client);
+				assertEquals(sc, qq);
+				latch.countDown();
+			}
+		};
+		r.start();
+		latch2.await();
+		Thread.sleep(50);
+		in.handleRead(qq, client);
+		latch.await();
+	}
+
 	/**
 	 * Test method for {@link org.apache.niolex.network.rpc.PacketInvoker#handleClose(org.apache.niolex.network.IPacketWriter)}.
 	 * @throws InterruptedException
 	 */
 	@Test
-	public void testHandleClose() throws InterruptedException {
+	public void testInvokeAndHandleClose() throws InterruptedException {
 		final PacketInvoker in = new PacketInvoker();
 		final PacketData rc = new PacketData(56, new byte[76]);
 		final IClient client = mock(IClient.class);
+		final CountDownLatch latch = new CountDownLatch(1);
 		Thread r = new Thread() {
 			public void run() {
+				latch.countDown();
 				in.invoke(rc, client);
 			}
 		};
 		r.start();
+		latch.await();
 		assertTrue(!r.isInterrupted());
+		r.interrupt();
 		Thread.sleep(10);
 		in.handleClose(null);
 	}
