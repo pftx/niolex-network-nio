@@ -15,13 +15,11 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.niolex.network.press;
+package org.apache.niolex.network.demo;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.List;
 
 import org.apache.niolex.commons.test.Counter;
 import org.apache.niolex.commons.test.MockUtil;
@@ -30,7 +28,6 @@ import org.apache.niolex.commons.test.StopWatch.Stop;
 import org.apache.niolex.network.PacketData;
 import org.apache.niolex.network.client.BaseClient;
 import org.apache.niolex.network.client.SocketClient;
-import org.apache.niolex.network.demo.json.DemoJsonRpcServer;
 import org.apache.niolex.network.example.SavePacketHandler;
 
 /**
@@ -51,9 +48,18 @@ public class DemoPress {
 		byte[] b2 = b.getData();
 		if (b1.length == b2.length) {
 			int k = MockUtil.ranInt(b1.length);
-			if (b1[k] == b2[k]) {
-				return true;
+			if (b1[k] != b2[k]) {
+				return false;
 			}
+			k = MockUtil.ranInt(b1.length);
+			if (b1[k] != b2[k]) {
+				return false;
+			}
+			k = MockUtil.ranInt(b1.length);
+			if (b1[k] != b2[k]) {
+				return false;
+			}
+			return true;
 		}
 		return false;
 	}
@@ -68,7 +74,7 @@ public class DemoPress {
 			THREAD_NUM = Integer.parseInt(args[1]);
 			SHUFFLE_NUM = Integer.parseInt(args[2]);
         }
-		DemoJsonRpcServer.main(null);
+		DemoServer.main(null);
 		for (int i = 0; i < 10; ++i) {
 			BaseClient cli = create();
 			LinkedList<PacketData> list = new LinkedList<PacketData>();
@@ -86,7 +92,7 @@ public class DemoPress {
 		Thread[] ts = new Thread[THREAD_NUM];
 		for (int i = 0; i < THREAD_NUM; ++i) {
 			BaseClient cli = create();
-			Rpc r = new Rpc(cli, "Hello " + i, " world.");
+			Runner r = new Runner(cli, "Hello " + i, " world.");
 			Thread t = new Thread(r);
 			t.start();
 			ts[i] = t;
@@ -97,7 +103,7 @@ public class DemoPress {
 			LinkedList<PacketData> list = new LinkedList<PacketData>();
 			cli.setPacketHandler(new SavePacketHandler(list));
 			Stop s = stopWatch.start();
-			PacketData pac = new PacketData(2, MockUtil.randByteArray(57));
+			PacketData pac = new PacketData(2, MockUtil.randByteArray(27));
 			cli.handleWrite(pac);
 			PacketData par = list.poll();
 			s.stop();
@@ -114,22 +120,21 @@ public class DemoPress {
 		stopWatch.done();
 		stopWatch.print();
 		System.out.println("Done..... error = " + ERROR_CNT.cnt());
-		DemoJsonRpcServer.stop();
+		DemoServer.stop();
 	}
 
 	public static SocketClient create() throws IOException {
-//		SocketClient c = new SocketClient(new InetSocketAddress("10.11.18.41", 8808));
 		SocketClient c = new SocketClient(new InetSocketAddress("localhost", 8808));
 		c.connect();
 		return c;
 	}
 
-	public static class Rpc implements Runnable {
+	public static class Runner implements Runnable {
 		BaseClient cli;
 		LinkedList<PacketData> list;
 		String a = "hello ", b = "world!";
 
-		public Rpc(BaseClient cli, String a, String b) {
+		public Runner(BaseClient cli, String a, String b) {
 			super();
 			this.cli = cli;
 			list = new LinkedList<PacketData>();
@@ -141,9 +146,10 @@ public class DemoPress {
 		@Override
 		public void run() {
 			int i = SIZE;
+			PacketData pac;
 			while (i-- > 0) {
 				Stop s = stopWatch.start();
-				PacketData pac = new PacketData(2, MockUtil.randByteArray(66));
+				pac = new PacketData(2, MockUtil.randByteArray(266));
 				cli.handleWrite(pac);
 				PacketData par = list.poll();
 				s.stop();
@@ -152,11 +158,8 @@ public class DemoPress {
 					System.out.println("Out => " + 1);
 				}
 				// -------------------------
-				List<String> args = new ArrayList<String>();
-				args.add("3");
-				args.add("3");
 				s = stopWatch.start();
-				pac = new PacketData(2, MockUtil.randByteArray(66));
+				pac = new PacketData(2, MockUtil.randByteArray(166));
 				cli.handleWrite(pac);
 				par = list.poll();
 				s.stop();
