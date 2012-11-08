@@ -23,8 +23,7 @@ import org.apache.niolex.commons.seri.ProtoUtil;
 import org.apache.niolex.rpc.RpcException;
 import org.apache.niolex.rpc.core.ClientProtocol;
 import org.apache.niolex.rpc.core.ServerProtocol;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.niolex.rpc.util.RpcUtil;
 
 import com.google.protobuf.GeneratedMessage;
 
@@ -36,7 +35,6 @@ import com.google.protobuf.GeneratedMessage;
  * @Date: 2012-6-5
  */
 public class ProtobufProtocol implements ClientProtocol, ServerProtocol {
-	private static final Logger LOG = LoggerFactory.getLogger(ProtobufProtocol.class);
 
 	/**
 	 * Override super method
@@ -56,9 +54,8 @@ public class ProtobufProtocol implements ClientProtocol, ServerProtocol {
 		if (ret instanceof GeneratedMessage) {
 			GeneratedMessage gen = (GeneratedMessage) ret;
 			return gen.toByteArray();
-		} else if (ret instanceof Exception) {
-			LOG.warn("ProtoBuffer can not support return Exception. We just log it here.", (Exception)ret);
-			return new byte[0];
+		} else if (ret instanceof RpcException) {
+			return RpcUtil.serializeRpcException((RpcException) ret);
 		} else {
 			throw new RpcException("Message is not protobuf type: " + ret.getClass(),
 					RpcException.Type.ERROR_PARSE_PARAMS, null);
@@ -80,7 +77,11 @@ public class ProtobufProtocol implements ClientProtocol, ServerProtocol {
 	 */
 	@Override
 	public Object prepareReturn(byte[] ret, Type type) throws Exception {
-		return ProtoUtil.parseOne(ret, type);
+		if (type.equals(RpcException.class)) {
+			return RpcUtil.parseRpcException(ret);
+		} else {
+			return ProtoUtil.parseOne(ret, type);
+		}
 	}
 
 }
