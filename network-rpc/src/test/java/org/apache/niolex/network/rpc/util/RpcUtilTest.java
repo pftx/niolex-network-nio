@@ -18,6 +18,8 @@
 package org.apache.niolex.network.rpc.util;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -40,34 +42,79 @@ import org.junit.Test;
 public class RpcUtilTest {
 
 	/**
-		 * Test method for {@link org.apache.niolex.network.rpc.util.RpcUtil#parseJson(byte[], java.lang.reflect.Type[])}.
-		 */
-		@Test
-		public void testParseJson() throws Throwable {
-			Benchmark bench = Benchmark.makeBenchmark();
-			Bean q = new Bean(5, "Another", 523212, new Date(1338008328334L));
-			ByteArrayOutputStream bos = new ByteArrayOutputStream();
-			JacksonUtil.writeObj(bos, bench);
-			JacksonUtil.writeObj(bos, q);
-			byte[] bs = bos.toByteArray();
-			Object[] re = RpcUtil.parseJson(bs, new Type[] {Benchmark.class, Bean.class});
-			if (re[0] instanceof Benchmark) {
-				Benchmark copy = (Benchmark)re[0];
-				assertTrue(bench.equals(copy));
-			} else {
-				fail("Benchmark Not yet implemented");
-			}
-			if (re[1] instanceof Bean) {
-				Bean t = (Bean)re[1];
-				assertTrue(t.getId() != 0);
-				assertTrue(t.getBirth().getTime() == 1338008328334L);
-			} else {
-				fail("Bean Not yet implemented");
-			}
-		}
+	 * Test method for
+	 * {@link org.apache.niolex.network.rpc.util.RpcUtil#authHeader(java.lang.String, java.lang.String)}.
+	 */
+	@Test
+	public final void testAuthHeader() {
+		String s = RpcUtil.authHeader("webadmin", "IJDieio3980");
+		System.out.println(s);
+		assertEquals("Basic d2ViYWRtaW46SUpEaWVpbzM5ODA=", s);
+	}
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.rpc.util.RpcUtil#generateKey(org.apache.niolex.network.PacketData)}.
+	 * Test method for {@link org.apache.niolex.network.rpc.util.RpcUtil#genSessionId(int)}.
+	 */
+	@Test
+	public final void testGenSessionId() {
+		String s = RpcUtil.genSessionId(45);
+		String q = RpcUtil.genSessionId(45);
+		assertEquals(45, s.length());
+		assertEquals(45, q.length());
+		assertNotSame(s, q);
+	}
+
+	/**
+	 * Test method for {@link org.apache.niolex.network.rpc.util.RpcUtil#checkServerStatus(java.lang.String, int, int)}
+	 * .
+	 */
+	@Test
+	public final void testCheckServerStatus() {
+		boolean b = RpcUtil.checkServerStatus("http://www.baidu.com", 4000, 4000);
+		System.out.println(b);
+		assertTrue(b);
+		boolean c = RpcUtil.checkServerStatus("http://cy.baidu.com/find.php", 4000, 4000);
+		System.out.println(c);
+		assertFalse(c);
+		boolean d = RpcUtil.checkServerStatus("http://cycqc.baidu.com/find.php", 4000, 4000);
+		System.out.println(d);
+		assertFalse(d);
+		boolean e = RpcUtil.checkServerStatus("http://www.cs.zju.edu.cn/org/codes/404.html", 4000, 4000);
+		System.out.println(e);
+		assertFalse(e);
+
+	}
+
+	/**
+	 * Test method for {@link org.apache.niolex.network.rpc.util.RpcUtil#parseJson(byte[], java.lang.reflect.Type[])}.
+	 */
+	@Test
+	public void testParseJson() throws Throwable {
+		Benchmark bench = Benchmark.makeBenchmark();
+		Bean q = new Bean(5, "Another", 523212, new Date(1338008328334L));
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		JacksonUtil.writeObj(bos, bench);
+		JacksonUtil.writeObj(bos, q);
+		byte[] bs = bos.toByteArray();
+		Object[] re = RpcUtil.parseJson(bs, new Type[] { Benchmark.class, Bean.class });
+		if (re[0] instanceof Benchmark) {
+			Benchmark copy = (Benchmark) re[0];
+			assertTrue(bench.equals(copy));
+		} else {
+			fail("Benchmark Not yet implemented");
+		}
+		if (re[1] instanceof Bean) {
+			Bean t = (Bean) re[1];
+			assertTrue(t.getId() != 0);
+			assertTrue(t.getBirth().getTime() == 1338008328334L);
+		} else {
+			fail("Bean Not yet implemented");
+		}
+	}
+
+	/**
+	 * Test method for
+	 * {@link org.apache.niolex.network.rpc.util.RpcUtil#generateKey(org.apache.niolex.network.PacketData)}.
 	 */
 	@Test
 	public void testGenerateKeyPacketData() {

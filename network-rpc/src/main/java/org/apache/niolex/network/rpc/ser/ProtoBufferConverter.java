@@ -23,8 +23,6 @@ import org.apache.niolex.commons.seri.ProtoUtil;
 import org.apache.niolex.network.rpc.IConverter;
 import org.apache.niolex.network.rpc.RpcException;
 import org.apache.niolex.network.rpc.util.RpcUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.protobuf.GeneratedMessage;
 
@@ -36,7 +34,6 @@ import com.google.protobuf.GeneratedMessage;
  * @Date: 2012-11-7
  */
 public class ProtoBufferConverter implements IConverter {
-	protected static final Logger LOG = LoggerFactory.getLogger(ProtoBufferConverter.class);
 
 	/**
 	 * Override super method
