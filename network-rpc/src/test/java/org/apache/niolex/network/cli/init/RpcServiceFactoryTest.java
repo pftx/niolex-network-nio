@@ -44,7 +44,7 @@ public class RpcServiceFactoryTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void testGetInstance() {
 		RpcClientFactory.registerBuilder("network/json", new JsonRpcBuilder());
-		RpcServiceFactory in = RpcServiceFactory.getInstance("/org/apache/niolex/network/rpc/json/rpc.properties");
+		RpcServiceFactory in = RpcServiceFactory.getInstance("/org/apache/niolex/network/cli/bui/rpc.properties");
 		in.getService("nan", RpcClientFactory.class);
 		fail("Not yet implemented");
 	}
@@ -56,7 +56,7 @@ public class RpcServiceFactoryTest {
 	@Test
 	public void testGetServiceStringClassOfT() {
 		RpcClientFactory.registerBuilder("network/json", new JsonRpcBuilder());
-		RpcServiceFactory factory = RpcServiceFactory.getInstance("/org/apache/niolex/network/rpc/json/rpc.properties");
+		RpcServiceFactory factory = RpcServiceFactory.getInstance("/org/apache/niolex/network/cli/bui/rpc.properties");
 		LocalService ser = factory.getService(LocalService.class);
 		for (int i = 0; i < 10; ++i) {
 			int r = ser.add(2, 3214, 123, 12, i);
@@ -72,7 +72,7 @@ public class RpcServiceFactoryTest {
 	@Test
 	public void testGetServiceStringClassOfF() {
 		RpcClientFactory.registerBuilder("network/json", new JsonRpcBuilder());
-		RpcServiceFactory factory = RpcServiceFactory.getInstance("/org/apache/niolex/network/rpc/json/rpc.properties");
+		RpcServiceFactory factory = RpcServiceFactory.getInstance("/org/apache/niolex/network/cli/bui/rpc.properties");
 		EfService ser = factory.getService(EfService.class);
 		for (int i = 0; i < 10; ++i) {
 			int r = ser.add(2, 3214, 123, 12, i);
@@ -87,7 +87,7 @@ public class RpcServiceFactoryTest {
 	@Test
 	public void testGetConfiger() {
 		RpcClientFactory.registerBuilder("network/json", new JsonRpcBuilder());
-		RpcServiceFactory in = RpcServiceFactory.getInstance("/org/apache/niolex/network/rpc/json/rpc.properties");
+		RpcServiceFactory in = RpcServiceFactory.getInstance("/org/apache/niolex/network/cli/bui/rpc.properties");
 		RpcConfiger con = in.getConfiger();
 		con.getConfig();
 	}

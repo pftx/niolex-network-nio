@@ -20,9 +20,9 @@ package org.apache.niolex.network.cli.bui;
 import java.net.InetSocketAddress;
 
 import org.apache.niolex.network.cli.init.RpcClientBuilder;
-import org.apache.niolex.network.client.PacketClient;
-import org.apache.niolex.network.rpc.PacketInvoker;
+import org.apache.niolex.network.client.SocketClient;
 import org.apache.niolex.network.rpc.RpcClient;
+import org.apache.niolex.network.rpc.SingleInvoker;
 import org.apache.niolex.network.rpc.ser.JsonConverter;
 
 /**
@@ -80,11 +80,10 @@ public class JsonRpcBuilder implements RpcClientBuilder {
 			throw new IllegalArgumentException("Invalid url: " + this.clientUrl);
 		}
 		int port = Integer.parseInt(arr[1]);
-		PacketClient pc = new PacketClient(new InetSocketAddress(arr[0], port));
-		PacketInvoker invoker = new PacketInvoker();
-		invoker.setRpcHandleTimeout(rpcHandleTimeout);
+		SocketClient pc = new SocketClient(new InetSocketAddress(arr[0], port));
+		SingleInvoker invoker = new SingleInvoker();
 		RpcClient rc = new RpcClient(pc, invoker, new JsonConverter());
-		rc.setConnectTimeout(connectTimeout);
+		rc.setConnectTimeout(connectTimeout > rpcHandleTimeout ? connectTimeout : rpcHandleTimeout);
 		return rc;
 	}
 }

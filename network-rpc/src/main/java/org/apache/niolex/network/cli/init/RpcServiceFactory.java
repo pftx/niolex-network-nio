@@ -45,7 +45,7 @@ import org.slf4j.LoggerFactory;
 public class RpcServiceFactory {
 	private static final Logger LOG = LoggerFactory.getLogger(RpcServiceFactory.class);
 
-	private Map<String, InvocationHandler> handlers = new HashMap<String, InvocationHandler>();
+	private Map<String, RetryHandler> handlers = new HashMap<String, RetryHandler>();
 	private RpcConfiger configer;
 
 	/**
@@ -60,7 +60,7 @@ public class RpcServiceFactory {
 		Map<String, RpcConfigBean> confs = configer.getConfigs();
 		for (Entry<String, RpcConfigBean> entry : confs.entrySet()) {
 			RpcConfigBean conf = entry.getValue();
-			InvocationHandler handler = RpcInitUtil.buildProxy(conf);
+			RetryHandler handler = RpcInitUtil.buildProxy(conf);
 			handlers.put(entry.getKey(), handler);
 			StringBuilder sb = new StringBuilder();
 			sb.append("\n===>Api server list for [" + entry.getKey() + "]:\n");
@@ -89,26 +89,23 @@ public class RpcServiceFactory {
 	 */
 	@SuppressWarnings("unchecked")
     public <T> T getService(String groupName, Class<T> c) {
-	    InvocationHandler handler = handlers.get(groupName);
-	    if (handler == null)
+		RetryHandler rh = handlers.get(groupName);
+	    if (rh == null)
 	        throw new IllegalArgumentException("Rpc server config not found for your interface!");
 	    /**
 	     * Register this interface into the backed RpcClient.
 	     * Or otherwise you can't invoke methods on this interface.
 	     */
-	    if (handler instanceof RetryHandler) {
-	    	RetryHandler rh = (RetryHandler) handler;
-	    	List<IServiceHandler> list = rh.getHandlers();
-	    	for (IServiceHandler is : list) {
-	    		InvocationHandler h = is.getHandler();
-	    		if (h instanceof RpcClient) {
-	    			RpcClient rpc = (RpcClient)h;
-	    			rpc.addInferface(c);
-	    		}
-	    	}
-	    }
+    	List<IServiceHandler> list = rh.getHandlers();
+    	for (IServiceHandler is : list) {
+    		InvocationHandler h = is.getHandler();
+    		if (h instanceof RpcClient) {
+    			RpcClient rpc = (RpcClient) h;
+    			rpc.addInferface(c);
+    		}
+    	}
 		return (T) Proxy.newProxyInstance(RpcServiceFactory.class.getClassLoader(),
-                new Class[] {c}, handler);
+                new Class[] {c}, rh);
 	}
 
 	/**
