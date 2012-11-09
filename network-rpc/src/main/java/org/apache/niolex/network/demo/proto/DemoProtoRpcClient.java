@@ -68,19 +68,15 @@ public class DemoProtoRpcClient {
 					PhoneNumber n = null;
 					n = PhoneNumber.newBuilder().setNumber("123122311" + 0).setType(PhoneType.MOBILE).build();
 					p = ser.getPerson(n);
-					if (!p.getName().startsWith("Niolex [0]")) {
-						System.out.println("Out => " + p);
-					}
+					assertt(p.getName().startsWith("Niolex [0]"), "Out 0 => " + p);
+
 					n = PhoneNumber.newBuilder().setNumber("123122311" + 1).setType(PhoneType.MOBILE).build();
 					p = ser.getPerson(n);
-					if (!p.getName().startsWith("Niolex [1]")) {
-						System.out.println("Out => " + p);
-					}
+					assertt(p.getName().startsWith("Niolex [1]"), "Out 1 => " + p);
+
 					n = PhoneNumber.newBuilder().setNumber("123122311" + 2).setType(PhoneType.MOBILE).build();
 					p = ser.getPerson(n);
-					if (!p.getName().startsWith("Niolex [2]")) {
-						System.out.println("Out => " + p);
-					}
+					assertt(p.getName().startsWith("Niolex [2]"), "Out 2 => " + p);
 
 					long xou = System.currentTimeMillis() - xin;
 					if (xou > maxin) {
@@ -104,6 +100,12 @@ public class DemoProtoRpcClient {
 
 		System.out.println("Done.....");
 		client.stop();
+	}
+
+	public static void assertt(boolean b, String c) {
+		if (!b) {
+			System.out.println(c);
+		}
 	}
 
 }

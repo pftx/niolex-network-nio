@@ -44,6 +44,11 @@ import org.junit.Test;
 public class RpcUtilTest {
 
 	@Test
+	public void test() {
+		new RpcUtil(){};
+	}
+
+	@Test
 	public void testSerializeRpcException() throws Exception {
 		byte[] bb = RpcUtil.serializeRpcException(new RpcException("This is good",
 				RpcException.Type.CONNECTION_CLOSED, null));
@@ -221,7 +226,9 @@ public class RpcUtilTest {
 		boolean e = RpcUtil.checkServerStatus("http://www.cs.zju.edu.cn/org/codes/404.html", 4000, 4000);
 		System.out.println(e);
 		assertFalse(e);
-
+		boolean f = RpcUtil.checkServerStatus("http://www.facebook.com", 4000, 4000);
+		System.out.println(f);
+		assertFalse(f);
 	}
 
 }

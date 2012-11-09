@@ -63,5 +63,7 @@ public class DemoJsonRpcServerTest {
 		System.out.println("test " + t.toString());
 		ts = method.getGenericParameterTypes();
 		System.out.println("test " + ts.length);
+		new RpcServiceImpl().testMe();
+		SocketJsonRpcClient.assertt(1, 0, "OSDODKK");
 	}
 }

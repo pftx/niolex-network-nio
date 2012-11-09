@@ -67,19 +67,15 @@ public class SocketJsonRpcClient {
 				while (i-- > 0) {
 					long xin = System.currentTimeMillis();
 					int k = ser.add(3, 4, 5, 6, 7, 8, 9, i);
-					if (k != 42 + i) {
-						System.out.println("Out => " + k);
-					}
+					assertt(k, 42 + i, "Out 1 => " + k);
 
 					List<String> args = new ArrayList<String>();
 					args.add("3");
 					args.add("3");
 					k = ser.size(args);
-					if (k != 2) {
-						System.out.println("Out => " + k);
-					}
+					assertt(k, 2, "Out 2 => " + k);
 					k = ser.size(null);
-					assert k == 0;
+					assertt(k, 0, "Out 3 => " + k);
 					long xou = System.currentTimeMillis() - xin;
 					if (xou > maxin) {
 						maxin = xou;
@@ -96,6 +92,12 @@ public class SocketJsonRpcClient {
 		System.out.println("Done.....");
 
 		client.stop();
+	}
+
+	public static void assertt(int a, int b, String c) {
+		if (a != b) {
+			System.out.println(c);
+		}
 	}
 
 }
