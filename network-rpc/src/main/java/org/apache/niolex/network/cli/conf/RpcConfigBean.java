@@ -25,7 +25,7 @@ import org.apache.niolex.network.cli.Constants;
 
 /**
  * The rpc config bean, config common rpc properties.
- * e.g. connectTimeout, readTimeout, retryTimes
+ * e.g. connectTimeout, sleepBetweenRetry, retryTimes
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
@@ -33,11 +33,24 @@ import org.apache.niolex.network.cli.Constants;
  */
 public class RpcConfigBean extends BaseConfigBean {
 
-    public int errorBlockTime = Constants.CLIENT_ERROR_BLOCK_TIME;
+	/**
+	 * The network connection parameters.
+	 */
     public int connectTimeout = Constants.CLIENT_CONNECT_TIMEOUT;
-    public int readTimeout = Constants.CLIENT_READ_TIMEOUT;
-    public int retryTimes = Constants.CLIENT_RETRY_TIMES;
-    public int intervalBetweenRetry = Constants.CLIENT_INTERVAL_BT_RETRY;
+    public int connectRetryTimes = Constants.CLIENT_CONNECT_RETRY_TIMES;
+    public int connectSleepBetweenRetry = Constants.CLIENT_CONNECT_SLEEP_TIME;
+
+    /**
+     * The Rpc parameters.
+     */
+    public int rpcTimeout = Constants.CLIENT_RPC_TIMEOUT;
+    public int rpcErrorBlockTime = Constants.CLIENT_RPC_ERROR_BLOCK_TIME;
+    public int rpcErrorRetryTimes = Constants.CLIENT_RPC_RETRY_TIMES;
+    public int rpcSleepBetweenRetry = Constants.CLIENT_RPC_INTERVAL_BT_RETRY;
+
+    /**
+     * Server address parameters.
+     */
     public String[] serverList;
     public String serviceUrl = "";
     public String serviceType = "network/json";
@@ -50,7 +63,7 @@ public class RpcConfigBean extends BaseConfigBean {
     @Override
     public void setConfig(String key, String value) {
         if ("serverList".equals(key)) {
-            serverList = value.split(" *, *");
+            serverList = value.split(" *[,;] *");
         } else {
             super.setConfig(key, value);
         }
@@ -66,11 +79,16 @@ public class RpcConfigBean extends BaseConfigBean {
     }
 
     public void copyFrom(final RpcConfigBean co) {
-        this.errorBlockTime = co.errorBlockTime;
-        this.connectTimeout = co.connectTimeout;
-        this.readTimeout = co.readTimeout;
-        this.retryTimes = co.retryTimes;
-        this.intervalBetweenRetry = co.intervalBetweenRetry;
+    	// connect
+    	this.connectTimeout = co.connectTimeout;
+    	this.connectRetryTimes = co.connectRetryTimes;
+    	this.connectSleepBetweenRetry = co.connectSleepBetweenRetry;
+    	// rpc
+        this.rpcTimeout = co.rpcTimeout;
+        this.rpcErrorBlockTime = co.rpcErrorBlockTime;
+        this.rpcErrorRetryTimes = co.rpcErrorRetryTimes;
+        this.rpcSleepBetweenRetry = co.rpcSleepBetweenRetry;
+        // address
         this.serverList = co.serverList;
         this.serviceUrl = co.serviceUrl;
         this.serviceType = co.serviceType;
@@ -79,11 +97,13 @@ public class RpcConfigBean extends BaseConfigBean {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("(").append(groupName).append(") [connectTimeout=").append(connectTimeout).append(
-                ", errorBlockTime=").append(errorBlockTime).append(", intervalBetweenRetry=").append(
-                intervalBetweenRetry).append(", readTimeout=").append(readTimeout).append(", retryTimes=").append(
-                retryTimes).append(", serverList=").append(Arrays.toString(serverList)).append(", serviceUrl=").append(
-                serviceUrl).append(", header=").append(header).append(", prop=").append(prop).append("]");
+        builder.append("(").append(groupName).append(") [connect: {").append(connectTimeout)
+        .append(", ").append(connectRetryTimes).append(", ").append(connectSleepBetweenRetry)
+        .append("}, rpc: {").append(rpcTimeout).append(", ").append(rpcErrorBlockTime)
+        .append(", ").append(rpcErrorRetryTimes).append(", ").append(rpcSleepBetweenRetry)
+        .append("}, address: {").append(Arrays.toString(serverList)).append(", ")
+        .append(serviceUrl).append(", ").append(serviceType).append("}, header: ")
+        .append(header).append(", prop: ").append(prop).append("]");
         return builder.toString();
     }
 

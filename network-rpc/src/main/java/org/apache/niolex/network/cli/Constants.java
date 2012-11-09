@@ -39,11 +39,14 @@ public abstract class Constants {
         }
     }
 
-    public static final int CLIENT_ERROR_BLOCK_TIME = PropUtil.getInteger("rpcClientErrorBlockTime", 60000);
-    public static final int CLIENT_CONNECT_TIMEOUT = PropUtil.getInteger("rpcClientConnectTimeout", 3000);
-    public static final int CLIENT_READ_TIMEOUT = PropUtil.getInteger("rpcClientReadTimeout", 3000);
-    public static final int CLIENT_RETRY_TIMES = PropUtil.getInteger("rpcClientRetryTimes", 2);
-    public static final int CLIENT_INTERVAL_BT_RETRY = PropUtil.getInteger("rpcClientIntervalBetweenRetry", 50);
+    public static final int CLIENT_CONNECT_TIMEOUT = PropUtil.getInteger("connectTimeout", 3000);
+    public static final int CLIENT_CONNECT_RETRY_TIMES = PropUtil.getInteger("connectRetryTimes", 100);
+    public static final int CLIENT_CONNECT_SLEEP_TIME = PropUtil.getInteger("connectSleepBetweenRetry", 1000);
 
-    public static final String CLIENT_ENCODING = PropUtil.getProperty("rpcClientEncoding", "utf-8");
+    public static final int CLIENT_RPC_TIMEOUT = PropUtil.getInteger("rpcTimeout", 3000);
+    public static final int CLIENT_RPC_ERROR_BLOCK_TIME = PropUtil.getInteger("rpcErrorBlockTime", 60000);
+    public static final int CLIENT_RPC_RETRY_TIMES = PropUtil.getInteger("rpcErrorRetryTimes", 3);
+    public static final int CLIENT_RPC_INTERVAL_BT_RETRY = PropUtil.getInteger("rpcSleepBetweenRetry", 50);
+
+    public static final String CLIENT_ENCODING = PropUtil.getProperty("Encoding", "utf-8");
 }
