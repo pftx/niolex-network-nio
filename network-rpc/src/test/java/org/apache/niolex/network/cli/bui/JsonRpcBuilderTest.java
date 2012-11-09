@@ -53,4 +53,14 @@ public class JsonRpcBuilderTest {
 		}
 	}
 
+	@Test
+	public void testBuild() throws Exception {
+		JsonRpcBuilder factory = new JsonRpcBuilder();
+		factory.setClientUrl("10.22.241.233:8808");
+		factory.setConnectTimeout(100);
+		factory.setRpcHandleTimeout(5000);
+		RpcClient cc = factory.build();
+		cc.stop();
+	}
+
 }
