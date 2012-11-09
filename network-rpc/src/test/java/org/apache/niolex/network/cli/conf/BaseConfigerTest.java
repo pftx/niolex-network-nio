@@ -47,8 +47,9 @@ public class BaseConfigerTest {
         assertEquals(conf.serverList[0], "dy-m-st01.niolex.net:8808");
         assertEquals(conf.serverList[2], "192.168.16.18:8808");
         assertEquals(conf.serviceUrl, "/cgi-bin/services/WdgetService.cgi");
-        assertEquals(conf.readTimeout, 7000);
-        assertEquals(conf.retryTimes, 5);
+        assertEquals(conf.rpcTimeout, 7000);
+        assertEquals(conf.rpcErrorRetryTimes, 5);
+        assertEquals(conf.header.get("password"), "ID(#J8329%$^S");
 	}
 
 }

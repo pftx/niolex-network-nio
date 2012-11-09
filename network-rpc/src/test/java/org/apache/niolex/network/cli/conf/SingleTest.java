@@ -37,7 +37,7 @@ public class SingleTest {
         assertEquals(conf.serverList[0], "dy-m-st01.niolex.net:8808");
         assertEquals(conf.serverList[2], "192.168.16.18:8808");
         assertEquals(conf.serviceUrl, "/cgi-bin/services/WdgetService.cgi");
-        assertEquals(conf.readTimeout, 12000);
-        assertEquals(conf.retryTimes, 3);
+        assertEquals(conf.rpcTimeout, 12000);
+        assertEquals(conf.rpcErrorRetryTimes, 3);
     }
 }

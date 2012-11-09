@@ -23,9 +23,7 @@ import java.util.List;
 
 import org.apache.niolex.network.cli.IServiceHandler;
 import org.apache.niolex.network.cli.RetryHandler;
-import org.apache.niolex.network.cli.RpcConnectionHandler;
 import org.apache.niolex.network.cli.conf.RpcConfigBean;
-import org.apache.niolex.network.rpc.RpcClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,15 +51,11 @@ public class RpcInitUtil {
 		int serverNum = conf.serverList.length;
 		String completeUrl = "";
 		for (int i = 0; i < serverNum; ++i) {
-			completeUrl = conf.serverList[i];
+			completeUrl = conf.serverList[i] + conf.serviceUrl;
 			try {
-				RpcClientBuilder proxy = RpcClientFactory.getBuilder(conf.serviceType);
-				proxy.setClientUrl(completeUrl);
-				proxy.setConnectTimeout(conf.connectTimeout);
-				proxy.setRpcHandleTimeout(conf.readTimeout);
-				RpcClient cli = proxy.build();
-				cli.connect();
-				listHandlers.add(new RpcConnectionHandler(completeUrl, cli));
+				ServiceHandlerBuilder proxy = ServiceHandlerFactory.getBuilder(conf.serviceType);
+				IServiceHandler cli = proxy.build(conf, completeUrl);
+				listHandlers.add(cli);
 			} catch (Exception e) {
 				LOG.warn("Failed to build rpc proxy for " + completeUrl + " : " + e.toString());
 			}
@@ -70,7 +64,7 @@ public class RpcInitUtil {
 			throw new IllegalStateException("No rpc server is ready for service: " + conf.serviceUrl);
 		}
 
-		return new RetryHandler(listHandlers, conf.retryTimes, conf.intervalBetweenRetry);
+		return new RetryHandler(listHandlers, conf.rpcErrorRetryTimes, conf.rpcSleepBetweenRetry);
 	}
 
 }

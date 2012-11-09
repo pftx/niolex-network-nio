@@ -1,5 +1,5 @@
 /**
- * RpcClientFactory.java
+ * ServiceHandlerFactory.java
  *
  * Copyright 2012 Niolex, Inc.
  *
@@ -21,18 +21,18 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * The factory method of RpcClientBuilder.
+ * The factory method of ServiceHandlerBuilder.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
  * @Date: 2012-6-19
  */
-public class RpcClientFactory {
+public class ServiceHandlerFactory {
 
 	/**
 	 * The internal hash map of builders.
 	 */
-	private static Map<String, RpcClientBuilder> builderMap = new HashMap<String, RpcClientBuilder>();
+	private static Map<String, ServiceHandlerBuilder> builderMap = new HashMap<String, ServiceHandlerBuilder>();
 
 	/**
 	 * Register builder.
@@ -40,7 +40,7 @@ public class RpcClientFactory {
 	 * @param serviceType
 	 * @param builder
 	 */
-	public static void registerBuilder(String serviceType, RpcClientBuilder builder) {
+	public static void registerBuilder(String serviceType, ServiceHandlerBuilder builder) {
 		builderMap.put(serviceType, builder);
 	}
 
@@ -50,8 +50,8 @@ public class RpcClientFactory {
 	 * @param serviceType
 	 * @return
 	 */
-	public static RpcClientBuilder getBuilder(String serviceType) {
-		RpcClientBuilder builder = builderMap.get(serviceType);
+	public static ServiceHandlerBuilder getBuilder(String serviceType) {
+		ServiceHandlerBuilder builder = builderMap.get(serviceType);
 		if (builder == null) {
 			throw new IllegalArgumentException("Builder for " + serviceType + " not found.");
 		}

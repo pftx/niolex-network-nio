@@ -20,8 +20,8 @@ package org.apache.niolex.network.cli.init;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 
-import org.apache.niolex.network.cli.init.RpcClientBuilder;
-import org.apache.niolex.network.cli.init.RpcClientFactory;
+import org.apache.niolex.network.cli.init.ServiceHandlerBuilder;
+import org.apache.niolex.network.cli.init.ServiceHandlerFactory;
 import org.junit.Test;
 
 /**
@@ -29,22 +29,22 @@ import org.junit.Test;
  * @version 1.0.0
  * @Date: 2012-6-20
  */
-public class RpcClientFactoryTest {
+public class ServiceHandlerFactoryTest {
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.cli.init.RpcClientFactory#getBuilder(java.lang.String)}.
+	 * Test method for {@link org.apache.niolex.network.cli.init.ServiceHandlerFactory#getBuilder(java.lang.String)}.
 	 */
 	@Test
 	public void testGetBuilder() {
-		new RpcClientFactory();
-		RpcClientBuilder factory = mock(RpcClientBuilder.class);
-		RpcClientFactory.registerBuilder("network/mock", factory);
-		assertEquals(factory, RpcClientFactory.getBuilder("network/mock"));
+		new ServiceHandlerFactory();
+		ServiceHandlerBuilder factory = mock(ServiceHandlerBuilder.class);
+		ServiceHandlerFactory.registerBuilder("network/mock", factory);
+		assertEquals(factory, ServiceHandlerFactory.getBuilder("network/mock"));
 	}
 
 	@Test(expected=IllegalArgumentException.class)
 	public void testGetBuilder2() {
-		assertEquals(null, RpcClientFactory.getBuilder("network/mock23"));
+		assertEquals(null, ServiceHandlerFactory.getBuilder("network/mock23"));
 	}
 
 }

@@ -77,6 +77,12 @@ public class RpcConnectionHandlerTest {
 		assertFalse(rpcConnectionHandler.isReady());
 	}
 
+	@Test
+	public final void testIsReadyTrue() {
+		when(handler.getConnStatus()).thenReturn(RpcClient.Status.CONNECTED);
+		assertTrue(rpcConnectionHandler.isReady());
+	}
+
 	/**
 	 * Test method for {@link org.apache.niolex.network.cli.RpcConnectionHandler#notReady(java.io.IOException)}.
 	 */
@@ -91,6 +97,12 @@ public class RpcConnectionHandlerTest {
 	@Test
 	public final void testGetHandler() {
 		assertEquals(handler, rpcConnectionHandler.getHandler());
+	}
+
+	@Test
+	public void testToString()
+	 throws Exception {
+		assertEquals(serviceUrl, rpcConnectionHandler.toString());
 	}
 
 }

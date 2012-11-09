@@ -18,11 +18,15 @@
 package org.apache.niolex.network.cli.bui;
 
 import java.net.InetSocketAddress;
+import java.net.URI;
 
-import org.apache.niolex.network.cli.init.RpcClientBuilder;
-import org.apache.niolex.network.client.SocketClient;
+import org.apache.niolex.network.cli.IServiceHandler;
+import org.apache.niolex.network.cli.RpcServiceHandler;
+import org.apache.niolex.network.cli.conf.RpcConfigBean;
+import org.apache.niolex.network.cli.init.ServiceHandlerBuilder;
+import org.apache.niolex.network.client.PacketClient;
+import org.apache.niolex.network.rpc.PacketInvoker;
 import org.apache.niolex.network.rpc.RpcClient;
-import org.apache.niolex.network.rpc.SingleInvoker;
 import org.apache.niolex.network.rpc.ser.JsonConverter;
 
 /**
@@ -33,57 +37,26 @@ import org.apache.niolex.network.rpc.ser.JsonConverter;
  * @version 1.0.0
  * @Date: 2012-6-4
  */
-public class JsonRpcBuilder implements RpcClientBuilder {
-
-	private String clientUrl;
-	private int connectTimeout;
-	private int rpcHandleTimeout;
+public class JsonRpcBuilder implements ServiceHandlerBuilder {
 
 	/**
 	 * Override super method
-	 * @see org.apache.niolex.network.cli.init.RpcClientBuilder#setClientUrl(java.lang.String)
+	 * @see org.apache.niolex.network.cli.init.ServiceHandlerBuilder#build(org.apache.niolex.network.cli.conf.RpcConfigBean, java.lang.String)
 	 */
 	@Override
-	public RpcClientBuilder setClientUrl(String url) {
-		this.clientUrl = url;
-		return this;
+	public IServiceHandler build(RpcConfigBean bean, String completeUrl) throws Exception {
+		URI u = new URI(completeUrl);
+		PacketClient pc = new PacketClient(new InetSocketAddress(u.getHost(), u.getPort()));
+		PacketInvoker invoker = new PacketInvoker();
+		RpcClient cli = new RpcClient(pc, invoker, new JsonConverter());
+		cli.setConnectTimeout(bean.connectTimeout);
+		cli.setConnectRetryTimes(bean.connectRetryTimes);
+		cli.setSleepBetweenRetryTime(bean.connectSleepBetweenRetry);
+		invoker.setRpcHandleTimeout(bean.rpcTimeout);
+		// Try to connect now.
+		cli.connect();
+		// Ready to return.
+		return new RpcServiceHandler(completeUrl, cli, bean.rpcErrorBlockTime, true);
 	}
 
-	/**
-	 * Override super method
-	 * @see org.apache.niolex.network.cli.init.RpcClientBuilder#setConnectTimeout(int)
-	 */
-	@Override
-	public RpcClientBuilder setConnectTimeout(int time) {
-		this.connectTimeout = time;
-		return this;
-	}
-
-	/**
-	 * Override super method
-	 * @see org.apache.niolex.network.cli.init.RpcClientBuilder#setRpcHandleTimeout(int)
-	 */
-	@Override
-	public RpcClientBuilder setRpcHandleTimeout(int time) {
-		this.rpcHandleTimeout = time;
-		return this;
-	}
-
-	/**
-	 * Override super method
-	 * @see org.apache.niolex.network.cli.init.RpcClientBuilder#build()
-	 */
-	@Override
-	public RpcClient build() {
-		String[] arr = this.clientUrl.split(":");
-		if (arr.length != 2) {
-			throw new IllegalArgumentException("Invalid url: " + this.clientUrl);
-		}
-		int port = Integer.parseInt(arr[1]);
-		SocketClient pc = new SocketClient(new InetSocketAddress(arr[0], port));
-		SingleInvoker invoker = new SingleInvoker();
-		RpcClient rc = new RpcClient(pc, invoker, new JsonConverter());
-		rc.setConnectTimeout(connectTimeout > rpcHandleTimeout ? connectTimeout : rpcHandleTimeout);
-		return rc;
-	}
 }

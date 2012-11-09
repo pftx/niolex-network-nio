@@ -1,5 +1,5 @@
 /**
- * RpcClientBuilder.java
+ * ServiceHandlerBuilder.java
  *
  * Copyright 2012 Niolex, Inc.
  *
@@ -17,38 +17,23 @@
  */
 package org.apache.niolex.network.cli.init;
 
-import org.apache.niolex.network.rpc.RpcClient;
+import org.apache.niolex.network.cli.IServiceHandler;
+import org.apache.niolex.network.cli.conf.RpcConfigBean;
 
 /**
- * Create rpc client from the complete connection Url.
+ * Create the service handler from the complete connection Url and config bean.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
  * @Date: 2012-6-3
  */
-public interface RpcClientBuilder {
+public interface ServiceHandlerBuilder {
 
 	/**
-	 * Create rpc client from the complete connection Url
-	 * @param url
-	 * @return
+	 * Build the service handler instance according to the parameters.
+	 *
+	 * @return the created service handler.
 	 */
-	public RpcClientBuilder setClientUrl(String url);
-
-	/**
-	 * Set the Socket Connect timeout for this client
-	 */
-	public RpcClientBuilder setConnectTimeout(int time);
-
-	/**
-	 *Set the Rpc handle timeout(read timeout) for this client
-	 */
-	public RpcClientBuilder setRpcHandleTimeout(int time);
-
-	/**
-	 * Build the client instance according to the previous parameters.
-	 * @return
-	 */
-	public RpcClient build();
+	public IServiceHandler build(RpcConfigBean bean, String completeUrl) throws Exception;
 
 }

@@ -17,13 +17,14 @@
  */
 package org.apache.niolex.network.cli.bui;
 
-import static org.junit.Assert.assertEquals;
-
 import java.io.IOException;
 
-import org.apache.niolex.network.cli.bui.JsonRpcBuilder;
-import org.apache.niolex.network.demo.json.RpcService;
+import org.apache.niolex.network.cli.IServiceHandler;
+import org.apache.niolex.network.cli.conf.RpcConfigBean;
+import org.apache.niolex.network.demo.json.DemoJsonRpcServer;
 import org.apache.niolex.network.rpc.RpcClient;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
@@ -33,34 +34,38 @@ import org.junit.Test;
  */
 public class JsonRpcBuilderTest {
 
+	@BeforeClass
+	public static void up() throws IOException {
+		DemoJsonRpcServer.main(null);
+	}
+
+	@AfterClass
+	public static void down() {
+		DemoJsonRpcServer.stop();
+	}
+
 	/**
 	 * Test method for {@link org.apache.niolex.network.cli.bui.JsonRpcBuilder#getInstance(java.lang.String)}.
 	 * @throws IOException
 	 */
 	@Test
-	public void testGetInstanceString() throws IOException {
+	public void testBuild() throws Exception {
+		RpcConfigBean bean = new RpcConfigBean("a");
 		JsonRpcBuilder factory = new JsonRpcBuilder();
-		factory.setClientUrl("10.22.241.233:8808");
-		factory.setConnectTimeout(5000000);
-		factory.setRpcHandleTimeout(10000);
-		RpcClient cc = factory.build();
-		cc.connect();
-		RpcService ser = cc.getService(RpcService.class);
-		for (int i = 0; i < 10; ++i) {
-			int r = ser.add(2, 3214, 123, 12, i);
-			System.out.println(r);
-			assertEquals(3351 + i, r);
-		}
+		bean.connectTimeout = 5000;
+		bean.rpcTimeout = 100;
+		IServiceHandler cc = factory.build(bean, "abc://localhost:8808/gogogo");
+		((RpcClient)cc.getHandler()).stop();
 	}
 
 	@Test
-	public void testBuild() throws Exception {
+	public void testBuild2() throws Exception {
+		RpcConfigBean bean = new RpcConfigBean("a");
 		JsonRpcBuilder factory = new JsonRpcBuilder();
-		factory.setClientUrl("10.22.241.233:8808");
-		factory.setConnectTimeout(100);
-		factory.setRpcHandleTimeout(5000);
-		RpcClient cc = factory.build();
-		cc.stop();
+		bean.connectTimeout = 345;
+		bean.rpcTimeout = 10000;
+		IServiceHandler cc = factory.build(bean, "abc://localhost:8808/gogogo");
+		((RpcClient)cc.getHandler()).stop();
 	}
 
 }

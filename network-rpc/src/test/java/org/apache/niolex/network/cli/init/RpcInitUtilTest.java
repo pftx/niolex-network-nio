@@ -19,9 +19,10 @@ package org.apache.niolex.network.cli.init;
 
 import static org.mockito.Mockito.mock;
 
+import org.apache.niolex.network.cli.bui.JsonRpcBuilder;
 import org.apache.niolex.network.cli.conf.RpcConfigBean;
-import org.apache.niolex.network.cli.init.RpcClientBuilder;
-import org.apache.niolex.network.cli.init.RpcClientFactory;
+import org.apache.niolex.network.cli.init.ServiceHandlerBuilder;
+import org.apache.niolex.network.cli.init.ServiceHandlerFactory;
 import org.apache.niolex.network.cli.init.RpcInitUtil;
 import org.junit.Test;
 
@@ -33,31 +34,30 @@ import org.junit.Test;
 public class RpcInitUtilTest {
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.cli.init.RpcInitUtil#buildProxy(org.apache.niolex.network.cli.conf.RpcConfigBean, org.apache.niolex.network.cli.init.RpcClientFactory)}.
+	 * Test method for {@link org.apache.niolex.network.cli.init.RpcInitUtil#buildProxy(org.apache.niolex.network.cli.conf.RpcConfigBean, org.apache.niolex.network.cli.init.ServiceHandlerFactory)}.
 	 */
 	@SuppressWarnings("static-access")
 	@Test(expected=IllegalStateException.class)
 	public void testBuildProxy() {
 		RpcInitUtil u = new RpcInitUtil();
-		RpcClientBuilder factory = mock(RpcClientBuilder.class);
-		RpcClientFactory.registerBuilder("network/json", factory);
+		ServiceHandlerBuilder factory = mock(ServiceHandlerBuilder.class);
+		ServiceHandlerFactory.registerBuilder("network/json", factory);
 		RpcConfigBean conf = new RpcConfigBean("d");
 		conf.serverList = new String[0];
 		u.buildProxy(conf);
 	}
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.cli.init.RpcInitUtil#buildProxy(org.apache.niolex.network.cli.conf.RpcConfigBean, org.apache.niolex.network.cli.init.RpcClientFactory)}.
+	 * Test method for {@link org.apache.niolex.network.cli.init.RpcInitUtil#buildProxy(org.apache.niolex.network.cli.conf.RpcConfigBean, org.apache.niolex.network.cli.init.ServiceHandlerFactory)}.
 	 */
 	@SuppressWarnings("static-access")
 	@Test(expected=IllegalStateException.class)
 	public void testBuildProxy2() {
 		RpcInitUtil u = new RpcInitUtil();
-		RpcClientBuilder factory = mock(RpcClientBuilder.class);
-		RpcClientFactory.registerBuilder("network/json", factory);
+		ServiceHandlerFactory.registerBuilder("network/json", new JsonRpcBuilder());
 		RpcConfigBean conf = new RpcConfigBean("d");
 		conf.serverList = new String[1];
-		conf.serverList[0] = "locidd:3022";
+		conf.serverList[0] = "locidd:3022df";
 		u.buildProxy(conf);
 	}
 
