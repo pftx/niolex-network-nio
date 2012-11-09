@@ -49,11 +49,9 @@ public class RpcServiceFactory {
 	private RpcConfiger configer;
 
 	/**
-	 * Init this Factory with a property file and a client factory.
+	 * Init this Factory with a property file.
 	 *
-	 * Constructor
 	 * @param fileName
-	 * @param factory
 	 */
 	protected RpcServiceFactory(String fileName) {
 		configer = new RpcConfiger(fileName);
@@ -70,10 +68,9 @@ public class RpcServiceFactory {
 	}
 
 	/**
-	 * Create a new factory with a property file and a client factory.
+	 * Create a new factory with a property file.
 	 *
 	 * @param fileName
-	 * @param factory
 	 * @return
 	 */
 	public static final RpcServiceFactory getInstance(String fileName) {

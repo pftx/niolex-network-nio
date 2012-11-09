@@ -63,7 +63,7 @@ public class RpcConnectionHandler implements IServiceHandler {
 
 	/**
 	 * This is the override of super method.
-	 * @see org.apache.niolex.network.cli.IServiceHandler#toString()
+	 * @see java.lang.Object#toString()
 	 */
 	@Override
 	public String toString() {

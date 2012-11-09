@@ -33,7 +33,7 @@ import org.apache.niolex.network.rpc.ser.ProtoStuffConverter;
 public class DemoStuffRpcClient {
 
 	/**
-	 * @param args
+	 * @param a
 	 * @throws IOException
 	 */
 	public static void main(String[] a) throws IOException {

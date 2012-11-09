@@ -34,7 +34,7 @@ public class PersonServiceImpl implements PersonService {
 
 	/**
 	 * Override super method
-	 * @see PersonService#addPerson(Person, PhoneNumber)
+	 * @see org.apache.niolex.network.demo.proto.PersonService#addPerson(org.apache.niolex.network.demo.proto.PersonProtos.Person, org.apache.niolex.network.demo.proto.PersonProtos.Person.PhoneNumber)
 	 */
 	@Override
 	public void addPerson(Person p, PhoneNumber number) {
@@ -44,7 +44,7 @@ public class PersonServiceImpl implements PersonService {
 
 	/**
 	 * Override super method
-	 * @see org.apache.niolex.network.demo.proto.PersonService#getPerson(PhoneNumber)
+	 * @see org.apache.niolex.network.demo.proto.PersonService#getPerson(org.apache.niolex.network.demo.proto.PersonProtos.Person.PhoneNumber)
 	 */
 	@Override
 	public Person getPerson(PhoneNumber number) {

@@ -41,7 +41,6 @@ public class RpcInitUtil {
 	 * Create RPC proxy from configuration.
 	 *
 	 * @param conf
-	 * @param factory
 	 * @return
 	 */
 	public static RetryHandler buildProxy(RpcConfigBean conf) {
