@@ -17,6 +17,7 @@
  */
 package org.apache.niolex.network.demo.json;
 
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 
@@ -66,4 +67,14 @@ public class DemoJsonRpcServerTest {
 		new RpcServiceImpl().testMe();
 		SocketJsonRpcClient.assertt(1, 0, "OSDODKK");
 	}
+
+
+    /**
+     * The Server Demo
+     * @param args
+     */
+    public static void main(String[] args) throws IOException {
+    	DemoJsonRpcServer.main(args);
+    }
+
 }

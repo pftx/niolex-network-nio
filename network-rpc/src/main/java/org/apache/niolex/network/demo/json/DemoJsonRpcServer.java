@@ -33,6 +33,7 @@ import org.apache.niolex.network.server.MultiNioServer;
 public class DemoJsonRpcServer {
 
     private static MultiNioServer s = new MultiNioServer();
+    private static HeartBeatAdapter ada;
 
     /**
      * The Server Demo
@@ -48,7 +49,7 @@ public class DemoJsonRpcServer {
         	handler = new RpcPacketHandler();
         }
         handler.setConverter(new JsonConverter());
-        HeartBeatAdapter ada = new HeartBeatAdapter(handler);
+        ada = new HeartBeatAdapter(handler);
         ada.setHeartBeatInterval(2000);
         ada.setForceHeartBeat(true);
         s.setPacketHandler(ada);
@@ -60,10 +61,12 @@ public class DemoJsonRpcServer {
         confs[0] = c;
 		handler.setRpcConfigs(confs);
 
+		ada.start();
         s.start();
     }
 
     public static void stop() {
         s.stop();
+        ada.stop();
     }
 }
