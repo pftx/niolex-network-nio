@@ -31,13 +31,15 @@ public interface IServiceHandler extends InvocationHandler {
 
 	/**
 	 * Get the Service Url of the underlying rpc client.
-	 * @return
+	 *
+	 * @return the current service url
 	 */
 	public abstract String getServiceUrl();
 
 	/**
 	 * Whether this client is ready or not.
-	 * @return
+	 *
+	 * @return true if this client is ready, false otherwise
 	 */
 	public abstract boolean isReady();
 
@@ -51,7 +53,8 @@ public interface IServiceHandler extends InvocationHandler {
 
 	/**
 	 * Get the underlying client stub, which is also an InvocationHandler
-	 * @return
+	 *
+	 * @return the underlying client stub
 	 */
 	public InvocationHandler getHandler();
 

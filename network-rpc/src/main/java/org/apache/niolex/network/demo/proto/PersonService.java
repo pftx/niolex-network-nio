@@ -22,9 +22,10 @@ import org.apache.niolex.network.demo.proto.PersonProtos.Person.PhoneNumber;
 import org.apache.niolex.network.rpc.anno.RpcMethod;
 
 /**
+ * Demo interface
+ *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
- * @version 1.0.0
- * @Date: 2012-6-5
+ * @version 1.0.0, Date: 2012-6-5
  */
 public interface PersonService {
 

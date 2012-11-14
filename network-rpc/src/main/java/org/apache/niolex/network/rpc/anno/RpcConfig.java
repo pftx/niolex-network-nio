@@ -28,7 +28,6 @@ import java.lang.annotation.Target;
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version @version@, $Date: 2010-10-18$
- *
  */
 
 @Documented

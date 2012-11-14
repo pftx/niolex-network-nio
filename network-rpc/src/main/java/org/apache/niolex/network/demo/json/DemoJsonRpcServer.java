@@ -26,9 +26,10 @@ import org.apache.niolex.network.rpc.ser.JsonConverter;
 import org.apache.niolex.network.server.MultiNioServer;
 
 /**
+ * Demo json server.
+ *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
- * @version 1.0.0
- * @Date: 2012-6-2
+ * @version 1.0.0, Date: 2012-6-2
  */
 public class DemoJsonRpcServer {
 

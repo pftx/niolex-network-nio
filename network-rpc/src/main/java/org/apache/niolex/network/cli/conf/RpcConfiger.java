@@ -31,7 +31,6 @@ public class RpcConfiger extends BaseConfiger<RpcConfigBean> {
 	/**
 	 * Generated constructor from super class.
 	 *
-	 * @see {@link BaseConfiger#BaseConfiger(String)}
 	 * @param fileName
 	 * @throws IOException
 	 */
@@ -43,7 +42,6 @@ public class RpcConfiger extends BaseConfiger<RpcConfigBean> {
 	/**
 	 * Generated constructor from super class.
 	 *
-	 * @see {@link BaseConfiger#BaseConfiger(InputStream, String)}
 	 * @param inStream
 	 * @param instanceMark
 	 * @throws IOException

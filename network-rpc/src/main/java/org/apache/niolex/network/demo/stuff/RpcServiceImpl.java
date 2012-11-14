@@ -21,9 +21,10 @@ package org.apache.niolex.network.demo.stuff;
 import org.apache.niolex.commons.util.DateTimeUtil;
 
 /**
+ * Demo implementation.
+ *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
- * @version 1.0.0
- * @Date: 2012-6-2
+ * @version 1.0.0, Date: 2012-6-2
  */
 public class RpcServiceImpl implements RpcService {
 

@@ -18,9 +18,10 @@
 package org.apache.niolex.network.demo.stuff;
 
 /**
+ * Protostuff can not translate direct arrays, so we wrap it.
+ *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
- * @version 1.0.0
- * @Date: 2012-9-4
+ * @version 1.0.0, Date: 2012-9-4
  */
 public class IntArray {
 

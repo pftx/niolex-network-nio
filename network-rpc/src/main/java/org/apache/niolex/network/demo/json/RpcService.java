@@ -22,9 +22,10 @@ import java.util.List;
 import org.apache.niolex.network.rpc.anno.RpcMethod;
 
 /**
+ * The demo interface
+ *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
- * @version 1.0.0
- * @Date: 2012-6-1
+ * @version 1.0.0, Date: 2012-6-1
  */
 public interface RpcService {
 

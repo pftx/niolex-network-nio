@@ -27,9 +27,10 @@ import org.apache.niolex.network.rpc.RpcClient;
 import org.apache.niolex.network.rpc.ser.JsonConverter;
 
 /**
+ * Demo client
+ *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
- * @version 1.0.0
- * @Date: 2012-6-2
+ * @version 1.0.0, Date: 2012-6-2
  */
 public class DemoJsonRpcClient {
 

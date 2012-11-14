@@ -20,9 +20,10 @@ package org.apache.niolex.network.demo.stuff;
 import org.apache.niolex.network.rpc.anno.RpcMethod;
 
 /**
+ * Demo interface.
+ *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
- * @version 1.0.0
- * @Date: 2012-6-1
+ * @version 1.0.0, Date: 2012-6-1
  */
 public interface RpcService {
 

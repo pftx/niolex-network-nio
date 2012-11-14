@@ -72,8 +72,7 @@ public class RpcException extends RuntimeException {
 	 * The meaning is in the name.
 	 *
 	 * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
-	 * @version 1.0.0
-	 * @Date: 2012-11-2
+	 * @version 1.0.0, Date: 2012-11-2
 	 */
 	public static enum Type {
 		TIMEOUT, NOT_CONNECTED, CONNECTION_CLOSED, CONNECTION_LOST, METHOD_NOT_FOUND, ERROR_PARSE_PARAMS,

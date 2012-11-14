@@ -24,9 +24,10 @@ import org.apache.niolex.network.demo.proto.PersonProtos.Person;
 import org.apache.niolex.network.demo.proto.PersonProtos.Person.PhoneNumber;
 
 /**
+ * Demo implementation.
+ *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
- * @version 1.0.0
- * @Date: 2012-6-5
+ * @version 1.0.0, Date: 2012-6-5
  */
 public class PersonServiceImpl implements PersonService {
 

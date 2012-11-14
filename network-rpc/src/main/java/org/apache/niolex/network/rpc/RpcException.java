@@ -74,8 +74,7 @@ public class RpcException extends RuntimeException {
 	 * The rpc exception type. User can get the detailed explanation from this enum.
 	 *
 	 * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
-	 * @version 1.0.0
-	 * @Date: 2012-11-8
+	 * @version 1.0.0, Date: 2012-11-8
 	 */
 	public static enum Type {
 		TIMEOUT("Rpc timeout, maybe network problem, server busy etc."),

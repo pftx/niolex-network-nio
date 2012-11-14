@@ -26,9 +26,10 @@ import org.apache.niolex.network.server.MultiNioServer;
 import org.apache.niolex.network.server.NioServer;
 
 /**
+ * Demo server.
+ *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
- * @version 1.0.0
- * @Date: 2012-6-5
+ * @version 1.0.0, Date: 2012-6-5
  */
 public class ProtoRpcServer {
 

@@ -28,9 +28,10 @@ import org.apache.niolex.network.rpc.RpcClient;
 import org.apache.niolex.network.rpc.ser.ProtoBufferConverter;
 
 /**
+ * Demo client
+ *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
- * @version 1.0.0
- * @Date: 2012-6-5
+ * @version 1.0.0, Date: 2012-6-5
  */
 public class DemoProtoRpcClient {
 

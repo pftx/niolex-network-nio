@@ -134,7 +134,7 @@ public class RetryHandler implements InvocationHandler {
 	/**
 	 * Get the internal list of handlers.
 	 *
-	 * @return
+	 * @return the managed handler list
 	 */
 	public List<IServiceHandler> getHandlers() {
 		return handlers;

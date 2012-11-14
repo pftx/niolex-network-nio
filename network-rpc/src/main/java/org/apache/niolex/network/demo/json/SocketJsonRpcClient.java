@@ -28,9 +28,10 @@ import org.apache.niolex.network.rpc.SingleInvoker;
 import org.apache.niolex.network.rpc.ser.JsonConverter;
 
 /**
+ * Socket client.
+ *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
- * @version 1.0.0
- * @Date: 2012-6-13
+ * @version 1.0.0, Date: 2012-6-13
  */
 public class SocketJsonRpcClient {
 
