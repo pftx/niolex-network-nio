@@ -38,8 +38,7 @@ import org.slf4j.LoggerFactory;
  * Common utils for Rpc.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
- * @version 1.0.0
- * @Date: 2012-6-1
+ * @version 1.0.0, Date: 2012-6-1
  */
 public abstract class RpcUtil {
 	private static final Logger LOG = LoggerFactory.getLogger(RpcUtil.class);
@@ -54,8 +53,8 @@ public abstract class RpcUtil {
 	 * This is for those protocol which needs static code change to do
 	 * object serialization.
 	 *
-	 * @param ex
-	 * @return
+	 * @param ex the exception need to serialize
+	 * @return the serialized byte array
 	 */
 	public static final byte[] serializeRpcException(RpcException ex) {
 		StringBuilder sb = new StringBuilder();
@@ -71,8 +70,8 @@ public abstract class RpcUtil {
 	/**
 	 * Parse the rpc exception from this byte array.
 	 *
-	 * @param data
-	 * @return
+	 * @param data the serialized byte array
+	 * @return the exception
 	 */
 	public static final RpcException parseRpcException(byte[] data) {
 		String[] strs = StringUtil.utf8ByteToStr(data).split(SEP_RPCEX);
@@ -83,13 +82,14 @@ public abstract class RpcUtil {
 	}
 
 	/**
-	 * This is the class to return a type.
+	 * This is the class to capture Java Type.
+	 * Use this with JacksonJson to return a type.
 	 *
 	 * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
-	 * @version 1.0.0
-	 * @Date: 2012-7-24
+	 * @version 1.0.0, Date: 2012-7-24
 	 */
 	private static class TypeRe<T> extends TypeReference<T> {
+		// The real type
 		private Type type;
 
 		public TypeRe(Type type) {
@@ -106,8 +106,8 @@ public abstract class RpcUtil {
 	/**
 	 * Decode parameters to JavaType.
 	 *
-	 * @param generic
-	 * @return
+	 * @param generic The generic Java type array
+	 * @return the decoded list
 	 */
 	public static final List<TypeRe<?>> decodeParams(Type[] generic) {
 		List<TypeRe<?>> list = new ArrayList<TypeRe<?>>(generic.length);
@@ -120,9 +120,9 @@ public abstract class RpcUtil {
 	/**
 	 * prepare parameters, read them from the data, as the type specified by the second parameter.
 	 *
-	 * @param data
-	 * @param generic
-	 * @return
+	 * @param data the parameters byte array
+	 * @param generic the generic Java type array
+	 * @return the decoded parameters
 	 * @throws IOException
 	 */
 	public static final Object[] parseJson(byte[] data, Type[] generic) throws IOException {
@@ -138,9 +138,10 @@ public abstract class RpcUtil {
 
 	/**
 	 * Generate Key for this PacketData.
+	 * The first two bytes are packet code, then the packet version, then the reserved.
 	 *
-	 * @param rc
-	 * @return
+	 * @param rc the packet
+	 * @return the generated key
 	 */
 	public static final int generateKey(PacketData rc) {
 		byte r = rc.getReserved();
@@ -152,11 +153,12 @@ public abstract class RpcUtil {
 
 	/**
 	 * Generate Key from a short and two bytes.
+	 * The output value will be "abc" concatenation.
 	 *
 	 * @param a
 	 * @param b
 	 * @param c
-	 * @return
+	 * @return the result
 	 */
 	public static final int generateKey(short a, byte b, byte c) {
 		int l = a << 16;
@@ -167,9 +169,9 @@ public abstract class RpcUtil {
 	/**
 	 * Generate the HTTP basic Authentication header.
 	 *
-	 * @param username
-	 * @param password
-	 * @return
+	 * @param username the user name
+	 * @param password the password
+	 * @return the basic authentication header
 	 */
     public static String authHeader(String username, String password) {
         String authString = username + ":" + password;
@@ -178,9 +180,10 @@ public abstract class RpcUtil {
 
     /**
      * Generate a random string as the session ID of this client.
+     * The generation is based on random number and system time stamp.
      *
-     * @param length
-     * @return
+     * @param length the length of session ID user needed
+     * @return the generated session ID
      */
     public static String genSessionId(int length) {
         String tempId = "";
@@ -197,10 +200,10 @@ public abstract class RpcUtil {
     /**
      * Check the connectivity of this url according to the given timeout.
      *
-     * @param completeUrl
-     * @param connectTimeout
-     * @param readTimeout
-     * @return
+     * @param completeUrl the complete url to server
+     * @param connectTimeout the socket connect timeout
+     * @param readTimeout the socket read timeout
+     * @return true if connected to server, false otherwise
      */
     public static boolean checkServerStatus(String completeUrl, int connectTimeout, int readTimeout) {
 		try {

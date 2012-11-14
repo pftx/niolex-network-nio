@@ -31,8 +31,7 @@ import org.codehaus.jackson.map.type.TypeFactory;
  * Using JSON Buffer to serialize data.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
- * @version 1.0.0
- * @Date: 2012-11-7
+ * @version 1.0.0, Date: 2012-11-7
  */
 public class JsonConverter implements IConverter {
 
