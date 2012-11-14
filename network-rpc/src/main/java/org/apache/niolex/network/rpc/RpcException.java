@@ -103,7 +103,7 @@ public class RpcException extends RuntimeException {
 
 		/**
 		 * Get the detailed explanation for error type.
-		 * @return
+		 * @return the detailed explanation
 		 */
 		public String getExplanation() {
 			return explanation;
