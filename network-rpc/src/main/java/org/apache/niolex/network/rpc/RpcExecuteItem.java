@@ -23,8 +23,7 @@ import java.lang.reflect.Method;
  * Rpc execute item, internal usage.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
- * @version 1.0.0
- * @Date: 2012-6-1
+ * @version 1.0.0, Date: 2012-6-1
  */
 public class RpcExecuteItem {
 

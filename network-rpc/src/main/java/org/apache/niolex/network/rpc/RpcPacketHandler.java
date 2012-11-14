@@ -39,8 +39,7 @@ import org.slf4j.LoggerFactory;
  * Server side RPC packet handler.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
- * @version 1.0.0
- * @Date: 2012-6-1
+ * @version 1.0.0, Date: 2012-6-1
  */
 public class RpcPacketHandler implements IPacketHandler {
 	protected static final Logger LOG = LoggerFactory.getLogger(RpcPacketHandler.class);
@@ -119,8 +118,7 @@ public class RpcPacketHandler implements IPacketHandler {
 	 * Internal usage, Run the detailed Rpc execution.
 	 *
 	 * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
-	 * @version 1.0.0
-	 * @Date: 2012-6-1
+	 * @version 1.0.0, Date: 2012-6-1
 	 */
 	private class RpcExecute implements Runnable {
 		private Object host;
@@ -247,7 +245,7 @@ public class RpcPacketHandler implements IPacketHandler {
 	/**
 	 * Get the number of methods invocations we are handling currently.
 	 *
-	 * @return
+	 * @return current size
 	 */
 	public int getQueueSize() {
 		return queueSize.get();

@@ -89,8 +89,7 @@ public class RpcClient implements InvocationHandler, IPacketHandler {
 	 * The connection status of this RpcClient.
 	 *
 	 * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
-	 * @version 1.0.0
-	 * @Date: 2012-6-2
+	 * @version 1.0.0, Date: 2012-6-2
 	 */
 	public static enum Status {
 		INNITIAL, CONNECTED, CLOSED
@@ -246,7 +245,7 @@ public class RpcClient implements InvocationHandler, IPacketHandler {
 	 * @param ret
 	 * @param type
 	 * @param isEx
-	 * @return
+	 * @return the object
 	 * @throws Exception
 	 */
 	protected Object prepareReturn(byte[] ret, Type type, boolean isEx) throws Exception {
@@ -315,7 +314,8 @@ public class RpcClient implements InvocationHandler, IPacketHandler {
 
 	/**
 	 * Get Connection Status of this rpc client.
-	 * @return
+	 *
+	 * @return current status
 	 */
 	public Status getConnStatus() {
 		return connStatus;

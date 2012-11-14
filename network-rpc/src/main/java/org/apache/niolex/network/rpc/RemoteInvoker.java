@@ -26,8 +26,7 @@ import org.apache.niolex.network.PacketData;
  * and wait for the results from server side.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
- * @version 1.0.0
- * @Date: 2012-6-13
+ * @version 1.0.0, Date: 2012-6-13
  */
 public interface RemoteInvoker extends IPacketHandler {
 
@@ -35,9 +34,9 @@ public interface RemoteInvoker extends IPacketHandler {
 	 * Invoke the write methods in the client, send packet data to server
 	 * and wait for the response.
 	 *
-	 * @param packet
-	 * @param client
-	 * @return
+	 * @param packet the data need to send
+	 * @param client the client used to send this data
+	 * @return the packet returned from server
 	 */
 	public PacketData invoke(PacketData packet, IClient client);
 

@@ -34,8 +34,7 @@ import org.slf4j.LoggerFactory;
  * @see org.apache.niolex.network.client.PacketClient
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
- * @version 1.0.0
- * @Date: 2012-6-13
+ * @version 1.0.0, Date: 2012-6-13
  */
 public class PacketInvoker implements RemoteInvoker {
 	private static final Logger LOG = LoggerFactory.getLogger(PacketInvoker.class);
@@ -107,7 +106,7 @@ public class PacketInvoker implements RemoteInvoker {
 	/**
 	 * Get the current timeout.
 	 *
-	 * @return
+	 * @return the current timeout
 	 */
 	public int getRpcHandleTimeout() {
 		return rpcHandleTimeout;
@@ -117,7 +116,7 @@ public class PacketInvoker implements RemoteInvoker {
 	 * The rpc holding thread will return null if the result is not ready after
 	 * this time.
 	 *
-	 * @param rpcHandleTimeout
+	 * @param rpcHandleTimeout the timeout to set to
 	 */
 	public void setRpcHandleTimeout(int rpcHandleTimeout) {
 		this.rpcHandleTimeout = rpcHandleTimeout;

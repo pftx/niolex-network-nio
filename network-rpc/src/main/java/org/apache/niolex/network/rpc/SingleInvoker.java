@@ -27,8 +27,7 @@ import org.apache.niolex.network.PacketData;
  *
  * @see org.apache.niolex.network.client.SocketClient
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
- * @version 1.0.0
- * @Date: 2012-6-13
+ * @version 1.0.0, Date: 2012-6-13
  */
 public class SingleInvoker implements RemoteInvoker {
 	private PacketData res;

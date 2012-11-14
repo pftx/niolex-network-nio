@@ -24,8 +24,7 @@ import java.lang.reflect.Type;
  * and vice-versa.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
- * @version 1.0.0
- * @Date: 2012-11-7
+ * @version 1.0.0, Date: 2012-11-7
  */
 public interface IConverter {
 
@@ -33,29 +32,29 @@ public interface IConverter {
 	 * Read parameters from the data.
 	 * generic can not be null, we already checked.
 	 *
-	 * @param data
-	 * @param generic
-	 * @return
-	 * @throws Exception
+	 * @param data the byte array
+	 * @param generic the parameters type array
+	 * @return the parameters array
+	 * @throws Exception when error occurs
 	 */
 	public Object[] prepareParams(byte[] data, Type[] generic) throws Exception;
 
 	/**
 	 * Serialize arguments objects into byte array.
 	 *
-	 * @param args
-	 * @return
-	 * @throws Exception
+	 * @param args the parameters array
+	 * @return the serialized byte array
+	 * @throws Exception when error occurs
 	 */
 	public byte[] serializeParams(Object[] args) throws Exception;
 
 	/**
 	 * De-serialize returned byte array into objects.
 	 *
-	 * @param ret
-	 * @param type
-	 * @return
-	 * @throws Exception
+	 * @param ret the return byte array
+	 * @param type the return object type
+	 * @return the returned object
+	 * @throws Exception when error occurs
 	 */
 	public Object prepareReturn(byte[] ret, Type type) throws Exception;
 
@@ -63,9 +62,9 @@ public interface IConverter {
 	 * Serialize returned object into byte array.
 	 * ret can not be null, we already checked.
 	 *
-	 * @param ret
-	 * @return
-	 * @throws Exception
+	 * @param ret the object to return
+	 * @return the serialized byte array
+	 * @throws Exception when error occurs
 	 */
 	public byte[] serializeReturn(Object ret) throws Exception;
 
