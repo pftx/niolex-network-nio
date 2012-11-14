@@ -23,10 +23,13 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
+import org.apache.niolex.commons.reflect.FieldUtil;
 import org.apache.niolex.commons.reflect.MethodUtil;
 import org.apache.niolex.network.rpc.RpcException;
 import org.junit.Before;
@@ -101,6 +104,19 @@ public class RetryHandlerTest {
 			flag = true;
 		}
 		assertTrue(flag);
+	}
+
+	@Test
+	public void testInvokeOverMax() throws Throwable {
+		Field idxField = FieldUtil.getField(RetryHandler.class, "idx");
+		idxField.setAccessible(true);
+		AtomicInteger idx = (AtomicInteger)idxField.get(retryHandler);
+		idx.set(Integer.MAX_VALUE - 1000);
+		retryHandler.invoke(handler1, null, null);
+		retryHandler.invoke(handler1, null, null);
+		retryHandler.invoke(handler1, null, null);
+		System.out.println("DKDKDK " + idx.get());
+		assertTrue(idx.get() < 8);
 	}
 
 	@Test
