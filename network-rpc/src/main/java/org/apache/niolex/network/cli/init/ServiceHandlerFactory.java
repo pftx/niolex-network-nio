@@ -21,11 +21,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * The factory method of ServiceHandlerBuilder.
+ * The factory of {{@link ServiceHandlerBuilder}.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
- * @version 1.0.0
- * @Date: 2012-6-19
+ * @version 1.0.0, Date: 2012-6-19
  */
 public class ServiceHandlerFactory {
 
@@ -37,8 +36,8 @@ public class ServiceHandlerFactory {
 	/**
 	 * Register builder.
 	 *
-	 * @param serviceType
-	 * @param builder
+	 * @param serviceType the service type this builder is capable of.
+	 * @param builder the builder instance.
 	 */
 	public static void registerBuilder(String serviceType, ServiceHandlerBuilder builder) {
 		builderMap.put(serviceType, builder);
@@ -48,7 +47,8 @@ public class ServiceHandlerFactory {
 	 * Get builder for this service type.
 	 *
 	 * @param serviceType
-	 * @return
+	 * @return the builder for this service type
+	 * @throws IllegalArgumentException if we can not find any builder for this service type
 	 */
 	public static ServiceHandlerBuilder getBuilder(String serviceType) {
 		ServiceHandlerBuilder builder = builderMap.get(serviceType);

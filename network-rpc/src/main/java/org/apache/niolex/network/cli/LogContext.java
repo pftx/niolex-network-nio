@@ -18,54 +18,64 @@
 package org.apache.niolex.network.cli;
 
 /**
- * The rpc framework use this class to write log prefix and set current service url.
+ * The rpc framework use this class to write log prefix and set current service url to it.
+ *
+ * User application need to subclass this,  we will get the global logid from it to maintain all
+ * the logs in a consistent logid.
+ *
+ * User need to override these two methods:
+ * {@link #setServerUrl(String)}
+ * {@link #getLogPrefix()}
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
- *
  * @version @version@, $Date: 2011-7-12$
- *
  */
-public abstract class LogContext {
+public class LogContext {
 
 	/**
-	 * This inner class, is just for unit test and demo run.
-	 * For products, please extend LogContext and create your own class.
+	 * This class is just for unit test and demo run.
+	 * For products, please extend LogContext and create your own subclass.
 	 */
-    private static LogContext INSTANCE = new LogContext() {
-
-        public String getLogPrefix() {
-            return "LOGID";
-        }
-
-        public void setServerUrl(String serverUrl) {
-        }
-
-    };
+    private static LogContext INSTANCE = new LogContext();
 
     /**
      * Inject a proper sub class of this LogContext.
-     * @param instance
+     *
+     * @param instance the instance to provide log prefix(i.e. log id) and store current
+     * service url
      */
     public static void setInstance(LogContext instance) {
         LogContext.INSTANCE = instance;
     }
 
     /**
-     * Return the log prefix for rpc framework. This framework will log with this prefix when
-     * something wrong.
-     * @return
+     * Just return GID here for demo & unit test.
+     *
+     * Subclass need to override this method to provide their own implementation,
+     * return the global log prefix for rpc framework. This framework will log with this prefix.
+     *
+     * @return the global logid or other log prefix
      */
-    public abstract String getLogPrefix();
+    protected String getLogPrefix() {
+    	return "GID";
+    }
 
     /**
-     * This rpc framework will inject the current server URL into this method.
-     * @param serverUrl
+     * Just do nothing here.
+     *
+     * Subclass need to override this method to provide their own implementation,
+     * this rpc framework will inject the current using server URL into this method.
+     *
+     * @param serverUrl the current using server url
      */
-    public abstract void setServerUrl(String serverUrl);
+    protected void setServerUrl(String serverUrl) {
+    	// Do nothing here, for demo.
+    }
 
     /**
      * Framework internal use only.
-     * @return
+     *
+     * @return current log prefix(i.e. logid)
      */
     static String prefix() {
         return INSTANCE.getLogPrefix();
@@ -73,7 +83,8 @@ public abstract class LogContext {
 
     /**
      * Framework internal use only.
-     * @param serverUrl
+     *
+     * @param serverUrl the current using server Url
      */
     static void serviceUrl(String serverUrl) {
         INSTANCE.setServerUrl(serverUrl);

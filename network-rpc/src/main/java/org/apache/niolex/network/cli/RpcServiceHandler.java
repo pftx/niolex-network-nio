@@ -25,11 +25,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Manage the Rpc Service Stub, deal with error block time.
+ * Manage the Rpc Service Client Stub, i.e. {@link org.apache.niolex.network.rpc.RpcClient},
+ * deal with error block functionality.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
- * @version 1.0.0
- * @Date: 2012-5-27
+ * @version 1.0.0, Date: 2012-5-27
  */
 public class RpcServiceHandler implements IServiceHandler {
 	private static final Logger LOG = LoggerFactory.getLogger(RpcServiceHandler.class);

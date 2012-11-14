@@ -28,9 +28,11 @@ import org.apache.niolex.network.rpc.RpcClient.Status;
  * This is the adapter to adapt RpcClient to IServiceHandler, which
  * is the interface could be managed by RetryHandler.
  *
+ * We disable the error block functionality in this class.
+ * If uesr want that, use {@link RpcServiceHandler}
+ *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
- * @version 1.0.0
- * @Date: 2012-6-3
+ * @version 1.0.3, Date: 2012-6-3
  */
 public class RpcConnectionHandler implements IServiceHandler {
 

@@ -57,6 +57,11 @@ public class RpcException extends RuntimeException {
 		this.type = type;
 	}
 
+	/**
+	 * Get the Rpc exception Type
+	 *
+	 * @return the Rpc exception Type
+	 */
 	public Type getType() {
 		return type;
 	}

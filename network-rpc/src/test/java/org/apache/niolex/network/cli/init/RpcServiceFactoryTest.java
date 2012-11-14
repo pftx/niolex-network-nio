@@ -54,9 +54,10 @@ public class RpcServiceFactoryTest {
 	 * Test method for
 	 * {@link org.apache.niolex.network.cli.init.RpcServiceFactory#getInstance(java.lang.String, org.apache.niolex.network.cli.init.ServiceHandlerFactory)}
 	 * .
+	 * @throws IOException
 	 */
 	@Test(expected = IllegalArgumentException.class)
-	public void testGetInstance() {
+	public void testGetInstance() throws IOException {
 		ServiceHandlerFactory.registerBuilder("network/json", new JsonRpcBuilder());
 		RpcServiceFactory in = RpcServiceFactory.getInstance("/org/apache/niolex/network/cli/bui/rpc.properties");
 		in.getService("nan", ServiceHandlerFactory.class);
@@ -66,9 +67,10 @@ public class RpcServiceFactoryTest {
 	/**
 	 * Test method for
 	 * {@link org.apache.niolex.network.cli.init.RpcServiceFactory#getService(java.lang.String, java.lang.Class)}.
+	 * @throws IOException
 	 */
 	@Test
-	public void testGetServiceStringClassOfT() {
+	public void testGetServiceStringClassOfT() throws IOException {
 		ServiceHandlerFactory.registerBuilder("network/json", new JsonRpcBuilder());
 		RpcServiceFactory factory = RpcServiceFactory.getInstance("/org/apache/niolex/network/cli/bui/rpc.properties");
 		LocalService ser = factory.getService(LocalService.class);
@@ -82,9 +84,10 @@ public class RpcServiceFactoryTest {
 	/**
 	 * Test method for
 	 * {@link org.apache.niolex.network.cli.init.RpcServiceFactory#getService(java.lang.String, java.lang.Class)}.
+	 * @throws IOException
 	 */
 	@Test
-	public void testGetServiceStringClassOfF() {
+	public void testGetServiceStringClassOfF() throws IOException {
 		ServiceHandlerFactory.registerBuilder("network/json", new JsonRpcBuilder());
 		RpcServiceFactory factory = RpcServiceFactory.getInstance("/org/apache/niolex/network/cli/bui/rpc.properties");
 		EfService ser = factory.getService(EfService.class);
@@ -97,9 +100,10 @@ public class RpcServiceFactoryTest {
 
 	/**
 	 * Test method for {@link org.apache.niolex.network.cli.init.RpcServiceFactory#getConfiger()}.
+	 * @throws IOException
 	 */
 	@Test
-	public void testGetConfiger() {
+	public void testGetConfiger() throws IOException {
 		ServiceHandlerFactory.registerBuilder("network/json", new JsonRpcBuilder());
 		RpcServiceFactory in = RpcServiceFactory.getInstance("/org/apache/niolex/network/cli/bui/rpc.properties");
 		RpcConfiger con = in.getConfiger();

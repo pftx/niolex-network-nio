@@ -19,6 +19,9 @@ package org.apache.niolex.network.cli.conf;
 
 import static org.junit.Assert.assertEquals;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Map;
 
 import org.apache.niolex.network.cli.conf.RpcConfigBean;
@@ -33,7 +36,16 @@ import org.junit.Test;
  *
  */
 public class RpcConfigerTest {
-    static RpcConfiger configer = new RpcConfiger("demo.properties");
+
+    static RpcConfiger configer;
+
+    static {
+    	try {
+			configer= new RpcConfiger("demo.properties");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+    }
 
     @Test
     public void doConfig_Stand_Alone() {
@@ -55,5 +67,14 @@ public class RpcConfigerTest {
         assertEquals(conf.serviceUrl, "/rpc/AcntService");
         assertEquals(conf.rpcTimeout, 12000);
     }
+
+	@Test
+	public void testRpcConfiger()
+	 throws Exception {
+		byte[] buf = "serviceUrl=/cgi-bin/services/WdgetService.cgi".getBytes();
+		InputStream ins = new ByteArrayInputStream(buf);
+		RpcConfiger confi = new RpcConfiger(ins, "demo.properties");
+		assertEquals("/cgi-bin/services/WdgetService.cgi", confi.getConfig().serviceUrl);
+	}
 
 }

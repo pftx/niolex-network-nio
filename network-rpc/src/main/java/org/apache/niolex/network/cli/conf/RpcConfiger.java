@@ -17,24 +17,57 @@
  */
 package org.apache.niolex.network.cli.conf;
 
+import java.io.IOException;
+import java.io.InputStream;
+
 /**
  * RpcConfiger, create RpcConfigBean here.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
- * @version 1.0.0
- * @Date: 2012-5-27
+ * @version 1.0.0, Date: 2012-5-27
  */
 public class RpcConfiger extends BaseConfiger<RpcConfigBean> {
 
-	public RpcConfiger(String fileName) {
+	/**
+	 * Generated constructor from super class.
+	 *
+	 * @see {@link BaseConfiger#BaseConfiger(String)}
+	 * @param fileName
+	 * @throws IOException
+	 */
+	public RpcConfiger(String fileName) throws IOException {
 		super(fileName);
 	}
 
+
+	/**
+	 * Generated constructor from super class.
+	 *
+	 * @see {@link BaseConfiger#BaseConfiger(InputStream, String)}
+	 * @param inStream
+	 * @param instanceMark
+	 * @throws IOException
+	 */
+	public RpcConfiger(InputStream inStream, String instanceMark) throws IOException {
+		super(inStream, instanceMark);
+	}
+
+	/**
+	 * Create RpcConfigBean here.
+	 *
+	 * Override super method
+	 * @see org.apache.niolex.network.cli.conf.BaseConfiger#newConfigBean(java.lang.String)
+	 */
 	@Override
 	protected RpcConfigBean newConfigBean(String groupName) {
 		return new RpcConfigBean(groupName);
 	}
 
+	/**
+	 * Get the default config if there is any.
+	 *
+	 * @return the default config bean if group not exist, null otherwise
+	 */
 	public RpcConfigBean getConfig() {
 		return (RpcConfigBean)super.getConfig(BaseConfiger.DEFAULT);
 	}

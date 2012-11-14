@@ -23,10 +23,11 @@ import org.slf4j.LoggerFactory;
 
 
 /**
+ * All the default configurable properties value are configured here.
+ * User can add a network-rpc.properties file to their classpath to change these values.
+ *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
- *
  * @version 1.0.0, $Date: 2011-7-11$
- *
  */
 public abstract class Constants {
     private static final Logger LOG = LoggerFactory.getLogger(Constants.class);

@@ -23,10 +23,14 @@ import java.util.Map;
 
 /**
  * The base configuration bean.
+ * We save all properties into the prop map, and save
+ * all the header properties into the header map.
+ *
+ * If you set hasHeader to false, we will not judge a property to be header
+ * property or not, just take it to be common property.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
- * @version 1.0.0
- * @Date: 2012-5-27
+ * @version 1.0.0, Date: 2012-5-27
  */
 public class BaseConfigBean {
     protected Map<String, String> prop = new HashMap<String, String>();
@@ -35,6 +39,9 @@ public class BaseConfigBean {
 	protected boolean hasHeader = false;
 
 	/**
+	 * Create a new config bean with this group name.
+	 * Every config bean will save lots of properties, they are considered as a config group.
+	 *
      * @param groupName The group name
      */
     public BaseConfigBean(String groupName) {
@@ -45,17 +52,23 @@ public class BaseConfigBean {
     /**
      * Set configuration into this bean.
      *
+     * If hasHeader is set to true, any property key start with header. will
+     * be considered as header property.
+     *
      * @param key
      * @param value
      */
     public void setConfig(String key, String value) {
+    	// 1. process header
 		if (hasHeader && key.startsWith("header.")) {
 			header.put(key.substring(7), value);
 			return;
 		}
 		try {
+			// 2. process fields
 			setField(this.getClass().getDeclaredField(key), value);
 		} catch (Exception e) {
+			// 3. save other property into map
 			prop.put(key, value);
 		}
 	}
@@ -63,7 +76,7 @@ public class BaseConfigBean {
     /**
      * Copy the super properties into this bean.
      *
-     * @param superConf
+     * @param superConf the template config bean used to configure common properties
      */
     protected void setSuper(final BaseConfigBean superConf) {
 	    prop.putAll(superConf.prop);
@@ -72,6 +85,7 @@ public class BaseConfigBean {
 
     /**
      * Set the value into this field.
+     * We only support short, int, long, boolean and string for now.
      *
      * @param field
      * @param value
@@ -82,6 +96,8 @@ public class BaseConfigBean {
 		field.setAccessible(true);
 		if (cls.equals(int.class)) {
 			field.setInt(this, Integer.parseInt(value));
+		} else if (cls.equals(short.class)) {
+			field.setShort(this, Short.parseShort(value));
 		} else if (cls.equals(long.class)) {
 			field.setLong(this, Long.parseLong(value));
 		} else if (cls.equals(boolean.class)) {

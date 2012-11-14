@@ -21,15 +21,12 @@ import java.util.Arrays;
 
 import org.apache.niolex.network.cli.Constants;
 
-
-
 /**
  * The rpc config bean, config common rpc properties.
  * e.g. connectTimeout, sleepBetweenRetry, retryTimes
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
- * @version 1.0.0
- * @Date: 2012-5-27
+ * @version 1.0.0, Date: 2012-5-27
  */
 public class RpcConfigBean extends BaseConfigBean {
 
@@ -55,11 +52,26 @@ public class RpcConfigBean extends BaseConfigBean {
     public String serviceUrl = "";
     public String serviceType = "network/json";
 
+    /**
+	 * Create a new config bean with this group name.
+	 * Every config bean will save lots of properties, they are considered as a config group.
+	 *
+	 * We will set hasHeader to true in this method.
+	 *
+     * @param groupName The group name
+     */
     public RpcConfigBean(String groupName) {
         super(groupName);
         hasHeader = true;
     }
 
+    /**
+     * Will deal with serverList here.
+     * We split serverList according to , and ; into multiple servers.
+     *
+     * Override super method
+     * @see org.apache.niolex.network.cli.conf.BaseConfigBean#setConfig(java.lang.String, java.lang.String)
+     */
     @Override
     public void setConfig(String key, String value) {
         if ("serverList".equals(key)) {

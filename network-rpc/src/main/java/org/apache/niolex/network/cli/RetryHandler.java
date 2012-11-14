@@ -20,8 +20,6 @@ package org.apache.niolex.network.cli;
 import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
-import java.net.SocketException;
-import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -40,21 +38,20 @@ import org.slf4j.LoggerFactory;
  * and invoke this method on it. If error occurred, we pick another and retry this method.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
- * @version 1.0.0
- * @Date: 2012-5-27
+ * @version 1.0.0, Date: 2012-5-27
  */
 public class RetryHandler implements InvocationHandler {
 	private static final Logger LOG = LoggerFactory.getLogger(RetryHandler.class);
 
 	private final AtomicInteger idx = new AtomicInteger(0);
-	private List<IServiceHandler> handlers;
-	private int retryTimes;
-	private int intervalBetweenRetry;
-	private int handlerNum;
+	private final List<IServiceHandler> handlers;
+	private final int retryTimes;
+	private final int intervalBetweenRetry;
+	private final int handlerNum;
 
 	/**
-	 * The only one.
-	 * Constructor
+	 * The only one Constructor
+	 *
 	 * @param handlers
 	 * @param retryTimes
 	 * @param intervalBetweenRetry
@@ -117,7 +114,7 @@ public class RetryHandler implements InvocationHandler {
 				LOG.info(sb.toString());
 				if (e.getCause() == null)
 					throw e;
-				else if (e.getCause() instanceof UnknownHostException || e.getCause() instanceof SocketException)
+				else if (e.getCause() instanceof IOException)
 					handler.notReady((IOException)(e.getCause()));
 				cause = e;
 			}

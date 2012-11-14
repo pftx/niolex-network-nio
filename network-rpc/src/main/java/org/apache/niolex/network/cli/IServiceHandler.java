@@ -22,11 +22,10 @@ import java.lang.reflect.InvocationHandler;
 
 /**
  * The interface for RetryHandler usage, this interface manage
- * the status of the underlying client, and store the complete url.
+ * the status of the underlying client, and store the complete url here for logging.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
- * @version 1.0.0
- * @Date: 2012-6-3
+ * @version 1.0.0, Date: 2012-6-3
  */
 public interface IServiceHandler extends InvocationHandler {
 

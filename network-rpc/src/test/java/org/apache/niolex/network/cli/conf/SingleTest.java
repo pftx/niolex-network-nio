@@ -19,6 +19,8 @@ package org.apache.niolex.network.cli.conf;
 
 import static org.junit.Assert.assertEquals;
 
+import java.io.IOException;
+
 import org.apache.niolex.network.cli.conf.RpcConfigBean;
 import org.apache.niolex.network.cli.conf.RpcConfiger;
 import org.junit.Test;
@@ -29,7 +31,16 @@ import org.junit.Test;
  * @Date: 2012-6-3
  */
 public class SingleTest {
-    static RpcConfiger configer = new RpcConfiger("single.properties");
+
+    static RpcConfiger configer;
+
+    static {
+    	try {
+			configer= new RpcConfiger("single.properties");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+    }
 
     @Test
     public void doConfig_Stand_Alone() {

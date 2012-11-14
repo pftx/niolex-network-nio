@@ -37,11 +37,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The based RpcClient, send and receive Rpc packets, do client stub here too.
+ * The basic RpcClient, send and receive Rpc packets, do client stub here too.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
- * @version 1.0.0
- * @Date: 2012-6-1
+ * @version 1.0.0, Date: 2012-6-1
  */
 public class RpcClient implements InvocationHandler, IPacketHandler {
 	private static final Logger LOG = LoggerFactory.getLogger(RpcClient.class);

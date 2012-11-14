@@ -17,6 +17,7 @@
  */
 package org.apache.niolex.network.cli.init;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Proxy;
 import java.util.HashMap;
@@ -39,8 +40,7 @@ import org.slf4j.LoggerFactory;
  * Create RPC Service Stub from this Factory.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
- * @version 1.0.0
- * @Date: 2012-6-3
+ * @version 1.0.0, Date: 2012-6-3
  */
 public class RpcServiceFactory {
 	private static final Logger LOG = LoggerFactory.getLogger(RpcServiceFactory.class);
@@ -51,9 +51,10 @@ public class RpcServiceFactory {
 	/**
 	 * Init this Factory with a property file.
 	 *
-	 * @param fileName
+	 * @param fileName the property file path
+	 * @throws IOException
 	 */
-	protected RpcServiceFactory(String fileName) {
+	protected RpcServiceFactory(String fileName) throws IOException {
 		configer = new RpcConfiger(fileName);
 		Map<String, RpcConfigBean> confs = configer.getConfigs();
 		for (Entry<String, RpcConfigBean> entry : confs.entrySet()) {
@@ -70,19 +71,21 @@ public class RpcServiceFactory {
 	/**
 	 * Create a new factory with a property file.
 	 *
-	 * @param fileName
-	 * @return
+	 * @param fileName the property file path
+	 * @return the created instance for this property file
+	 * @throws IOException
 	 */
-	public static final RpcServiceFactory getInstance(String fileName) {
+	public static final RpcServiceFactory getInstance(String fileName) throws IOException {
 	    return new RpcServiceFactory(fileName);
 	}
 
 	/**
 	 * Create a service stub by this specified groupName.
 	 *
-	 * @param groupName
-	 * @param c
-	 * @return
+	 * @param groupName the config group name to use
+	 * @param c the rpc service interface
+	 * @return the created rpc service stub
+	 * @throws IllegalArgumentException If Rpc server config not found for your interface
 	 */
 	@SuppressWarnings("unchecked")
     public <T> T getService(String groupName, Class<T> c) {
@@ -91,7 +94,7 @@ public class RpcServiceFactory {
 	        throw new IllegalArgumentException("Rpc server config not found for your interface!");
 	    /**
 	     * Register this interface into the backed RpcClient.
-	     * Or otherwise you can't invoke methods on this interface.
+	     * Or otherwise you can't invoke methods on this interface at all.
 	     */
     	List<IServiceHandler> list = rh.getHandlers();
     	for (IServiceHandler is : list) {
@@ -108,8 +111,8 @@ public class RpcServiceFactory {
 	/**
 	 * Create a service stub, parse config from annotation.
 	 *
-	 * @param c
-	 * @return
+	 * @param c the rpc service interface
+	 * @return the created rpc service stub
 	 */
 	public <T> T getService(Class<T> c) {
 	    if (c.isAnnotationPresent(RpcConfig.class)) {
@@ -124,7 +127,8 @@ public class RpcServiceFactory {
 
 	/**
 	 * Get the internal configer.
-	 * @return
+	 *
+	 * @return the internal configer.
 	 */
 	public RpcConfiger getConfiger() {
 		return configer;

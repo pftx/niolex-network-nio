@@ -37,11 +37,13 @@
             <charset>UTF-8</charset>
         </encoder>
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-            <level>INFO</level>
+            <level>DEBUG</level>
         </filter>
     </appender>
 
-    <logger name="org.apache.niolex.network.cli" level="DEBUG"/>
+    <logger name="org.apache.niolex.network.cli" level="DEBUG">
+		<appender-ref ref="CONSOLE" />
+	</logger>
 
     <root level="INFO">
         <appender-ref ref="CONSOLE" />

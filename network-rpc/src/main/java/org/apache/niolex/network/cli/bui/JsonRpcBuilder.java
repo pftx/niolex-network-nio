@@ -31,11 +31,12 @@ import org.apache.niolex.network.rpc.ser.JsonConverter;
 
 /**
  * The Json Rpc client Factory.
- * Create JsonRpcClient internally.
+ * Create RpcClient deal with Json internally.
+ * We use {@link org.apache.niolex.network.client.PacketClient} here, so one connection
+ * can be used in multiple threads.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
- * @version 1.0.0
- * @Date: 2012-6-4
+ * @version 1.0.0, Date: 2012-6-4
  */
 public class JsonRpcBuilder implements ServiceHandlerBuilder {
 

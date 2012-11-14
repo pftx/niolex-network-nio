@@ -28,24 +28,24 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Create RPC proxy from configuration.
+ * Create RPC Client Side Proxy from configuration.
+ * We use {@link RetryHandler} to handle client side load balance and fail over.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
- * @version 1.0.0
- * @Date: 2012-6-3
+ * @version 1.0.0, Date: 2012-6-3
  */
 public class RpcInitUtil {
 	private static final Logger LOG = LoggerFactory.getLogger(RpcInitUtil.class);
 
 	/**
-	 * Create RPC proxy from configuration.
+	 * Create RPC Client Side Proxy from configuration.
 	 *
-	 * @param conf
-	 * @return
+	 * @param conf the configuration bean
+	 * @return the built retry handler
 	 */
 	public static RetryHandler buildProxy(RpcConfigBean conf) {
-		LOG.info("Start to build rpc proxy: [serverList=" + Arrays.toString(conf.serverList) + ", serviceUrl=" + conf.serviceUrl + ", header="
-				+ conf.getHeader() + "]");
+		LOG.info("Start to build rpc proxy: [serverList=" + Arrays.toString(conf.serverList) + ", serviceUrl="
+				+ conf.serviceUrl + ", header=" + conf.getHeader() + "]");
 		List<IServiceHandler> listHandlers = new ArrayList<IServiceHandler>();
 		int serverNum = conf.serverList.length;
 		String completeUrl = "";
@@ -60,7 +60,7 @@ public class RpcInitUtil {
 			}
 		}
 		if (listHandlers.isEmpty()) {
-			throw new IllegalStateException("No rpc server is ready for service: " + conf.serviceUrl);
+			throw new IllegalStateException("No rpc server is ready for service: " + conf.getGroupName());
 		}
 
 		return new RetryHandler(listHandlers, conf.rpcErrorRetryTimes, conf.rpcSleepBetweenRetry);

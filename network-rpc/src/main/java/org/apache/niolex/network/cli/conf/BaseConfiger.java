@@ -17,22 +17,26 @@
  */
 package org.apache.niolex.network.cli.conf;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Map.Entry;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.niolex.commons.stream.StreamUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * The base configer to read and parse config file, build config beans.
+ * We support property file(which must in classpath) and {@link java.io.InputStream} for now.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
- * @version 1.0.0
- * @Date: 2012-6-3
- * @param <B>
+ * @version 1.0.0, Date: 2012-6-3
+ *
+ * @param <B> the real config bean class
  */
 public abstract class BaseConfiger<B extends BaseConfigBean> {
     private static final Logger LOG = LoggerFactory.getLogger(BaseConfiger.class);
@@ -48,18 +52,35 @@ public abstract class BaseConfiger<B extends BaseConfigBean> {
 
     /**
      * Init the Configer with a property file, relative to the class path of this class.
-     * Constructor
-     * @param fileName
+     *
+     * @param fileName property file path name(which must in classpath)
+     * @throws IOException when error occurred
      */
-    public BaseConfiger(String fileName) {
-        props = new Properties();
+    public BaseConfiger(String fileName) throws IOException {
+    	this(BaseConfiger.class.getResourceAsStream(fileName), fileName);
+    }
+
+    /**
+     * Reads a property list (key and element pairs) from the input byte stream.
+     * The input stream is in a simple line-oriented format and is assumed to use the ISO 8859-1 character encoding;
+     * that is each byte is one Latin1 character. Characters not in Latin1, and certain special characters,
+     * are represented in keys and elements using Unicode escapes.
+     *
+     * The specified stream will be closed after this method returns.
+     *
+     * @param inStream the stream contains property list
+     * @param instanceMark the string mark this configer
+     * @throws IOException when error occurred
+     */
+    public BaseConfiger(InputStream inStream, String instanceMark) throws IOException {
+    	props = new Properties();
         try {
-            props.load(BaseConfiger.class.getResourceAsStream(fileName));
+            props.load(inStream);
             readSuperList();
             readConfigList();
-            LOG.info("Instantiate properties for " + fileName + " successful.");
-        } catch (Exception ioe) {
-            LOG.error("Cannot access the config file [" + fileName + "].", ioe);
+            LOG.info("Instantiate a new Configer for " + instanceMark + " succeeded.");
+        } finally {
+        	StreamUtil.closeStream(inStream);
         }
     }
 
@@ -75,7 +96,7 @@ public abstract class BaseConfiger<B extends BaseConfigBean> {
     private void buildSuper() {
         String str = props.getProperty(SUPER);
         if (!StringUtils.isBlank(str)) {
-            String[] superArr = str.split(" *, *");
+            String[] superArr = str.split(" *[,;] *");
             for (String superName : superArr) {
                 superMap.put(superName, newConfigBean(superName));
             }
@@ -111,7 +132,7 @@ public abstract class BaseConfiger<B extends BaseConfigBean> {
     private void buildGroup() {
         String str = props.getProperty(GROUP);
         if (!StringUtils.isBlank(str)) {
-            String[] groupArr = str.split(" *, *");
+            String[] groupArr = str.split(" *[,;] *");
             for (String groupName : groupArr) {
                 groupMap.put(groupName, newConfigBean(groupName));
             }

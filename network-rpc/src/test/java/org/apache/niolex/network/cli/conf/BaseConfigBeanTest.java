@@ -31,6 +31,7 @@ public class BaseConfigBeanTest {
 
 	class Head extends BaseConfigBean {
 		private long kill;
+		private short time;
 
 		/**
 		 * Constructor
@@ -42,6 +43,10 @@ public class BaseConfigBeanTest {
 
 		public long getKill() {
 			return kill;
+		}
+
+		public short getTime() {
+			return time;
 		}
 
 	}
@@ -106,7 +111,9 @@ public class BaseConfigBeanTest {
 	 throws Exception {
 		Head h = new Head("ghgh");
 		h.setConfig("kill", "912039298102988");
+		h.setConfig("time", "32767");
 		assertEquals(912039298102988l, h.getKill());
+		assertEquals(32767, h.getTime());
 	}
 
 }

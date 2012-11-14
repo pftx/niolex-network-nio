@@ -37,12 +37,13 @@ import org.mockito.runners.MockitoJUnitRunner;
  * @Date: 2012-5-27
  */
 public class LogContextTest {
+
 	@Mock
 	private LogContext instance;
 
 	@BeforeClass
 	public static void test() {
-		Assert.assertEquals("LOGID", LogContext.prefix());
+		Assert.assertEquals("GID", LogContext.prefix());
 		LogContext.serviceUrl("hdhdhdj");
 	}
 

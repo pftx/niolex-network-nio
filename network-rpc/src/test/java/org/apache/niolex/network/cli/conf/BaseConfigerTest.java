@@ -19,6 +19,8 @@ package org.apache.niolex.network.cli.conf;
 
 import static org.junit.Assert.*;
 
+import java.io.IOException;
+
 import org.apache.niolex.network.cli.conf.RpcConfigBean;
 import org.apache.niolex.network.cli.conf.RpcConfiger;
 import org.junit.Test;
@@ -32,9 +34,10 @@ public class BaseConfigerTest {
 
 	/**
 	 * Test method for {@link org.apache.niolex.network.cli.conf.BaseConfiger#getConfig(java.lang.String)}.
+	 * @throws IOException
 	 */
-	@Test
-	public final void testGetConfig() {
+	@Test(expected=NullPointerException.class)
+	public final void testGetConfig() throws IOException {
 		RpcConfiger configer = new RpcConfiger("null.properties");
 		assertEquals(0, configer.getConfigs().size());
 	}

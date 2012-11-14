@@ -24,15 +24,17 @@ import org.apache.niolex.network.cli.conf.RpcConfigBean;
  * Create the service handler from the complete connection Url and config bean.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
- * @version 1.0.0
- * @Date: 2012-6-3
+ * @version 1.0.0, Date: 2012-6-3
  */
 public interface ServiceHandlerBuilder {
 
 	/**
 	 * Build the service handler instance according to the parameters.
 	 *
+	 * @param bean the config bean
+	 * @param completeUrl the complete server url
 	 * @return the created service handler.
+	 * @throws Exception when error occurred
 	 */
 	public IServiceHandler build(RpcConfigBean bean, String completeUrl) throws Exception;
 
