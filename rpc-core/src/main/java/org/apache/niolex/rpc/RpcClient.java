@@ -185,7 +185,7 @@ public class RpcClient implements InvocationHandler {
 					throw (RpcException)e;
 				}
 				if (e instanceof SocketTimeoutException) {
-					rep = new RpcException("Timeout for this remote procedure call.", RpcException.Type.TIMEOUT, null);
+					rep = new RpcException("Timeout for this remote procedure call.", RpcException.Type.TIMEOUT, e);
 					throw rep;
 				} else if (e instanceof IOException) {
 					handleConnectionLose();
