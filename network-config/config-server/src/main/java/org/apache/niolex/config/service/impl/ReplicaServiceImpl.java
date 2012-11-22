@@ -75,6 +75,9 @@ public class ReplicaServiceImpl implements ReplicaService {
 	}
 
 	public void tryConnectToOtherServer(InetSocketAddress addr) {
+		/**
+		 * First of all, let's remove localhost from the list.
+		 */
 		if (IP_SET.contains(addr.getAddress()) && localPort == addr.getPort()) {
 			return;
 		}

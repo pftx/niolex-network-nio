@@ -70,7 +70,7 @@ public class MemoryStorage {
 
 	/**
 	 * Get all the current stored group config(s).
-	 * @return
+	 * @return all the current config groups.
 	 */
 	public Collection<ConfigGroup> getAll() {
 		return mapStorage.values();

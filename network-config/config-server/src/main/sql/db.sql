@@ -33,7 +33,8 @@ CREATE TABLE IF NOT EXISTS `config_info` (
   `curid` int(11) NOT NULL,
   `uurid` int(11) NOT NULL,
   `updatetime` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`groupid`,`ckey`)
+  PRIMARY KEY (`groupid`,`ckey`),
+  KEY `updatetime` (`updatetime`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 INSERT INTO `user_info` VALUES (1,'su','c0b69acfd4a83d695385cee755275037a9b84467','ADMIN');

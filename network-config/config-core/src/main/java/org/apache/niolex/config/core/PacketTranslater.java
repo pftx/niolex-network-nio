@@ -17,7 +17,6 @@
  */
 package org.apache.niolex.config.core;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.niolex.commons.codec.StringUtil;
@@ -28,7 +27,7 @@ import org.apache.niolex.config.bean.SubscribeBean;
 import org.apache.niolex.config.bean.SyncBean;
 import org.apache.niolex.config.bean.UserInfo;
 import org.apache.niolex.network.PacketData;
-import org.codehaus.jackson.map.type.TypeFactory;
+import org.codehaus.jackson.type.TypeReference;
 
 /**
  * Translate beans into packets and translate packets into beans.
@@ -42,7 +41,7 @@ public class PacketTranslater {
 	/**
 	 * Translate SubscribeBean into PacketData
 	 * @param bean
-	 * @return
+	 * @return packet
 	 */
 	public static final PacketData translate(SubscribeBean bean) {
 		try {
@@ -57,7 +56,7 @@ public class PacketTranslater {
 	/**
 	 * Translate PacketData into SubscribeBean
 	 * @param sc
-	 * @return
+	 * @return bean
 	 */
 	public static final SubscribeBean toSubscribeBean(PacketData sc) {
 		try {
@@ -71,7 +70,7 @@ public class PacketTranslater {
 	/**
 	 * Translate ConfigGroup into PacketData
 	 * @param conf
-	 * @return
+	 * @return packet
 	 */
 	public static final PacketData translate(ConfigGroup conf) {
 		try {
@@ -85,7 +84,7 @@ public class PacketTranslater {
 	/**
 	 * Translate PacketData into ConfigGroup
 	 * @param sc
-	 * @return
+	 * @return bean
 	 */
 	public static final ConfigGroup toConfigGroup(PacketData sc) {
 		try {
@@ -99,7 +98,7 @@ public class PacketTranslater {
 	/**
 	 * Translate list of SyncBean into PacketData
 	 * @param list
-	 * @return
+	 * @return packet
 	 */
 	public static final PacketData translate(List<SyncBean> list) {
 		try {
@@ -114,13 +113,12 @@ public class PacketTranslater {
 	/**
 	 * Translate PacketData into SyncBean
 	 * @param sc
-	 * @return
+	 * @return the bean
 	 */
-	@SuppressWarnings("deprecation")
 	public static final List<SyncBean> toSyncBean(PacketData sc) {
 		try {
 			String s = StringUtil.utf8ByteToStr(sc.getData());
-			return JacksonUtil.str2Obj(s, TypeFactory.collectionType(ArrayList.class, SyncBean.class));
+			return JacksonUtil.str2Obj(s, new TypeReference<List<SyncBean>>(){});
 		} catch (Exception e) {
 			throw new ConfigException("Failed to translate to SyncBean.", e);
 		}
@@ -129,7 +127,7 @@ public class PacketTranslater {
 	/**
 	 * Translate ConfigItem into PacketData
 	 * @param item
-	 * @return
+	 * @return packet
 	 */
 	public static final PacketData translate(ConfigItem item) {
 		try {
@@ -143,7 +141,7 @@ public class PacketTranslater {
 	/**
 	 * Translate PacketData into ConfigItem
 	 * @param sc
-	 * @return
+	 * @return bean
 	 */
 	public static final ConfigItem toConfigItem(PacketData sc) {
 		try {
@@ -157,7 +155,7 @@ public class PacketTranslater {
 	/**
 	 * Translate UserInfo into PacketData
 	 * @param item
-	 * @return
+	 * @return packet
 	 */
 	public static final PacketData translate(UserInfo item) {
 		try {
@@ -171,7 +169,7 @@ public class PacketTranslater {
 	/**
 	 * Translate PacketData into UserInfo
 	 * @param sc
-	 * @return
+	 * @return bean
 	 */
 	public static final UserInfo toUserInfo(PacketData sc) {
 		try {

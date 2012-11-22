@@ -122,13 +122,15 @@ public class GroupServiceImpl implements GroupService {
 	 */
 	private Set<String> getCachedGroupSet(IPacketWriter wt) {
 		// This client may already has some groups, so we merge them.
-		Set<String> set = wt.getAttached(AttachKey.GROUP_SET);
-		if (set == null) {
-			set = new HashSet<String>();
-			// Attach group list. For close this client and remove listener.
-			wt.attachData(AttachKey.GROUP_SET, set);
+		synchronized (wt) {
+			Set<String> set = wt.getAttached(AttachKey.GROUP_SET);
+			if (set == null) {
+				set = new HashSet<String>();
+				// Attach group list. For close this client and remove listener.
+				wt.attachData(AttachKey.GROUP_SET, set);
+			}
+			return set;
 		}
-		return set;
 	}
 
 	/**
@@ -185,7 +187,7 @@ public class GroupServiceImpl implements GroupService {
 	 * Assemble config items into group config.
 	 * @param allGroups
 	 * @param allItems
-	 * @return
+	 * @return the assembled groups
 	 */
 	private List<ConfigGroup> assembleGroups(List<ConfigGroup> allGroups, List<ConfigItem> allItems) {
 		int j = 0, groupId = 0;
@@ -390,7 +392,7 @@ public class GroupServiceImpl implements GroupService {
 				dispatcher.fireEvent(groupName, item);
 				return "Update item success.";
 			} else {
-				return "Failed to update.";
+				return "Failed to update due to DB error.";
 			}
 		} else {
 			return "You do not have the right to update config item.";

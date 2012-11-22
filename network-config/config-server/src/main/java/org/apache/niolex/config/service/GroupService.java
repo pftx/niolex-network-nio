@@ -36,7 +36,8 @@ public interface GroupService {
 	 *
 	 * @param groupName
 	 * @param wt
-	 * @return
+	 * @return true if success, false otherwise. Detailed information will be send to
+	 * <code>wt</code> directly.
 	 */
 	public boolean cliSubscribeGroup(String groupName, IPacketWriter wt);
 
@@ -55,12 +56,14 @@ public interface GroupService {
 
 	/**
 	 * Update this diff packet from other server into memory storage.
+	 *
 	 * @param diff
 	 */
 	public void svrSendDiff(ConfigItem diff);
 
 	/**
 	 * Handle the group add request from other server.
+	 *
 	 * @param groupName
 	 */
 	public void svrSendGroup(String groupName);
@@ -69,29 +72,33 @@ public interface GroupService {
 	 * Refresh this group data with DB, send changes to other server as well.
 	 *
 	 * @param groupName
+	 * @return the detailed string about the status of refresh group
 	 */
 	public String adminRefreshGroup(String groupName);
 
 	/**
 	 * Add a new config group with this name.
+	 *
 	 * @param groupName
-	 * @return
+	 * @return the detailed string about the status of add group
 	 */
 	public String addGroup(String groupName, IPacketWriter wt);
 
 	/**
 	 * Add a new config item.
+	 *
 	 * @param item
 	 * @param wt
-	 * @return
+	 * @return the detailed string about the status of add config item
 	 */
 	public String addItem(ConfigItem item, IPacketWriter wt);
 
 	/**
 	 * Update an existing config item.
+	 *
 	 * @param item
 	 * @param wt
-	 * @return
+	 * @return the detailed string about the status of update config item
 	 */
 	public String updateItem(ConfigItem item, IPacketWriter wt);
 

@@ -18,6 +18,8 @@
 package org.apache.niolex.config.bean;
 
 /**
+ * This bean is corresponding to the table of user_info in the database.
+ *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
  * @Date: 2012-7-6
@@ -43,6 +45,8 @@ public class UserInfo {
 	 * The user role.
 	 */
 	private String userRole;
+
+	//---------------------- GETTER & SETTER ---------------------------------
 
 	public String getUserName() {
 		return userName;

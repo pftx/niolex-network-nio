@@ -43,7 +43,7 @@ public interface AuthenDao {
 	 * @param username
 	 * @param digest
 	 * @param role
-	 * @return
+	 * @return true if success, false otherwise.
 	 */
 	public boolean addUser(String username, String digest, String role);
 
@@ -52,7 +52,7 @@ public interface AuthenDao {
 	 * @param username
 	 * @param digest
 	 * @param role
-	 * @return
+	 * @return true if success, false otherwise.
 	 */
 	public boolean updateUser(String username, String digest, String role);
 
@@ -60,7 +60,7 @@ public interface AuthenDao {
 	 * Get user info by this user name.
 	 *
 	 * @param userName
-	 * @return
+	 * @return the user information, null if not found.
 	 */
 	public UserInfo getUser(String userName);
 
@@ -68,7 +68,7 @@ public interface AuthenDao {
 	 * Check whether this user has the right to read the specified group config.
 	 * @param userid
 	 * @param groupId
-	 * @return
+	 * @return true if success, false otherwise.
 	 */
 	public boolean hasReadAuth(long userid, long groupId);
 
@@ -76,7 +76,7 @@ public interface AuthenDao {
 	 * Add the read authorize to this user.
 	 * @param userid
 	 * @param groupId
-	 * @return
+	 * @return true if success, false otherwise.
 	 */
 	public boolean addReadAuth(long userid, long groupId);
 
@@ -84,7 +84,7 @@ public interface AuthenDao {
 	 * Delete read authorize from this user.
 	 * @param userid
 	 * @param groupId
-	 * @return
+	 * @return true if success, false otherwise.
 	 */
 	public boolean delReadAuth(long userid, long groupId);
 

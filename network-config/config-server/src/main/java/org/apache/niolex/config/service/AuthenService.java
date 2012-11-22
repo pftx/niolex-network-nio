@@ -37,7 +37,7 @@ public interface AuthenService {
 	 *
 	 * @param bean
 	 * @param wt
-	 * @return
+	 * @return true if success, false otherwise.
 	 */
 	public boolean authUser(SubscribeBean bean, IPacketWriter wt);
 
@@ -53,7 +53,7 @@ public interface AuthenService {
 	 * Only Admin can add user with user role, Op can only add common user.
 	 * @param info
 	 * @param wt
-	 * @return
+	 * @return the detailed message about the status of add user
 	 */
 	public String addUser(UserInfo info, IPacketWriter wt);
 
@@ -61,7 +61,7 @@ public interface AuthenService {
 	 * Update a user role or password. Only Admin can update user role.
 	 * @param info
 	 * @param wt
-	 * @return
+	 * @return the detailed message about the status of update user
 	 */
 	public String updateUser(UserInfo info, IPacketWriter wt);
 
@@ -70,7 +70,7 @@ public interface AuthenService {
 	 *
 	 * @param group
 	 * @param wt
-	 * @return
+	 * @return true if have read auth, false otherwise
 	 */
 	public boolean hasReadAuth(ConfigGroup group, IPacketWriter wt);
 
@@ -78,7 +78,7 @@ public interface AuthenService {
 	 * Check whether this client has the right to add and change config.
 	 *
 	 * @param wt
-	 * @return
+	 * @return true if have config auth, false otherwise
 	 */
 	public boolean hasConfigAuth(IPacketWriter wt);
 
@@ -88,7 +88,7 @@ public interface AuthenService {
 	 * @param userName
 	 * @param groupName
 	 * @param wt
-	 * @return
+	 * @return the detailed message about the status of add read auth
 	 */
 	public String addReadAuth(String userName, String groupName, IPacketWriter wt);
 
@@ -97,7 +97,7 @@ public interface AuthenService {
 	 * @param userName
 	 * @param groupName
 	 * @param wt
-	 * @return
+	 * @return the detailed message about the status of remove read auth
 	 */
 	public String removeReadAuth(String userName, String groupName, IPacketWriter wt);
 }

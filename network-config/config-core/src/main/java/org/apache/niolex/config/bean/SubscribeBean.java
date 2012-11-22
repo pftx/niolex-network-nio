@@ -24,6 +24,11 @@ import java.util.Set;
 /**
  * This bean is used to subscribe client to config server.
  *
+ * It contains authentication information and the config group user want to have.
+ * Every config group will be authorized separately. So there will be the case that
+ * user have the authority to read some groups but do not have for the others.
+ * We will return the status of each config group one by one.
+ *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
  * @Date: 2012-7-3

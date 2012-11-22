@@ -21,7 +21,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Sync groups with server bean.
+ * Sync bean, sync config groups with server.
+ *
+ * Config Client will send his local data to server from time to time. So we will
+ * check whether there is any difference between client and server.
+ *
+ * Config framework use this mechanism as a backup for data loss due to program
+ * BUG or environment issue. It's not supposed to take effect in normal status.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0

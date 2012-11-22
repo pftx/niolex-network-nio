@@ -35,14 +35,16 @@ public interface ItemDao {
 	 * Get all the config items from DB.
 	 * Notice! Only load items older than the specified time.
 	 * The list must order by groupId.
-	 * @return
+	 *
+	 * @return the updated config items after the startTime
 	 */
 	public List<ConfigItem> loadAllConfigItems(long startTime);
 
 	/**
 	 * Load all the config items for this group.
+	 *
 	 * @param groupId
-	 * @return
+	 * @return all the config items for this group
 	 */
 	public List<ConfigItem> loadGroupItems(int groupId);
 
@@ -54,7 +56,6 @@ public interface ItemDao {
 	 * @return true if update success.
 	 */
 	public boolean updateConfig(ConfigItem item);
-
 
 	/**
 	 * Add this config.

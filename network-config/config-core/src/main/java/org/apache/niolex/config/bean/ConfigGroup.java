@@ -25,7 +25,14 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * The group config bean.
+ * The config group bean.
+ *
+ * The data management in config framework is like this:
+ *
+ * ConfigGroup
+ * 		=>	ConfigItem
+ * 				=>	RealData
+ * We have only two levels management.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0

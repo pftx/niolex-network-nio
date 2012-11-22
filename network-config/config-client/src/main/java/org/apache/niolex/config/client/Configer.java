@@ -23,7 +23,7 @@ import org.apache.niolex.config.core.ConfigException;
 import org.apache.niolex.config.event.ConfigListener;
 
 /**
- * Configer是一个用来读取配置中心的工具类
+ * Configer是一个用来读取配置中心配置的工具类
  *
  * @category niolex-network-config -> 公共库 -> 配置处理
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
@@ -39,7 +39,8 @@ public class Configer extends ConfigClient {
 
     /**
      * Create a Configer to manage the configuration of this group.
-     * @param groupName
+     *
+     * @param groupName the group name of this config group.
      */
     public Configer(String groupName) {
 		super();
@@ -56,12 +57,12 @@ public class Configer extends ConfigClient {
 	}
 
 	/**
-	 * Add an event listener who cares the config with this key changes.
+	 * Add an event listener to watch the config with this key changes.
 	 * Attention! We can only manage one listener for one key.
 	 *
-	 * @param key
-	 * @param listener
-	 * @return the old listener.
+	 * @param key the config item key
+	 * @param listener the listener
+	 * @return the old listener if there is any, null otherwise.
 	 */
 	public ConfigListener addListener(String key, ConfigListener listener) {
 		return registerEventHandler(config.getGroupName(), key, listener);

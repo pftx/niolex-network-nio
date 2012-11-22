@@ -103,14 +103,15 @@ public class ConfigEventDispatcher {
 	 * @param item
 	 */
 	public void fireEvent(String groupName, ConfigItem item) {
+		PacketData data = PacketTranslater.translate(item);
 		// Fire to other servers.
 		synchronized(otherServers) {
 			for (IPacketWriter wt : otherServers) {
-				wt.handleWrite(PacketTranslater.translate(item));
+				wt.handleWrite(data);
 			}
 		}
 		// Fire to all clients.
-		fireClientEvent(groupName, item);
+		fireClientEvent(groupName, data);
 	}
 
 	/**
@@ -119,10 +120,19 @@ public class ConfigEventDispatcher {
 	 * @param item
 	 */
 	public void fireClientEvent(String groupName, ConfigItem item) {
+		fireClientEvent(groupName, PacketTranslater.translate(item));
+	}
+
+	/**
+	 * Fire the specified event to all the listeners registered to this dispatcher.
+	 * @param groupName
+	 * @param data
+	 */
+	public void fireClientEvent(String groupName, PacketData data) {
 		ConcurrentHashMap<IPacketWriter, String> queue = clients.get(groupName);
 		if (queue != null) {
 			for (IPacketWriter wt : queue.keySet()) {
-				wt.handleWrite(PacketTranslater.translate(item));
+				wt.handleWrite(data);
 			}
 		}
 	}
@@ -132,13 +142,13 @@ public class ConfigEventDispatcher {
 	 * @param groupName
 	 */
 	public void fireAddEvent(String groupName) {
+		PacketData data = new PacketData(CodeMap.GROUP_ADD, groupName);
 		// Fire to other servers.
 		synchronized(otherServers) {
 			for (IPacketWriter wt : otherServers) {
-				wt.handleWrite(new PacketData(CodeMap.GROUP_ADD, groupName));
+				wt.handleWrite(data);
 			}
 		}
-
 	}
 
 }

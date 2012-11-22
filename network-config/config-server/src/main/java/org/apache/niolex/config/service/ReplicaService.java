@@ -28,6 +28,11 @@ import java.net.InetSocketAddress;
  */
 public interface ReplicaService {
 
+	/**
+	 * Try to connect to other servers by one connection per server, to sync data between each other.
+	 *
+	 * @param addresses the server addresses list
+	 */
 	public void connectToOtherServers(InetSocketAddress[] addresses);
 
 }

@@ -84,7 +84,6 @@ public class AuthSubscribeHandler implements IPacketHandler {
 		}
 
 		// Start to try subscribe group list.
-
 		for (String groupName : list) {
 			groupService.cliSubscribeGroup(groupName, wt);
 		}

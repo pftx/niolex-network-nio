@@ -114,7 +114,7 @@ public class ConfigClient {
     private static InitStatus INIT_STATUS = InitStatus.INIT;
 
     private static enum InitStatus {
-    	INIT, TRY, CONNECTED, AUTHED, FAILED
+    	INIT, TRY, CONNECTED, AUTHED, FAILED, NOAUTH;
     }
 
     /**
@@ -136,7 +136,7 @@ public class ConfigClient {
     	CLIENT.setPacketHandler(new ClientHandler());
     	// Default to 1 hour.
     	REFRESH_INTERVAL = PropUtil.getLong("server.refresh.interval", 3600000);
-    	STORAGE_PATH = PropUtil.getProperty("local.storage.path", "/data/follower/config/storage");
+    	STORAGE_PATH = PropUtil.getProperty("local.storage.path", "/data/config-client/storage");
     	FileUtil.mkdirsIfAbsent(STORAGE_PATH);
     	// Start to init connection in another thread.
     	new Thread() { public void run() {initConnection();} }.start();
@@ -273,7 +273,7 @@ public class ConfigClient {
     /**
      * Get group name by group id.
      * @param groupId
-     * @return
+     * @return the group name
      */
     private static final String findGroupName(ConfigItem item) {
     	return STORAGE.findGroupName(item.getGroupId());
@@ -307,13 +307,15 @@ public class ConfigClient {
     			String groupName = findGroupName(item);
     			if (groupName != null) {
     				updateConfigItem(groupName, item);
+    				// Store this config to local disk.
+        			storeConfigGroupToLocakDisk(STORAGE.get(groupName));
     			}
     			break;
     		case CodeMap.GROUP_NOA:
     			groupName = StringUtil.utf8ByteToStr(sc.getData());
     			ConfigGroup group = STORAGE.get(groupName);
     			if (group != null) {
-    				// If the group authentication has been removed, we need to delete if from local disk.
+    				// If the group authentication has been removed, we need to delete it from local disk.
     				group.getGroupData().clear();
     				BEAN.getGroupSet().remove(groupName);
     				deleteConfigGroupFromLocakDisk(group);
@@ -333,6 +335,7 @@ public class ConfigClient {
     		case CodeMap.AUTH_FAIL:
     			LOG.error("Authentication failure, config client will stop.");
     			CLIENT.stop();
+    			INIT_STATUS = InitStatus.NOAUTH;
     			break;
     		default:
     			LOG.warn("Packet received for code [{}] have no handler, just ignored.", sc.getCode());
@@ -400,7 +403,7 @@ public class ConfigClient {
 
     /**
      * Return the next server index.
-     * @return
+     * @return the next server index
      */
     private static final int nextServer() {
     	return SERVER_IDX = ++SERVER_IDX % ADDRESSES.length;
@@ -465,7 +468,7 @@ public class ConfigClient {
     private static final void waitForConnected() throws InterruptedException {
     	LOCK.lock();
     	try {
-    		if (INIT_STATUS == InitStatus.AUTHED) {
+    		if (INIT_STATUS == InitStatus.AUTHED || INIT_STATUS == InitStatus.NOAUTH) {
     			return;
     		}
     		if (WAIT_CONNECTED == null) {
