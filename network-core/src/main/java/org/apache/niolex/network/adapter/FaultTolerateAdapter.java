@@ -21,7 +21,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.apache.niolex.commons.collection.LRUHashMap;
-import org.apache.niolex.commons.collection.RRList;
+import org.apache.niolex.commons.collection.CircularList;
 import org.apache.niolex.network.Config;
 import org.apache.niolex.network.IPacketHandler;
 import org.apache.niolex.network.IPacketWriter;
@@ -100,7 +100,7 @@ public class FaultTolerateAdapter implements IPacketHandler, WriteEventListener 
 
 			// Prepare environment for the next fault tolerate.
 			wt.attachData(KEY_UUID, ssid);
-			RRList<PacketData> list = new RRList<PacketData>(RR_SIZE);
+			CircularList<PacketData> list = new CircularList<PacketData>(RR_SIZE);
 			wt.attachData(KEY_RRLIST, list);
 			// Attach it self to listen all the write events.
 			wt.addEventListener(this);
@@ -116,14 +116,14 @@ public class FaultTolerateAdapter implements IPacketHandler, WriteEventListener 
 			// Store the non-send data.
 			ConcurrentLinkedQueue<PacketData> els = bpw.getRemainQueue();
 			// The rrlist is to store the last N packets send to client.
-			RRList<PacketData> list = wt.getAttached(KEY_RRLIST);
+			CircularList<PacketData> list = wt.getAttached(KEY_RRLIST);
 			/**
 			 * Due to the network buffer, the last N packets may have send to client or
 			 * not. We try to re-send them when client re-connected.
 			 */
 			if (list != null) {
 				PacketData sc;
-				int end = list.size() > RR_SIZE ? RR_SIZE : list.size();
+				int end = list.size();
 				for (int i = 0; i < end; ++i) {
 					sc = list.get(i);
 					els.add(sc);
@@ -143,7 +143,7 @@ public class FaultTolerateAdapter implements IPacketHandler, WriteEventListener 
 	@Override
 	public void afterSend(WriteEvent wEvent) {
 		IPacketWriter wt = wEvent.getPacketWriter();
-		RRList<PacketData> list = wt.getAttached(KEY_RRLIST);
+		CircularList<PacketData> list = wt.getAttached(KEY_RRLIST);
 		if (list != null) {
 			list.add(wEvent.getPacketData());
 		}

@@ -26,7 +26,7 @@ import static org.mockito.Mockito.verify;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import org.apache.niolex.commons.collection.RRList;
+import org.apache.niolex.commons.collection.CircularList;
 import org.apache.niolex.network.Config;
 import org.apache.niolex.network.IPacketHandler;
 import org.apache.niolex.network.IPacketWriter;
@@ -88,7 +88,7 @@ public class FaultTolerateAdapterTest {
 	public void testHandleCloseSSid_list_ok() {
 		IPacketWriter wt = new TBasePacketWriter();
 		wt.attachData(Config.ATTACH_KEY_FAULTTO_UUID, "haha_me");
-		RRList<PacketData> list = new RRList<PacketData>(2);
+		CircularList<PacketData> list = new CircularList<PacketData>(2);
 		wt.attachData(Config.ATTACH_KEY_FAULT_RRLIST, list);
 		list.add(PacketData.getHeartBeatPacket());
 
