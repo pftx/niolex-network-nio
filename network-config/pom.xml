@@ -10,14 +10,14 @@
 	</parent>
 
 	<artifactId>network-config</artifactId>
-	<version>0.1.5</version>
+	<version>0.1.6</version>
 	<packaging>pom</packaging>
 
 	<name>network-config</name>
 	<url>http://maven.apache.org</url>
 	
 	<properties>
-		<co.re.ver>0.1.5</co.re.ver>
+		<co.re.ver>0.1.6</co.re.ver>
 	</properties>
 	
 	<modules>
