@@ -122,7 +122,7 @@ public class ConfigClient {
      */
     static {
     	try {
-    		String fileName = System.getProperty("config-client-properties");
+    		String fileName = System.getProperty("config.client.property.file");
     		if (fileName != null) {
     			PropUtil.loadConfig(fileName);
     		} else {
