@@ -19,6 +19,9 @@ package org.apache.niolex.config.admin;
 
 import java.util.Scanner;
 
+import jline.console.ConsoleReader;
+import jline.console.completer.StringsCompleter;
+
 import org.apache.niolex.commons.file.FileUtil;
 
 /**
@@ -35,17 +38,34 @@ public class ConfigAdminMain {
 	 */
 	public static void main(String[] args) throws Exception {
 		if (args.length != 3) {
-			System.out.println("Usage: server user password");
+			System.out.println("Usage: cadmin <server> <user> <password>");
 			return;
 		}
 		final Updater updater = new UpdaterClient(args[0]);
 		updater.subscribeAuthInfo(args[1], args[2]);
+		final ConsoleReader reader = new ConsoleReader();
+		boolean isJline = reader.clearScreen();
+		if (isJline) {
+			reader.addCompleter(new StringsCompleter("help", "exit", "last", "add group",
+					"refresh group", "add item", "update item", "get item", "add user",
+					"update user", "change password", "add auth", "remove auth"));
+			System.out.println("Welcome to Config management Console.");
+			System.out.println("JLine enabled, please use <tab> key to help you speed up.");
+		} else {
+			System.out.println("Welcome to Config management Console.");
+			System.out.println("JLine disabled, fall back to native console");
+		}
+		System.out.println("\nType help for usage.");
 		final Scanner scan = new Scanner(System.in);
-		System.out.println("Welcome to Config management Console.");
 		String[] lastCmds = new String[0];
 		while (true) {
-			System.out.print("#> ");
-			String line = scan.nextLine();
+			String line = null;
+			if (isJline) {
+				line = reader.readLine("#> ");
+			} else {
+				System.out.print("#> ");
+				line = scan.nextLine();
+			}
 			String[] cmds = line.split(" +", 5);
 			if (line.equalsIgnoreCase("last")) {
 				cmds = lastCmds;
@@ -54,6 +74,7 @@ public class ConfigAdminMain {
 			}
 			if (cmds.length < 3) {
 				if (line.equalsIgnoreCase("exit")) {
+					System.out.println("\nGood Bye.");
 					System.exit(0);
 				}
 				printHelp();

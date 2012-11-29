@@ -1,21 +1,38 @@
----admin commands---
-exit [exit this commmand]
-last [execute last command]
 
----config group related commands---
-add group [groupname]
-refresh group [groupname]
+USAGE OF Config management Console
 
----config item related commands---
-add item [groupname key value]
-update item [groupname key value]
-get item [groupname key]
+ ADMIN COMMANDS
+	help		Print this message
+	exit		Exit this Console
+	last		Execute last command again
 
----user related commands---
-add user [username password role]
-update user [username password role]
-change password [username password]
 
----authorization related commands---
-add auth [username groupname]
-remove auth [username groupname]
+ CONFIG GROUP RELATED COMMANDS
+	add group <groupname>		Add a new group with this name
+	refresh group <groupname>	Refresh the data of the group
+
+
+ CONFIG ITEM RELATED COMMANDS
+	add item <groupname> <key> <value>
+			Add a new config item
+	update item <groupname> <key> <value>
+			Update an old config item
+	get item <groupname> <key>
+			Get the data of this config item
+
+
+ USER RELATED COMMANDS
+	add user <username> <password> <role>
+			Add a new user
+	update user <username> <password> <role>
+			Update an old user with new password and role
+	change password <username> <password>
+			Change the password of this user
+
+
+ AUTHORIZATION RELATED COMMANDS
+	add auth <username> <groupname>
+			Add group read authorization to this user
+	remove auth <username> <groupname>
+			Remove group read authorization from this user
+
