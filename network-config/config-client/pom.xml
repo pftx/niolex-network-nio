@@ -5,13 +5,13 @@
 	<parent>
 		<groupId>org.apache.niolex</groupId>
 		<artifactId>network-config</artifactId>
-		<version>0.1.6</version>
+		<version>0.1.7</version>
 		<relativePath>../</relativePath>
 	</parent>
 
 	<artifactId>config-client</artifactId>
+	<version>1.0.0</version>
 	<packaging>jar</packaging>
-
 	<name>config-client</name>
 	<url>http://maven.apache.org</url>
 
@@ -30,7 +30,7 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>4.8.2</version>
+			<version>${junit.ver}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>

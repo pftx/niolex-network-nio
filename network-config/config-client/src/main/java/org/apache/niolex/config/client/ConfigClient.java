@@ -122,7 +122,12 @@ public class ConfigClient {
      */
     static {
     	try {
-            PropUtil.loadConfig("/conf-client.properties", ConfigClient.class);
+    		String fileName = System.getProperty("config-client-properties");
+    		if (fileName != null) {
+    			PropUtil.loadConfig(fileName);
+    		} else {
+    			PropUtil.loadConfig("/conf-client.properties", ConfigClient.class);
+    		}
         } catch (Throwable t) {
             LOG.info("conf-client.properties not found, use default configurations instead.");
         }

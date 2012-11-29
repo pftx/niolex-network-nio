@@ -25,15 +25,18 @@ import static org.junit.Assert.assertTrue;
 import java.util.Collection;
 import java.util.List;
 
+import org.apache.niolex.commons.test.OrderedRunner;
 import org.apache.niolex.config.bean.ConfigGroup;
 import org.apache.niolex.config.bean.ConfigItem;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /**
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
  * @Date: 2012-7-11
  */
+@RunWith(OrderedRunner.class)
 public class MemoryStorageTest {
 	private static final MemoryStorage storage = new MemoryStorage();
 
@@ -41,7 +44,7 @@ public class MemoryStorageTest {
 	 * Test method for {@link org.apache.niolex.config.core.MemoryStorage#store(org.apache.niolex.config.bean.ConfigGroup)}.
 	 */
 	@Test
-	public void testStore() {
+	public void testAStore() {
 		ConfigGroup grp = new ConfigGroup();
 		grp.setGroupId(123);
 		grp.setGroupName("Like Name");
@@ -57,7 +60,7 @@ public class MemoryStorageTest {
 	}
 
 	@Test
-	public void testStore2() {
+	public void testBStore2() {
 		ConfigGroup grp = new ConfigGroup();
 		grp.setGroupId(123);
 		grp.setGroupName("Like Name");

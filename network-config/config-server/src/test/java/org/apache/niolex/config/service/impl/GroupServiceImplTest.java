@@ -24,6 +24,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.HashMap;
 
+import org.apache.niolex.commons.test.OrderedRunner;
 import org.apache.niolex.config.bean.ConfigItem;
 import org.apache.niolex.config.bean.ConfigGroup;
 import org.apache.niolex.config.bean.SyncBean;
@@ -33,12 +34,14 @@ import org.apache.niolex.config.core.Context;
 import org.apache.niolex.config.core.MemoryStorage;
 import org.apache.niolex.network.server.BasePacketWriter;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /**
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
  * @Date: 2012-7-9
  */
+@RunWith(OrderedRunner.class)
 public class GroupServiceImplTest {
 
 	private GroupServiceImpl sevice = Context.CTX.getBean(GroupServiceImpl.class);
