@@ -29,7 +29,7 @@ import org.apache.niolex.network.demo.stuff.RpcService;
 import org.apache.niolex.network.demo.stuff.StringArray;
 import org.apache.niolex.network.rpc.RpcClient;
 import org.apache.niolex.network.rpc.SingleInvoker;
-import org.apache.niolex.network.rpc.ser.ProtoStuffConverter;
+import org.apache.niolex.network.rpc.conv.ProtoStuffConverter;
 
 /**
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>

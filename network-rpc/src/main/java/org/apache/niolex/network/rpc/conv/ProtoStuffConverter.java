@@ -1,5 +1,5 @@
 /**
- * ProtoBufferConverter.java
+ * ProtoStuffConverter.java
  *
  * Copyright 2012 Niolex, Inc.
  *
@@ -15,24 +15,20 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.niolex.network.rpc.ser;
+package org.apache.niolex.network.rpc.conv;
 
 import java.lang.reflect.Type;
 
-import org.apache.niolex.commons.seri.ProtoUtil;
+import org.apache.niolex.commons.seri.ProtoStuffUtil;
 import org.apache.niolex.network.rpc.IConverter;
-import org.apache.niolex.network.rpc.RpcException;
-import org.apache.niolex.network.rpc.util.RpcUtil;
-
-import com.google.protobuf.GeneratedMessage;
 
 /**
- * Using Google Protocol Buffer to serialize data.
+ * Using god like man protostuff protocol to serialize data.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0, Date: 2012-11-7
  */
-public class ProtoBufferConverter implements IConverter {
+public class ProtoStuffConverter implements IConverter {
 
 	/**
 	 * Override super method
@@ -40,7 +36,7 @@ public class ProtoBufferConverter implements IConverter {
 	 */
 	@Override
 	public Object[] prepareParams(byte[] data, Type[] generic) throws Exception {
-		return ProtoUtil.parseMulti(data, generic);
+		return ProtoStuffUtil.parseMulti(data, generic);
 	}
 
 	/**
@@ -49,7 +45,7 @@ public class ProtoBufferConverter implements IConverter {
 	 */
 	@Override
 	public byte[] serializeParams(Object[] args) throws Exception {
-		return ProtoUtil.seriMulti(args);
+		return ProtoStuffUtil.seriMulti(args);
 	}
 
 	/**
@@ -58,11 +54,7 @@ public class ProtoBufferConverter implements IConverter {
 	 */
 	@Override
 	public Object prepareReturn(byte[] ret, Type type) throws Exception {
-		if (type.equals(RpcException.class)) {
-			return RpcUtil.parseRpcException(ret);
-		} else {
-			return ProtoUtil.parseOne(ret, type);
-		}
+		return ProtoStuffUtil.parseOne(ret, type);
 	}
 
 	/**
@@ -71,15 +63,7 @@ public class ProtoBufferConverter implements IConverter {
 	 */
 	@Override
 	public byte[] serializeReturn(Object ret) throws Exception {
-		if (ret instanceof GeneratedMessage) {
-			GeneratedMessage gen = (GeneratedMessage) ret;
-			return gen.toByteArray();
-		} else if (ret instanceof RpcException) {
-			return RpcUtil.serializeRpcException((RpcException) ret);
-		} else {
-			throw new RpcException("Message is not protobuf type: " + ret.getClass(),
-					RpcException.Type.ERROR_PARSE_PARAMS, null);
-		}
+		return ProtoStuffUtil.seriOne(ret);
 	}
 
 }

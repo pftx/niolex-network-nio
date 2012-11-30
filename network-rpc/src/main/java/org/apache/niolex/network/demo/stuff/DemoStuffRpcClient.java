@@ -23,7 +23,7 @@ import java.net.InetSocketAddress;
 import org.apache.niolex.network.client.PacketClient;
 import org.apache.niolex.network.rpc.PacketInvoker;
 import org.apache.niolex.network.rpc.RpcClient;
-import org.apache.niolex.network.rpc.ser.ProtoStuffConverter;
+import org.apache.niolex.network.rpc.conv.ProtoStuffConverter;
 
 /**
  * Demo client

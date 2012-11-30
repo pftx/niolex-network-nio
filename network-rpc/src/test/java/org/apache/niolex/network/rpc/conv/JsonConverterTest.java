@@ -15,7 +15,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.niolex.network.rpc.ser;
+package org.apache.niolex.network.rpc.conv;
 
 import static org.junit.Assert.*;
 
@@ -23,6 +23,7 @@ import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Date;
 
+import org.apache.niolex.network.rpc.conv.JsonConverter;
 import org.junit.Test;
 
 /**
@@ -96,7 +97,7 @@ public class JsonConverterTest {
 	}
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.rpc.ser.JsonConverter#prepareParams(byte[], java.lang.reflect.Type[])}.
+	 * Test method for {@link org.apache.niolex.network.rpc.conv.JsonConverter#prepareParams(byte[], java.lang.reflect.Type[])}.
 	 * @throws Exception
 	 */
 	@Test
@@ -109,7 +110,7 @@ public class JsonConverterTest {
 	}
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.rpc.ser.JsonConverter#serializeParams(java.lang.Object[])}.
+	 * Test method for {@link org.apache.niolex.network.rpc.conv.JsonConverter#serializeParams(java.lang.Object[])}.
 	 * @throws Exception
 	 */
 	@Test
@@ -120,7 +121,7 @@ public class JsonConverterTest {
 	}
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.rpc.ser.JsonConverter#prepareReturn(byte[], java.lang.reflect.Type)}.
+	 * Test method for {@link org.apache.niolex.network.rpc.conv.JsonConverter#prepareReturn(byte[], java.lang.reflect.Type)}.
 	 * @throws Exception
 	 */
 	@Test
@@ -130,7 +131,7 @@ public class JsonConverterTest {
 	}
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.rpc.ser.JsonConverter#serializeReturn(java.lang.Object)}.
+	 * Test method for {@link org.apache.niolex.network.rpc.conv.JsonConverter#serializeReturn(java.lang.Object)}.
 	 * @throws Exception
 	 */
 	@Test

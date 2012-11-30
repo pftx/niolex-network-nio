@@ -22,7 +22,7 @@ import java.io.IOException;
 import org.apache.niolex.network.adapter.HeartBeatAdapter;
 import org.apache.niolex.network.rpc.ConfigItem;
 import org.apache.niolex.network.rpc.RpcPacketHandler;
-import org.apache.niolex.network.rpc.ser.JsonConverter;
+import org.apache.niolex.network.rpc.conv.JsonConverter;
 import org.apache.niolex.network.server.MultiNioServer;
 
 /**

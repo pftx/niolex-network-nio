@@ -21,7 +21,7 @@ import java.io.IOException;
 
 import org.apache.niolex.network.rpc.ConfigItem;
 import org.apache.niolex.network.rpc.RpcPacketHandler;
-import org.apache.niolex.network.rpc.ser.ProtoStuffConverter;
+import org.apache.niolex.network.rpc.conv.ProtoStuffConverter;
 import org.apache.niolex.network.server.MultiNioServer;
 
 /**

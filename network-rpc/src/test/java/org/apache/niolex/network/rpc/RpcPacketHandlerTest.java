@@ -25,7 +25,7 @@ import org.apache.niolex.network.IPacketWriter;
 import org.apache.niolex.network.PacketData;
 import org.apache.niolex.network.demo.json.RpcService;
 import org.apache.niolex.network.demo.json.RpcServiceImpl;
-import org.apache.niolex.network.rpc.ser.JsonConverter;
+import org.apache.niolex.network.rpc.conv.JsonConverter;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 

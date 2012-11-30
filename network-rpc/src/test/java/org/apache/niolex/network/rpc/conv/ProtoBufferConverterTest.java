@@ -15,7 +15,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.niolex.network.rpc.ser;
+package org.apache.niolex.network.rpc.conv;
 
 import static org.junit.Assert.*;
 
@@ -27,6 +27,7 @@ import org.apache.niolex.network.demo.proto.PersonProtos.Person;
 import org.apache.niolex.network.demo.proto.PersonProtos.Person.PhoneNumber;
 import org.apache.niolex.network.demo.proto.PersonProtos.Person.PhoneType;
 import org.apache.niolex.network.rpc.RpcException;
+import org.apache.niolex.network.rpc.conv.ProtoBufferConverter;
 import org.junit.Test;
 
 /**
@@ -39,7 +40,7 @@ public class ProtoBufferConverterTest {
 	ProtoBufferConverter con = new ProtoBufferConverter();
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.rpc.ser.ProtoBufferConverter#prepareParams(byte[], java.lang.reflect.Type[])}.
+	 * Test method for {@link org.apache.niolex.network.rpc.conv.ProtoBufferConverter#prepareParams(byte[], java.lang.reflect.Type[])}.
 	 * @throws Exception
 	 */
 	@Test
@@ -68,7 +69,7 @@ public class ProtoBufferConverterTest {
 	}
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.rpc.ser.ProtoBufferConverter#serializeParams(java.lang.Object[])}.
+	 * Test method for {@link org.apache.niolex.network.rpc.conv.ProtoBufferConverter#serializeParams(java.lang.Object[])}.
 	 * @throws Exception
 	 */
 	@Test
@@ -96,7 +97,7 @@ public class ProtoBufferConverterTest {
 	}
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.rpc.ser.ProtoBufferConverter#prepareReturn(byte[], java.lang.reflect.Type)}.
+	 * Test method for {@link org.apache.niolex.network.rpc.conv.ProtoBufferConverter#prepareReturn(byte[], java.lang.reflect.Type)}.
 	 * @throws Exception
 	 */
 	@Test
@@ -112,7 +113,7 @@ public class ProtoBufferConverterTest {
 	}
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.rpc.ser.ProtoBufferConverter#serializeReturn(java.lang.Object)}.
+	 * Test method for {@link org.apache.niolex.network.rpc.conv.ProtoBufferConverter#serializeReturn(java.lang.Object)}.
 	 * @throws Exception
 	 */
 	@Test

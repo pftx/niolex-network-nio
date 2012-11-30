@@ -15,13 +15,14 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.niolex.network.rpc.ser;
+package org.apache.niolex.network.rpc.conv;
 
 import static org.junit.Assert.*;
 
 import java.lang.reflect.Type;
 
 import org.apache.niolex.commons.test.Benchmark;
+import org.apache.niolex.network.rpc.conv.ProtoStuffConverter;
 import org.junit.Test;
 
 /**
@@ -34,7 +35,7 @@ public class ProtoStuffConverterTest {
 	ProtoStuffConverter con = new ProtoStuffConverter();
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.rpc.ser.ProtoStuffConverter#prepareParams(byte[], java.lang.reflect.Type[])}.
+	 * Test method for {@link org.apache.niolex.network.rpc.conv.ProtoStuffConverter#prepareParams(byte[], java.lang.reflect.Type[])}.
 	 * @throws Exception
 	 */
 	@Test
@@ -48,7 +49,7 @@ public class ProtoStuffConverterTest {
 	}
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.rpc.ser.ProtoStuffConverter#prepareReturn(byte[], java.lang.reflect.Type)}.
+	 * Test method for {@link org.apache.niolex.network.rpc.conv.ProtoStuffConverter#prepareReturn(byte[], java.lang.reflect.Type)}.
 	 * @throws Exception
 	 */
 	@Test

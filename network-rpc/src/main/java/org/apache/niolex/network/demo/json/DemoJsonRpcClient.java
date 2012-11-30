@@ -24,7 +24,7 @@ import java.util.List;
 import org.apache.niolex.network.client.PacketClient;
 import org.apache.niolex.network.rpc.PacketInvoker;
 import org.apache.niolex.network.rpc.RpcClient;
-import org.apache.niolex.network.rpc.ser.JsonConverter;
+import org.apache.niolex.network.rpc.conv.JsonConverter;
 
 /**
  * Demo client

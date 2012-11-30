@@ -29,7 +29,7 @@ import org.apache.niolex.network.client.SocketClient;
 import org.apache.niolex.network.demo.json.RpcService;
 import org.apache.niolex.network.rpc.RpcClient;
 import org.apache.niolex.network.rpc.SingleInvoker;
-import org.apache.niolex.network.rpc.ser.JsonConverter;
+import org.apache.niolex.network.rpc.conv.JsonConverter;
 
 /**
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>

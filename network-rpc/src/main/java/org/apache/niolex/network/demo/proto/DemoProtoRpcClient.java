@@ -25,7 +25,7 @@ import org.apache.niolex.network.demo.proto.PersonProtos.Person.PhoneNumber;
 import org.apache.niolex.network.demo.proto.PersonProtos.Person.PhoneType;
 import org.apache.niolex.network.rpc.PacketInvoker;
 import org.apache.niolex.network.rpc.RpcClient;
-import org.apache.niolex.network.rpc.ser.ProtoBufferConverter;
+import org.apache.niolex.network.rpc.conv.ProtoBufferConverter;
 
 /**
  * Demo client

@@ -32,7 +32,7 @@ import org.apache.niolex.network.rpc.RpcClient;
 import org.apache.niolex.network.rpc.RpcClient.Status;
 import org.apache.niolex.network.rpc.PacketInvoker;
 import org.apache.niolex.network.rpc.RpcException;
-import org.apache.niolex.network.rpc.ser.JsonConverter;
+import org.apache.niolex.network.rpc.conv.JsonConverter;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
