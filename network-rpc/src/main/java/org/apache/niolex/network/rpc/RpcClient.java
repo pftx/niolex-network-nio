@@ -284,6 +284,7 @@ public class RpcClient implements InvocationHandler, IPacketHandler {
 			LOG.error("We can not re-connect to server after retry times, RpcClient with stop.");
 			// Try to shutdown this Client, inform all the threads.
 			this.connStatus = Status.CLOSED;
+			this.client.stop();
 			this.invoker.handleClose(wt);
 		}
 	}
