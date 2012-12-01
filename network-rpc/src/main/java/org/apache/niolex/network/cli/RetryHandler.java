@@ -109,9 +109,19 @@ public class RetryHandler implements InvocationHandler {
 			    handleEnd = System.currentTimeMillis();
 			    StringBuilder sb = new StringBuilder();
                 sb.append(LogContext.prefix()).append(" Failed to invoke handler on [").append(handler.getServiceUrl());
-                sb.append("] time {").append(handleEnd - handleStart).append("} RETRY? ").append(e.getCause() != null);
+                sb.append("] time {").append(handleEnd - handleStart).append("} RETRY ").append(curTry);
                 sb.append(" ERRMSG: ").append(e.getMessage());
 				LOG.info(sb.toString());
+				if (e instanceof RpcException) {
+					RpcException re = (RpcException)e;
+					// For some type of RpcException, we need to retry.
+					switch (re.getType()) {
+					    case TIMEOUT:
+					    case NOT_CONNECTED:
+					    case CONNECTION_CLOSED:
+					        continue;
+					}
+				}
 				if (e.getCause() == null)
 					throw e;
 				else if (e.getCause() instanceof IOException)

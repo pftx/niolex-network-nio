@@ -80,16 +80,19 @@ public class PacketClient extends BaseClient {
 	 */
     @Override
 	public void connect() throws IOException {
+        // Ensure resource closed.
+        stop();
+        // Start a new world.
         socket = new Socket();
         socket.setSoTimeout(connectTimeout);
         socket.setTcpNoDelay(true);
         socket.connect(serverAddress);
         this.isWorking = true;
-        Thread tr = new Thread(new ReadLoop(socket.getInputStream()));
-        tr.start();
         writeThread = new Thread(new WriteLoop(socket.getOutputStream()));
         writeThread.start();
-        LOG.info("Client connected to address: {}", serverAddress);
+        Thread tr = new Thread(new ReadLoop(socket.getInputStream()));
+        tr.start();
+        LOG.info("Packet client connected to address: {}", serverAddress);
     }
 
     /**
@@ -101,6 +104,10 @@ public class PacketClient extends BaseClient {
         this.isWorking = false;
         if (writeThread != null) {
             writeThread.interrupt();
+            try {
+                writeThread.join();
+            } catch (InterruptedException e) {}
+            writeThread = null;
         }
     }
 

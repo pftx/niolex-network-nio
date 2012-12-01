@@ -71,6 +71,11 @@ public class SocketClient extends BaseClient {
 	 */
 	@Override
 	public void connect() throws IOException {
+	    // First, we must ensure the old socket is closed, or there will be resource leak.
+	    if (socket != null) {
+            socket.close();
+        }
+	    // Then, we are ready to go.
         socket = new Socket();
         socket.setSoTimeout(connectTimeout);
         socket.setTcpNoDelay(true);
@@ -78,7 +83,7 @@ public class SocketClient extends BaseClient {
         this.isWorking = true;
         inS = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
         outS = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
-        LOG.info("Client connected to address: {}", serverAddress);
+        LOG.info("Socket client connected to address: {}", serverAddress);
 	}
 
     /**
@@ -89,12 +94,14 @@ public class SocketClient extends BaseClient {
 	public void stop() {
         this.isWorking = false;
         try {
-    		inS.close();
-    		outS.close();
-    		socket.close();
-    		LOG.info("Client stoped");
+            if (socket != null) {
+                // Closing this socket will also close the socket's InputStream and OutputStream.
+                socket.close();
+                socket = null;
+            }
+    		LOG.info("Socket client stoped.");
     	} catch(Exception e) {
-    		LOG.error("Error occured when stop the server.", e);
+    		LOG.error("Error occured when stop the socket client.", e);
     	}
     }
 
