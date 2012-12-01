@@ -58,6 +58,11 @@ public class HeartBeatAdapter implements IPacketHandler, WriteEventListener, Run
     private int heartBeatInterval = Config.SERVER_HEARTBEAT_INTERVAL;
 
     /**
+     * The max heart beat error.
+     */
+    private int maxHeartBeatError = heartBeatInterval / 8;
+
+    /**
      * The status of this adapter.
      */
     private boolean isWorking;
@@ -88,6 +93,7 @@ public class HeartBeatAdapter implements IPacketHandler, WriteEventListener, Run
     public void start() {
     	isWorking = true;
     	thread = new Thread(this);
+    	thread.setDaemon(true);
     	thread.start();
     }
 
@@ -170,7 +176,7 @@ public class HeartBeatAdapter implements IPacketHandler, WriteEventListener, Run
 		while (isWorking) {
 			handleHeartBeat();
 			try {
-				Thread.sleep(heartBeatInterval / 5);
+				Thread.sleep(heartBeatInterval / 4);
 			} catch (InterruptedException e) {
 				// Failed to sleep is ok.
 			}
@@ -190,7 +196,7 @@ public class HeartBeatAdapter implements IPacketHandler, WriteEventListener, Run
     		if (ttm != null) {
     			// Send heart beat if and only if last send time is earlier than
     			// One heart beat interval.
-    			if (ttm + heartBeatInterval < System.currentTimeMillis()) {
+    			if (ttm + heartBeatInterval < System.currentTimeMillis() + maxHeartBeatError) {
     				wt.handleWrite(PacketData.getHeartBeatPacket());
     				wt.attachData(KEY, System.currentTimeMillis());
     			}
@@ -209,11 +215,13 @@ public class HeartBeatAdapter implements IPacketHandler, WriteEventListener, Run
 
     /**
 	 * The heartBeatInterval to set
+	 * There will be a +-(12.5%) max error for heart beat.
 	 *
 	 * @param heartBeatInterval
 	 */
 	public void setHeartBeatInterval(int heartBeatInterval) {
         this.heartBeatInterval = heartBeatInterval;
+        this.maxHeartBeatError = heartBeatInterval / 8;
     }
 
 	/**

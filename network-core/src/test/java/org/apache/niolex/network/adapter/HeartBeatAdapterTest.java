@@ -18,12 +18,7 @@
 package org.apache.niolex.network.adapter;
 
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.atLeast;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 import java.util.concurrent.CountDownLatch;
 
@@ -128,15 +123,40 @@ public class HeartBeatAdapterTest {
 		ada.start();
 		Thread.sleep(100);
 		verify(wt, atLeast(1)).handleWrite(PacketData.getHeartBeatPacket());
-		final CountDownLatch latch = new CountDownLatch(1);
-		Thread t = new Thread() {
-			public void run() {
-				latch.countDown();
-				ada.stop();
-			}
-		};
-		t.start();
-		latch.await();
-		t.interrupt();
+		ada.stop();
+	}
+
+	@Test
+	public void testHeartBeatInterrupt() throws Exception {
+	    IPacketHandler other = mock(IPacketHandler.class);
+	    final HeartBeatAdapter ada = new HeartBeatAdapter(other);
+	    ada.setHeartBeatInterval(10);
+	    ada.setForceHeartBeat(true);
+	    // started now.
+	    IPacketWriter wt = new TBasePacketWriter() {
+	        @Override
+	        public void handleWrite(PacketData sc) {
+	            try {
+                    Thread.sleep(30);
+                } catch (InterruptedException e) {}
+                try {
+                    Thread.sleep(30);
+                } catch (InterruptedException e) {}
+	        }
+	    };
+	    PacketData sc = new PacketData(789, new byte[0]);
+	    ada.handleRead(sc, wt);
+	    ada.start();
+	    Thread.sleep(20);
+	    final CountDownLatch latch = new CountDownLatch(1);
+	    Thread t = new Thread() {
+	        public void run() {
+	            latch.countDown();
+	            ada.stop();
+	        }
+	    };
+	    t.start();
+	    latch.await();
+	    t.interrupt();
 	}
 }
