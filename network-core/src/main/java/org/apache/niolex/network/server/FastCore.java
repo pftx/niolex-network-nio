@@ -218,7 +218,12 @@ public class FastCore extends BasePacketWriter {
      */
     public void readFinished() {
     	LOG.debug("Packet received. desc {}, size {}.", receivePacket.descriptor(), receivePacket.getLength());
-    	packetHandler.handleRead(receivePacket, this);
+    	// We send heart beat back directly, without notifying the packet handler.
+    	if (receivePacket.getCode() == Config.CODE_HEART_BEAT) {
+    		handleWrite(receivePacket);
+    	} else {
+    		packetHandler.handleRead(receivePacket, this);
+    	}
     	receiveStatus = Status.HEADER;
     	receiveBuffer = ByteBuffer.allocate(8);
     }

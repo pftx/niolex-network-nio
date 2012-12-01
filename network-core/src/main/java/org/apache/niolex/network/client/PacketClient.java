@@ -27,6 +27,7 @@ import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.niolex.network.Config;
 import org.apache.niolex.network.PacketData;
@@ -201,10 +202,12 @@ public class PacketClient extends BaseClient {
                     	/**
                     	 * The write thread wait on this queue till there is data.
                     	 */
-                    	PacketData sendPacket = sendPacketList.takeFirst();
+                    	PacketData sendPacket = sendPacketList.pollFirst(connectTimeout / 2, TimeUnit.MILLISECONDS);
                     	if (sendPacket != null) {
-                    		// If nothing to send, let's sleep.
                     		sendNewPacket(sendPacket);
+                    	} else {
+                    		// If nothing to send, let's send a heart beat.
+                    		sendNewPacket(PacketData.getHeartBeatPacket());
                     	}
                     } catch (InterruptedException e) {
                         // Let's ignore it.
