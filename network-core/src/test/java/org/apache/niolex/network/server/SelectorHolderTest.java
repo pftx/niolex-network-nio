@@ -19,9 +19,7 @@ package org.apache.niolex.network.server;
 
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.anyInt;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
@@ -55,7 +53,7 @@ public class SelectorHolderTest {
 	@Test
 	public void testChangeInterestOps() {
 		SelectionKey selectionKey = mock(SelectionKey.class);
-		assertNotSame(selectorThread, Thread.currentThread());
+		assertNotEquals(selectorThread, Thread.currentThread());
 		selectorHolder.changeInterestOps(selectionKey);
 		verify(selectionKey, never()).interestOps(anyInt());
 		verify(selector).wakeup();

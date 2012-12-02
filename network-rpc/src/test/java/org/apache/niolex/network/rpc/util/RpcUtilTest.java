@@ -20,7 +20,7 @@ package org.apache.niolex.network.rpc.util;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -205,7 +205,7 @@ public class RpcUtilTest {
 		String q = RpcUtil.genSessionId(45);
 		assertEquals(45, s.length());
 		assertEquals(45, q.length());
-		assertNotSame(s, q);
+		assertNotEquals(s, q);
 	}
 
 	/**

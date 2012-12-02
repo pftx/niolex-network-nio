@@ -28,13 +28,10 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import junit.framework.Assert;
-
 import org.apache.niolex.commons.reflect.MethodUtil;
 import org.apache.niolex.commons.util.Runner;
-import org.apache.niolex.network.cli.IServiceHandler;
-import org.apache.niolex.network.cli.RpcServiceHandler;
 import org.apache.niolex.network.rpc.RpcException;
+import org.junit.Assert;
 import org.junit.Test;
 
 

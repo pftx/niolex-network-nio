@@ -88,7 +88,7 @@ public abstract class RpcUtil {
 	 * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
 	 * @version 1.0.0, Date: 2012-7-24
 	 */
-	private static class TypeRe<T> extends TypeReference<T> {
+	public static class TypeRe<T> extends TypeReference<T> {
 		// The real type
 		private Type type;
 
@@ -112,7 +112,7 @@ public abstract class RpcUtil {
 	public static final List<TypeRe<?>> decodeParams(Type[] generic) {
 		List<TypeRe<?>> list = new ArrayList<TypeRe<?>>(generic.length);
 		for (Type tp : generic) {
-			list.add(new TypeRe<String>(tp));
+			list.add(new TypeRe<Object>(tp));
 		}
 		return list;
 	}

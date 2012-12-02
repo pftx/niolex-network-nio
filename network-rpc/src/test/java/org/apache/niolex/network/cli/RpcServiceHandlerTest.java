@@ -23,10 +23,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-import junit.framework.Assert;
-
-import org.apache.niolex.network.cli.IServiceHandler;
-import org.apache.niolex.network.cli.RpcServiceHandler;
+import org.junit.Assert;
 import org.junit.Test;
 
 /**
