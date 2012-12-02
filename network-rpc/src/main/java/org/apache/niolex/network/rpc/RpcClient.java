@@ -304,6 +304,7 @@ public class RpcClient implements InvocationHandler, IPacketHandler {
 			LOG.info("RPC Client try to reconnect to server round {} ...", i);
 			try {
 				client.connect();
+				this.connStatus = Status.CONNECTED;
 				return true;
 			} catch (IOException e) {
 				// Not connected.

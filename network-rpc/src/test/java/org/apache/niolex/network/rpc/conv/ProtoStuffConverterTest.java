@@ -59,4 +59,12 @@ public class ProtoStuffConverterTest {
 		assertEquals(r, "NIce to have protostuff.");
 	}
 
+	@Test
+    public void testGeneral() throws Exception {
+        GeneralTestConverter g = new GeneralTestConverter(con);
+        g.testComplicate();
+        g.testReturn();
+        g.testSimple();
+    }
+
 }

@@ -92,7 +92,7 @@ public class JsonRpcClientTest {
 	 * @throws Throwable
 	 */
 	@Test
-	public void testConnect() throws Throwable {
+	public void testRetryConnect() throws Throwable {
 		client.setSleepBetweenRetryTime(400);
 		client.setConnectRetryTimes(2);
 		DemoJsonRpcServer.stop();

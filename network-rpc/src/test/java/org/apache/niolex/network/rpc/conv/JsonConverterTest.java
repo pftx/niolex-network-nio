@@ -139,4 +139,12 @@ public class JsonConverterTest {
 		con.serializeReturn(new Bean(123, 'c'));
 	}
 
+	@Test
+    public void testGeneral() throws Exception {
+	    GeneralTestConverter g = new GeneralTestConverter(con);
+	    g.testComplicate();
+	    g.testReturn();
+	    g.testSimple();
+	}
+
 }
