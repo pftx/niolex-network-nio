@@ -220,13 +220,14 @@ public class RpcUtilTest {
 		boolean c = RpcUtil.checkServerStatus("http://www.apache.org/tomcat.php", 4000, 4000);
 		System.out.println(c);
 		assertFalse(c);
-		boolean d = RpcUtil.checkServerStatus("http://cycqc.baidu.com/find.php", 4000, 4000);
+		boolean d = RpcUtil.checkServerStatus(RpcUtilTest.class.getResource("onebyte.txt").toExternalForm(),
+		        4000, 4000);
 		System.out.println(d);
 		assertFalse(d);
 		boolean e = RpcUtil.checkServerStatus("http://www.cs.zju.edu.cn/org/codes/404.html", 4000, 4000);
 		System.out.println(e);
 		assertFalse(e);
-		boolean f = RpcUtil.checkServerStatus("http://www.facebook.com", 4000, 4000);
+		boolean f = RpcUtil.checkServerStatus("http://www.facebook.com", 1000, 1000);
 		System.out.println(f);
 		assertFalse(f);
 	}
