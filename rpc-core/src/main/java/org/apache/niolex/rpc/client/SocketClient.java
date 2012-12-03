@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 
+import org.apache.niolex.commons.stream.StreamUtil;
 import org.apache.niolex.network.Config;
 import org.apache.niolex.network.IClient;
 import org.apache.niolex.network.Packet;
@@ -93,6 +94,9 @@ public class SocketClient implements IClient {
 	 */
 	@Override
 	public void connect() throws IOException {
+		if (socket != null) {
+			socket.close();
+		}
         socket = new Socket();
         socket.setSoTimeout(connectTimeout);
         socket.setTcpNoDelay(true);
@@ -155,12 +159,13 @@ public class SocketClient implements IClient {
 	public void stop() {
         this.isWorking = false;
         try {
-    		inS.close();
-    		outS.close();
+    		StreamUtil.closeStream(inS);
+    		StreamUtil.closeStream(outS);
     		socket.close();
-    		LOG.info("Client stoped.");
+    		socket = null;
+    		LOG.info("Socket client stoped.");
     	} catch(Exception e) {
-    		LOG.error("Error occured when stop the server.", e);
+    		LOG.error("Error occured when stop the socket client.", e);
     	}
     }
 

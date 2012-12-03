@@ -15,13 +15,16 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.niolex.rpc.json;
+package org.apache.niolex.rpc.demo;
 
 import java.util.List;
 
+import org.apache.niolex.commons.test.Benchmark;
 import org.apache.niolex.commons.util.DateTimeUtil;
 
 /**
+ * The demo implementation.
+ *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
  * @Date: 2012-6-2
@@ -29,21 +32,17 @@ import org.apache.niolex.commons.util.DateTimeUtil;
 public class RpcServiceImpl implements RpcService {
 
 	/**
-	 * This is the override of super method.
-	 * @see org.apache.niolex.network.demo.rpc.RpcService#add(int[])
+	 * Override super method
+	 * @see org.apache.niolex.rpc.demo.RpcService#benchmark(org.apache.niolex.commons.test.Benchmark, java.lang.String)
 	 */
 	@Override
-	public int add(int... args) {
-		int k = 0;
-		for (int i : args) {
-			k += i;
-		}
-		return k;
+	public int benchmark(Benchmark ben, String mark) {
+		return ben.getClassId() + ben.getPriv() + mark.length();
 	}
 
 	/**
 	 * This is the override of super method.
-	 * @see org.apache.niolex.network.demo.rpc.RpcService#size(java.util.List)
+	 * @see org.apache.niolex.rpc.demo.RpcService#size(java.util.List)
 	 */
 	@Override
 	public int size(List<String> arg) {
@@ -55,16 +54,16 @@ public class RpcServiceImpl implements RpcService {
 
 	/**
 	 * Override super method
-	 * @see org.apache.niolex.network.demo.rpc.RpcService#throwEx()
+	 * @see org.apache.niolex.rpc.demo.RpcService#throwEx()
 	 */
 	@Override
 	public String throwEx() {
-		throw new RuntimeException("org.apache.niolex.network.demo.rpc.RpcService#throwEx()");
+		throw new RuntimeException("Demo ex throw from #throwEx()");
 	}
 
 	/**
 	 * Override super method
-	 * @see org.apache.niolex.network.demo.rpc.RpcService#concat(java.lang.String, java.lang.String)
+	 * @see org.apache.niolex.rpc.demo.RpcService#concat(java.lang.String, java.lang.String)
 	 */
 	@Override
 	public String concat(String a, String b) {
@@ -73,7 +72,7 @@ public class RpcServiceImpl implements RpcService {
 
 	/**
 	 * Override super method
-	 * @see org.apache.niolex.network.demo.rpc.RpcService#testMe()
+	 * @see org.apache.niolex.rpc.demo.RpcService#testMe()
 	 */
 	@Override
 	public void testMe() {

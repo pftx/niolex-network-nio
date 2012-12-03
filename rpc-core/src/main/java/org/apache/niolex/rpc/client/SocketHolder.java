@@ -17,8 +17,9 @@
  */
 package org.apache.niolex.rpc.client;
 
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Hold all the ready connections. Every connection is represented as
@@ -30,7 +31,7 @@ import java.util.concurrent.CountDownLatch;
  */
 public class SocketHolder {
 
-	private final ConcurrentLinkedQueue<ClientCore> readyQueue = new ConcurrentLinkedQueue<ClientCore>();
+	private final LinkedBlockingQueue<ClientCore> readyQueue = new LinkedBlockingQueue<ClientCore>();
 	private NioClient nioClient;
 	private CountDownLatch latch;
 
@@ -71,17 +72,35 @@ public class SocketHolder {
 
 	/**
 	 * Retrieves and removes the head of the ready queue, or returns null if the queue is empty.
-	 * @return
+	 *
+	 * @param connectTimeout the timeout to take item from queue.
+	 * @return an instance of ClientCore, null if client is busy.
 	 */
-	public ClientCore take() {
+	public ClientCore take(int connectTimeout) {
 		ClientCore core;
-		while ((core = readyQueue.poll()) != null) {
+		while ((core = takeOne(connectTimeout)) != null) {
 			if (core.isValid())
 				return core;
 			else
 				nioClient.closeChannel(core);
 		}
 		return null;
+	}
+
+	/**
+	 * Take one ClientCore from the ready queue, will return null of can not take out any
+	 * element at the given timeout.
+	 * We will not check the status of this instance, so it maybe already broken.
+	 *
+	 * @param connectTimeout the timeout to take item from queue.
+	 * @return an instance of ClientCore, null if timeout.
+	 */
+	protected ClientCore takeOne(int connectTimeout) {
+		try {
+			return readyQueue.poll(connectTimeout, TimeUnit.MILLISECONDS);
+		} catch (InterruptedException e) {
+			return null;
+		}
 	}
 
 	/**

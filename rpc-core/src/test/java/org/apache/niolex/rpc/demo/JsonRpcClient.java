@@ -15,14 +15,17 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.niolex.rpc.json;
+package org.apache.niolex.rpc.demo;
 
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.niolex.commons.test.Benchmark;
 import org.apache.niolex.rpc.RpcClient;
 import org.apache.niolex.rpc.client.SocketClient;
+import org.apache.niolex.rpc.json.JsonProtocol;
+import org.junit.Assert;
 
 /**
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
@@ -47,8 +50,9 @@ public class JsonRpcClient {
 
 		final RpcService ser = client.getService(RpcService.class);
 
-		int k = ser.add(3, 4, 5, 6, 7, 8, 9);
-		System.out.println("42 => " + k);
+		int k = ser.benchmark(Benchmark.makeBenchmark(), "This is client.");
+		System.out.println("benchmark => " + k);
+
 		List<String> list = new ArrayList<String>();
 		list.add("3");
 		list.add("3");
@@ -57,23 +61,22 @@ public class JsonRpcClient {
 		System.out.println("3 => " + k);
 		k = ser.size(null);
 		System.out.println("0 => " + k);
-		k = ser.add(3, 4, 5);
-		System.out.println("12 => " + k);
 
 		String s = ser.concat("Hello ", "Jiyun!");
+		System.out.println("concat => " + s);
 		try {
 			ser.throwEx();
 		} catch (Exception e) {
-			System.out.println("----------------------------------");
-			e.printStackTrace();
+			System.out.println("--------------#throwEx()-------------------");
+			Assert.assertEquals("Demo ex throw from #throwEx()", e.getCause().getCause().getMessage());
 		}
 		try {
 			ser.testMe();
 		} catch (Exception e) {
-			System.out.println("----------------------------------");
-			e.printStackTrace();
+			System.out.println("--------------#testMe()--------------------");
+			Assert.assertEquals("The method you want to invoke is not a remote procedure call.", e.getMessage());
 		}
-		System.out.println("Done.5.methods... " + s);
+		System.out.println("Done.5.methods... client will stop.");
 		client.stop();
 	}
 

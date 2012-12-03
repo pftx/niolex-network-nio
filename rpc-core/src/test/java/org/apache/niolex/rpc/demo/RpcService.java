@@ -15,10 +15,11 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.niolex.rpc.json;
+package org.apache.niolex.rpc.demo;
 
 import java.util.List;
 
+import org.apache.niolex.commons.test.Benchmark;
 import org.apache.niolex.rpc.RpcMethod;
 
 
@@ -30,7 +31,7 @@ import org.apache.niolex.rpc.RpcMethod;
 public interface RpcService {
 
 	@RpcMethod(14)
-	public int add(int ...args);
+	public int benchmark(Benchmark ben, String mark);
 
 	@RpcMethod(15)
 	public int size(List<String> arg);

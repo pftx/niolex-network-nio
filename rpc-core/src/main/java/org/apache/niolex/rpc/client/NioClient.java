@@ -71,6 +71,12 @@ public class NioClient implements IClient, Runnable {
 	private int rpcHandleTimeout = Config.RPC_HANDLE_TIMEOUT;
 
     /**
+     * Socket connect timeout. There is no connect timeout in Non-Blocking,
+     * so we use this timeout for take connection from {@link SocketHolder}
+     */
+    protected int connectTimeout = Config.SO_CONNECT_TIMEOUT;
+
+    /**
      * The status of this client.
      */
     protected boolean isWorking;
@@ -231,7 +237,7 @@ public class NioClient implements IClient, Runnable {
 	 */
 	public WaitOn<Packet> asyncInvoke(Packet sc) {
 		sc.setSerial((short) 1);
-		ClientCore cli = socketHolder.take();
+		ClientCore cli = socketHolder.take(connectTimeout);
 		if (cli != null) {
 			WaitOn<Packet> on = blocker.initWait(cli);
 			cli.prepareWrite(sc);
@@ -295,7 +301,7 @@ public class NioClient implements IClient, Runnable {
 	 */
 	@Override
 	public void setConnectTimeout(int connectTimeout) {
-		// Connection timeout is use less for nonblocking.
+		this.connectTimeout = connectTimeout;
 	}
 
 	/**
@@ -331,6 +337,9 @@ public class NioClient implements IClient, Runnable {
 			ass[i] = s;
 		}
 		serverAddresses = ass;
+		if (connectionNumber == 0) {
+			connectionNumber = ass.length;
+		}
 	}
 
 }

@@ -22,13 +22,14 @@ import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.niolex.commons.test.Benchmark;
 import org.apache.niolex.commons.test.Counter;
 import org.apache.niolex.commons.test.StopWatch;
 import org.apache.niolex.commons.test.StopWatch.Stop;
 import org.apache.niolex.rpc.RpcClient;
 import org.apache.niolex.rpc.client.SocketClient;
+import org.apache.niolex.rpc.demo.RpcService;
 import org.apache.niolex.rpc.json.JsonProtocol;
-import org.apache.niolex.rpc.json.RpcService;
 
 /**
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
@@ -101,7 +102,6 @@ public class RpcPress {
 	}
 
 	public static RpcClient create() throws IOException {
-//		SocketClient c = new SocketClient(new InetSocketAddress("10.11.18.41", 8808));
 		SocketClient c = new SocketClient(new InetSocketAddress("localhost", 8808));
 		RpcClient client = new RpcClient(c, new JsonProtocol());
 		client.connect();
@@ -130,13 +130,18 @@ public class RpcPress {
 		@Override
 		public void run() {
 			int i = SIZE;
+			Benchmark ben = Benchmark.makeBenchmark();
+			String str = "This is client.";
+			int connn = str.length() + ben.getClassId();
+			int lennn = a.length() + b.length();
 			while (i-- > 0) {
 				Stop s = stopWatch.start();
-				int k = service.add(3, 4, 5, 6, 7, 8, 9, i);
+				ben.setPriv(i);
+				int k = service.benchmark(ben, str);
 				s.stop();
-				if (k != 42 + i) {
+				if (k != connn + i) {
 					ERROR_CNT.inc();
-					System.out.println("Out => " + k);
+					System.out.println("Benchmark => " + k);
 				}
 				// -------------------------
 				List<String> args = new ArrayList<String>();
@@ -147,19 +152,16 @@ public class RpcPress {
 				s.stop();
 				if (k != 2) {
 					ERROR_CNT.inc();
-					System.out.println("Out => " + k);
+					System.out.println("Size => " + k);
 				}
 				// -------------------------
 				s = stopWatch.start();
 				String c = service.concat(a, b);
-				s.stop();
-				if (c.length() > 64000) {
-					if (a.length() < b.length()) {
-						a = c;
-					} else {
-						b = c;
-					}
+				if (c.length() != lennn) {
+					ERROR_CNT.inc();
+					System.out.println("Concat => " + c);
 				}
+				s.stop();
 				Thread.yield();
 			}
 			cli.stop();
