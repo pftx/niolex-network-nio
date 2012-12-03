@@ -17,8 +17,6 @@
  */
 package org.apache.niolex.rpc.demo;
 
-import java.util.List;
-
 import org.apache.niolex.commons.test.Benchmark;
 import org.apache.niolex.rpc.RpcMethod;
 
@@ -31,10 +29,10 @@ import org.apache.niolex.rpc.RpcMethod;
 public interface RpcService {
 
 	@RpcMethod(14)
-	public int benchmark(Benchmark ben, String mark);
+	public Int benchmark(Benchmark ben, String mark);
 
 	@RpcMethod(15)
-	public int size(List<String> arg);
+	public Int size(String[] arg);
 
 	@RpcMethod(16)
 	public String throwEx();
@@ -43,4 +41,27 @@ public interface RpcService {
 	public String concat(String a, String b);
 
 	public void testMe();
+
+	public static class Int {
+
+		public int i;
+
+		public Int() {
+			super();
+		}
+
+		public Int(int i) {
+			super();
+			this.i = i;
+		}
+
+		public int getI() {
+			return i;
+		}
+
+		public void setI(int i) {
+			this.i = i;
+		}
+
+	}
 }

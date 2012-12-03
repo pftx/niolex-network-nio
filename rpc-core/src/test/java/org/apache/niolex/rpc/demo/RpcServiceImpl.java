@@ -17,8 +17,6 @@
  */
 package org.apache.niolex.rpc.demo;
 
-import java.util.List;
-
 import org.apache.niolex.commons.test.Benchmark;
 import org.apache.niolex.commons.util.DateTimeUtil;
 
@@ -36,20 +34,20 @@ public class RpcServiceImpl implements RpcService {
 	 * @see org.apache.niolex.rpc.demo.RpcService#benchmark(org.apache.niolex.commons.test.Benchmark, java.lang.String)
 	 */
 	@Override
-	public int benchmark(Benchmark ben, String mark) {
-		return ben.getClassId() + ben.getPriv() + mark.length();
+	public Int benchmark(Benchmark ben, String mark) {
+		return new Int(ben.getClassId() + ben.getPriv() + mark.length());
 	}
 
 	/**
 	 * This is the override of super method.
-	 * @see org.apache.niolex.rpc.demo.RpcService#size(java.util.List)
+	 * @see org.apache.niolex.rpc.demo.RpcService#size(String[]))
 	 */
 	@Override
-	public int size(List<String> arg) {
+	public Int size(String[] arg) {
 		if (arg != null) {
-			return arg.size();
+			return new Int(arg.length);
 		}
-		return 0;
+		return new Int(0);
 	}
 
 	/**

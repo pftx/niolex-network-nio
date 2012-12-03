@@ -50,16 +50,16 @@ public class JsonRpcClient {
 
 		final RpcService ser = client.getService(RpcService.class);
 
-		int k = ser.benchmark(Benchmark.makeBenchmark(), "This is client.");
+		int k = ser.benchmark(Benchmark.makeBenchmark(), "This is client.").i;
 		System.out.println("benchmark => " + k);
 
 		List<String> list = new ArrayList<String>();
 		list.add("3");
 		list.add("3");
 		list.add("3");
-		k = ser.size(list);
+		k = ser.size(list.toArray(new String[3])).i;
 		System.out.println("3 => " + k);
-		k = ser.size(null);
+		k = ser.size(null).i;
 		System.out.println("0 => " + k);
 
 		String s = ser.concat("Hello ", "Jiyun!");

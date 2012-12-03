@@ -19,26 +19,23 @@ package org.apache.niolex.rpc.press;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.List;
 
-import org.apache.niolex.commons.test.Benchmark;
 import org.apache.niolex.commons.test.Counter;
 import org.apache.niolex.commons.test.StopWatch;
 import org.apache.niolex.commons.test.StopWatch.Stop;
 import org.apache.niolex.rpc.RpcClient;
 import org.apache.niolex.rpc.client.SocketClient;
 import org.apache.niolex.rpc.demo.RpcService;
-import org.apache.niolex.rpc.json.JsonProtocol;
+import org.apache.niolex.rpc.stuff.StuffProtocol;
 
 /**
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
  * @Date: 2012-8-11
  */
-public class RpcPress {
+public class StuffPress {
 
-	static int SIZE = 10240;
+	static int SIZE = 51200;
 	static int THREAD_NUM = 5;
 	static int SHUFFLE_NUM = 50;
 	static final StopWatch stopWatch = new StopWatch(1);
@@ -103,7 +100,7 @@ public class RpcPress {
 
 	public static RpcClient create() throws IOException {
 		SocketClient c = new SocketClient(new InetSocketAddress("localhost", 8808));
-		RpcClient client = new RpcClient(c, new JsonProtocol());
+		RpcClient client = new RpcClient(c, new StuffProtocol());
 		client.connect();
 		return client;
 	}
@@ -130,30 +127,9 @@ public class RpcPress {
 		@Override
 		public void run() {
 			int i = SIZE;
-			Benchmark ben = Benchmark.makeBenchmark();
-			String str = "This is client.";
-			int connn = str.length() + ben.getClassId();
 			int lennn = a.length() + b.length();
 			while (i-- > 0) {
-				Stop s = stopWatch.start();
-				ben.setPriv(i);
-				int k = service.benchmark(ben, str).i;
-				s.stop();
-				if (k != connn + i) {
-					ERROR_CNT.inc();
-					System.out.println("Benchmark => " + k);
-				}
-				// -------------------------
-				List<String> args = new ArrayList<String>();
-				args.add("3");
-				args.add("3");
-				s = stopWatch.start();
-				k = service.size(args.toArray(new String[2])).i;
-				s.stop();
-				if (k != 2) {
-					ERROR_CNT.inc();
-					System.out.println("Size => " + k);
-				}
+				Stop s;
 				// -------------------------
 				s = stopWatch.start();
 				String c = service.concat(a, b);
