@@ -24,7 +24,6 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.util.concurrent.RejectedExecutionException;
 
 import org.apache.niolex.network.Config;
 import org.apache.niolex.network.PacketData;
@@ -36,17 +35,23 @@ import org.slf4j.LoggerFactory;
  * thread. If you want to reuse client in multithreading, use #PacketClient
  *
  * We will try to read one packet from remote after send on packet. If you are
- * in the situation that server will not respond, please use #PacketClient
+ * in the situation that server will not respond, please use {@link #setAutoRead(boolean)}
+ * If it's set to false, we will not read from server, please invoke
+ * {@link #handleRead()} manually.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
- * @version 1.0.0
- * @Date: 2012-6-13
+ * @version 1.0.0, Date: 2012-6-13
  */
 public class SocketClient extends BaseClient {
 	private static final Logger LOG = LoggerFactory.getLogger(SocketClient.class);
 
     private DataInputStream inS;
     private DataOutputStream outS;
+
+    /**
+     * Automatically read data from remote server.
+     */
+    private boolean autoRead = true;
 
     /**
      * Crate a SocketClient without any server address
@@ -72,9 +77,7 @@ public class SocketClient extends BaseClient {
 	@Override
 	public void connect() throws IOException {
 	    // First, we must ensure the old socket is closed, or there will be resource leak.
-	    if (socket != null) {
-            socket.close();
-        }
+	    safeClose();
 	    // Then, we are ready to go.
         socket = new Socket();
         socket.setSoTimeout(connectTimeout);
@@ -93,16 +96,13 @@ public class SocketClient extends BaseClient {
     @Override
 	public void stop() {
         this.isWorking = false;
-        try {
-            if (socket != null) {
-                // Closing this socket will also close the socket's InputStream and OutputStream.
-                socket.close();
-                socket = null;
-            }
-    		LOG.info("Socket client stoped.");
-    	} catch(Exception e) {
-    		LOG.error("Error occured when stop the socket client.", e);
-    	}
+        // Closing this socket will also close the socket's InputStream and OutputStream.
+        Exception e = safeClose();
+        if (e != null) {
+            LOG.error("Error occured when stop the socket client.", e);
+        }
+        socket = null;
+        LOG.info("Socket client stoped.");
     }
 
 	/**
@@ -114,12 +114,25 @@ public class SocketClient extends BaseClient {
         try {
 			sc.generateData(outS);
 			LOG.debug("Packet sent. desc {}, length {}.", sc.descriptor(), sc.getLength());
-			handleRead();
+			if (autoRead) {
+			    handleRead();
+			}
 		} catch (IOException e) {
-			throw new RejectedExecutionException("Failed to write packet to client.", e);
+		    // When IO exception occurred, this socket is invalid, we close it.
+		    stop();
+		    // Notify the handler.
+		    packetHandler.handleClose(this);
+		    // Throw an exception to the invoker.
+			throw new IllegalStateException("Failed to send packet to server.", e);
 		}
 	}
 
+	/**
+	 * Read one packet from remote server. If we read a heart beat, we will
+	 * retry again until we read a real packet.
+	 *
+	 * @throws IOException if network problem
+	 */
 	public void handleRead() throws IOException {
 		PacketData readPacket = new PacketData();
 		while (true) {
@@ -133,5 +146,21 @@ public class SocketClient extends BaseClient {
 			break;
 		}
 	}
+
+	/**
+	 * @return The current auto read status.
+	 */
+    public boolean isAutoRead() {
+        return autoRead;
+    }
+
+    /**
+     * Set whether you need we automatically read one data packet for you after handleWrite.
+     *
+     * @param autoRead
+     */
+    public void setAutoRead(boolean autoRead) {
+        this.autoRead = autoRead;
+    }
 
 }

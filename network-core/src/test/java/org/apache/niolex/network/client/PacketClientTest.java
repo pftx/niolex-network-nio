@@ -19,7 +19,6 @@ package org.apache.niolex.network.client;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.spy;
@@ -34,7 +33,6 @@ import org.apache.niolex.network.CoreRunner;
 import org.apache.niolex.network.IPacketHandler;
 import org.apache.niolex.network.IPacketWriter;
 import org.apache.niolex.network.PacketData;
-import org.apache.niolex.network.client.PacketClient;
 import org.apache.niolex.network.example.EchoPacketHandler;
 import org.apache.niolex.network.server.NioServer;
 import org.junit.After;
@@ -130,19 +128,8 @@ public class PacketClientTest {
 	@Test
 	public void testGetRemoteName() throws Exception {
 		assertEquals("localhost/127.0.0.1:8809-0000", packetClient.getRemoteName());
-		try {
-			packetClient.attachData("adsfasdf", "adsfasdf");
-			assertTrue("Should not attache.", false);
-		} catch (Exception e) {
-			;
-		}
-		try {
-			packetClient.getAttached("adsfasdf");
-			assertTrue("Should not attache.", false);
-		} catch (Exception e) {
-			;
-		}
 		packetClient.connect();
+		packetClient.setConnectTimeout(4);
 		packetClient.handleWrite(PacketData.getHeartBeatPacket());
 		Thread.sleep(CoreRunner.CO_SLEEP);
 		nioServer.stop();

@@ -29,8 +29,7 @@ import org.apache.niolex.network.event.WriteEventListener;
  * The base implementation of IClient, please extend this class for convenience.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
- * @version 1.0.0
- * @Date: 2012-6-14
+ * @version 1.0.0, Date: 2012-6-14
  */
 public abstract class BaseClient implements IClient {
 
@@ -70,6 +69,20 @@ public abstract class BaseClient implements IClient {
     	} else {
     		return serverAddress.toString() + "-" + socket.getLocalPort();
     	}
+    }
+
+    /**
+     * Safely close the socket.
+     *
+     * @return null if success, exception if error occurred.
+     */
+    protected Exception safeClose() {
+        try {
+            if (socket != null) socket.close();
+            return null;
+        } catch (Exception e) {
+            return e;
+        }
     }
 
 	/**

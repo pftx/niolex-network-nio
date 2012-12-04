@@ -29,6 +29,7 @@ import java.net.Socket;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.niolex.commons.stream.StreamUtil;
 import org.apache.niolex.network.Config;
 import org.apache.niolex.network.PacketData;
 import org.slf4j.Logger;
@@ -39,7 +40,7 @@ import org.slf4j.LoggerFactory;
  * own threads. This client can be used in multiple threads.
  *
  * @author Xie, Jiyun
- *
+ * @version 1.0.0, Date: 2012-6-13
  */
 public class PacketClient extends BaseClient {
 	private static final Logger LOG = LoggerFactory.getLogger(PacketClient.class);
@@ -118,7 +119,8 @@ public class PacketClient extends BaseClient {
 
 	/**
 	 * Return the non-send packets size.
-	 * @return
+	 *
+	 * @return current not-send packets size
 	 */
 	public int size() {
 		return sendPacketList.size();
@@ -173,9 +175,7 @@ public class PacketClient extends BaseClient {
                     LOG.info("Read loop stoped.");
                 }
             } finally {
-            	try {
-            		in.close();
-            	} catch(Exception e) {}
+                StreamUtil.closeStream(in);
             }
         }
     }
@@ -224,10 +224,8 @@ public class PacketClient extends BaseClient {
             } catch(Exception e) {
                 LOG.error("Error occured in write loop.", e);
             } finally {
-            	try {
-            		out.close();
-            		socket.close();
-            	} catch(Exception e) {}
+                StreamUtil.closeStream(out);
+                safeClose();
             }
         }
 

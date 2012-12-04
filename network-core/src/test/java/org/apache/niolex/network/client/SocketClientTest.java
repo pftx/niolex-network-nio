@@ -20,12 +20,14 @@ package org.apache.niolex.network.client;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.RejectedExecutionException;
 
 import org.apache.niolex.network.CoreRunner;
 import org.apache.niolex.network.PacketData;
@@ -69,29 +71,33 @@ public class SocketClientTest {
 
 	/**
 	 * Test method for {@link org.apache.niolex.network.client.SocketClient#getRemoteName()}.
+	 * @throws IOException
 	 */
 	@Test
-	public void testGetRemoteName() {
-		SocketClient packetClient = new SocketClient(new InetSocketAddress("localhost", 8808));
-		assertEquals("localhost/127.0.0.1:8808-0000", packetClient.getRemoteName());
+	public void testGetRemoteName() throws IOException {
+		SocketClient scli = new SocketClient(new InetSocketAddress("localhost", 8808));
+		assertEquals("localhost/127.0.0.1:8808-0000", scli.getRemoteName());
 		try {
-			packetClient.attachData("adsfasdf", "adsfasdf");
+			scli.attachData("adsfasdf", "adsfasdf");
 			assertTrue("Should not attache.", false);
 		} catch (Exception e) {
 			;
 		}
 		try {
-			packetClient.getAttached("adsfasdf");
+			scli.getAttached("adsfasdf");
 			assertTrue("Should not attache.", false);
 		} catch (Exception e) {
 			;
 		}
 		try {
-			packetClient.addEventListener(null);
+			scli.addEventListener(null);
 			assertTrue("Should not listen.", false);
 		} catch (Exception e) {
 			;
 		}
+		scli.socket = mock(Socket.class);
+        doThrow(new IOException("This is test testSafeClose.")).when(scli.socket).close();
+        scli.stop();
 	}
 
 	@Test
@@ -109,10 +115,19 @@ public class SocketClientTest {
 		boolean flag = false;
 		try {
 			sc.handleWrite(new PacketData(6, "Morning."));
-		} catch (RejectedExecutionException e) {
+		} catch (IllegalStateException e) {
 			flag = true;
 		}
 		assertTrue(flag);
 	}
+
+    @Test
+    public void testIsAutoRead() throws Exception {
+        SocketClient sc = new SocketClient();
+        assertTrue(sc.isAutoRead());
+        sc.setAutoRead(false);
+        assertFalse(sc.isAutoRead());
+        sc.stop();
+    }
 
 }
