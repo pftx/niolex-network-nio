@@ -56,6 +56,12 @@ public class PoolHandler implements InvocationHandler {
     private final int handlerNum;
     private int waitTimeout = Constants.CLIENT_CONNECT_TIMEOUT;
 
+    /**
+     * Create a PoolHandler with the specified parameters.
+     *
+     * @param retryTimes the number of times to retry when some kind of error occurred
+     * @param col the collections of RpcClient
+     */
     public PoolHandler(int retryTimes, Collection<RpcClient> col) {
         super();
         this.retryTimes = retryTimes;
@@ -69,7 +75,7 @@ public class PoolHandler implements InvocationHandler {
         Throwable cause = null;
         long handleStart = 0, handleEnd = 500;
         int curTry = 0;
-        while (curTry < retryTimes) {
+        while (curTry++ < retryTimes) {
             core = take();
             if (core == null) {
                 throw new RpcException("Failed to service " + method.getName(), RpcException.Type.NO_SERVER_READY, null);
@@ -108,8 +114,11 @@ public class PoolHandler implements InvocationHandler {
                 else if (e.getCause() instanceof IOException)
                     continue;
                 cause = e;
+            } finally {
+                // Return the resource.
+                readyQueue.offer(core);
             }
-        }
+        } // End of while.
         throw new RpcException("Failed to service " + method.getName() + ": exceeds retry time [" + retryTimes + "].",
                 RpcException.Type.ERROR_EXCEED_RETRY, cause);
     }
@@ -123,14 +132,15 @@ public class PoolHandler implements InvocationHandler {
         RpcClient core;
         int anyTried = 0;
         while ((core = takeOne(waitTimeout)) != null) {
-            // All the connections has been checked.
-            if (anyTried++ >= handlerNum) {
-                return null;
-            }
+            // First check the connection status.
             if (core.isValid())
                 return core;
             else {
                 readyQueue.offer(core);
+            }
+            // All the connections has been checked.
+            if (++anyTried >= handlerNum) {
+                return null;
             }
         }
         return null;
