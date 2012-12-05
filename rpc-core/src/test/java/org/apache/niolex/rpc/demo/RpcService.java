@@ -24,7 +24,7 @@ import org.apache.niolex.rpc.RpcMethod;
 /**
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
- * @Date: 2012-6-1
+ * @since 2012-6-1
  */
 public interface RpcService {
 
@@ -39,6 +39,9 @@ public interface RpcService {
 
 	@RpcMethod(17)
 	public String concat(String a, String b);
+
+	@RpcMethod(18)
+	public Int sum(IntArray ia);
 
 	public void testMe();
 
@@ -62,6 +65,20 @@ public interface RpcService {
 		public void setI(int i) {
 			this.i = i;
 		}
+
+	}
+
+	public static class IntArray {
+	    public int[] arr;
+
+	    public IntArray() {
+	        super();
+	    }
+
+        public IntArray(int... arr) {
+            super();
+            this.arr = arr;
+        }
 
 	}
 }

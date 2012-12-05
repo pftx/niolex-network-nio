@@ -28,7 +28,7 @@ import org.apache.niolex.network.PacketData;
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
- * @Date: 2012-5-31
+ * @since 2012-5-31
  */
 public class SavePacketHandler implements IPacketHandler {
 	// The list to save data

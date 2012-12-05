@@ -40,7 +40,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
- * @Date: 2012-6-1
+ * @since 2012-6-1
  */
 public class RpcClient implements InvocationHandler {
 	private static final Logger LOG = LoggerFactory.getLogger(RpcClient.class);
@@ -80,7 +80,7 @@ public class RpcClient implements InvocationHandler {
 	 *
 	 * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
 	 * @version 1.0.0
-	 * @Date: 2012-6-2
+	 * @since 2012-6-2
 	 */
 	public static enum Status {
 		INNITIAL, CONNECTED, CLOSED

@@ -33,7 +33,7 @@ import org.apache.niolex.network.event.WriteEventListener;
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
- * @Date: 2012-5-30
+ * @since 2012-5-30
  */
 public abstract class BasePacketWriter implements IPacketWriter {
 

@@ -35,7 +35,7 @@ import org.apache.niolex.network.name.core.NameClient;
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
- * @Date: 2012-6-20
+ * @since 2012-6-20
  */
 public class AddressSubscriber extends NameClient {
 

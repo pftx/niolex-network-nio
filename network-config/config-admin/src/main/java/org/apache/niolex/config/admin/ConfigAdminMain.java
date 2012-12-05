@@ -27,7 +27,7 @@ import org.apache.niolex.commons.file.FileUtil;
 /**
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
- * @Date: 2012-7-9
+ * @since 2012-7-9
  */
 public class ConfigAdminMain {
 

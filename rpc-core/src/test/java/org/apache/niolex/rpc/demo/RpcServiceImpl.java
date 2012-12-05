@@ -25,7 +25,7 @@ import org.apache.niolex.commons.util.DateTimeUtil;
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
- * @Date: 2012-6-2
+ * @since 2012-6-2
  */
 public class RpcServiceImpl implements RpcService {
 
@@ -76,5 +76,18 @@ public class RpcServiceImpl implements RpcService {
 	public void testMe() {
 		System.out.println("TestMe called at " + DateTimeUtil.formatDate2DateTimeStr());
 	}
+
+    /**
+     * Override super method
+     * @see org.apache.niolex.rpc.demo.RpcService#sum(org.apache.niolex.rpc.demo.RpcService.IntArray)
+     */
+    @Override
+    public Int sum(IntArray ia) {
+        int k = 0;
+        for (int i = 0; i < ia.arr.length; ++i) {
+            k += ia.arr[i];
+        }
+        return new Int(k);
+    }
 
 }

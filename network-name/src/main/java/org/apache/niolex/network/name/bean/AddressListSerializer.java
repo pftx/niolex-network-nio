@@ -29,7 +29,7 @@ import org.apache.niolex.network.packet.BaseSerializer;
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
- * @Date: 2012-6-21
+ * @since 2012-6-21
  */
 public class AddressListSerializer extends BaseSerializer<List<String>> {
 

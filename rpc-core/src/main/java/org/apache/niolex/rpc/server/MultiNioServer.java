@@ -208,7 +208,7 @@ public class MultiNioServer extends NioServer {
 	 *
 	 * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
 	 * @version 1.0.0
-	 * @Date: 2012-6-11
+	 * @since 2012-6-11
 	 */
 	private class RunnableSelector implements Runnable {
 		private LinkedList<SocketChannel> clientQueue = new LinkedList<SocketChannel>();

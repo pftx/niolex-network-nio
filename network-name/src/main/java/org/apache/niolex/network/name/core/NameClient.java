@@ -39,7 +39,7 @@ import org.slf4j.LoggerFactory;
 /**
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
- * @Date: 2012-6-20
+ * @since 2012-6-20
  */
 public class NameClient implements IPacketHandler {
 	private static final Logger LOG = LoggerFactory.getLogger(NameClient.class);

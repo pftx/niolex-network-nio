@@ -29,7 +29,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
- * @Date: 2012-8-17
+ * @since 2012-8-17
  */
 public class SelectorHolder {
 

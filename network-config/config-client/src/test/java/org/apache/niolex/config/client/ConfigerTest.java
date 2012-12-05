@@ -26,7 +26,7 @@ import org.junit.Test;
 /**
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
- * @Date: 2012-7-4
+ * @since 2012-7-4
  */
 public class ConfigerTest {
 

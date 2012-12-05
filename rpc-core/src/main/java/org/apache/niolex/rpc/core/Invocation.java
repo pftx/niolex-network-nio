@@ -29,7 +29,7 @@ import org.apache.niolex.network.Packet;
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
- * @Date: 2012-8-19
+ * @since 2012-8-19
  */
 public class Invocation implements Runnable {
 

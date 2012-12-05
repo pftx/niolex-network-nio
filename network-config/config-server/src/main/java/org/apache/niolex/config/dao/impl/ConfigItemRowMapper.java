@@ -26,7 +26,7 @@ import org.springframework.jdbc.core.RowMapper;
 /**
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
- * @Date: 2012-7-6
+ * @since 2012-7-6
  */
 public class ConfigItemRowMapper implements RowMapper<ConfigItem> {
 

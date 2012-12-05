@@ -23,7 +23,7 @@ import org.apache.niolex.rpc.core.Invoker;
 /**
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
- * @Date: 2012-8-19
+ * @since 2012-8-19
  */
 public class EchoInvoker implements Invoker {
 

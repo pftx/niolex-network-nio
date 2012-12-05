@@ -39,7 +39,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 /**
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
- * @Date: 2012-6-29
+ * @since 2012-6-29
  */
 public class NameClientTest {
 

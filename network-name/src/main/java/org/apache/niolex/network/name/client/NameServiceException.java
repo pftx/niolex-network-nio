@@ -20,7 +20,7 @@ package org.apache.niolex.network.name.client;
 /**
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
- * @Date: 2012-6-27
+ * @since 2012-6-27
  */
 public class NameServiceException extends RuntimeException {
 

@@ -22,7 +22,7 @@ package org.apache.niolex.config.core;
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
- * @Date: 2012-6-27
+ * @since 2012-6-27
  */
 public class ConfigException extends RuntimeException {
 

@@ -24,7 +24,7 @@ import org.apache.niolex.config.bean.UserInfo;
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
- * @Date: 2012-7-5
+ * @since 2012-7-5
  */
 public interface AuthenDao {
 

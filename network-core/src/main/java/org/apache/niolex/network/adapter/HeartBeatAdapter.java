@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
- * @Date: 2012-6-14
+ * @since 2012-6-14
  */
 public class HeartBeatAdapter implements IPacketHandler, WriteEventListener, Runnable {
 	private static final Logger LOG = LoggerFactory.getLogger(HeartBeatAdapter.class);

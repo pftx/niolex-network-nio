@@ -27,7 +27,7 @@ import java.lang.annotation.Target;
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
- * @Date: 2012-5-30
+ * @since 2012-5-30
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)

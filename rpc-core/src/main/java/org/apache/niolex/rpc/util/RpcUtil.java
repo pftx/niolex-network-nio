@@ -25,7 +25,7 @@ import org.apache.niolex.rpc.RpcException;
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
- * @Date: 2012-11-8
+ * @since 2012-11-8
  */
 public abstract class RpcUtil {
 

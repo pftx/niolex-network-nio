@@ -25,7 +25,7 @@ import java.io.IOException;
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
- * @Date: 2012-6-2
+ * @since 2012-6-2
  */
 public interface IClient {
 

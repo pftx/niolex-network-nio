@@ -33,7 +33,7 @@ import org.springframework.stereotype.Component;
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
- * @Date: 2012-7-5
+ * @since 2012-7-5
  */
 @Component
 public class GroupSyncHandler implements IPacketHandler {

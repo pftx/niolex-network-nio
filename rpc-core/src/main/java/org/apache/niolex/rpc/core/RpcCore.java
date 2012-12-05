@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
- * @Date: 2012-8-17
+ * @since 2012-8-17
  */
 public class RpcCore {
 	private static final Logger LOG = LoggerFactory.getLogger(RpcCore.class);

@@ -34,7 +34,7 @@ import org.junit.runner.RunWith;
 /**
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
- * @Date: 2012-7-11
+ * @since 2012-7-11
  */
 @RunWith(OrderedRunner.class)
 public class MemoryStorageTest {

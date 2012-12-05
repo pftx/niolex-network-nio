@@ -31,7 +31,7 @@ import org.codehaus.jackson.type.TypeReference;
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
- * @Date: 2012-6-1
+ * @since 2012-6-1
  */
 public abstract class JsonUtil {
 
@@ -39,7 +39,7 @@ public abstract class JsonUtil {
 	 * This is the class to return a type.
 	 * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
 	 * @version 1.0.0
-	 * @Date: 2012-7-24
+	 * @since 2012-7-24
 	 */
 	private static class TypeRe<T> extends TypeReference<T> {
 		private Type type;

@@ -61,7 +61,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
- * @Date: 2012-7-3
+ * @since 2012-7-3
  */
 public class ConfigClient {
 	private static final Logger LOG = LoggerFactory.getLogger(ConfigClient.class);
@@ -249,7 +249,7 @@ public class ConfigClient {
      *
      * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
      * @version 1.0.0
-     * @Date: 2012-7-3
+     * @since 2012-7-3
      */
     private static final class ClientHandler implements IPacketHandler {
 

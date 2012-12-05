@@ -44,7 +44,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 /**
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
- * @Date: 2012-5-31
+ * @since 2012-5-31
  */
 public class FaultTolerateAdapterTest {
 	@Mock

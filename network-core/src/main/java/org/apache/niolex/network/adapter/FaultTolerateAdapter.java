@@ -50,7 +50,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
- * @Date: 2012-5-30
+ * @since 2012-5-30
  */
 public class FaultTolerateAdapter implements IPacketHandler, WriteEventListener {
 	private static final Logger LOG = LoggerFactory.getLogger(FaultTolerateAdapter.class);

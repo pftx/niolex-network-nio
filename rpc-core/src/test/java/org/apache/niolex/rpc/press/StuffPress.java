@@ -31,7 +31,7 @@ import org.apache.niolex.rpc.stuff.StuffProtocol;
 /**
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
- * @Date: 2012-8-11
+ * @since 2012-8-11
  */
 public class StuffPress {
 

@@ -34,7 +34,7 @@ import org.springframework.stereotype.Service;
 /**
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
- * @Date: 2012-7-6
+ * @since 2012-7-6
  */
 @Service
 public class AuthenServiceImpl implements AuthenService {
