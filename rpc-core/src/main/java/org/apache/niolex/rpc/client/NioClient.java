@@ -25,6 +25,7 @@ import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -182,7 +183,7 @@ public class NioClient implements IClient, Runnable {
 	public void connect() throws IOException {
 		this.isWorking = true;
 		addClientChannels();
-		socketHolder.needReady(connectionNumber / 2);
+		socketHolder.needReady(connectionNumber / 2 + 1);
 		thread.start();
 		try {
 			socketHolder.waitReady();
@@ -195,8 +196,11 @@ public class NioClient implements IClient, Runnable {
 	public void addClientChannels() {
 		while (validCnt.get() < connectionNumber) {
 			int k = validCnt.incrementAndGet();
-			if (k <= connectionNumber)
+			if (k <= connectionNumber) {
 				addNewClientChannel();
+			} else {
+			    validCnt.decrementAndGet();
+			}
 		}
 	}
 
@@ -233,7 +237,7 @@ public class NioClient implements IClient, Runnable {
 	 * Async invoke of remote call.
 	 *
 	 * @param sc
-	 * @return
+	 * @return the wait on object.
 	 */
 	public WaitOn<Packet> asyncInvoke(Packet sc) {
 		sc.setSerial((short) 1);
@@ -271,7 +275,7 @@ public class NioClient implements IClient, Runnable {
 	@Override
 	public void stop() {
 		this.isWorking = false;
-		for (SelectionKey skey : selector.keys()) {
+		for (SelectionKey skey : new HashSet<SelectionKey>(selector.keys())) {
         	try {
         		skey.channel().close();
         	} catch (Exception e) {}
@@ -280,7 +284,7 @@ public class NioClient implements IClient, Runnable {
 		try {
 			thread.join();
 			selector.close();
-    		LOG.info("Client stoped.");
+    		LOG.info("NioClient stoped.");
     	} catch(Exception e) {
     		LOG.error("Error occured when stop the nio client.", e);
     	}
@@ -328,7 +332,7 @@ public class NioClient implements IClient, Runnable {
 	 * @param serverAddress
 	 */
 	public void setServerAddress(String str) {
-		String[] ss = str.split(" *, *");
+		String[] ss = str.split(" *[,;] *");
 		SocketAddress[] ass = new SocketAddress[ss.length];
 		for (int i = 0; i < ss.length; ++i) {
 			String a = ss[i];

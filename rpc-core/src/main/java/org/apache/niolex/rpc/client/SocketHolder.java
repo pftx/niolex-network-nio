@@ -67,7 +67,7 @@ public class SocketHolder {
 	 */
 	public void ready(ClientCore clientCore) {
 		latch.countDown();
-		readyQueue.add(clientCore);
+		readyQueue.offer(clientCore);
 	}
 
 	/**
@@ -82,7 +82,7 @@ public class SocketHolder {
 			if (core.isValid())
 				return core;
 			else
-				nioClient.closeChannel(core);
+			    close(core);
 		}
 		return null;
 	}
@@ -104,6 +104,8 @@ public class SocketHolder {
 	}
 
 	/**
+	 * Notify all the threads waiting for results from this connection.
+	 *
 	 * @param clientCore
 	 */
 	public void close(ClientCore clientCore) {

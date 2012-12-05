@@ -119,6 +119,7 @@ public class ClientCore {
 	    	socketHolder.ready(this);
     	} catch (Exception e) {
     		handleClose();
+    		return;
     	}
 
     	this.remoteName = socketChannel.socket().getRemoteSocketAddress().toString();
@@ -175,7 +176,7 @@ public class ClientCore {
         		}
         	}
         } catch (Exception e) {
-            LOG.info("Failed to send data to client socket: {}", e.getMessage());
+            LOG.info("Failed to send data to server: {}", e.getMessage());
             handleClose();
         }
     }
@@ -220,7 +221,7 @@ public class ClientCore {
                 }
             }
         } catch (Exception e) {
-            LOG.info("Failed to read data from client socket: {}", e.toString());
+            LOG.info("Failed to read data from server: {}", e.toString());
             handleClose();
         }
         return false;
