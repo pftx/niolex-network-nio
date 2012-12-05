@@ -43,6 +43,7 @@ public class StuffPress {
 	static int SHUFFLE_NUM = 50;
 	static final StopWatch stopWatch = new StopWatch(1);
 	static final Counter ERROR_CNT = new Counter();
+	static String ADDR = "localhost";
 
 	/**
 	 * @param args
@@ -53,6 +54,7 @@ public class StuffPress {
 			SIZE = Integer.parseInt(args[0]);
 			THREAD_NUM = Integer.parseInt(args[1]);
 			SHUFFLE_NUM = Integer.parseInt(args[2]);
+			ADDR = args[3];
         }
 		for (int i = 0; i < 10; ++i) {
 			RpcClient cli = create();
@@ -101,7 +103,7 @@ public class StuffPress {
 	}
 
 	public static RpcClient create() throws IOException {
-		SocketClient c = new SocketClient(new InetSocketAddress("localhost", 8808));
+		SocketClient c = new SocketClient(new InetSocketAddress(ADDR, 8808));
 		RpcClient client = new RpcClient(c, new SingleInvoker(), new ProtoStuffConverter());
 		client.connect();
 		return client;

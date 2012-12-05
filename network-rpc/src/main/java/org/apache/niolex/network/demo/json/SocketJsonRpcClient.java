@@ -28,77 +28,69 @@ import org.apache.niolex.network.rpc.SingleInvoker;
 import org.apache.niolex.network.rpc.conv.JsonConverter;
 
 /**
- * Socket client.
+ * Socket client test.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0, Date: 2012-6-13
  */
 public class SocketJsonRpcClient {
 
+    private static int err = 0;
 
-	public static void main(String[] arg2s) throws IOException, Throwable {
-		SocketClient c = new SocketClient(new InetSocketAddress("localhost", 8808));
-		RpcClient client = new RpcClient(c, new SingleInvoker(), new JsonConverter());
-		client.connect();
+    public static void main(String[] arg2s) throws IOException, Throwable {
+        SocketClient c = new SocketClient(new InetSocketAddress("localhost", 8808));
+        RpcClient client = new RpcClient(c, new SingleInvoker(), new JsonConverter());
+        client.connect();
 
-		final RpcService ser = client.getService(RpcService.class);
+        final RpcService ser = client.getService(RpcService.class);
 
-		int k = ser.add(3, 4, 5, 6, 7, 8, 9);
-		System.out.println("Out 42 => " + k);
-		List<String> args = new ArrayList<String>();
-		args.add("3");
-		args.add("3");
-		args.add("3");
-		k = ser.size(args);
-		System.out.println("Out 3 => " + k);
-		k = ser.size(null);
-		System.out.println("Out 0 => " + k);
-		k = ser.add(3, 4, 5);
-		System.out.println("Out 12 => " + k);
+        int k = ser.add(3, 4, 5, 6, 7, 8, 9);
+        System.out.println("Out 42 => " + k);
+        List<String> args = new ArrayList<String>();
+        args.add("3");
+        args.add("3");
+        args.add("3");
+        k = ser.size(args);
+        System.out.println("Out 3 => " + k);
+        k = ser.size(null);
+        System.out.println("Out 0 => " + k);
+        k = ser.add(3, 4, 5);
+        System.out.println("Out 12 => " + k);
 
-		Runnable r = new Runnable() {
+        final int SIZE = 2212;
 
-			final int SIZE = 2212;
+        int i = SIZE;
+        long in = System.currentTimeMillis();
+        long maxin = 0;
+        while (i-- > 0) {
+            long xin = System.currentTimeMillis();
+            k = ser.add(3, 4, 5, 6, 7, 8, 9, i);
+            assertt(k, 42 + i, "Out 1 => " + k);
 
-			@Override
-			public void run() {
-				int i = SIZE;
-				long in = System.currentTimeMillis();
-				long maxin = 0;
-				while (i-- > 0) {
-					long xin = System.currentTimeMillis();
-					int k = ser.add(3, 4, 5, 6, 7, 8, 9, i);
-					assertt(k, 42 + i, "Out 1 => " + k);
+            args = new ArrayList<String>();
+            args.add("3");
+            args.add("3");
+            k = ser.size(args);
+            assertt(k, 2, "Out 2 => " + k);
+            k = ser.size(null);
+            assertt(k, 0, "Out 3 => " + k);
+            long xou = System.currentTimeMillis() - xin;
+            if (xou > maxin) {
+                maxin = xou;
+            }
+        }
+        long t = System.currentTimeMillis() - in;
+        System.out.println("rps => " + (SIZE * 3000 / t) + ", Max " + maxin + ", Avg " + (t / (SIZE * 3)));
+        System.out.println("Done..... " + err);
 
-					List<String> args = new ArrayList<String>();
-					args.add("3");
-					args.add("3");
-					k = ser.size(args);
-					assertt(k, 2, "Out 2 => " + k);
-					k = ser.size(null);
-					assertt(k, 0, "Out 3 => " + k);
-					long xou = System.currentTimeMillis() - xin;
-					if (xou > maxin) {
-						maxin = xou;
-					}
-				}
-				long t = System.currentTimeMillis() - in;
-				System.out.println("rps => " + (SIZE * 3000 / t) + ", Max " + maxin + ", Avg " + (t / (SIZE * 3)));
-			}
-		};
-		Thread t = new Thread(r);
-		t.start();
-		t.join();
-		System.out.println("Join ...");
-		System.out.println("Done.....");
+        client.stop();
+    }
 
-		client.stop();
-	}
-
-	public static void assertt(int a, int b, String c) {
-		if (a != b) {
-			System.out.println(c);
-		}
-	}
+    public static void assertt(int a, int b, String c) {
+        if (a != b) {
+            ++err;
+            System.out.println(c);
+        }
+    }
 
 }

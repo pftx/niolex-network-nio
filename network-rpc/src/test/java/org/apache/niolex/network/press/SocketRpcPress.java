@@ -1,5 +1,5 @@
 /**
- * RpcPress.java
+ * SocketRpcPress.java
  *
  * Copyright 2012 Niolex, Inc.
  *
@@ -21,10 +21,13 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.niolex.commons.test.Counter;
+import org.apache.niolex.commons.test.MockUtil;
 import org.apache.niolex.commons.test.StopWatch;
 import org.apache.niolex.commons.test.StopWatch.Stop;
+import org.apache.niolex.commons.util.SystemUtil;
 import org.apache.niolex.network.client.SocketClient;
 import org.apache.niolex.network.demo.json.RpcService;
 import org.apache.niolex.network.rpc.RpcClient;
@@ -36,13 +39,15 @@ import org.apache.niolex.network.rpc.conv.JsonConverter;
  * @version 1.0.0
  * @since 2012-8-11
  */
-public class RpcPress {
+public class SocketRpcPress {
 
-	static int SIZE = 8024;
-	static int THREAD_NUM = 5;
+	static int SIZE = 51200;
+	static int THREAD_NUM = 6;
 	static int SHUFFLE_NUM = 50;
 	static final StopWatch stopWatch = new StopWatch(1);
 	static final Counter ERROR_CNT = new Counter();
+	static final AtomicInteger CNT = new AtomicInteger();
+	static String ADDR = "localhost";
 
 	/**
 	 * @param args
@@ -53,6 +58,7 @@ public class RpcPress {
 			SIZE = Integer.parseInt(args[0]);
 			THREAD_NUM = Integer.parseInt(args[1]);
 			SHUFFLE_NUM = Integer.parseInt(args[2]);
+			ADDR = args[3];
         }
 		for (int i = 0; i < 10; ++i) {
 			RpcClient cli = create();
@@ -64,7 +70,6 @@ public class RpcPress {
 				throw new Exception("OK " + ok + ", i " + i);
 			}
 			cli.stop();
-			Thread.yield();
 		}
 		Thread[] ts = new Thread[THREAD_NUM];
 		for (int i = 0; i < THREAD_NUM; ++i) {
@@ -85,7 +90,7 @@ public class RpcPress {
 				throw new Exception("OK " + ok + ", i " + i);
 			}
 			cli.stop();
-			Thread.yield();
+			SystemUtil.sleep(1);
 		}
 		for (int i = 0; i < THREAD_NUM; ++i) {
 			ts[i].join();
@@ -97,7 +102,7 @@ public class RpcPress {
 	}
 
 	public static RpcClient create() throws IOException {
-		SocketClient c = new SocketClient(new InetSocketAddress("localhost", 8808));
+		SocketClient c = new SocketClient(new InetSocketAddress(ADDR, 8808));
 		RpcClient client = new RpcClient(c, new SingleInvoker(), new JsonConverter());
 		client.connect();
 		return client;
@@ -118,8 +123,10 @@ public class RpcPress {
 
 		@Override
 		public void run() {
-			int i = SIZE;
-			while (i-- > 0) {
+		    int i = MockUtil.ranInt(102192133);
+		    int LEN = a.length() + b.length();
+			while (CNT.getAndIncrement() < SIZE) {
+			    --i;
 				Stop s = stopWatch.start();
 				int k = service.add(3, 4, 5, 6, 7, 8, 9, i);
 				s.stop();
@@ -142,8 +149,9 @@ public class RpcPress {
 				s = stopWatch.start();
 				String c = service.concat(a, b);
 				s.stop();
-				if (c.length() < 14) {
-					System.out.println("Out3 => " + k);
+				if (c.length() != LEN) {
+				    ERROR_CNT.inc();
+					System.out.println("Out3 => " + c);
 				}
 				Thread.yield();
 			}

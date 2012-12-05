@@ -46,6 +46,7 @@ public class RpcPress {
 	static int SHUFFLE_NUM = 50;
 	static final StopWatch stopWatch = new StopWatch(1);
 	static final Counter ERROR_CNT = new Counter();
+	static String ADDR = "localhost";
 
 	/**
 	 * @param args
@@ -57,6 +58,7 @@ public class RpcPress {
 			SIZE = Integer.parseInt(args[0]);
 			THREAD_NUM = Integer.parseInt(args[1]);
 			SHUFFLE_NUM = Integer.parseInt(args[2]);
+			ADDR = args[3];
         }
 		// Warm server.
 		for (int i = 0; i < 10; ++i) {
@@ -105,7 +107,7 @@ public class RpcPress {
 	}
 
 	public static RpcClient create() throws IOException {
-		SocketClient c = new SocketClient(new InetSocketAddress("localhost", 8808));
+		SocketClient c = new SocketClient(new InetSocketAddress(ADDR, 8808));
 		RpcClient client = new RpcClient(c, new JsonProtocol());
 		client.connect();
 		return client;

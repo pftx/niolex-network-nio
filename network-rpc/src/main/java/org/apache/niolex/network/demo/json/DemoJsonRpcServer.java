@@ -19,7 +19,6 @@ package org.apache.niolex.network.demo.json;
 
 import java.io.IOException;
 
-import org.apache.niolex.network.adapter.HeartBeatAdapter;
 import org.apache.niolex.network.rpc.ConfigItem;
 import org.apache.niolex.network.rpc.RpcPacketHandler;
 import org.apache.niolex.network.rpc.conv.JsonConverter;
@@ -34,7 +33,6 @@ import org.apache.niolex.network.server.MultiNioServer;
 public class DemoJsonRpcServer {
 
     private static MultiNioServer s = new MultiNioServer();
-    private static HeartBeatAdapter ada;
 
     /**
      * The Server Demo
@@ -50,10 +48,7 @@ public class DemoJsonRpcServer {
         	handler = new RpcPacketHandler();
         }
         handler.setConverter(new JsonConverter());
-        ada = new HeartBeatAdapter(handler);
-        ada.setHeartBeatInterval(2000);
-        ada.setForceHeartBeat(true);
-        s.setPacketHandler(ada);
+        s.setPacketHandler(handler);
 
         ConfigItem[] confs = new ConfigItem[1];
         ConfigItem c = new ConfigItem();
@@ -62,12 +57,10 @@ public class DemoJsonRpcServer {
         confs[0] = c;
 		handler.setRpcConfigs(confs);
 
-		ada.start();
         s.start();
     }
 
     public static void stop() {
         s.stop();
-        ada.stop();
     }
 }
