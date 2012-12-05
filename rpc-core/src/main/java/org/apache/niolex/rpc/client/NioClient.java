@@ -162,7 +162,7 @@ public class NioClient implements IClient, Runnable {
             } else if (selectionKey.isReadable()) {
             	if (cli.handleRead()) {
             		// Read packet finished, we need to invoke packet handler
-            		blocker.release(cli, cli.readFinished());
+            		cli.readFinished(blocker);
             	}
             } else if (selectionKey.isWritable()) {
             	cli.handleWrite();

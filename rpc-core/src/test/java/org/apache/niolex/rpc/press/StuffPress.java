@@ -21,11 +21,14 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 
 import org.apache.niolex.commons.test.Counter;
+import org.apache.niolex.commons.test.MockUtil;
 import org.apache.niolex.commons.test.StopWatch;
 import org.apache.niolex.commons.test.StopWatch.Stop;
+import org.apache.niolex.commons.util.SystemUtil;
 import org.apache.niolex.rpc.RpcClient;
 import org.apache.niolex.rpc.client.SocketClient;
 import org.apache.niolex.rpc.demo.RpcService;
+import org.apache.niolex.rpc.demo.RpcService.IntArray;
 import org.apache.niolex.rpc.stuff.StuffProtocol;
 
 /**
@@ -86,7 +89,7 @@ public class StuffPress {
 				throw new Exception("OK " + ok + ", i " + i);
 			}
 			cli.stop();
-			Thread.yield();
+			SystemUtil.sleep(1);
 		}
 		// Waiting for done.
 		for (int i = 0; i < THREAD_NUM; ++i) {
@@ -128,6 +131,9 @@ public class StuffPress {
 		public void run() {
 			int i = SIZE;
 			int lennn = a.length() + b.length();
+			int z = MockUtil.ranInt(10240);
+            int y = MockUtil.ranInt(10240);
+            int x = MockUtil.ranInt(10240);
 			while (i-- > 0) {
 				Stop s;
 				// -------------------------
@@ -138,7 +144,14 @@ public class StuffPress {
 					System.out.println("Concat => " + c);
 				}
 				s.stop();
-				Thread.yield();
+				// -------------------------
+				s = stopWatch.start();
+				int m = service.sum(new IntArray(x, y, z, i)).i;
+				if (m != x + y + z + i) {
+				    ERROR_CNT.inc();
+				    System.out.println("Concat => " + c);
+				}
+				s.stop();
 			}
 			cli.stop();
 		}

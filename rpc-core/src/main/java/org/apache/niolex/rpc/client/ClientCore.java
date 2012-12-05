@@ -22,6 +22,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 
+import org.apache.niolex.commons.concurrent.Blocker;
 import org.apache.niolex.network.Config;
 import org.apache.niolex.network.Packet;
 import org.apache.niolex.network.PacketUtil;
@@ -229,12 +230,20 @@ public class ClientCore {
 
     /**
      * Read packet finished, we will detach this channel from read.
+     *
+     * @param blocker use this to release the result.
      */
-    public Packet readFinished() {
+    public void readFinished(Blocker<Packet> blocker) {
     	LOG.debug("Packet received. desc {}, size {}.", packet.descriptor(), packet.getLength());
+    	if (packet.getCode() == Config.CODE_HEART_BEAT) {
+            // Let's ignore the heart beat packet here.
+    	    return;
+    	}
+    	// Read packet finished, we need to invoke packet handler.
+    	blocker.release(this, packet);
+    	// Return this resource to the pool.
     	selectionKey.interestOps(0);
     	socketHolder.ready(this);
-    	return packet;
     }
 
     /**
