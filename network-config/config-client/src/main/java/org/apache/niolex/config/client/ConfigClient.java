@@ -35,7 +35,7 @@ import org.apache.niolex.commons.config.PropUtil;
 import org.apache.niolex.commons.download.DownloadUtil;
 import org.apache.niolex.commons.file.FileUtil;
 import org.apache.niolex.commons.test.MockUtil;
-import org.apache.niolex.commons.util.Pair;
+import org.apache.niolex.commons.bean.Pair;
 import org.apache.niolex.commons.util.Runme;
 import org.apache.niolex.config.bean.ConfigGroup;
 import org.apache.niolex.config.bean.ConfigItem;

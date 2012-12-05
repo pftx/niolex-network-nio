@@ -22,7 +22,7 @@ import static org.junit.Assert.assertEquals;
 import java.lang.reflect.Type;
 
 import org.apache.niolex.commons.test.Benchmark;
-import org.apache.niolex.commons.util.Pair;
+import org.apache.niolex.commons.bean.Pair;
 import org.apache.niolex.network.rpc.conv.JsonConverterTest.Bean;
 import org.junit.Test;
 

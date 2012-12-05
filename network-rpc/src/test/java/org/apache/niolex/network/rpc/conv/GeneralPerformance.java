@@ -21,7 +21,7 @@ import static org.junit.Assert.assertEquals;
 
 import org.apache.niolex.commons.test.MockUtil;
 import org.apache.niolex.commons.test.Performance;
-import org.apache.niolex.commons.util.Pair;
+import org.apache.niolex.commons.bean.Pair;
 import org.apache.niolex.network.rpc.IConverter;
 import org.codehaus.jackson.type.TypeReference;
 
