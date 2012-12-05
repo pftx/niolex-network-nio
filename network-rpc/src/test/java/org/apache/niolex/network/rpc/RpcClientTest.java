@@ -17,6 +17,7 @@
  */
 package org.apache.niolex.network.rpc;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.fail;
 
 import java.lang.reflect.Method;
@@ -48,6 +49,7 @@ public class RpcClientTest {
 	public void testInvoke_1() throws Throwable {
 		PacketClient pc = new PacketClient();
 		RpcClient rr = new RpcClient(pc, new PacketInvoker(), new JsonConverter());
+		assertFalse(rr.isValid());
 		Method method = MethodUtil.getMethods(RpcService.class, "add")[0];
 		rr.invoke(rr, method, null);
 		fail("Not yet implemented");
@@ -73,6 +75,7 @@ public class RpcClientTest {
 	public void testHandleClose() throws Throwable {
 		PacketClient pc = new PacketClient(new InetSocketAddress("localhost", 8808));
 		RpcClient rr = new RpcClient(pc, new PacketInvoker(), new JsonConverter());
+		rr.getRemoteName();
 		rr.handleClose(pc);
 	}
 

@@ -22,7 +22,6 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 
 import org.apache.niolex.network.rpc.RpcClient;
-import org.apache.niolex.network.rpc.RpcClient.Status;
 
 /**
  * This is the adapter to adapt RpcClient to IServiceHandler, which
@@ -78,7 +77,7 @@ public class RpcConnectionHandler implements IServiceHandler {
 	 */
 	@Override
 	public boolean isReady() {
-		return handler.getConnStatus() == Status.CONNECTED;
+		return handler.isValid();
 	}
 
 	/**

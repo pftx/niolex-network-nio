@@ -69,6 +69,7 @@ public class JsonRpcClientTest {
 		client.addInferface(getClass());
 		client.addInferface(RpcService.class);
 		client.setConnectTimeout(1234);
+		assertTrue(client.isValid());
 		assertTrue(client.getConnStatus() == Status.CONNECTED);
 	}
 

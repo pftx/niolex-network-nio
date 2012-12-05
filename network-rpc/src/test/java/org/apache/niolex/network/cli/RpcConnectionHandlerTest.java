@@ -79,7 +79,7 @@ public class RpcConnectionHandlerTest {
 
 	@Test
 	public final void testIsReadyTrue() {
-		when(handler.getConnStatus()).thenReturn(RpcClient.Status.CONNECTED);
+		when(handler.isValid()).thenReturn(true);
 		assertTrue(rpcConnectionHandler.isReady());
 	}
 

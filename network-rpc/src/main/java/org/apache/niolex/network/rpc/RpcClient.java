@@ -324,6 +324,22 @@ public class RpcClient implements InvocationHandler, IPacketHandler {
 	}
 
 	/**
+	 * Get Connection Status of this rpc client.
+	 *
+	 * @return true if this RpcClient is valid and ready to work.
+	 */
+	public boolean isValid() {
+        return connStatus == Status.CONNECTED;
+    }
+
+	/**
+     * @return The string representation of the remote peer. i.e. The IP address.
+     */
+	public String getRemoteName() {
+        return client.getRemoteName();
+    }
+
+    /**
 	 * Set the time in milliseconds that client with sleep between retry to connect
 	 * to server.
 	 *

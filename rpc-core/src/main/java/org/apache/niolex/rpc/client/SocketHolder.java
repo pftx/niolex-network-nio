@@ -88,7 +88,7 @@ public class SocketHolder {
 	}
 
 	/**
-	 * Take one ClientCore from the ready queue, will return null of can not take out any
+	 * Take one ClientCore from the ready queue, will return null if can not take out any
 	 * element at the given timeout.
 	 * We will not check the status of this instance, so it maybe already broken.
 	 *
