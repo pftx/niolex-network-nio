@@ -19,6 +19,7 @@ package org.apache.niolex.network.rpc;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
 
 import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
@@ -49,6 +50,7 @@ public class RpcClientTest {
 	public void testInvoke_1() throws Throwable {
 		PacketClient pc = new PacketClient();
 		RpcClient rr = new RpcClient(pc, new PacketInvoker(), new JsonConverter());
+		rr.addInferface(RpcService.class);
 		rr.setServerAddress(new InetSocketAddress("localhost", 8808));
 		assertFalse(rr.isValid());
 		Method method = MethodUtil.getMethods(RpcService.class, "add")[0];
@@ -63,9 +65,27 @@ public class RpcClientTest {
 	 * @throws Throwable
 	 */
 	@Test(expected = RpcException.class)
+	public void testInvoke_a() throws Throwable {
+	    PacketClient pc = mock(PacketClient.class);
+	    PacketInvoker in = mock(PacketInvoker.class);
+	    RpcClient rr = new RpcClient(pc, in, new JsonConverter());
+	    rr.addInferface(RpcService.class);
+	    rr.connect();
+	    Method method = MethodUtil.getMethods(RpcService.class, "add")[0];
+	    rr.invoke(rr, method, new Object[0]);
+	}
+
+	/**
+	 * Test method for
+	 * {@link org.apache.niolex.network.rpc.RpcClient#invoke(java.lang.Object, java.lang.reflect.Method, java.lang.Object[])}
+	 * .
+	 * @throws Throwable
+	 */
+	@Test(expected = RpcException.class)
 	public void testInvoke_2() throws Throwable {
 		PacketClient pc = new PacketClient();
 		RpcClient rr = new RpcClient(pc, new PacketInvoker(), new JsonConverter());
+		rr.addInferface(RpcService.class);
 		rr.stop();
 		Method method = MethodUtil.getMethods(RpcService.class, "add")[0];
 		rr.invoke(rr, method, null);
@@ -73,11 +93,27 @@ public class RpcClientTest {
 	}
 
 	@Test
-	public void testHandleClose() throws Throwable {
+	public void testHandleClose1() throws Throwable {
 		PacketClient pc = new PacketClient(new InetSocketAddress("localhost", 8808));
 		RpcClient rr = new RpcClient(pc, new PacketInvoker(), new JsonConverter());
+		rr.addInferface(RpcService.class);
 		rr.getRemoteName();
+		rr.setSleepBetweenRetryTime(10);
+		rr.setConnectTimeout(10);
+		rr.stop();
 		rr.handleClose(pc);
+	}
+
+	@Test
+	public void testHandleClose2() throws Throwable {
+	    PacketClient pc = new PacketClient(new InetSocketAddress("localhost", 8808));
+	    RpcClient rr = new RpcClient(pc, new PacketInvoker(), new JsonConverter());
+	    rr.addInferface(RpcService.class);
+	    rr.getRemoteName();
+	    rr.setSleepBetweenRetryTime(10);
+	    rr.setConnectTimeout(10);
+	    rr.setConnectRetryTimes(1);
+	    rr.handleClose(pc);
 	}
 
 }

@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.niolex.commons.reflect.MethodUtil;
+import org.apache.niolex.commons.util.SystemUtil;
 import org.apache.niolex.network.Config;
 import org.apache.niolex.network.IClient;
 import org.apache.niolex.network.IPacketHandler;
@@ -297,11 +298,7 @@ public class RpcClient implements InvocationHandler, IPacketHandler {
 	 */
 	private boolean retryConnect() {
 		for (int i = 0; i < connectRetryTimes; ++i) {
-			try {
-				Thread.sleep(sleepBetweenRetryTime);
-			} catch (InterruptedException e1) {
-				// It's OK.
-			}
+		    SystemUtil.sleep(sleepBetweenRetryTime);
 			LOG.info("RPC Client try to reconnect to server round {} ...", i);
 			try {
 				client.connect();
