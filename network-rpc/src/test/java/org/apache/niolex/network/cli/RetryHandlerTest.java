@@ -18,7 +18,9 @@
 package org.apache.niolex.network.cli;
 
 import static org.junit.Assert.*;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -31,6 +33,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.niolex.commons.reflect.FieldUtil;
 import org.apache.niolex.commons.reflect.MethodUtil;
+import org.apache.niolex.commons.util.Runner;
+import org.apache.niolex.commons.util.SystemUtil;
 import org.apache.niolex.network.rpc.RpcException;
 import org.junit.Before;
 import org.junit.Test;
@@ -82,7 +86,38 @@ public class RetryHandlerTest {
 	 */
 	@Test
 	public void testInvokeSuccess() throws Throwable {
-		retryHandler.invoke(handler1, null, null);
+	    Method method = MethodUtil.getMethods(PoolHandlerTest.class, "thisMethod")[0];
+		retryHandler.invoke(handler1, method, null);
+		retryHandler.invoke(handler1, method, null);
+	}
+
+	/**
+	 * Test method for {@link org.apache.niolex.network.cli.RetryHandler#RetryHandler(java.util.List, int, int)}.
+	 * @throws Throwable
+	 */
+	@Test
+	public void testInvokeSleep() throws Throwable {
+	    when(handler2.isReady()).thenReturn(true);
+	    retryHandler = new RetryHandler(handlers, retryTimes, 1000);
+	    doThrow(new RpcException("Conn1", RpcException.Type.TIMEOUT, null)).when(handler1)
+        .invoke(any(), any(Method.class), any(Object[].class));
+	    Thread t = Runner.run(this, "testInvokeSuccess");
+        SystemUtil.sleep(2);
+        t.interrupt();
+        SystemUtil.sleep(10);
+        t.interrupt();
+        t.join();
+	}
+
+	/**
+	 * Test method for {@link org.apache.niolex.network.cli.RetryHandler#RetryHandler(java.util.List, int, int)}.
+	 * @throws Throwable
+	 */
+	@Test(expected=RpcException.class)
+	public void testInvokeErr() throws Throwable {
+	    doThrow(new RpcException("Conn1", RpcException.Type.ERROR_INVOKE, null)).when(handler1)
+	    .invoke(any(), any(Method.class), any(Object[].class));
+	    testInvokeSuccess();
 	}
 
 	/**

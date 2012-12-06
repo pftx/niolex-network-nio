@@ -17,7 +17,6 @@
  */
 package org.apache.niolex.network.cli;
 
-import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.Collection;
@@ -101,18 +100,20 @@ public class PoolHandler implements InvocationHandler {
                 LOG.info(sb.toString());
                 if (e instanceof RpcException) {
                     RpcException re = (RpcException)e;
-                    // For some type of RpcException, we need to retry.
                     switch (re.getType()) {
+                        // For some type of RpcException, we need to retry.
                         case TIMEOUT:
                         case NOT_CONNECTED:
                         case CONNECTION_CLOSED:
                             continue;
+                        // For the others, we just throw.
+                        default:
+                            throw re;
                     }
                 }
+                // If this exception has no cause, we think it's necessary to throw it out.
                 if (e.getCause() == null)
                     throw e;
-                else if (e.getCause() instanceof IOException)
-                    continue;
                 cause = e;
             } finally {
                 // Return the resource.

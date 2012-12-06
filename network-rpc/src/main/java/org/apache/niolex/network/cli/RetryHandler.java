@@ -114,12 +114,15 @@ public class RetryHandler implements InvocationHandler {
 				LOG.info(sb.toString());
 				if (e instanceof RpcException) {
 					RpcException re = (RpcException)e;
-					// For some type of RpcException, we need to retry.
 					switch (re.getType()) {
 					    case TIMEOUT:
 					    case NOT_CONNECTED:
 					    case CONNECTION_CLOSED:
+					        // For some type of RpcException, we need to retry.
 					        continue;
+                        default:
+                            // For the others, we just throw.
+                            throw re;
 					}
 				}
 				if (e.getCause() == null)

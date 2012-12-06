@@ -33,10 +33,14 @@ public abstract class Constants {
     private static final Logger LOG = LoggerFactory.getLogger(Constants.class);
 
     static {
+        init("/network-rpc.properties");
+    }
+
+    public static final void init(String fileName) {
         try {
-            PropUtil.loadConfig("/network-rpc.properties", Constants.class);
+            PropUtil.loadConfig(fileName, Constants.class);
         } catch (Throwable t) {
-            LOG.info("network-rpc.properties not found, use default configurations instead.");
+            LOG.info(fileName + " not found, use default configurations instead.");
         }
     }
 
