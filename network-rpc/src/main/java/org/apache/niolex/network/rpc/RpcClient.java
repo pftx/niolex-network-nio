@@ -22,6 +22,7 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.lang.reflect.Type;
+import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -367,5 +368,15 @@ public class RpcClient implements InvocationHandler, IPacketHandler {
 	public void setConnectTimeout(int timeout) {
 		this.client.setConnectTimeout(timeout);
 	}
+
+	/**
+     * Set the server Internet address this client want to connect
+     * This method must be called before {@link #connect()}
+     *
+     * @param serverAddress
+     */
+    public void setServerAddress(InetSocketAddress serverAddress) {
+        client.setServerAddress(serverAddress);
+    }
 
 }
