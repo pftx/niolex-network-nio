@@ -32,22 +32,25 @@ public interface ISerializer<T> {
 
 	/**
 	 * Get the code this Serializer is capable of.
-	 * @return
+	 *
+	 * @return the code
 	 */
 	public short getCode();
 
 	/**
 	 * Translate object to byte array.
+	 *
 	 * @param code
 	 * @param o
-	 * @return
+	 * @return the result
 	 */
 	public PacketData obj2Data(short code, Object o);
 
 	/**
 	 * Translate byte array to object.
+	 *
 	 * @param sc
-	 * @return
+	 * @return the result
 	 */
 	public T data2Obj(PacketData sc);
 

@@ -37,7 +37,8 @@ public class PacketData extends Packet {
 
     /**
      * Get the default heart beat packet.
-     * @return
+     *
+     * @return the heart beat packet.
      */
     public static final PacketData getHeartBeatPacket() {
         return HEART_BEAT;

@@ -44,8 +44,16 @@ import org.junit.Test;
 public class RpcUtilTest {
 
 	@Test
-	public void test() {
+	public void testSerializeRpc() {
 		new RpcUtil(){};
+		Exception e = new ArrayStoreException("Can not alloc memory.#49$");
+		RpcException ex = new RpcException("This is not Good.", RpcException.Type.ERROR_INVOKE, e);
+		byte[] bb = RpcUtil.serializeRpcException(ex);
+		assertNotNull(bb);
+		RpcException ox = RpcUtil.parseRpcException(bb);
+		assertEquals("This is not Good.", ox.getMessage());
+        assertEquals(RpcException.Type.ERROR_INVOKE, ox.getType());
+        System.out.println(ox.getCause());
 	}
 
 	@Test
@@ -55,7 +63,7 @@ public class RpcUtilTest {
 		assertNotNull(bb);
 		RpcException ex = RpcUtil.parseRpcException(bb);
 		assertEquals("This is good", ex.getMessage());
-		assertEquals("NullCause", ex.getCause().getMessage());
+		assertEquals("NullCause@air cloud", ex.getCause().getMessage());
 		assertEquals(RpcException.Type.CONNECTION_CLOSED, ex.getType());
 	}
 

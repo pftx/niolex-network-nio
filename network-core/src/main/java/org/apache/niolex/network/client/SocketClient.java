@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 
+import org.apache.niolex.commons.util.Runner;
 import org.apache.niolex.network.Config;
 import org.apache.niolex.network.PacketData;
 import org.slf4j.Logger;
@@ -119,9 +120,11 @@ public class SocketClient extends BaseClient {
 			}
 		} catch (IOException e) {
 		    // When IO exception occurred, this socket is invalid, we close it.
-		    stop();
-		    // Notify the handler.
-		    packetHandler.handleClose(this);
+		    if (this.isWorking) {
+		        stop();
+		        // Notify the handler.
+		        Runner.run(packetHandler, "handleClose", this);
+		    }
 		    // Throw an exception to the invoker.
 			throw new IllegalStateException("Failed to send packet to server.", e);
 		}

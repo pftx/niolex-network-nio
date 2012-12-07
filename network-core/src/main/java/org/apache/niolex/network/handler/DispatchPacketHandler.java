@@ -83,7 +83,7 @@ public class DispatchPacketHandler implements IPacketHandler {
     /**
      * Return the internal dispatch map size. For user to check.
      *
-     * @return
+     * @return the current dispatch map size
      */
     protected int getDispatchSize() {
     	return dispatchMap.size();

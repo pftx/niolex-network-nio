@@ -59,10 +59,20 @@ public abstract class RpcUtil {
 	public static final byte[] serializeRpcException(RpcException ex) {
 		StringBuilder sb = new StringBuilder();
 		sb.append(ex.getMessage()).append(SEP_RPCEX).append(ex.getType()).append(SEP_RPCEX);
-		if (ex.getCause() != null) {
-			sb.append(ex.getCause().getMessage());
+		Throwable cause = ex.getCause();
+		// Find the root cause.
+		while (cause != null && cause.getCause() != null) {
+		    cause = cause.getCause();
+		}
+		// Mark the cause.
+		if (cause != null) {
+			sb.append(cause.toString());
+			StackTraceElement[] sarr = cause.getStackTrace();
+			if (sarr != null && sarr.length >= 1) {
+			    sb.append('@').append(sarr[0].toString());
+			}
 		} else {
-			sb.append("NullCause");
+			sb.append("NullCause@air cloud");
 		}
 		return StringUtil.strToUtf8Byte(sb.toString());
 	}

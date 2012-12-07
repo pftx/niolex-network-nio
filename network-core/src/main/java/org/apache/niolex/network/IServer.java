@@ -40,8 +40,7 @@ public interface IServer {
 	public void stop();
 
 	/**
-	 * The current listen port.
-	 * @return
+	 * @return The current listen port.
 	 */
 	public int getPort();
 

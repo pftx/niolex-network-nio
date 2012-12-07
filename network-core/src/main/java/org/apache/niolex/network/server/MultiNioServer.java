@@ -124,7 +124,8 @@ public class MultiNioServer extends NioServer {
 
 	/**
 	 * Get the current threads number.
-	 * @return
+	 *
+	 * @return the current threads number.
 	 */
 	public int getThreadsNumber() {
 		return threadsNumber;
@@ -134,6 +135,7 @@ public class MultiNioServer extends NioServer {
 	 * Set the internal work pool threads number.
 	 * You need to set this before call the start method,
 	 * or it will be useless.
+	 *
 	 * @param threadsNumber
 	 */
 	public void setThreadsNumber(int threadsNumber) {

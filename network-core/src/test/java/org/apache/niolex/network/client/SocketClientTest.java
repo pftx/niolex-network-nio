@@ -22,6 +22,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -30,6 +31,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.niolex.network.CoreRunner;
+import org.apache.niolex.network.IPacketHandler;
 import org.apache.niolex.network.PacketData;
 import org.apache.niolex.network.example.SavePacketHandler;
 import org.junit.AfterClass;
@@ -119,6 +121,27 @@ public class SocketClientTest {
 			flag = true;
 		}
 		assertTrue(flag);
+	}
+
+	@Test
+	public void testConn2Recon() throws Exception {
+	    SocketClient sc = new SocketClient();
+	    InetSocketAddress inn = new InetSocketAddress("localhost", CoreRunner.PORT);
+	    sc.setServerAddress(inn);
+	    IPacketHandler hand = mock(IPacketHandler.class);
+	    sc.setPacketHandler(hand);
+	    sc.connect();
+	    sc.stop();
+	    sc.isWorking = true;
+	    boolean flag = false;
+	    try {
+	        sc.handleWrite(new PacketData(6, "Morning."));
+	    } catch (IllegalStateException e) {
+	        flag = true;
+	    }
+	    assertTrue(flag);
+	    Thread.sleep(10);
+	    verify(hand).handleClose(sc);
 	}
 
     @Test

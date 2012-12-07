@@ -129,14 +129,16 @@ public class ProtoBufferConverterTest {
 
 	@Test
 	public void testHandleRpc() throws Exception {
+	    Exception e = new Exception("This is bad");
 		byte[] bb = con.serializeReturn(new RpcException("This is good",
-				RpcException.Type.CONNECTION_CLOSED, new Exception("This is bad")));
+				RpcException.Type.CONNECTION_CLOSED, new Exception("Middle class.", e)));
 		assertNotNull(bb);
 		RpcException ex = (RpcException) con.prepareReturn(bb, RpcException.class);
 		assertEquals("This is good", ex.getMessage());
-		assertEquals("This is bad", ex.getCause().getMessage());
+		assertTrue(ex.getCause().getMessage().contains("This is bad"));
+		assertFalse(ex.getCause().getMessage().contains("Middle class."));
 		assertEquals(RpcException.Type.CONNECTION_CLOSED, ex.getType());
-		ex.printStackTrace();
+		System.out.println(ex.toString());
 	}
 
 	@Test(expected=RpcException.class)

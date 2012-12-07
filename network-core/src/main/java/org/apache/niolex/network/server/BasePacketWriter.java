@@ -126,7 +126,7 @@ public abstract class BasePacketWriter implements IPacketWriter {
 	/**
 	 * Sub class need to use this method to get packets to send.
 	 *
-	 * @return
+	 * @return the next packet
 	 */
 	protected PacketData handleNext() {
 		return sendPacketsQueue.poll();
@@ -157,7 +157,7 @@ public abstract class BasePacketWriter implements IPacketWriter {
 	/**
 	 * Return whether the send packets queue is empty or not.
 	 *
-	 * @return
+	 * @return true if it's empty
 	 */
 	public boolean isEmpty() {
 		return sendPacketsQueue.isEmpty();
@@ -166,7 +166,7 @@ public abstract class BasePacketWriter implements IPacketWriter {
 	/**
 	 * Get the current non send packet queue.
 	 *
-	 * @return
+	 * @return the current queue
 	 */
 	public ConcurrentLinkedQueue<PacketData> getRemainQueue() {
 		return sendPacketsQueue;

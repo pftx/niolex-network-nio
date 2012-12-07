@@ -43,15 +43,17 @@ public abstract class BaseSerializer<T> implements ISerializer<T> {
 
 	/**
 	 * serialize object to byte array.
+	 *
 	 * @param t
-	 * @return
+	 * @return the result
 	 */
 	public abstract byte[] serObj(T t);
 
 	/**
 	 * Deserialize byte array to object.
+	 *
 	 * @param arr
-	 * @return
+	 * @return the result
 	 */
 	public abstract T deserObj(byte[] arr);
 

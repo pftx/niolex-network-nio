@@ -35,7 +35,8 @@ public @interface Serializer {
 
 	/**
 	 * The Serializer class of this annotated class.
-	 * @return
+	 *
+	 * @return the serializer class
 	 */
 	Class<?> value();
 }

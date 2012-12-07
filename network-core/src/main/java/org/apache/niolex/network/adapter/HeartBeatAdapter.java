@@ -236,7 +236,8 @@ public class HeartBeatAdapter implements IPacketHandler, WriteEventListener, Run
 
 	/**
 	 * Return the status of this adapter
-	 * @return
+	 *
+	 * @return the current status
 	 */
 	public boolean isWorking() {
 		return isWorking;

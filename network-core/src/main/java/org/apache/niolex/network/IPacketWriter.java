@@ -33,7 +33,7 @@ public interface IPacketWriter {
     /**
      * The string representation of the remote peer. i.e. The IP address.
      *
-     * @return
+     * @return the remote peer name
      */
     public String getRemoteName();
 
@@ -74,7 +74,7 @@ public interface IPacketWriter {
      * Get the attached data from this Writer, or null if nothing is stored.
      *
      * @param key
-     * @return
+     * @return the attached object
      */
     public <T> T getAttached(String key);
 

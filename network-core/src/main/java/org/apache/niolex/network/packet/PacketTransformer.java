@@ -51,7 +51,8 @@ public class PacketTransformer {
 
 	/**
 	 * Get the global instance of this class.
-	 * @return
+	 *
+	 * @return the instance
 	 */
 	public static PacketTransformer getInstance() {
 		return INSTANCE;
@@ -67,8 +68,9 @@ public class PacketTransformer {
 
 	/**
 	 * Whether this code can be handled.
+	 *
 	 * @param code
-	 * @return
+	 * @return true if can handle, false otherwise
 	 */
 	public boolean canHandle(Short code) {
 		return serMap.containsKey(code);
@@ -76,8 +78,9 @@ public class PacketTransformer {
 
 	/**
 	 * Translate PacketData to Object.
+	 *
 	 * @param sc
-	 * @return
+	 * @return the result
 	 * @throws IllegalStateException if we can not translate this packet
 	 */
 	@SuppressWarnings("unchecked")
@@ -91,9 +94,10 @@ public class PacketTransformer {
 
 	/**
 	 * Translate Object to PacketData.
+	 *
 	 * @param code
 	 * @param o
-	 * @return
+	 * @return the result
 	 * @throws IllegalStateException if we can not translate this packet
 	 */
 	public PacketData getPacketData(Short code, Object o) {

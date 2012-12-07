@@ -76,7 +76,8 @@ public class Packet {
      * i.e.		3A456B12
      * This method will cache the result. So if you change the header after call this
      * method, the string will not change accordingly.
-     * @return
+     *
+     * @return the descriptor
      */
     public String descriptor() {
     	if (desc == null) {

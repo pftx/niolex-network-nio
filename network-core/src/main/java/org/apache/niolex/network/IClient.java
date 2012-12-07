@@ -33,6 +33,7 @@ public interface IClient extends IPacketWriter {
 	/**
 	 * Do real connect action, connect to server.
 	 * This method will return immediately after get connected.
+	 *
 	 * @throws IOException
 	 */
 	public void connect() throws IOException;
@@ -44,12 +45,14 @@ public interface IClient extends IPacketWriter {
 
 	/**
 	 * Test whether this client is working now
-	 * @return
+	 *
+	 * @return the current status
 	 */
 	public boolean isWorking();
 
 	/**
 	 * Set the packet handler this client going to use
+	 *
 	 * @param packetHandler
 	 */
 	public void setPacketHandler(IPacketHandler packetHandler);
@@ -72,7 +75,8 @@ public interface IClient extends IPacketWriter {
 
 	/**
 	 * Get the current Internet address of Remote server.
-	 * @return
+	 *
+	 * @return the remote server address
 	 */
 	public InetSocketAddress getServerAddress();
 

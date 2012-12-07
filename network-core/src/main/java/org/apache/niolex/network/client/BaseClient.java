@@ -141,8 +141,8 @@ public abstract class BaseClient implements IClient {
 
 	/**
 	 * This is the override of super method.
-	 * Get the socket connect timeout.
-	 * @return
+	 *
+	 * @return the socket connect timeout.
 	 */
 	public int getConnectTimeout() {
 		return connectTimeout;
