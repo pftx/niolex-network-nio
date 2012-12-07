@@ -97,6 +97,7 @@ public class PoolHandlerTest {
         col.remove(23);
         col.remove(45);
         PoolHandler pool = new PoolHandler(3, col);
+        pool.offer(mock(RpcClient.class));
         for (int i = 0; i < 500; ++i) {
             pool.invoke(pool, method, new Object[0]);
         }

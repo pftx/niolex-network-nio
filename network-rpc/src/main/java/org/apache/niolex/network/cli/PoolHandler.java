@@ -137,7 +137,7 @@ public class PoolHandler implements InvocationHandler {
             if (core.isValid())
                 return core;
             else {
-                readyQueue.offer(core);
+                repair(core);
             }
             // All the connections has been checked.
             if (++anyTried >= handlerNum) {
@@ -161,6 +161,24 @@ public class PoolHandler implements InvocationHandler {
         } catch (InterruptedException e) {
             return null;
         }
+    }
+
+    /**
+     * Repair the broken rpc client. If it can not be repaired, you need to close it.
+     *
+     * @param core
+     */
+    protected void repair(RpcClient core) {
+        readyQueue.offer(core);
+    }
+
+    /**
+     * Offer the internal pool a new rpc client.
+     *
+     * @param core
+     */
+    public void offer(RpcClient core) {
+        readyQueue.offer(core);
     }
 
     /**
