@@ -26,7 +26,7 @@ package org.apache.niolex.config.admin;
  */
 public interface Updater {
 
-	public void subscribeAuthInfo(String username, String password);
+	public String subscribeAuthInfo(String username, String password) throws Exception;
 
 	public String addGroup(String groupName) throws Exception;
 
@@ -48,4 +48,5 @@ public interface Updater {
 
 	public String removeAuth(String username, String groupName) throws Exception;
 
+	public void stop();
 }

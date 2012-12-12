@@ -76,6 +76,9 @@ public class AuthSubscribeHandler implements IPacketHandler {
 			// Auth failed.
 			wt.handleWrite(new PacketData(CodeMap.AUTH_FAIL));
 			return;
+		} else {
+		    // Auth success.
+		    wt.handleWrite(new PacketData(CodeMap.AUTH_SUCC));
 		}
 		// Step 2. Deal with group subscribe.
 		Set<String> list = bean.getGroupSet();

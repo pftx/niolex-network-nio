@@ -47,6 +47,8 @@ public interface CodeMap {
 	short AUTH_FAIL = 2001;
 	// Server subscribe.
 	short SERVER_SUBS = 2002;
+	// Auth success.
+	short AUTH_SUCC = 2003;
 
 	// Add a new config group.
 	short ADMIN_ADD_GROUP = 3001;

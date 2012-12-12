@@ -42,7 +42,11 @@ public class ConfigAdminMain {
 			return;
 		}
 		final Updater updater = new UpdaterClient(args[0]);
-		updater.subscribeAuthInfo(args[1], args[2]);
+		String res = updater.subscribeAuthInfo(args[1], args[2]);
+		if (!res.startsWith("SUCC")) {
+		    System.out.println("Authentication failure, config admin will stop now.");
+		    return;
+		}
 		final ConsoleReader reader = new ConsoleReader();
 		boolean isJline = reader.clearScreen();
 		if (isJline) {

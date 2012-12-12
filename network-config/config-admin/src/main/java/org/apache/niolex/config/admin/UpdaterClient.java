@@ -30,7 +30,6 @@ import org.apache.niolex.config.bean.UserInfo;
 import org.apache.niolex.config.core.CodeMap;
 import org.apache.niolex.config.core.MemoryStorage;
 import org.apache.niolex.config.core.PacketTranslater;
-import org.apache.niolex.network.Config;
 import org.apache.niolex.network.IPacketHandler;
 import org.apache.niolex.network.IPacketWriter;
 import org.apache.niolex.network.PacketData;
@@ -46,13 +45,13 @@ public class UpdaterClient implements Updater, IPacketHandler {
 	/**
 	 * The internal managed packet client.
 	 */
-	final PacketClient client = new PacketClient();
+	protected final PacketClient client = new PacketClient();
 
-	final Blocker<String> waiter = new Blocker<String>();
+	protected final Blocker<String> waiter = new Blocker<String>();
 
-	final MemoryStorage storage = new MemoryStorage();
+	protected final MemoryStorage storage = new MemoryStorage();
 
-	final int waitForTimeout = 30000;
+	final int waitForTimeout = 10000;
 
 
 	/**
@@ -65,21 +64,23 @@ public class UpdaterClient implements Updater, IPacketHandler {
 		client.setServerAddress(new InetSocketAddress(addrs[0], Integer.parseInt(addrs[1])));
 		client.setPacketHandler(this);
 		client.connect();
-		client.handleWrite(new PacketData(Config.CODE_REGR_HBEAT));
 	}
 
 
 	/**
 	 * Override super method
+	 * @throws Exception
 	 * @see org.apache.niolex.config.admin.Updater#subscribeAuthInfo(java.lang.String, java.lang.String)
 	 */
 	@Override
-	public void subscribeAuthInfo(String username, String password) {
+	public String subscribeAuthInfo(String username, String password) throws Exception {
 		SubscribeBean bean = new SubscribeBean();
 		bean.setUserName(username);
 		bean.setPassword(password);
 		PacketData p = PacketTranslater.translate(bean);
-		client.handleWrite(p);
+		WaitOn<String> on = waiter.initWait("auth");
+        client.handleWrite(p);
+        return on.waitForResult(waitForTimeout);
 	}
 
 	/**
@@ -315,10 +316,12 @@ public class UpdaterClient implements Updater, IPacketHandler {
 			// Notify anyone waiting for this.
 			waiter.release(groupName, "Group not found.");
 			break;
+		case CodeMap.AUTH_SUCC:
+		    waiter.release("auth", "SUCC");
+		    break;
 		case CodeMap.AUTH_FAIL:
-			System.out.println("Authentication failure, config client will stop.");
 			client.stop();
-			System.exit(-1);
+			waiter.release("auth", "User Name or Password invalid.");
 			break;
 		}
 	}
@@ -360,5 +363,16 @@ public class UpdaterClient implements Updater, IPacketHandler {
 		client.handleWrite(p);
 		return on.waitForResult(waitForTimeout);
 	}
+
+
+    /**
+     * Override super method
+     * @see org.apache.niolex.config.admin.Updater#stop()
+     */
+    @Override
+    public void stop() {
+        client.stop();
+        System.out.println("Client stoped. Please exit.");
+    }
 
 }
