@@ -109,20 +109,32 @@ public class UpdaterClient implements Updater, IPacketHandler {
 	}
 
 	/**
+	 * Get the config group with this specified group name.
+	 *
+	 * @param groupName
+	 * @return the message from server.
+	 * @throws Exception
+	 */
+	public String getGroup(String groupName) throws Exception {
+	    WaitOn<String> on = waiter.initWait(groupName);
+        // Send packet to remote server.
+        PacketData sub = new PacketData(CodeMap.GROUP_SUB, StringUtil.strToUtf8Byte(groupName));
+        client.handleWrite(sub);
+        String s = on.waitForResult(waitForTimeout);
+        return s;
+	}
+
+	/**
 	 * Override super method
 	 * @throws Exception
 	 * @see org.apache.niolex.config.admin.Updater#addItem(java.lang.String, java.lang.String, java.lang.String)
 	 */
 	@Override
 	public String addItem(String groupName, String key, String value) throws Exception {
-		WaitOn<String> on = waiter.initWait(groupName);
-    	// Send packet to remote server.
-    	PacketData sub = new PacketData(CodeMap.GROUP_SUB, StringUtil.strToUtf8Byte(groupName));
-    	client.handleWrite(sub);
-    	String s = on.waitForResult(waitForTimeout);
-    	if (s.length() > 0) {
-    		return s;
-    	}
+	    String s = getGroup(groupName);
+	    if (s.length() > 0) {
+            return s;
+        }
     	if (storage.get(groupName).getGroupData().get(key) != null) {
     		return "The key you want to add already exist.";
     	}
@@ -133,7 +145,7 @@ public class UpdaterClient implements Updater, IPacketHandler {
     	item.setValue(value);
     	PacketData p = PacketTranslater.translate(item);
     	p.setCode(CodeMap.ADMIN_ADD_CONFIG);
-    	on = waiter.initWait(key);
+    	WaitOn<String> on = waiter.initWait(key);
     	client.handleWrite(p);
 		return on.waitForResult(waitForTimeout);
 	}
@@ -145,11 +157,7 @@ public class UpdaterClient implements Updater, IPacketHandler {
 	 */
 	@Override
 	public String updateItem(String groupName, String key, String value) throws Exception {
-		WaitOn<String> on = waiter.initWait(groupName);
-    	// Send packet to remote server.
-    	PacketData sub = new PacketData(CodeMap.GROUP_SUB, StringUtil.strToUtf8Byte(groupName));
-    	client.handleWrite(sub);
-    	String s = on.waitForResult(waitForTimeout);
+	    String s = getGroup(groupName);
     	if (s.length() > 0) {
     		return s;
     	}
@@ -160,7 +168,7 @@ public class UpdaterClient implements Updater, IPacketHandler {
     	item.setValue(value);
     	PacketData p = PacketTranslater.translate(item);
     	p.setCode(CodeMap.ADMIN_UPDATE_CONFIG);
-    	on = waiter.initWait(key);
+    	WaitOn<String> on = waiter.initWait(key);
     	client.handleWrite(p);
 		return on.waitForResult(waitForTimeout);
 	}
