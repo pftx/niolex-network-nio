@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="./resources/screen.css" type="text/css"
+	media="screen, projection">
+<link rel="stylesheet" href="./resources/config.css" type="text/css"
+	media="screen, projection">
+<link rel="icon" href="./resources/icon.ico" type="image/ico">
+<title>配置中心</title>
+</head>
+<body>
+	<div id="header">
+		<header>
+			<h1>欢迎来到配置中心</h1>
+		</header>
+		<nav>
+			<ul>
+				<li><a href="login">登录</a>
+				<li><a href="config.html">查看配置</a>
+				<li><a href="i5.html">修改配置</a>
+				<li><a href="login">用户中心</a>
+			</ul>
+		</nav>
+	</div>
+	<div id="content">
+		<form action="group">
+			<p>
+				<label>Config Group:</label> <input type="date" name=groupName autofocus required
+					placeholder="Input the Group Name" /> <input type="submit" value="查询" />
+			</p>
+		</form>
+		<article>
+			<header>
+				<h3>数据模型</h3>
+			</header>
+			<section>
+				<h4>原理图</h4>
+				<img alt="原理图" src="./resources/data-model.jpg">
+			</section>
+			<details>
+				<summary>简介</summary>
+				<p>所有的配置信息以config-group的形式进行组织和管理。
+				<br>用户基于config-group进行读授权，基于用户角色进行写授权。
+				<br>每一个config-group具有一个groupName，全局唯一。
+				<br>每一条配置具有一个groupId，key，value，其中groupId和key全局唯一。</p>
+			</details>
+		</article>
+		<meter value="40" min=0 max=100 low=10 high=80></meter>
+		<footer>
+			<small>Copy Right @ NIOLEX</small>
+		</footer>
+	</div>
+</body>
+</html>

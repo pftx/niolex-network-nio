@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Bootstrap, from Twitter</title>
+
+<!-- Le styles -->
+<link href="bootstrap/css/bootstrap.css" rel="stylesheet">
+<style>
+body {
+	padding-top: 60px;
+	/* 60px to make the container go all the way to the bottom of the topbar */
+}
+
+.bs-docs-example {
+	position: relative;
+	margin: 15px 0;
+	padding: 39px 19px 14px;
+	background-color: white;
+	border: 1px solid #DDD;
+	-webkit-border-radius: 4px;
+	-moz-border-radius: 4px;
+	border-radius: 4px;
+}
+
+.bs-docs-example::after {
+	content: "Example";
+	position: absolute;
+	top: -1px;
+	left: -1px;
+	padding: 3px 7px;
+	font-size: 12px;
+	font-weight: bold;
+	background-color: whiteSmoke;
+	border: 1px solid #DDD;
+	color: #9DA0A4;
+	-webkit-border-radius: 4px 0 4px 0;
+	-moz-border-radius: 4px 0 4px 0;
+	border-radius: 4px 0 4px 0;
+}
+</style>
+<link href="bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
+</head>
+
+<body>
+	<script src="http://code.jquery.com/jquery-latest.js"></script>
+	<script src="bootstrap/js/bootstrap.min.js"></script>
+
+	<div class="navbar">
+		<div class="navbar-inner">
+			<div class="container">
+				<a class="btn btn-navbar" data-toggle="collapse"
+					data-target=".nav-collapse"> <span class="icon-bar">a</span> <span
+					class="icon-bar">a</span> <span class="icon-bar">a</span>
+				</a> <a class="brand" href="#">Project name</a>
+				<div class="nav-collapse">
+					<ul class="nav">
+						<li class="active"><a href="#">Home</a></li>
+						<li><a href="#">Link</a></li>
+						<li><a href="#">Link</a></li>
+						<li><a data-toggle="modal" data-target="#mymodal"
+							href="#mymodal">Link</a></li>
+						<li class="dropdown"><a href="#" class="dropdown-toggle"
+							data-toggle="dropdown">Dropdown <b class="caret"></b></a>
+							<ul class="dropdown-menu">
+								<li><a href="#">Action</a></li>
+								<li><a href="#">Another action</a></li>
+								<li><a href="#">Something else here</a></li>
+								<li class="divider"></li>
+								<li class="nav-header">Nav header</li>
+								<li><a href="#">Separated link</a></li>
+								<li><a href="#">One more separated link</a></li>
+							</ul></li>
+					</ul>
+					<form class="navbar-search pull-left" action="">
+						<input type="text" class="search-query span2" placeholder="Search">
+					</form>
+					<ul class="nav pull-right">
+						<li><a href="#">Link</a></li>
+						<li class="divider-vertical"></li>
+						<li class="dropdown"><a href="#" class="dropdown-toggle"
+							data-toggle="dropdown">Dropdown <b class="caret"></b></a>
+							<ul class="dropdown-menu">
+								<li><a href="#">Action</a></li>
+								<li><a href="#">Another action</a></li>
+								<li><a href="#">Something else here</a></li>
+								<li class="divider"></li>
+								<li><a href="#">Separated link</a></li>
+							</ul></li>
+					</ul>
+				</div>
+				<!-- /.nav-collapse -->
+			</div>
+		</div>
+		<!-- /navbar-inner -->
+	</div>
+	<!-- /navbar -->
+
+	<div class="navbar navbar-inverse navbar-fixed-top">
+		<div class="navbar-inner">
+			<div class="container">
+				<a class="btn btn-navbar" data-toggle="collapse"
+					data-target=".nav-collapse"> <span class="icon-bar"></span> <span
+					class="icon-bar"></span> <span class="icon-bar"></span>
+				</a> <a class="brand" href="#">Project name</a>
+				<div class="nav-collapse collapse">
+					<ul class="nav">
+						<li class="active"><a href="#">Home</a></li>
+						<li><a href="#about">About</a></li>
+						<li><a href="#contact">Contact</a></li>
+					</ul>
+				</div>
+				<!--/.nav-collapse -->
+			</div>
+		</div>
+	</div>
+
+	<div class="container">
+		<ul id="myTab" class="nav nav-tabs">
+			<li class="active"><a href="#home" data-toggle="tab">Home</a></li>
+			<li><a href="#profile" data-toggle="tab">Profile</a></li>
+			<li class="dropdown"><a href="#" class="dropdown-toggle"
+				data-toggle="dropdown">Dropdown <b class="caret"></b></a>
+				<ul class="dropdown-menu">
+					<li><a href="#dropdown1" data-toggle="tab">@fat</a></li>
+					<li><a href="#dropdown2" data-toggle="tab">@mdo</a></li>
+				</ul></li>
+		</ul>
+		<div id="myTabContent" class="tab-content">
+			<div class="tab-pane fade in active" id="home">
+				<p>Raw denim you probably haven't heard of them jean shorts
+					Austin. Nesciunt tofu stumptown aliqua, retro synth master cleanse.
+					Mustache cliche tempor, williamsburg carles vegan helvetica.
+					Reprehenderit butcher retro keffiyeh dreamcatcher synth. Cosby
+					sweater eu banh mi, qui irure terry richardson ex squid. Aliquip
+					placeat salvia cillum iphone. Seitan aliquip quis cardigan american
+					apparel, butcher voluptate nisi qui.</p>
+			</div>
+			<div class="tab-pane fade" id="profile">
+				<p>Food truck fixie locavore, accusamus mcsweeney's marfa nulla
+					single-origin coffee squid. Exercitation +1 labore velit, blog
+					sartorial PBR leggings next level wes anderson artisan four loko
+					farm-to-table craft beer twee. Qui photo booth letterpress, commodo
+					enim craft beer mlkshk aliquip jean shorts ullamco ad vinyl cillum
+					PBR. Homo nostrud organic, assumenda labore aesthetic magna
+					delectus mollit. Keytar helvetica VHS salvia yr, vero magna velit
+					sapiente labore stumptown. Vegan fanny pack odio cillum wes
+					anderson 8-bit, sustainable jean shorts beard ut DIY ethical culpa
+					terry richardson biodiesel. Art party scenester stumptown, tumblr
+					butcher vero sint qui sapiente accusamus tattooed echo park.</p>
+			</div>
+			<div class="tab-pane fade" id="dropdown1">
+				<p>Etsy mixtape wayfarers, ethical wes anderson tofu before they
+					sold out mcsweeney's organic lomo retro fanny pack lo-fi
+					farm-to-table readymade. Messenger bag gentrify pitchfork tattooed
+					craft beer, iphone skateboard locavore carles etsy salvia banksy
+					hoodie helvetica. DIY synth PBR banksy irony. Leggings gentrify
+					squid 8-bit cred pitchfork. Williamsburg banh mi whatever
+					gluten-free, carles pitchfork biodiesel fixie etsy retro mlkshk
+					vice blog. Scenester cred you probably haven't heard of them, vinyl
+					craft beer blog stumptown. Pitchfork sustainable tofu synth
+					chambray yr.</p>
+			</div>
+			<div class="tab-pane fade" id="dropdown2">
+				<p>Trust fund seitan letterpress, keytar raw denim keffiyeh etsy
+					art party before they sold out master cleanse gluten-free squid
+					scenester freegan cosby sweater. Fanny pack portland seitan DIY,
+					art party locavore wolf cliche high life echo park Austin. Cred
+					vinyl keffiyeh DIY salvia PBR, banh mi before they sold out
+					farm-to-table VHS viral locavore cosby sweater. Lomo wolf viral,
+					mustache readymade thundercats keffiyeh craft beer marfa ethical.
+					Wolf salvia freegan, sartorial keffiyeh echo park vegan.</p>
+			</div>
+			<select>
+				<option>1</option>
+				<option>2</option>
+				<option>3</option>
+				<option>4</option>
+				<option>5</option>
+			</select>
+		</div>
+		<div class="tooltip-demo well">
+			<p class="muted" style="margin-bottom: 0;">
+				Tight pants next level keffiyeh <a href="#" rel="tooltip"
+					title="first tooltip">you probably</a> haven't heard of them. Photo
+				booth beard raw denim letterpress vegan messenger bag stumptown.
+				Farm-to-table seitan, mcsweeney's fixie sustainable quinoa 8-bit
+				american apparel <a href="#" rel="tooltip" title="Another tooltip">have
+					a</a> terry richardson vinyl chambray. Beard stumptown, cardigans banh
+				mi lomo thundercats. Tofu biodiesel williamsburg marfa, four loko
+				mcsweeney's cleanse vegan chambray. A really ironic artisan <a
+					href="#" rel="tooltip" title="Another one here too">whatever
+					keytar</a>, scenester farm-to-table banksy Austin <a href="#"
+					rel="tooltip" title="The last tip!">twitter handle</a> freegan cred
+				raw denim single-origin coffee viral.
+			</p>
+		</div>
+		<div class="span3  ">
+			<a class="btn  btn-success" type="submit" rel="popover"
+				title="推荐到射交网络" data-content="你以为我会告诉你渣浪老删帖吗？！"><i
+				class=" icon-white icon-share"></i> 推荐</a>
+		</div>
+		<!--rating modal's content-->
+		<div id="mymodal" class="modal hide fade">
+
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal">&times;</button>
+				<h3>添加收藏: 我买过这个服务</h3>
+			</div>
+			<!--Modal header-->
+			<div class="modal-body">
+				<div class="row">
+					<div class="span1"></div>
+					<div class="span4 ">
+						<h3>求评价(@^_^@) :</h3>
+					</div>
+					<div class="span4" id="ratingstar"></div>
+					<div class="span1" id="target"></div>
+				</div>
+			</div>
+			<!--Modal body-->
+			<div class="modal-footer">
+				<a href="#" class="btn" data-dismiss="modal">Close</a> <a href="#"
+					class="btn btn-primary">Save changes</a>
+			</div>
+			<!--Modal footer-->
+		</div>
+		<!--Modal-->
+		<div class="alert">
+			<button type="button" class="close" data-dismiss="alert">&times;</button>
+			<strong>测试</strong>这是alert info提醒区域.
+		</div>
+		<div class="input-append">
+			<input class="span2" id="appendedDropdownButton" type="text">
+			<div class="btn-group">
+				<button class="btn dropdown-toggle" data-toggle="dropdown">
+					Action <span class="caret"></span>
+				</button>
+				<ul class="dropdown-menu">
+					<li><a href="#">Action</a></li>
+					<li><a href="#">Another action</a></li>
+					<li><a href="#">Something else here</a></li>
+					<li class="divider"></li>
+					<li><a href="#">Separated link</a></li>
+				</ul>
+			</div>
+		</div>
+		<form class="bs-docs-example">
+			<span class="input-xlarge uneditable-input">Some value here</span>
+		</form>
+		<h1>Bootstrap starter template</h1>
+		<p>
+			Use this document as a way to quick start any new project.<br>
+			All you get is this message and a barebones HTML document.
+		</p>
+		<div class="btn-group">
+			<button class="btn btn-primary dropdown-toggle"
+				data-toggle="dropdown">
+				Action <span class="caret"></span>
+			</button>
+			<ul class="dropdown-menu">
+				<li><a href="#">Action</a></li>
+				<li><a href="#">Another action</a></li>
+				<li><a href="#">Something else here</a></li>
+				<li class="divider"></li>
+				<li><a href="#">Separated link</a></li>
+			</ul>
+		</div>
+		<!-- /btn-group -->
+		<ul class="nav nav-tabs">
+			<li class="active"><a href="#">Home</a></li>
+			<li><a href="#home">Profile</a></li>
+			<li><a href="#">Messages</a></li>
+		</ul>
+		<div id="home" class="pagination">
+			<ul>
+				<li><a href="#">&laquo;</a></li>
+				<li class="active"><a href="#">10</a></li>
+				<li class="disabled"><a href="#">...</a></li>
+				<li><a href="#">20</a></li>
+				<li><a href="#">&raquo;</a></li>
+			</ul>
+		</div>
+		<div class="span3 well pricehover">
+			<h3>alert例子</h3>
+			<div class="alert alert-success">
+				<button type="button" class="close" data-dismiss="alert">&times;</button>
+				<strong>测试</strong>这是alert success提醒区域.
+			</div>
+		</div>
+		<div class="span3 well pricehover">
+			<h3>动画效果</h3>
+			<p>带有条纹的动画效果进度条 (no IE).</p>
+			<div class="progress progress-striped active">
+				<div class="bar" style="width: 45%"></div>
+			</div>
+		</div>
+		<div class="span6 ">
+			<blockquote class="pull-right">
+				<p>凌冬将至. 我是黑暗中的利剑，长城上的守卫，抵御寒冷的烈焰，破晓时分的光线，唤醒眠者的号角，守护王国的坚盾。</p>
+				守夜人军团总司令.<small>蒙奇.D.<cite title="aaa">路飞</cite></small>
+			</blockquote>
+		</div>
+		<div class="span6 ">
+			<div class="control-group warning">
+				<label class="control-label" for="inputWarning">Input with
+					warning</label>
+				<div class="controls">
+					<input type="text" id="inputWarning"> <span
+						class="help-inline">Something may have gone wrong</span>
+				</div>
+			</div>
+			<div class="control-group error">
+				<label class="control-label" for="inputError">Input with
+					error</label>
+				<div class="controls">
+					<input type="text" id="inputError"> <span
+						class="help-inline">Please correct the error</span>
+				</div>
+			</div>
+			<div class="control-group success">
+				<label class="control-label" for="inputSuccess">Input with
+					success</label>
+				<div class="controls">
+					<input type="text" id="inputSuccess"> <span
+						class="help-inline">Woohoo!</span>
+				</div>
+			</div>
+		</div>
+		<div class="span8">
+			<form class="form-horizontal">
+				<fieldset>
+					<div class="control-group">
+						<label class="control-label" for="focusedInput">Focused
+							input</label>
+						<div class="controls">
+							<input class="input-xlarge focused" id="focusedInput" type="text"
+								value="This is focused…">
+						</div>
+					</div>
+					<div class="control-group">
+						<label class="control-label">Uneditable input</label>
+						<div class="controls">
+							<span class="input-xlarge uneditable-input">Some value
+								here</span>
+						</div>
+					</div>
+					<div class="control-group">
+						<label class="control-label" for="disabledInput">Disabled
+							input</label>
+						<div class="controls">
+							<input class="input-xlarge disabled" id="disabledInput"
+								type="text" placeholder="Disabled input here…" disabled>
+						</div>
+					</div>
+					<div class="control-group">
+						<label class="control-label" for="optionsCheckbox2">Disabled
+							checkbox</label>
+						<div class="controls">
+							<label class="checkbox"> <input type="checkbox"
+								id="optionsCheckbox2" value="option1" disabled> This is
+								a disabled checkbox
+							</label>
+						</div>
+					</div>
+					<div class="control-group warning">
+						<label class="control-label" for="inputWarning">Input with
+							warning</label>
+						<div class="controls">
+							<input type="text" id="inputWarning"> <span
+								class="help-inline">Something may have gone wrong</span>
+						</div>
+					</div>
+					<div class="control-group error">
+						<label class="control-label" for="inputError">Input with
+							error</label>
+						<div class="controls">
+							<input type="text" id="inputError"> <span
+								class="help-inline">Please correct the error</span>
+						</div>
+					</div>
+					<div class="control-group success">
+						<label class="control-label" for="inputSuccess">Input with
+							success</label>
+						<div class="controls">
+							<input type="text" id="inputSuccess"> <span
+								class="help-inline">Woohoo!</span>
+						</div>
+					</div>
+					<div class="control-group success">
+						<label class="control-label" for="selectError">Select with
+							success</label>
+						<div class="controls">
+							<select id="selectError">
+								<option>1</option>
+								<option>2</option>
+								<option>3</option>
+								<option>4</option>
+								<option>5</option>
+							</select> <span class="help-inline">Woohoo!</span>
+						</div>
+					</div>
+					<div class="form-actions">
+						<button type="submit" class="btn btn-primary">Save
+							changes</button>
+						<button class="btn">Cancel</button>
+					</div>
+				</fieldset>
+			</form>
+		</div>
+		<div class="span6">
+			<div class="tabbable">
+				<!-- Only required for left/right tabs -->
+				<ul class="nav nav-tabs">
+					<li class="active"><a href="#tab1" data-toggle="tab">Section
+							1</a></li>
+					<li><a href="#tab2" data-toggle="tab">Section 2</a></li>
+				</ul>
+				<div class="tab-content">
+					<div class="tab-pane active" id="tab1">
+						<p>I'm in Section 1.</p>
+					</div>
+					<div class="tab-pane" id="tab2">
+						<p>Howdy, I'm in Section 2.</p>
+					</div>
+				</div>
+			</div>
+		</div>
+		<table class="table table-bordered table-striped">
+			<thead>
+				<tr>
+					<th>Button</th>
+					<th>class=""</th>
+					<th>Description</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td><button class="btn" href="#">Default</button></td>
+					<td><code>btn</code></td>
+					<td>Standard gray button with gradient</td>
+				</tr>
+				<tr>
+					<td><button class="btn btn-primary" href="#">Primary</button></td>
+					<td><code>btn btn-primary</code></td>
+					<td>Provides extra visual weight and identifies the primary
+						action in a set of buttons</td>
+				</tr>
+				<tr>
+					<td><button class="btn btn-info" href="#">Info</button></td>
+					<td><code>btn btn-info</code></td>
+					<td>Used as an alternative to the default styles</td>
+				</tr>
+				<tr>
+					<td><button class="btn btn-success" href="#">Success</button></td>
+					<td><code>btn btn-success</code></td>
+					<td>Indicates a successful or positive action</td>
+				</tr>
+				<tr>
+					<td><button class="btn btn-warning" href="#">Warning</button></td>
+					<td><code>btn btn-warning</code></td>
+					<td>Indicates caution should be taken with this action</td>
+				</tr>
+				<tr>
+					<td><button class="btn btn-danger" href="#">Danger</button></td>
+					<td><code>btn btn-danger</code></td>
+					<td>Indicates a dangerous or potentially negative action</td>
+				</tr>
+				<tr>
+					<td><button class="btn btn-inverse" href="#">Inverse</button></td>
+					<td><code>btn btn-inverse</code></td>
+					<td>Alternate dark gray button, not tied to a semantic action
+						or use</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+	<!-- /container -->
+</body>
+</html>

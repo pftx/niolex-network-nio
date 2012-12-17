@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Bootstrap 101 Template</title>
+    <!-- Bootstrap -->
+    <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <script type="text/javascript">
+    	function draw(id) {
+    		var can = document.getElementById(id);
+    		if (can == null) {
+    			return false;
+    		}
+    		var cont = can.getContext('2d');
+    		cont.fillStyle = "#EFADFD";
+    		//cont.fillRect(0,0,580,480);
+    		cont.fillStyle = "green";
+    		cont.strokeStyle = "red";
+    		cont.lineWidth = 1;
+    		cont.fillRect(50, 50, 100, 80);
+    		cont.strokeRect(60, 60, 110, 75);
+    		for (var i = 0; i < 10; ++i) {
+    			cont.beginPath();
+    			cont.arc(i * 25, i * 25, i * 15, 0, Math.PI * 2, true);
+    			cont.closePath();
+    			cont.fillStyle = 'rgba(255, 100, 70, 0.25)';
+    			cont.fill();
+    		}
+    		var dx = 450;
+    		var dy = 150;
+    		var s = 100;
+    		cont.beginPath();
+    		cont.globalCompositeOperation = 'and';
+    		cont.shadowOffsetX = 10;
+    		cont.shadowOffsetY = 10;
+    		cont.shadowColor = 'rgba(105, 100, 70, 0.25)';
+    		cont.shadowBlur = 7.5;
+    		var g = cont.createLinearGradient(200,0,500,600);
+    		g.addColorStop(0, 'rgb(200,200,0)');
+    		g.addColorStop(1, 'rgb(0,0,255)');
+    		cont.fillStyle = g;
+    		
+    		var dig = Math.PI * 11 / 15;
+    		cont.moveTo(dx, dy);
+    		for (var i = 0; i < 30; ++i) {
+    			var x = Math.sin(i * dig);
+    			var y = Math.cos(i * dig);
+    			cont.bezierCurveTo(dx + x * s, dy + y * s - 100, dx + x * s + 100, dy + y * s,
+    					dx + x * s, dy + y * s);
+    		}
+    		cont.closePath();
+    		cont.fill();
+    		cont.stroke();
+    	}
+    </script>
+  </head>
+  <body onload="draw('canvas');">
+    <h1>Hello, world!</h1>
+    <canvas id="canvas" width="900" height="600"></canvas>
+    <script src="http://code.jquery.com/jquery-latest.js"></script>
+    <script src="bootstrap/js/bootstrap.min.js"></script>
+  </body>
+</html>
