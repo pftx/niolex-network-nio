@@ -70,7 +70,7 @@ public class ItemDaoImplTest {
 	public void testLoadGroupItems() {
 		List<ConfigItem> list = dao.loadGroupItems(1);
 		System.out.println("Item " + list);
-		assertEquals(2, list.size());
+		assertEquals(3, list.size());
 	}
 
 	/**
