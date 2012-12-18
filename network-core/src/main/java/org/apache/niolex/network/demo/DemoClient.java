@@ -22,7 +22,7 @@ import java.net.InetSocketAddress;
 import java.util.Scanner;
 
 import org.apache.niolex.network.PacketData;
-import org.apache.niolex.network.client.PacketClient;
+import org.apache.niolex.network.client.BlockingClient;
 
 
 /**
@@ -41,7 +41,7 @@ public class DemoClient {
      * @param args
      */
     public static void main(String[] args) throws Exception {
-        PacketClient c = new PacketClient(new InetSocketAddress("localhost", 8808));
+        BlockingClient c = new BlockingClient(new InetSocketAddress("localhost", 8808));
         // Set timeout to 10 minutes.
         c.setConnectTimeout(600000);
         c.setPacketHandler(new PrintPacketHandler());

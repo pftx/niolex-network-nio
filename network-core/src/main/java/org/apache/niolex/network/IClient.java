@@ -74,6 +74,14 @@ public interface IClient extends IPacketWriter {
 	public void setServerAddress(InetSocketAddress serverAddress);
 
 	/**
+	 * Set the server Internet address this client want to connect
+	 * This method must be called before connect()
+	 *
+	 * @param serverAddress
+	 */
+	public void setServerAddress(String serverAddress);
+
+	/**
 	 * Get the current Internet address of Remote server.
 	 *
 	 * @return the remote server address

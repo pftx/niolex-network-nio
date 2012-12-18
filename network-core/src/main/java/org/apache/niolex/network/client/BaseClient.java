@@ -141,6 +141,16 @@ public abstract class BaseClient implements IClient {
 
 	/**
 	 * This is the override of super method.
+	 * @see org.apache.niolex.network.IClient#setServerAddress(java.lang.String)
+	 */
+	@Override
+	public void setServerAddress(String addr) {
+	    String[] aa = addr.split(":");
+	    this.serverAddress = new InetSocketAddress(aa[0], Integer.parseInt(aa[1]));
+	}
+
+	/**
+	 * This is the override of super method.
 	 *
 	 * @return the socket connect timeout.
 	 */

@@ -55,6 +55,7 @@ public class BaseClientTest {
             public void handleWrite(PacketData sc) {
 
             }};
+        cli.setServerAddress("localhost:8123");
         cli.connect();
         Exception e = cli.safeClose();
         assertEquals(e.getMessage(), "This is test testSafeClose.");

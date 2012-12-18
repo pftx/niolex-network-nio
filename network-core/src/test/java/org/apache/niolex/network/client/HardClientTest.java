@@ -26,7 +26,6 @@ import java.util.List;
 import org.apache.niolex.commons.test.MockUtil;
 import org.apache.niolex.network.CoreRunner;
 import org.apache.niolex.network.PacketData;
-import org.apache.niolex.network.client.PacketClient;
 import org.apache.niolex.network.example.SavePacketHandler;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -42,7 +41,7 @@ import org.junit.Test;
  * @since 2012-5-31
  */
 public class HardClientTest {
-	PacketClient c = new PacketClient(new InetSocketAddress("localhost", CoreRunner.PORT));
+    BlockingClient c = new BlockingClient(new InetSocketAddress("localhost", CoreRunner.PORT));
 	List<PacketData> clientSavePkList = new ArrayList<PacketData>();
 	List<PacketData> clientSendList = new ArrayList<PacketData>();
 
