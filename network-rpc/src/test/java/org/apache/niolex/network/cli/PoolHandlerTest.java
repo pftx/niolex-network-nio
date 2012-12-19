@@ -96,7 +96,7 @@ public class PoolHandlerTest {
     public void testPoolHandler() throws Throwable {
         col.remove(23);
         col.remove(45);
-        PoolHandler pool = new PoolHandler(3, col);
+        PoolHandler<RpcClient> pool = new PoolHandler<RpcClient>(3, col);
         pool.offer(mock(RpcClient.class));
         for (int i = 0; i < 500; ++i) {
             pool.invoke(pool, method, new Object[0]);
@@ -109,7 +109,7 @@ public class PoolHandlerTest {
      */
     @Test(expected=RpcException.class)
     public void testInvokeE() throws Throwable {
-        PoolHandler pool = new PoolHandler(3, col);
+        PoolHandler<RpcClient> pool = new PoolHandler<RpcClient>(3, col);
         for (int i = 0; i < 200; ++i) {
             pool.invoke(pool, method, new Object[0]);
         }
@@ -122,7 +122,7 @@ public class PoolHandlerTest {
     @Test(expected=IOException.class)
     public void testInvokeR() throws Throwable {
         col.remove(23);
-        PoolHandler pool = new PoolHandler(3, col);
+        PoolHandler<RpcClient> pool = new PoolHandler<RpcClient>(3, col);
         for (int i = 0; i < 200; ++i) {
             pool.invoke(pool, method, new Object[0]);
         }
@@ -135,7 +135,7 @@ public class PoolHandlerTest {
     @Test(expected=RpcException.class)
     public void testNoReady() throws Throwable {
         col.clear();
-        PoolHandler pool = new PoolHandler(2, col);
+        PoolHandler<RpcClient> pool = new PoolHandler<RpcClient>(2, col);
         pool.setWaitTimeout(2);
         pool.invoke(pool, method, new Object[0]);
     }
@@ -146,7 +146,7 @@ public class PoolHandlerTest {
      */
     @Test(expected=RpcException.class)
     public void testExceedsRetry() throws Throwable {
-        PoolHandler pool = new PoolHandler(2, col);
+        PoolHandler<RpcClient> pool = new PoolHandler<RpcClient>(2, col);
         for (int i = 0; i < 200; ++i) {
             pool.invoke(pool, method, new Object[0]);
         }
@@ -162,7 +162,7 @@ public class PoolHandlerTest {
         col.add(mock(RpcClient.class));
         col.add(mock(RpcClient.class));
         col.add(mock(RpcClient.class));
-        PoolHandler pool = new PoolHandler(2, col);
+        PoolHandler<RpcClient> pool = new PoolHandler<RpcClient>(2, col);
         assertNull(pool.take());
     }
 
@@ -172,7 +172,7 @@ public class PoolHandlerTest {
     @Test
     public void testTakeNull() {
         col.clear();
-        PoolHandler pool = new PoolHandler(2, col);
+        PoolHandler<RpcClient> pool = new PoolHandler<RpcClient>(2, col);
         pool.setWaitTimeout(2);
         assertNull(pool.take());
     }
@@ -187,7 +187,7 @@ public class PoolHandlerTest {
         col.add(mock(RpcClient.class));
         col.add(mock(RpcClient.class));
         col.add(mock(RpcClient.class));
-        PoolHandler pool = new PoolHandler(2, col);
+        PoolHandler<RpcClient> pool = new PoolHandler<RpcClient>(2, col);
         assertNotNull(pool.takeOne(0));
     }
 
@@ -197,7 +197,7 @@ public class PoolHandlerTest {
     @Test
     public void testTakeOneNull() {
         col.clear();
-        PoolHandler pool = new PoolHandler(2, col);
+        PoolHandler<RpcClient> pool = new PoolHandler<RpcClient>(2, col);
         assertNull(pool.takeOne(2));
     }
 
@@ -207,7 +207,7 @@ public class PoolHandlerTest {
     @Test
     public void testTakeOneE() {
         col.clear();
-        PoolHandler pool = new PoolHandler(2, col);
+        PoolHandler<RpcClient> pool = new PoolHandler<RpcClient>(2, col);
         Thread t = Runner.run(pool, "takeOne", 1000);
         SystemUtil.sleep(2);
         t.interrupt();
@@ -218,7 +218,7 @@ public class PoolHandlerTest {
      */
     @Test
     public void testGetWaitTimeout() {
-        PoolHandler pool = new PoolHandler(2, col);
+        PoolHandler<RpcClient> pool = new PoolHandler<RpcClient>(2, col);
         pool.setWaitTimeout(2345);
         assertEquals(2345, pool.getWaitTimeout());
     }
@@ -228,7 +228,7 @@ public class PoolHandlerTest {
      */
     @Test
     public void testGetRetryTimes() {
-        PoolHandler pool = new PoolHandler(54, col);
+        PoolHandler<RpcClient> pool = new PoolHandler<RpcClient>(54, col);
         assertEquals(54, pool.getRetryTimes());
     }
 

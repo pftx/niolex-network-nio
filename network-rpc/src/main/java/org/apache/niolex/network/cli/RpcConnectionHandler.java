@@ -21,10 +21,10 @@ import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 
-import org.apache.niolex.network.rpc.RpcClient;
+import org.apache.niolex.network.rpc.PoolableInvocationHandler;
 
 /**
- * This is the adapter to adapt RpcClient to IServiceHandler, which
+ * This is the adapter to adapt PoolableInvocationHandler to IServiceHandler, which
  * is the interface could be managed by RetryHandler.
  *
  * We disable the error block functionality in this class.
@@ -36,9 +36,9 @@ import org.apache.niolex.network.rpc.RpcClient;
 public class RpcConnectionHandler implements IServiceHandler {
 
 	private final String serviceUrl;
-	private final RpcClient handler;
+	private final PoolableInvocationHandler handler;
 
-	public RpcConnectionHandler(String serviceUrl, RpcClient handler) {
+	public RpcConnectionHandler(String serviceUrl, PoolableInvocationHandler handler) {
 		super();
 		this.serviceUrl = serviceUrl;
 		this.handler = handler;
@@ -86,7 +86,7 @@ public class RpcConnectionHandler implements IServiceHandler {
 	 */
 	@Override
 	public void notReady(IOException ioe) {
-		// We will ignore this method, the RpcClient will manage it's status.
+		// We will ignore this method, the PoolableInvocationHandler will manage it's status.
 	}
 
 	/**

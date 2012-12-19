@@ -23,7 +23,7 @@ import java.util.Collection;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.niolex.network.rpc.RpcClient;
+import org.apache.niolex.network.rpc.PoolableInvocationHandler;
 import org.apache.niolex.network.rpc.RpcException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,10 +47,10 @@ import org.slf4j.LoggerFactory;
  * @version 1.0.5
  * @since 2012-12-5
  */
-public class PoolHandler implements InvocationHandler {
+public class PoolHandler<CLI extends PoolableInvocationHandler> implements InvocationHandler {
     private static final Logger LOG = LoggerFactory.getLogger(PoolHandler.class);
 
-    private final LinkedBlockingQueue<RpcClient> readyQueue = new LinkedBlockingQueue<RpcClient>();
+    private final LinkedBlockingQueue<CLI> readyQueue = new LinkedBlockingQueue<CLI>();
     private final int retryTimes;
     private final int handlerNum;
     private int waitTimeout = Constants.CLIENT_CONNECT_TIMEOUT;
@@ -61,7 +61,7 @@ public class PoolHandler implements InvocationHandler {
      * @param retryTimes the number of times to retry when some kind of error occurred
      * @param col the collections of RpcClient
      */
-    public PoolHandler(int retryTimes, Collection<RpcClient> col) {
+    public PoolHandler(int retryTimes, Collection<CLI> col) {
         super();
         this.retryTimes = retryTimes;
         handlerNum = col.size();
@@ -70,7 +70,7 @@ public class PoolHandler implements InvocationHandler {
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        RpcClient core;
+        CLI core;
         Throwable cause = null;
         long handleStart = 0, handleEnd = 500;
         int curTry = 0;
@@ -129,8 +129,8 @@ public class PoolHandler implements InvocationHandler {
      *
      * @return an instance of RpcClient, null if all clients are busy.
      */
-    public RpcClient take() {
-        RpcClient core;
+    public CLI take() {
+        CLI core;
         int anyTried = 0;
         while ((core = takeOne(waitTimeout)) != null) {
             // First check the connection status.
@@ -155,7 +155,7 @@ public class PoolHandler implements InvocationHandler {
      * @param connectTimeout the timeout to take item from queue.
      * @return an instance of RpcClient, null if timeout.
      */
-    protected RpcClient takeOne(int connectTimeout) {
+    protected CLI takeOne(int connectTimeout) {
         try {
             return readyQueue.poll(connectTimeout, TimeUnit.MILLISECONDS);
         } catch (InterruptedException e) {
@@ -168,7 +168,7 @@ public class PoolHandler implements InvocationHandler {
      *
      * @param core
      */
-    protected void repair(RpcClient core) {
+    protected void repair(CLI core) {
         readyQueue.offer(core);
     }
 
@@ -177,7 +177,7 @@ public class PoolHandler implements InvocationHandler {
      *
      * @param core
      */
-    public void offer(RpcClient core) {
+    public void offer(CLI core) {
         readyQueue.offer(core);
     }
 

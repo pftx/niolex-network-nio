@@ -18,7 +18,6 @@
 package org.apache.niolex.network.rpc;
 
 import java.io.IOException;
-import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.lang.reflect.Type;
@@ -44,7 +43,7 @@ import org.slf4j.LoggerFactory;
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0, Date: 2012-6-1
  */
-public class RpcClient implements InvocationHandler, IPacketHandler {
+public class RpcClient implements PoolableInvocationHandler, IPacketHandler {
 	private static final Logger LOG = LoggerFactory.getLogger(RpcClient.class);
 
 	/**
