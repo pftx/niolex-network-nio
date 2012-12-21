@@ -213,8 +213,8 @@ function create_list_annimation() {
 }
 
 function handle_modify_disable() {
-	$("#typedKey").attr('disabled',' true');
-	$("#selectKeyBtn").attr('disabled',' true');
+	$("#typedKey").attr('disabled', 'true');
+	$("#selectKeyBtn").attr('disabled', 'true');
 	$("#alertMessagePr").stop();
 	$("#alertMessagePr").removeClass("hide");
 }
@@ -233,14 +233,14 @@ function check_data() {
 		if ($('#typedKey').val() != "") {
 			$('#theAddBtn').removeAttr('disabled');
 		} else {
-			$('#theAddBtn').attr('disabled',' true');
+			$('#theAddBtn').attr('disabled', 'true');
 		}
 	});
 }
 
 function add_value_area() {
 	if ($('#typedKey').val() != "") {
-		$("#typedKey").attr('disabled',' true');
+		$("#typedKey").attr('disabled', 'true');
 		$("#theSaveBtn").removeAttr('disabled');
 		$("#selectItemValue").removeClass("hide");
 		$("#goodMsg").text("您可以直接在下框中修改配置，然后点击<Save changes>按钮进行保存。");
@@ -303,12 +303,12 @@ function handle_check() {
 function handle_config_enable() {
 	$("#alertMessage").text("该配置组已经被确认，可以添加");
 	$("#theAddBtn").removeAttr('disabled');
-	$("#groupName").attr('disabled',' true');
+	$("#groupName").attr('disabled', 'true');
 	$("#alertMessagePr").removeClass('hide');
 }
 
 function handle_config_disable() {
-	$("#theAddBtn").attr('disabled',' true');
+	$("#theAddBtn").attr('disabled', 'true');
 	$("#alertMessagePr").removeClass('hide');
 }
 
@@ -338,6 +338,16 @@ function handle_add_group() {
 }
 
 function handle_add_disable() {
-	$("#theAddBtn").attr('disabled',' true');
+	$("#theAddBtn").attr('disabled', 'true');
 	$("#groupName").removeAttr('disabled');
+}
+
+
+
+//=================================================================
+//For user Page
+//=================================================================
+
+function add_user_role(role) {
+	$("#addUserRole").val(role);
 }
