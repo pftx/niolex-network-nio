@@ -197,6 +197,9 @@ public class RpcClient implements PoolableInvocationHandler, IPacketHandler {
 				if (exp == 1 || exp == -255) {
 					isEx = true;
 				}
+				if (sc.getLength() == 0) {
+				    return null;
+				}
 				Object ret = prepareReturn(sc.getData(), method.getGenericReturnType(), isEx);
 				if (isEx) {
 					rep = (RpcException) ret;
