@@ -111,7 +111,7 @@ public class SocketClient extends BaseClient {
 	 * @see org.apache.niolex.network.IPacketWriter#handleWrite(org.apache.niolex.network.PacketData)
 	 */
 	@Override
-	public void handleWrite(PacketData sc) {
+	public synchronized void handleWrite(PacketData sc) {
         try {
 			sc.generateData(outS);
 			LOG.debug("Packet sent. desc {}, length {}.", sc.descriptor(), sc.getLength());
