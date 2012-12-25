@@ -342,6 +342,9 @@ public class ConfigClient {
     			CLIENT.stop();
     			INIT_STATUS = InitStatus.NOAUTH;
     			break;
+    		case CodeMap.AUTH_SUCC:
+    		    // Do not care about auth success.
+                break;
     		default:
     			LOG.warn("Packet received for code [{}] have no handler, just ignored.", sc.getCode());
 				break;
