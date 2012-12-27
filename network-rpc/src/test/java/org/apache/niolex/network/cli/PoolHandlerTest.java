@@ -27,11 +27,13 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 
 import org.apache.niolex.commons.reflect.MethodUtil;
 import org.apache.niolex.commons.util.Runner;
 import org.apache.niolex.commons.util.SystemUtil;
+import org.apache.niolex.network.rpc.PoolableInvocationHandler;
 import org.apache.niolex.network.rpc.RpcClient;
 import org.apache.niolex.network.rpc.RpcException;
 import org.junit.Before;
@@ -138,6 +140,20 @@ public class PoolHandlerTest {
         PoolHandler<RpcClient> pool = new PoolHandler<RpcClient>(2, col);
         pool.setWaitTimeout(2);
         pool.invoke(pool, method, new Object[0]);
+    }
+
+    /**
+     * Test method for {@link org.apache.niolex.network.cli.PoolHandler#setWaitTimeout(int)}.
+     * @throws Throwable
+     */
+    @Test(expected=RpcException.class)
+    public void testNoItem() throws Throwable {
+        col.clear();
+        PoolHandler<RpcClient> pool = new PoolHandler<RpcClient>(2, col);
+        pool.setWaitTimeout(2);
+        PoolableInvocationHandler hand = (PoolableInvocationHandler) Proxy.newProxyInstance(RpcClient.class.getClassLoader(),
+                new Class[] {PoolableInvocationHandler.class}, pool);
+        hand.getRemoteName();
     }
 
     /**
