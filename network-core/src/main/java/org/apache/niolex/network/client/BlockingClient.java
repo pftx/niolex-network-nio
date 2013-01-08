@@ -67,7 +67,7 @@ public class BlockingClient extends BaseClient {
     }
 
     /**
-     * Start two separate threads for reads and writes.
+     * Start one thread for read packets, write will be done in user thread.
      *
 	 * This is the override of super method.
 	 * @see org.apache.niolex.network.IClient#connect()
