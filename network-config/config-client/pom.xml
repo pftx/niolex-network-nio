@@ -10,7 +10,7 @@
 	</parent>
 
 	<artifactId>config-client</artifactId>
-	<version>1.0.3</version>
+	<version>1.0.4-SNAPSHOT</version>
 	<packaging>jar</packaging>
 	<name>config-client</name>
 	<url>http://maven.apache.org</url>
