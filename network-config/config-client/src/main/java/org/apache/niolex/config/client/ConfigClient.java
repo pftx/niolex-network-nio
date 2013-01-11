@@ -27,15 +27,15 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.apache.niolex.commons.bean.Pair;
 import org.apache.niolex.commons.codec.StringUtil;
 import org.apache.niolex.commons.compress.JacksonUtil;
 import org.apache.niolex.commons.concurrent.Blocker;
+import org.apache.niolex.commons.concurrent.ConcurrentUtil;
 import org.apache.niolex.commons.concurrent.WaitOn;
 import org.apache.niolex.commons.config.PropUtil;
 import org.apache.niolex.commons.download.DownloadUtil;
 import org.apache.niolex.commons.file.FileUtil;
-import org.apache.niolex.commons.test.MockUtil;
-import org.apache.niolex.commons.bean.Pair;
 import org.apache.niolex.commons.util.Runme;
 import org.apache.niolex.config.bean.ConfigGroup;
 import org.apache.niolex.config.bean.ConfigItem;
@@ -51,6 +51,7 @@ import org.apache.niolex.network.Config;
 import org.apache.niolex.network.IPacketHandler;
 import org.apache.niolex.network.IPacketWriter;
 import org.apache.niolex.network.PacketData;
+import org.apache.niolex.network.client.ClientManager;
 import org.apache.niolex.network.client.PacketClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -83,6 +84,11 @@ public class ConfigClient {
     private static final PacketClient CLIENT = new PacketClient();
 
     /**
+     * The manager to manage client connection status.
+     */
+    private static final ClientManager<PacketClient> MGR = new ClientManager<PacketClient>(CLIENT);
+
+    /**
      * The client subscribe bean.
      */
     private static final SubscribeBean BEAN = new SubscribeBean();
@@ -108,8 +114,6 @@ public class ConfigClient {
      * Non final fields
      */
     private static String SERVER_ADDRESS;
-    private static InetSocketAddress[] ADDRESSES;
-    private static int SERVER_IDX;
     private static Condition WAIT_CONNECTED;
     private static InitStatus INIT_STATUS = InitStatus.INIT;
 
@@ -143,8 +147,8 @@ public class ConfigClient {
     	REFRESH_INTERVAL = PropUtil.getLong("server.refresh.interval", 3600000);
     	STORAGE_PATH = PropUtil.getProperty("local.storage.path", "/data/config-client/storage");
     	FileUtil.mkdirsIfAbsent(STORAGE_PATH);
-    	// Start to init connection in another thread.
-    	new Thread() { public void run() {initConnection();} }.start();
+    	// Start to init connection in this main thread.
+    	initConnection();
     }
 
     /**
@@ -153,7 +157,10 @@ public class ConfigClient {
     private static final void initConnection() {
     	// Sync with server at startup, if can not connect to http server,
     	// system will try local file at this time.
-    	syncServerAddress(true);
+    	if (!syncServerAddress(true)) {
+    	    LOG.error("Can not get config server address, config client will not work!!!!");
+    	    return;
+    	}
 
     	// Sync with server periodically.
     	Runme me = new Runme() {
@@ -204,20 +211,17 @@ public class ConfigClient {
     		LOG.error("Server address is empty, init failed.");
     		return false;
     	}
-    	final InetSocketAddress[] tmp = new InetSocketAddress[servers.length];
-    	final int[] rand = MockUtil.reorderIntArray(servers.length);
+    	final List<InetSocketAddress> tmp = new ArrayList<InetSocketAddress>(servers.length);
     	for (int i = 0; i < servers.length; ++i) {
     		String str = servers[i];
     		String[] addrs = str.split(":");
-    		tmp[rand[i]] = new InetSocketAddress(addrs[0], Integer.parseInt(addrs[1]));
+    		tmp.add(new InetSocketAddress(addrs[0], Integer.parseInt(addrs[1])));
     	}
-    	ADDRESSES = tmp;
-    	if (INIT_STATUS == InitStatus.INIT) {
-    		INIT_STATUS = InitStatus.TRY;
-    		// Client is not working, try to start a connect.
-        	SERVER_IDX = (int) (System.nanoTime() % ADDRESSES.length);
+    	// Update manager with the new address list.
+    	MGR.setAddressList(tmp);
+    	if (isStart) {
     		// Connect with server.
-    		connect();
+    	    firstConnect();
     	}
     	return true;
     }
@@ -241,6 +245,60 @@ public class ConfigClient {
 	        	CLIENT.handleWrite(syn);
 	    	}
     	}
+    }
+
+
+    /**
+     * Try infinitely to get a valid connection.
+     */
+    private static final void firstConnect() {
+        MGR.setConnectRetryTimes(Integer.MAX_VALUE);
+        if (MGR.connect()) {
+            connected();
+        } else {
+            INIT_STATUS = InitStatus.TRY;
+            // Wait for client get connected.
+            new Thread() { public void run() {connected();} }.start();
+        }
+    }
+
+    /**
+     * Try infinitely to get a valid connection.
+     */
+    private static final void reConnect() {
+        MGR.setConnectRetryTimes(Integer.MAX_VALUE);
+        if (MGR.retryConnect()) {
+            connected();
+        } else {
+            LOG.error("Failed to retry connect to config server: exceeds max retry times.");
+        }
+    }
+
+    /**
+     * Init connection when connected.
+     */
+    private static final void connected() {
+        try {
+            if (MGR.waitForConnected()) {
+                INIT_STATUS = InitStatus.CONNECTED;
+                initSubscribe();
+                // Client connected, notify all the waiters.
+                notifyAllWaiter();
+            }
+        } catch (InterruptedException e) {
+            LOG.error("Error occured when wait for connect to config server.", e);
+        }
+    }
+
+    /**
+     * Init subscribe when client is connected to server.
+     */
+    private static final void initSubscribe() {
+        // 1. Register heart beat.
+        CLIENT.handleWrite(new PacketData(Config.CODE_REGR_HBEAT));
+        PacketData init = PacketTranslater.translate(BEAN);
+        // 2. Register interested groups.
+        CLIENT.handleWrite(init);
     }
 
     /**
@@ -270,7 +328,7 @@ public class ConfigClient {
 		public void handleClose(IPacketWriter wt) {
 			// We will try to reconnect to server.
 			INIT_STATUS = InitStatus.FAILED;
-			connect();
+			reConnect();
 		}
 
     }
@@ -352,26 +410,6 @@ public class ConfigClient {
     }
 
     /**
-     * Delete the group config from local disk.
-     * @param conf
-     */
-    private static final void deleteConfigGroupFromLocakDisk(ConfigGroup conf) {
-    	File f = new File(STORAGE_PATH + "/" + conf.getGroupName());
-    	if (f.exists()) {
-    		f.delete();
-    	}
-    }
-
-    /**
-     * Store the group config into local disk.
-     * @param conf
-     */
-    private static final void storeConfigGroupToLocakDisk(ConfigGroup conf) {
-    	FileUtil.setBinaryFileContentToFileSystem(STORAGE_PATH + "/" + conf.getGroupName(),
-    			PacketTranslater.translate(conf).getData());
-    }
-
-    /**
      * Store this item into memory, and dispatch event if necessary.
      * @param groupName
      * @param item
@@ -397,60 +435,9 @@ public class ConfigClient {
     protected static final ConfigListener registerEventHandler(String groupName, String key, ConfigListener listener) {
     	ConfigEventDispatcher disp = DISPATCHER.get(groupName);
 		if (disp == null) {
-			ConfigEventDispatcher tmp = new ConfigEventDispatcher();
-			disp = DISPATCHER.putIfAbsent(groupName, tmp);
-			if (disp != null) {
-				return disp.addListener(key, listener);
-			} else {
-				return tmp.addListener(key, listener);
-			}
-		} else {
-			return disp.addListener(key, listener);
+		    disp = ConcurrentUtil.initMap(DISPATCHER, groupName, new ConfigEventDispatcher());
 		}
-    }
-
-    /**
-     * Return the next server index.
-     * @return the next server index
-     */
-    private static final int nextServer() {
-    	return SERVER_IDX = ++SERVER_IDX % ADDRESSES.length;
-    }
-
-    /**
-     * Try infinitely to get a valid connection.
-     */
-    private static final void connect() {
-    	InetSocketAddress serverAddress = null;
-    	while (true) {
-	    	try {
-	    		serverAddress = ADDRESSES[nextServer()];
-	    		CLIENT.setServerAddress(serverAddress);
-				CLIENT.connect();
-				break;
-			} catch (Exception e) {
-				LOG.info("Error occured when connect to address: {}, client will retry. {}",
-						serverAddress, e.toString());
-				try {
-					Thread.sleep(3000);
-				} catch (InterruptedException e1) {}
-			}
-    	}
-    	INIT_STATUS = InitStatus.CONNECTED;
-    	initSubscribe();
-    	// Client connected, notify all the waiters.
-    	notifyAllWaiter();
-    }
-
-    /**
-     * Init subscribe when client is connected to server.
-     */
-    private static final void initSubscribe() {
-    	// 1. Register heart beat.
-    	CLIENT.handleWrite(new PacketData(Config.CODE_REGR_HBEAT));
-    	PacketData init = PacketTranslater.translate(BEAN);
-    	// 2. Register interested groups.
-    	CLIENT.handleWrite(init);
+		return disp.addListener(key, listener);
     }
 
     /**
@@ -503,7 +490,7 @@ public class ConfigClient {
     /**
      * Load group config from local disk file.
      * @param groupName
-     * @return
+     * @return the config group
      */
     private static final ConfigGroup getConfigGroupFromLocakDisk(String groupName) {
     	try {
@@ -518,13 +505,33 @@ public class ConfigClient {
     }
 
     /**
+     * Delete the group config from local disk.
+     * @param conf
+     */
+    private static final void deleteConfigGroupFromLocakDisk(ConfigGroup conf) {
+        File f = new File(STORAGE_PATH + "/" + conf.getGroupName());
+        if (f.exists()) {
+            f.delete();
+        }
+    }
+
+    /**
+     * Store the group config into local disk.
+     * @param conf
+     */
+    private static final void storeConfigGroupToLocakDisk(ConfigGroup conf) {
+        FileUtil.setBinaryFileContentToFileSystem(STORAGE_PATH + "/" + conf.getGroupName(),
+                PacketTranslater.translate(conf).getData());
+    }
+
+    /**
      * Get group config by group name. If not found in local, we will try to
-     * get it from config server.
+     * get it from config server. We prefer remote result if connection is ready.
      *
      * This method is synchronized.
      *
      * @param groupName
-     * @return
+     * @return the config group
      * @throws Exception
      */
     protected static final ConfigGroup getConfigGroup(String groupName) throws Exception {
@@ -532,28 +539,43 @@ public class ConfigClient {
     	ConfigGroup tmp = STORAGE.get(groupName);
     	if (tmp != null)
     		return tmp;
-    	// Try to load config from local disk.
+    	// 1. First, we prefer remote config group, it's up-to-date.
+    	if (INIT_STATUS == InitStatus.AUTHED) {
+    	    // Already connected to server.
+    	    return getConfigGroupFromRemote(groupName);
+    	}
+    	// 2. Try to load config from local disk.
     	tmp = getConfigGroupFromLocakDisk(groupName);
     	if (tmp != null) {
     		// OK, we find config from disk, we store it into memory immediately.
     		STORAGE.store(tmp);
     		// Add this group name to bean.
-        	if (BEAN.getGroupSet().add(groupName) && INIT_STATUS == InitStatus.AUTHED) {
-        		// Send packet to remote server.
-        		PacketData sub = new PacketData(CodeMap.GROUP_SUB, StringUtil.strToUtf8Byte(groupName));
-        		CLIENT.handleWrite(sub);
-        	}
+    		BEAN.getGroupSet().add(groupName);
     		return tmp;
     	}
+    	// 3. At this condition, we can not found it from disk, and connection is not ready.
+    	// It's so sad, we must wait for connection.
     	checkConncetion();
-    	// Add this group name to bean.
-    	BEAN.getGroupSet().add(groupName);
-    	Pair<Boolean, WaitOn<ConfigGroup>> on = WAITER.init(groupName);
-    	if (on.a) {
-    		// Send packet to remote server.
-    		PacketData sub = new PacketData(CodeMap.GROUP_SUB, StringUtil.strToUtf8Byte(groupName));
-    		CLIENT.handleWrite(sub);
-    	}
-    	return on.b.waitForResult(CONNECT_TIMEOUT);
+    	// Already connected to server.
+        return getConfigGroupFromRemote(groupName);
+    }
+
+    /**
+     * Try to get config group from remote directly.
+     *
+     * @param groupName
+     * @return the config group
+     * @throws Exception
+     */
+    private static final ConfigGroup getConfigGroupFromRemote(String groupName) throws Exception {
+        // Add this group name to bean.
+        BEAN.getGroupSet().add(groupName);
+        Pair<Boolean, WaitOn<ConfigGroup>> on = WAITER.init(groupName);
+        if (on.a) {
+            // Send packet to remote server.
+            PacketData sub = new PacketData(CodeMap.GROUP_SUB, StringUtil.strToUtf8Byte(groupName));
+            CLIENT.handleWrite(sub);
+        }
+        return on.b.waitForResult(CONNECT_TIMEOUT);
     }
 }
