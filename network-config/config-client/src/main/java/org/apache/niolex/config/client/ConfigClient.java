@@ -37,6 +37,7 @@ import org.apache.niolex.commons.config.PropUtil;
 import org.apache.niolex.commons.download.DownloadUtil;
 import org.apache.niolex.commons.file.FileUtil;
 import org.apache.niolex.commons.util.Runme;
+import org.apache.niolex.commons.util.SystemUtil;
 import org.apache.niolex.config.bean.ConfigGroup;
 import org.apache.niolex.config.bean.ConfigItem;
 import org.apache.niolex.config.bean.SubscribeBean;
@@ -126,11 +127,14 @@ public class ConfigClient {
      */
     static {
     	try {
-    		String fileName = System.getProperty("config.client.property.file");
+    		String fileName = SystemUtil.getSystemProperty("ConfigClient.configurationFile", "config-client-properties",
+    		        "config.client.property.file");
     		if (fileName != null) {
     			PropUtil.loadConfig(fileName);
+    			LOG.info("Config file [{}] loaded into config client.", fileName);
     		} else {
     			PropUtil.loadConfig("/conf-client.properties", ConfigClient.class);
+    			LOG.info("Config file [conf-client.properties] loaded into config client.");
     		}
         } catch (Throwable t) {
             LOG.info("conf-client.properties not found, use default configurations instead.");
