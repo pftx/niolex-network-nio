@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE configuration>
 
-    <!-- config-admin log configuration file. upgrade to logback       -->
+    <!-- config-admin log configuration file. upgrade to logback        -->
     <!--                                                                -->
     <!-- For professional support please see                            -->
-    <!--    http://www.qos.ch/shop/products/professionalSupport         -->
+    <!--    http://logback.qos.ch/documentation.html	                -->
+    <!--    http://logback.qos.ch/manual/configuration.html             -->
+    <!--    http://logback.qos.ch/manual/appenders.html                 -->
     <!--                                                                -->
 
 <configuration debug="false">
