@@ -273,7 +273,7 @@ public class ClientManager<T extends IClient> {
     /**
      * Set the socket connect timeout.
      *
-     * @See {@link org.apache.niolex.network.IClient#setConnectTimeout(int)}
+     * @see {@link org.apache.niolex.network.IClient#setConnectTimeout(int)}
      * @param timeout the new connect timeout
      */
     public void setConnectTimeout(int timeout) {

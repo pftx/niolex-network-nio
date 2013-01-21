@@ -31,6 +31,8 @@ import org.slf4j.LoggerFactory;
  * Dispatch Packet by packet code.
  * Every code can be a type of packet, so register a Handler for a kind of Packet.
  * For example, code 0 for HeartBeat, code 1 for get description.
+ *
+ * User can set a default handler to handle all other packets not handled by dispatch map.
  * We do not support range handler now, so this handler is more demo than useful.
  *
  * @author Xie, Jiyun
@@ -40,6 +42,7 @@ public class DispatchPacketHandler implements IPacketHandler {
 	private static final Logger LOG = LoggerFactory.getLogger(DispatchPacketHandler.class);
 
     private Map<Short, IPacketHandler> dispatchMap = new HashMap<Short, IPacketHandler>();
+    private IPacketHandler defaultHandler;
 
     /**
      * Add a handler for code <code>
@@ -61,6 +64,9 @@ public class DispatchPacketHandler implements IPacketHandler {
         for (IPacketHandler h : dispatchMap.values()) {
             h.handleClose(wt);
         }
+        if (defaultHandler != null) {
+            defaultHandler.handleClose(wt);
+        }
     }
 
     /**
@@ -75,9 +81,29 @@ public class DispatchPacketHandler implements IPacketHandler {
         IPacketHandler h = dispatchMap.get(sc.getCode());
         if (h != null) {
             h.handleRead(sc, wt);
+        } else if (defaultHandler != null) {
+            defaultHandler.handleRead(sc, wt);
         } else {
             LOG.warn("No handler registered for Packet with code {}", sc.getCode());
         }
+    }
+
+    /**
+     * Get the current default handler
+     *
+     * @return the default handler
+     */
+    public IPacketHandler getDefaultHandler() {
+        return defaultHandler;
+    }
+
+    /**
+     * Set the current default handler
+     *
+     * @param defaultHandler the new default handler
+     */
+    public void setDefaultHandler(IPacketHandler defaultHandler) {
+        this.defaultHandler = defaultHandler;
     }
 
     /**

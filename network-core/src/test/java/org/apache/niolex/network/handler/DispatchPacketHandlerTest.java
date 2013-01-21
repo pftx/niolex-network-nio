@@ -43,11 +43,15 @@ public class DispatchPacketHandlerTest {
 	@Mock
 	IPacketHandler pHandler2;
 
+	@Mock
+	IPacketHandler pHandler3;
+
 	@Before
 	public void setUp() {
 		handler = new DispatchPacketHandler();
 		handler.addHandler((short) 3, pHandler1);
 		handler.addHandler((short) 5, pHandler2);
+		handler.setDefaultHandler(pHandler3);
 	}
 
 	@Test
@@ -64,6 +68,8 @@ public class DispatchPacketHandlerTest {
 			handler.handleClose(ip);
 			verify(pHandler1, times(3)).handleClose(ip);
 			verify(pHandler2, times(3)).handleClose(ip);
+			verify(pHandler3, times(3)).handleClose(ip);
+			verify(pHandler3, times(2)).handleRead(sc, ip);
 			assertEquals(2, handler.getDispatchSize());
 		}
 
@@ -72,13 +78,37 @@ public class DispatchPacketHandlerTest {
 		PacketData sc = mock(PacketData.class);
 		when(sc.getCode()).thenReturn((short)3, (short)3, (short)4, (short)4, (short)5);
 		IPacketWriter ip = mock(IPacketWriter.class);
+		handler.setDefaultHandler(null);
 		handler.handleRead(sc , ip);
 		handler.handleRead(sc , ip);
 		handler.handleRead(sc , ip);
 		handler.handleRead(sc , ip);
 		verify(pHandler1, times(2)).handleRead(sc, ip);
 		verify(pHandler2, times(1)).handleRead(sc, ip);
+		verify(pHandler3, times(0)).handleRead(sc, ip);
 		assertEquals(2, handler.getDispatchSize());
+		handler.setDefaultHandler(pHandler3);
 	}
+
+	@Test
+	public void testHandleRead_NoDefault() {
+	    PacketData sc = mock(PacketData.class);
+	    when(sc.getCode()).thenReturn((short)3, (short)3, (short)4, (short)4, (short)5);
+	    IPacketWriter ip = mock(IPacketWriter.class);
+	    handler.handleRead(sc , ip);
+	    handler.handleRead(sc , ip);
+	    handler.handleRead(sc , ip);
+	    handler.handleRead(sc , ip);
+	    handler.handleRead(sc , ip);
+	    verify(pHandler1, times(2)).handleRead(sc, ip);
+	    verify(pHandler2, times(1)).handleRead(sc, ip);
+	    verify(pHandler3, times(2)).handleRead(sc, ip);
+	    assertEquals(2, handler.getDispatchSize());
+	}
+
+    @Test
+    public void testSetDefaultHandler() throws Exception {
+        assertEquals(pHandler3, handler.getDefaultHandler());
+    }
 
 }
