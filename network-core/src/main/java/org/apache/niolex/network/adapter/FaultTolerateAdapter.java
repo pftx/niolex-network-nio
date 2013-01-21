@@ -38,13 +38,13 @@ import org.slf4j.LoggerFactory;
  * This is the fault tolerate packet adapter.
  * This adapter try to save all the non-send packets into internal data structure,
  * and send them when client re-connected to this server.
- *
+ * <p>
  * You can use this handler to deduce the rate of packet lose when network is not stable.
  * The packet order will not be remained after fault toleration.
- *
+ * <p>
  * The difference between handler and adapter is that adapter can be applied on everything and handler
  * only deal with a specific situation.
- *
+ * <p>
  * In this adapter, the first connect packet need to be Session ID Packet, otherwise it can not handle the
  * fault toleration properly.
  *
