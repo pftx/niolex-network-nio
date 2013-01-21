@@ -25,7 +25,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-
 /**
  * Summary the Packet information to the output, just for test.
  * This is a demo packet handler.

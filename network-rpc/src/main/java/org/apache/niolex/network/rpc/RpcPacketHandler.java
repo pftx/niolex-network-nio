@@ -97,10 +97,7 @@ public class RpcPacketHandler implements IPacketHandler {
 	 */
 	@Override
 	public void handleRead(PacketData sc, IPacketWriter wt) {
-		if (sc.getCode() == Config.CODE_HEART_BEAT) {
-			// This is heart beat, just return.
-			return;
-		}
+		// Heart beat will be handled in FastCore, so we will not encounter it here.
 		RpcExecuteItem ei = executeMap.get(sc.getCode());
 		RpcException rep = null;
 		if (ei != null) {
