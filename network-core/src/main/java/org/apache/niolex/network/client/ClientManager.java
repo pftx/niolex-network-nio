@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * This class manage client connection status, retry and fail over.
- * User can set a list of server addresses in to this class, and it
+ * User can set a list of server addresses into this class, and it
  * will pick up one randomly and try to connect to it.
  * <p>
  * User need to call {@link #connect()} manually to connect to server.
