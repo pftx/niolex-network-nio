@@ -147,14 +147,11 @@ public class RpcClient implements PoolableInvocationHandler, IPacketHandler {
 	 * Check the client status before doing remote call and after response.
 	 */
 	private void checkStatus() {
-		RpcException rep = null;
 		switch (connStatus) {
 			case INNITIAL:
-				rep = new RpcException("Client not connected.", RpcException.Type.NOT_CONNECTED, null);
-				throw rep;
+			    throw new RpcException("Client not connected.", RpcException.Type.NOT_CONNECTED, null);
 			case CLOSED:
-				rep = new RpcException("Client closed.", RpcException.Type.CONNECTION_CLOSED, null);
-				throw rep;
+			    throw new RpcException("Client closed.", RpcException.Type.CONNECTION_CLOSED, null);
 		}
 	}
 
@@ -176,31 +173,31 @@ public class RpcClient implements PoolableInvocationHandler, IPacketHandler {
 				arr = converter.serializeParams(args);
 			}
 			// 2. Create PacketData
-			PacketData rc = new PacketData(rei, arr);
+			PacketData reqData = new PacketData(rei, arr);
 			// 3. Generate serial number
-			serialPacket(rc);
+			serialPacket(reqData);
 
 			// 4. Invoke, send packet to server and wait for result
-			PacketData sc = invoker.invoke(rc, client);
+			PacketData respData = invoker.invoke(reqData, client);
 
 			// 5. Process result.
-			if (sc == null) {
+			if (respData == null) {
 				checkStatus();
 				rep = new RpcException("Timeout for this remote procedure call.",
 						RpcException.Type.TIMEOUT, null);
 				throw rep;
 			} else {
-				int exp = sc.getReserved() - rc.getReserved();
+				int exp = respData.getReserved() - reqData.getReserved();
 				boolean isEx = false;
 				// 127 + 1 = -128
 				// -128 - 127 = -255
 				if (exp == 1 || exp == -255) {
 					isEx = true;
 				}
-				if (sc.getLength() == 0) {
+				if (respData.getLength() == 0) {
 				    return null;
 				}
-				Object ret = prepareReturn(sc.getData(), method.getGenericReturnType(), isEx);
+				Object ret = prepareReturn(respData.getData(), method.getGenericReturnType(), isEx);
 				if (isEx) {
 					rep = (RpcException) ret;
 					throw rep;
