@@ -223,20 +223,30 @@ public class RpcPacketHandler implements IPacketHandler {
 	 */
 	public void setRpcConfigs(ConfigItem[] confs) {
 		for (ConfigItem conf : confs) {
-			Method[] arr = MethodUtil.getMethods(conf.getInterface());
-			for (Method m : arr) {
-				if (m.isAnnotationPresent(RpcMethod.class)) {
-					RpcMethod rp = m.getAnnotation(RpcMethod.class);
-					RpcExecuteItem rei = new RpcExecuteItem();
-					rei.setMethod(m);
-					rei.setTarget(conf.getTarget());
-					rei = executeMap.put(rp.value(), rei);
-					if (rei != null) {
-						LOG.warn("Duplicate configuration for code: {}", rp.value());
-					}
-				}
-			} // End of arr
+		    addRpcConfig(conf);
 		} // End of confs
+	}
+
+	/**
+	 * Set the Rpc Config, this method will parse the configuration and generate execute map.
+     * One can call this method repeatedly to add more Rpc Config.
+     *
+	 * @param conf
+	 */
+	public void addRpcConfig(ConfigItem conf) {
+	    Method[] arr = MethodUtil.getMethods(conf.getInterface());
+        for (Method m : arr) {
+            if (m.isAnnotationPresent(RpcMethod.class)) {
+                RpcMethod rp = m.getAnnotation(RpcMethod.class);
+                RpcExecuteItem rei = new RpcExecuteItem();
+                rei.setMethod(m);
+                rei.setTarget(conf.getTarget());
+                rei = executeMap.put(rp.value(), rei);
+                if (rei != null) {
+                    LOG.warn("Duplicate configuration for code: {}", rp.value());
+                }
+            }
+        } // End of arr
 	}
 
 	/**
