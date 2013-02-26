@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
 /**
  * This is the Rpc core of server packet processing component.
  * This is definitely the core of the whole network server.
- * There is a {@link #ClientCore} class to handle client side network.
+ * There is a {@link #NioConnCore} class to handle client side network.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0

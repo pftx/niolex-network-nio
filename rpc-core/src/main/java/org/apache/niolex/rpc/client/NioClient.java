@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * The non blocking client.
- * This client maintains a number of connections by the ConnectionHolder class.
+ * This client maintains a number of connections by the NioConnManager class.
  * So it's concurrent enabled.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
@@ -73,7 +73,7 @@ public class NioClient implements IClient, Runnable {
 
     /**
      * Socket connect timeout. There is no connect timeout in Non-Blocking,
-     * so we use this timeout for take connection from {@link ConnectionHolder}
+     * so we use this timeout for take connection from {@link NioConnManager}
      */
     protected int connectTimeout = Config.SO_CONNECT_TIMEOUT;
 
@@ -100,7 +100,7 @@ public class NioClient implements IClient, Runnable {
 	/**
 	 * The socket container hold all the sockets.
 	 */
-	private final ConnectionHolder socketHolder;
+	private final NioConnManager socketHolder;
 
 	/**
 	 * The configured server address array.
@@ -121,7 +121,7 @@ public class NioClient implements IClient, Runnable {
 		this.selector = Selector.open();
 		this.thread = new Thread(this);
 		selectorHolder = new SelectorHolder(thread, selector);
-		socketHolder = new ConnectionHolder(this);
+		socketHolder = new NioConnManager(this);
 	}
 
 	/**
@@ -156,7 +156,7 @@ public class NioClient implements IClient, Runnable {
      */
     protected void handleKey(SelectionKey selectionKey) throws IOException {
         try {
-        	ClientCore cli = (ClientCore) selectionKey.attachment();
+        	NioConnCore cli = (NioConnCore) selectionKey.attachment();
             if (selectionKey.isConnectable()) {
             	cli.handleConnect();
             } else if (selectionKey.isReadable()) {
@@ -216,7 +216,7 @@ public class NioClient implements IClient, Runnable {
 			ch.socket().setTcpNoDelay(true);
 			ch.socket().setSoLinger(false, 0);
 			ch.connect(remote);
-			new ClientCore(selectorHolder, ch, socketHolder);
+			new NioConnCore(selectorHolder, ch, socketHolder);
 		} catch (IOException e) {
 			validCnt.decrementAndGet();
 			LOG.error("Failed to create channel to address: {}", remote, e);
@@ -227,7 +227,7 @@ public class NioClient implements IClient, Runnable {
 	 * A channel is invalid and closed here.
 	 * @param clientCore
 	 */
-	public void closeChannel(ClientCore clientCore) {
+	public void closeChannel(NioConnCore clientCore) {
 		validCnt.decrementAndGet();
 		Exception ex = new RpcException("Client closed.", RpcException.Type.CONNECTION_LOST, null);
 		blocker.release(clientCore, ex);
@@ -241,7 +241,7 @@ public class NioClient implements IClient, Runnable {
 	 */
 	public WaitOn<Packet> asyncInvoke(Packet sc) {
 		sc.setSerial((short) 1);
-		ClientCore cli = socketHolder.take(connectTimeout);
+		NioConnCore cli = socketHolder.take(connectTimeout);
 		if (cli != null) {
 			WaitOn<Packet> on = blocker.initWait(cli);
 			cli.prepareWrite(sc);

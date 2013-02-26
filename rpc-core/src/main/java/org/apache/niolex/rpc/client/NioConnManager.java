@@ -1,5 +1,5 @@
 /**
- * ConnectionHolder.java
+ * NioConnManager.java
  *
  * Copyright 2012 Niolex, Inc.
  *
@@ -29,18 +29,18 @@ import java.util.concurrent.TimeUnit;
  * @version 1.0.0
  * @since 2012-8-19
  */
-public class ConnectionHolder {
+public class NioConnManager {
 
-	private final LinkedBlockingQueue<ClientCore> readyQueue = new LinkedBlockingQueue<ClientCore>();
+	private final LinkedBlockingQueue<NioConnCore> readyQueue = new LinkedBlockingQueue<NioConnCore>();
 	private NioClient nioClient;
 	private CountDownLatch latch;
 
 	/**
-	 * Create a ConnectionHolder with this nioClient.
+	 * Create a NioConnManager with this nioClient.
 	 * The only Constructor
 	 * @param nioClient
 	 */
-	public ConnectionHolder(NioClient nioClient) {
+	public NioConnManager(NioClient nioClient) {
 		super();
 		this.nioClient = nioClient;
 	}
@@ -65,7 +65,7 @@ public class ConnectionHolder {
 	 * Insert this client into the tail of the ready queue.
 	 * @param clientCore
 	 */
-	public void ready(ClientCore clientCore) {
+	public void ready(NioConnCore clientCore) {
 		latch.countDown();
 		readyQueue.offer(clientCore);
 	}
@@ -74,10 +74,10 @@ public class ConnectionHolder {
 	 * Retrieves and removes the head of the ready queue, or returns null if the queue is empty.
 	 *
 	 * @param connectTimeout the timeout to take item from queue.
-	 * @return an instance of ClientCore, null if client is busy.
+	 * @return an instance of NioConnCore, null if client is busy.
 	 */
-	public ClientCore take(int connectTimeout) {
-		ClientCore core;
+	public NioConnCore take(int connectTimeout) {
+		NioConnCore core;
 		while ((core = takeOne(connectTimeout)) != null) {
 			if (core.isValid())
 				return core;
@@ -88,14 +88,14 @@ public class ConnectionHolder {
 	}
 
 	/**
-	 * Take one ClientCore from the ready queue, will return null if can not take out any
+	 * Take one NioConnCore from the ready queue, will return null if can not take out any
 	 * element at the given timeout.
 	 * We will not check the status of this instance, so it maybe already broken.
 	 *
 	 * @param connectTimeout the timeout to take item from queue.
-	 * @return an instance of ClientCore, null if timeout.
+	 * @return an instance of NioConnCore, null if timeout.
 	 */
-	protected ClientCore takeOne(int connectTimeout) {
+	protected NioConnCore takeOne(int connectTimeout) {
 		try {
 			return readyQueue.poll(connectTimeout, TimeUnit.MILLISECONDS);
 		} catch (InterruptedException e) {
@@ -108,7 +108,7 @@ public class ConnectionHolder {
 	 *
 	 * @param clientCore
 	 */
-	public void close(ClientCore clientCore) {
+	public void close(NioConnCore clientCore) {
 		nioClient.closeChannel(clientCore);
 	}
 
