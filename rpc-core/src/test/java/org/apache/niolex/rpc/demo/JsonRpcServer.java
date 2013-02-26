@@ -20,7 +20,7 @@ package org.apache.niolex.rpc.demo;
 import java.io.IOException;
 
 import org.apache.niolex.rpc.RpcConfig;
-import org.apache.niolex.rpc.json.JsonProtocol;
+import org.apache.niolex.rpc.protocol.JsonProtocol;
 import org.apache.niolex.rpc.server.MultiNioServer;
 import org.apache.niolex.rpc.server.RpcInvoker;
 

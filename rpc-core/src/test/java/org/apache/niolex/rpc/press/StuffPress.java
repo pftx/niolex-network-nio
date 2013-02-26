@@ -29,7 +29,7 @@ import org.apache.niolex.rpc.client.RpcClient;
 import org.apache.niolex.rpc.client.SocketClient;
 import org.apache.niolex.rpc.demo.RpcService;
 import org.apache.niolex.rpc.demo.RpcService.IntArray;
-import org.apache.niolex.rpc.stuff.StuffProtocol;
+import org.apache.niolex.rpc.protocol.StuffProtocol;
 
 /**
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>

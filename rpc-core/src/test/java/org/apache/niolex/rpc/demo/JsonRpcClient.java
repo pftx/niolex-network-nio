@@ -24,7 +24,7 @@ import java.util.List;
 import org.apache.niolex.commons.test.Benchmark;
 import org.apache.niolex.rpc.client.RpcClient;
 import org.apache.niolex.rpc.client.SocketClient;
-import org.apache.niolex.rpc.json.JsonProtocol;
+import org.apache.niolex.rpc.protocol.JsonProtocol;
 import org.junit.Assert;
 
 /**

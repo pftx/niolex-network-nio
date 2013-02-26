@@ -26,7 +26,7 @@ import org.apache.niolex.commons.test.MultiPerformance;
 import org.apache.niolex.rpc.core.CoreTest;
 import org.apache.niolex.rpc.demo.RpcService;
 import org.apache.niolex.rpc.demo.RpcService.IntArray;
-import org.apache.niolex.rpc.json.JsonProtocol;
+import org.apache.niolex.rpc.protocol.JsonProtocol;
 import org.junit.Test;
 
 /**

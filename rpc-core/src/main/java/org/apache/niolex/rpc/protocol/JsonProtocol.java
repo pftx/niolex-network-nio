@@ -15,7 +15,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.niolex.rpc.json;
+package org.apache.niolex.rpc.protocol;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -23,8 +23,6 @@ import java.lang.reflect.Type;
 
 import org.apache.niolex.commons.compress.JacksonUtil;
 import org.apache.niolex.network.Config;
-import org.apache.niolex.rpc.protocol.ClientProtocol;
-import org.apache.niolex.rpc.protocol.ServerProtocol;
 import org.codehaus.jackson.map.type.TypeFactory;
 
 /**

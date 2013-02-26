@@ -15,13 +15,11 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.niolex.rpc.stuff;
+package org.apache.niolex.rpc.protocol;
 
 import java.lang.reflect.Type;
 
 import org.apache.niolex.commons.seri.ProtoStuffUtil;
-import org.apache.niolex.rpc.protocol.ClientProtocol;
-import org.apache.niolex.rpc.protocol.ServerProtocol;
 
 /**
  * Using god like man protostuff protocol to serialize data.
