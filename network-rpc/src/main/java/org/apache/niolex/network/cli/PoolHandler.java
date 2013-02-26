@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * The basic client implementation is {@link org.apache.niolex.network.client.SocketClient}
- * which is simple, and correct proven. But it's can not be used in multiple threading
+ * which is simple, and correct proven. But it can not be used in multiple threading
  * environment.
  *
  * The {@link org.apache.niolex.network.client.PacketClient} can be used in multiple threads,

@@ -1,5 +1,5 @@
 /**
- * RpcConnectionHandler.java
+ * RpcPoolableHandler.java
  *
  * Copyright 2012 Niolex, Inc.
  *
@@ -33,12 +33,12 @@ import org.apache.niolex.network.rpc.PoolableInvocationHandler;
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.3, Date: 2012-6-3
  */
-public class RpcConnectionHandler implements IServiceHandler {
+public class RpcPoolableHandler implements IServiceHandler {
 
 	private final String serviceUrl;
 	private final PoolableInvocationHandler handler;
 
-	public RpcConnectionHandler(String serviceUrl, PoolableInvocationHandler handler) {
+	public RpcPoolableHandler(String serviceUrl, PoolableInvocationHandler handler) {
 		super();
 		this.serviceUrl = serviceUrl;
 		this.handler = handler;

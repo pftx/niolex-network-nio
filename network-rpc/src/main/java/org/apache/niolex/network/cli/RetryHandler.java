@@ -24,6 +24,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.apache.niolex.commons.util.SystemUtil;
 import org.apache.niolex.network.rpc.RpcException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -87,9 +88,7 @@ public class RetryHandler implements InvocationHandler {
 			}
 			if (handleEnd - handleStart < intervalBetweenRetry) {
 			    // We need this to prevent RetryHandler from retry too fast and lower level has not recovered.
-			    try {
-                    Thread.sleep(intervalBetweenRetry + handleStart - handleEnd);
-                } catch (Throwable t) {}
+			    SystemUtil.sleep(intervalBetweenRetry + handleStart - handleEnd);
 			}
 			// Ready to try.
 			++curTry;
