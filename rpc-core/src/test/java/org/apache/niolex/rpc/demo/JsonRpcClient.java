@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.niolex.commons.test.Benchmark;
-import org.apache.niolex.rpc.RpcClient;
+import org.apache.niolex.rpc.client.RpcClient;
 import org.apache.niolex.rpc.client.SocketClient;
 import org.apache.niolex.rpc.json.JsonProtocol;
 import org.junit.Assert;

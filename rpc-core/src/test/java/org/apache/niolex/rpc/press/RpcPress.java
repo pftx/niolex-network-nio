@@ -28,7 +28,7 @@ import org.apache.niolex.commons.test.MockUtil;
 import org.apache.niolex.commons.test.StopWatch;
 import org.apache.niolex.commons.test.StopWatch.Stop;
 import org.apache.niolex.commons.util.SystemUtil;
-import org.apache.niolex.rpc.RpcClient;
+import org.apache.niolex.rpc.client.RpcClient;
 import org.apache.niolex.rpc.client.SocketClient;
 import org.apache.niolex.rpc.demo.RpcService;
 import org.apache.niolex.rpc.demo.RpcService.IntArray;

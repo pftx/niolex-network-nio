@@ -15,7 +15,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.niolex.rpc;
+package org.apache.niolex.rpc.server;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
@@ -25,8 +25,12 @@ import java.util.Map;
 import org.apache.niolex.commons.reflect.MethodUtil;
 import org.apache.niolex.network.Config;
 import org.apache.niolex.network.Packet;
+import org.apache.niolex.rpc.RpcConfig;
+import org.apache.niolex.rpc.RpcException;
+import org.apache.niolex.rpc.RpcExecuteItem;
+import org.apache.niolex.rpc.RpcMethod;
 import org.apache.niolex.rpc.core.Invoker;
-import org.apache.niolex.rpc.core.ServerProtocol;
+import org.apache.niolex.rpc.protocol.ServerProtocol;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

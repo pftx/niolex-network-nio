@@ -21,8 +21,8 @@ import java.lang.reflect.Type;
 
 import org.apache.niolex.commons.seri.ProtoUtil;
 import org.apache.niolex.rpc.RpcException;
-import org.apache.niolex.rpc.core.ClientProtocol;
-import org.apache.niolex.rpc.core.ServerProtocol;
+import org.apache.niolex.rpc.protocol.ClientProtocol;
+import org.apache.niolex.rpc.protocol.ServerProtocol;
 import org.apache.niolex.rpc.util.RpcUtil;
 
 import com.google.protobuf.GeneratedMessage;
@@ -38,7 +38,7 @@ public class ProtobufProtocol implements ClientProtocol, ServerProtocol {
 
 	/**
 	 * Override super method
-	 * @see org.apache.niolex.rpc.core.ServerProtocol#prepareParams(byte[], java.lang.reflect.Type[])
+	 * @see org.apache.niolex.rpc.protocol.ServerProtocol#prepareParams(byte[], java.lang.reflect.Type[])
 	 */
 	@Override
 	public Object[] prepareParams(byte[] data, Type[] generic) throws Exception {
@@ -47,7 +47,7 @@ public class ProtobufProtocol implements ClientProtocol, ServerProtocol {
 
 	/**
 	 * Override super method
-	 * @see org.apache.niolex.rpc.core.ServerProtocol#serializeReturn(java.lang.Object)
+	 * @see org.apache.niolex.rpc.protocol.ServerProtocol#serializeReturn(java.lang.Object)
 	 */
 	@Override
 	public byte[] serializeReturn(Object ret) throws Exception {
@@ -64,7 +64,7 @@ public class ProtobufProtocol implements ClientProtocol, ServerProtocol {
 
 	/**
 	 * Override super method
-	 * @see org.apache.niolex.rpc.core.ClientProtocol#serializeParams(java.lang.Object[])
+	 * @see org.apache.niolex.rpc.protocol.ClientProtocol#serializeParams(java.lang.Object[])
 	 */
 	@Override
 	public byte[] serializeParams(Object[] args) throws Exception {
@@ -73,7 +73,7 @@ public class ProtobufProtocol implements ClientProtocol, ServerProtocol {
 
 	/**
 	 * Override super method
-	 * @see org.apache.niolex.rpc.core.ClientProtocol#prepareReturn(byte[], java.lang.reflect.Type)
+	 * @see org.apache.niolex.rpc.protocol.ClientProtocol#prepareReturn(byte[], java.lang.reflect.Type)
 	 */
 	@Override
 	public Object prepareReturn(byte[] ret, Type type) throws Exception {

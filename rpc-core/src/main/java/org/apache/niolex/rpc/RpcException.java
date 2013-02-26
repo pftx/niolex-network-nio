@@ -67,6 +67,11 @@ public class RpcException extends RuntimeException {
 		this.type = type;
 	}
 
+    @Override
+    public String toString() {
+        return "[" + type + "] " + super.toString();
+    }
+
 	/**
 	 * The RpcException type.
 	 * The meaning is in the name.
