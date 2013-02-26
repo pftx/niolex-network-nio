@@ -76,6 +76,11 @@ public class RpcCore {
     private final SelectionKey selectionKey;
 
     /**
+     * The head byte buffer.
+     */
+    private final ByteBuffer headBuffer = ByteBuffer.allocate(8);
+
+    /**
      * The name of the remote side of this socket.
      */
     private String remoteName;
@@ -100,7 +105,7 @@ public class RpcCore {
 
 		// Initialize local variables, Prepare to read data.
         status = Status.RECEVE_HEADER;
-        byteBuffer = ByteBuffer.allocate(8);
+        byteBuffer = headBuffer;
 
         StringBuilder sb = new StringBuilder();
         sb.append("Remote Client [").append(remoteName);
@@ -114,8 +119,8 @@ public class RpcCore {
      * handle read request. called by NIO selector.
      *
      * Read status change summary:
-     * HEADER -> Need read header, means nothing is read by now
-     * BODY -> Header is read, need to read body now
+     * RECEVE_HEADER -> Need read header, means nothing is read by now
+     * RECEVE_BODY -> Header is read, need to read body now
      *
      *@return true if read finished.
      */
@@ -168,7 +173,8 @@ public class RpcCore {
     		byteBuffer.put(pc.getData());
     	} else {
     		status = Status.SEND_HEADER;
-    		byteBuffer = ByteBuffer.allocate(8);
+    		byteBuffer = headBuffer;
+    		headBuffer.clear();
     		PacketUtil.putHeader(packet, byteBuffer);
     	}
     	// Make buffer ready for read.
@@ -181,8 +187,8 @@ public class RpcCore {
      * Send packets to client.
      *
      * Status change summary:
-     * HEADER -> Sending a packet, header now
-     * BODY -> Sending a packet body
+     * SEND_HEADER -> Sending a packet, header now
+     * SEND_BODY -> Sending a packet body
      *
      */
     public void handleWrite() {
@@ -212,7 +218,8 @@ public class RpcCore {
     public void writeFinished() {
     	// Send OK, try read.
     	status = Status.RECEVE_HEADER;
-    	byteBuffer = ByteBuffer.allocate(8);
+    	byteBuffer = headBuffer;
+        headBuffer.clear();
     	selectionKey.interestOps(SelectionKey.OP_READ);
     }
 

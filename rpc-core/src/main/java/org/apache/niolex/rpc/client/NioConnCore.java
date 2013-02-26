@@ -84,6 +84,11 @@ public class NioConnCore {
     private final SelectionKey selectionKey;
 
     /**
+     * The head byte buffer.
+     */
+    private final ByteBuffer headBuffer = ByteBuffer.allocate(8);
+
+    /**
      * The name of this client socket.
      */
     private String remoteName;
@@ -131,6 +136,11 @@ public class NioConnCore {
         LOG.info(sb.toString());
     }
 
+    private ByteBuffer getHeadBuffer() {
+        headBuffer.clear();
+        return headBuffer;
+    }
+
     /**
      * Prepare to write this packet, attache this channel to write.
      * @param pc
@@ -144,10 +154,10 @@ public class NioConnCore {
     		byteBuffer.put(pc.getData());
     	} else {
     		status = Status.SEND_HEADER;
-    		byteBuffer = ByteBuffer.allocate(8);
+    		byteBuffer = getHeadBuffer();
     		PacketUtil.putHeader(packet, byteBuffer);
     	}
-    	// Make buffer ready for write.
+    	// Make buffer ready for write to server.
     	byteBuffer.flip();
     	selectorHolder.changeInterestOps(selectionKey, SelectionKey.OP_WRITE);
     }
@@ -189,7 +199,7 @@ public class NioConnCore {
     	// Send OK, try read.
         LOG.debug("Packet sent. desc {}, length {}.", packet.descriptor(), packet.getLength());
     	status = Status.RECEVE_HEADER;
-    	byteBuffer = ByteBuffer.allocate(8);
+    	byteBuffer = getHeadBuffer();
     	selectionKey.interestOps(SelectionKey.OP_READ);
     }
 
