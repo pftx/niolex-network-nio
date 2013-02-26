@@ -82,6 +82,11 @@ public class FastCore extends BasePacketWriter {
     private final SelectionKey selectionKey;
 
     /**
+     * The head byte buffer.
+     */
+    private final ByteBuffer headBuffer = ByteBuffer.allocate(8);
+
+    /**
      * The name of the client side of this socket.
      */
     private String remoteName;
@@ -126,13 +131,23 @@ public class FastCore extends BasePacketWriter {
 		// Initialize local variables.
         sendStatus = Status.NONE;
         receiveStatus = Status.HEADER;
-        receiveBuffer = ByteBuffer.allocate(8);
+        receiveBuffer = getHeadBuffer();
         remoteName = client.socket().getRemoteSocketAddress().toString();
         StringBuilder sb = new StringBuilder();
         sb.append("Remote Client [").append(remoteName);
         sb.append("] connected to local Port [").append(client.socket().getLocalPort());
         sb.append("].");
         LOG.info(sb.toString());
+    }
+
+    /**
+     * Clean the head buffer and return it.
+     *
+     * @return the head buffer
+     */
+    private ByteBuffer getHeadBuffer() {
+        headBuffer.clear();
+        return headBuffer;
     }
 
     /**
@@ -225,7 +240,7 @@ public class FastCore extends BasePacketWriter {
     		packetHandler.handleRead(receivePacket, this);
     	}
     	receiveStatus = Status.HEADER;
-    	receiveBuffer = ByteBuffer.allocate(8);
+    	receiveBuffer = getHeadBuffer();
     }
 
     /**
@@ -317,7 +332,7 @@ public class FastCore extends BasePacketWriter {
     	} else {
     		// Packet too large, we will send it multiple times.
     		sendStatus = Status.HEADER;
-    		sendBuffer = ByteBuffer.allocate(8);
+    		sendBuffer = getHeadBuffer();
     		sendPacket.putHeader(sendBuffer);
     	}
     	sendBuffer.flip();

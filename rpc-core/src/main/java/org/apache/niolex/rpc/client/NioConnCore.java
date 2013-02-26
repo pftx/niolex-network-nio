@@ -136,6 +136,10 @@ public class NioConnCore {
         LOG.info(sb.toString());
     }
 
+    /**
+     * Clean the head buffer and return it.
+     * @return the head buffer
+     */
     private ByteBuffer getHeadBuffer() {
         headBuffer.clear();
         return headBuffer;
