@@ -128,6 +128,7 @@ public class JsonConverterTest {
 	public void testPrepareReturn() throws Exception {
 		Bean b = (Bean) con.prepareReturn("{\"a\":3424,\"b\":\"c\"}".getBytes(), Bean.class);
 		assertEquals(b.a, 3424);
+		assertEquals(b.b, 'c');
 	}
 
 	/**

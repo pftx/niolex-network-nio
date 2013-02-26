@@ -161,6 +161,19 @@ public class RpcUtilTest {
 	}
 
 	@Test
+	public void testGenerateKey10000() {
+	    PacketData abc = new PacketData(128);
+	    for (int i = 1; i < 200000; i += 2) {
+	        abc.setVersion((byte) (i >> 8));
+	        abc.setReserved((byte) i);
+	        int k = RpcUtil.generateKey(abc);
+	        abc.setReserved((byte) (abc.getReserved() + 1));
+	        int q = RpcUtil.generateKey(abc);
+	        assertEquals(k, q);
+	    }
+	}
+
+	@Test
 	public void main() throws Exception {
 		short a = (short) 0xcffc;
 		int q = a << 16;
