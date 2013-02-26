@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * The non blocking client.
- * This client maintains a number of connections by the SocketHolder class.
+ * This client maintains a number of connections by the ConnectionHolder class.
  * So it's concurrent enabled.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
@@ -73,7 +73,7 @@ public class NioClient implements IClient, Runnable {
 
     /**
      * Socket connect timeout. There is no connect timeout in Non-Blocking,
-     * so we use this timeout for take connection from {@link SocketHolder}
+     * so we use this timeout for take connection from {@link ConnectionHolder}
      */
     protected int connectTimeout = Config.SO_CONNECT_TIMEOUT;
 
@@ -100,7 +100,7 @@ public class NioClient implements IClient, Runnable {
 	/**
 	 * The socket container hold all the sockets.
 	 */
-	private final SocketHolder socketHolder;
+	private final ConnectionHolder socketHolder;
 
 	/**
 	 * The configured server address array.
@@ -121,7 +121,7 @@ public class NioClient implements IClient, Runnable {
 		this.selector = Selector.open();
 		this.thread = new Thread(this);
 		selectorHolder = new SelectorHolder(thread, selector);
-		socketHolder = new SocketHolder(this);
+		socketHolder = new ConnectionHolder(this);
 	}
 
 	/**

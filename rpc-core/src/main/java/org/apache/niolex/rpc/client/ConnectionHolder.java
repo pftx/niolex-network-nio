@@ -1,5 +1,5 @@
 /**
- * SocketHolder.java
+ * ConnectionHolder.java
  *
  * Copyright 2012 Niolex, Inc.
  *
@@ -29,18 +29,18 @@ import java.util.concurrent.TimeUnit;
  * @version 1.0.0
  * @since 2012-8-19
  */
-public class SocketHolder {
+public class ConnectionHolder {
 
 	private final LinkedBlockingQueue<ClientCore> readyQueue = new LinkedBlockingQueue<ClientCore>();
 	private NioClient nioClient;
 	private CountDownLatch latch;
 
 	/**
-	 * Create a SocketHolder with this nioClient.
+	 * Create a ConnectionHolder with this nioClient.
 	 * The only Constructor
 	 * @param nioClient
 	 */
-	public SocketHolder(NioClient nioClient) {
+	public ConnectionHolder(NioClient nioClient) {
 		super();
 		this.nioClient = nioClient;
 	}

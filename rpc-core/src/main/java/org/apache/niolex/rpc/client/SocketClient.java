@@ -34,7 +34,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * The blocking implementation of IClient. This client can only be used in one
- * thread. If you want to reuse client in multithreading, use #NioClient
+ * thread. If you want to reuse client in multithreading, use
+ * {@link NioClient}
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
@@ -86,6 +87,16 @@ public class SocketClient implements IClient {
 	public SocketClient(InetSocketAddress serverAddress) {
 		super();
 		this.serverAddress = serverAddress;
+	}
+
+	/**
+	 * Create a SocketClient with this Server Address
+	 * @param host the server host name
+	 * @param port the server port
+	 */
+	public SocketClient(String host, int port) {
+	    super();
+	    this.serverAddress = new InetSocketAddress(host, port);
 	}
 
 	/**
@@ -142,7 +153,7 @@ public class SocketClient implements IClient {
 		Packet readPacket = new Packet();
 		while (true) {
 			readPacket.readObject(inS);
-			LOG.debug("Packet received. desc {}, size {}.", readPacket.descriptor(), readPacket.getLength());
+			LOG.debug("Packet received. desc {}, length {}.", readPacket.descriptor(), readPacket.getLength());
 			if (readPacket.getCode() == Config.CODE_HEART_BEAT) {
             	// Let's ignore the heart beat packet here.
             	continue;
@@ -171,7 +182,8 @@ public class SocketClient implements IClient {
 
 	/**
 	 * Set the server Internet address this client want to connect
-	 * This method must be called before connect()
+	 * This method must be called before connect(), or the client
+	 * will still connect to the old address.
 	 *
 	 * @param serverAddress
 	 */
@@ -181,10 +193,18 @@ public class SocketClient implements IClient {
 
 	/**
 	 * Get the current Internet address
-	 * @return
+	 * @return the current Internet address
 	 */
 	public InetSocketAddress getServerAddress() {
 		return serverAddress;
+	}
+
+	/**
+	 * Override super method
+	 * @see org.apache.niolex.network.IClient#setConnectTimeout(int)
+	 */
+	public void setConnectTimeout(int connectTimeout) {
+	    this.connectTimeout = connectTimeout;
 	}
 
 	/**
@@ -194,14 +214,6 @@ public class SocketClient implements IClient {
 	 */
 	public int getConnectTimeout() {
 		return connectTimeout;
-	}
-
-	/**
-	 * Override super method
-	 * @see org.apache.niolex.network.IClient#setConnectTimeout(int)
-	 */
-	public void setConnectTimeout(int connectTimeout) {
-		this.connectTimeout = connectTimeout;
 	}
 
 	/**

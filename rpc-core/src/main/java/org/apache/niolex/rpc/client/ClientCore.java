@@ -76,7 +76,7 @@ public class ClientCore {
     /**
      * The socket container hold all the sockets, including this one.
      */
-    private final SocketHolder socketHolder;
+    private final ConnectionHolder socketHolder;
 
     /**
      * The socket selection key of this channel.
@@ -101,7 +101,7 @@ public class ClientCore {
      * @param socketHolder
      * @throws IOException
      */
-    public ClientCore(SelectorHolder selector, SocketChannel client, SocketHolder socketHolder) throws IOException {
+    public ClientCore(SelectorHolder selector, SocketChannel client, ConnectionHolder socketHolder) throws IOException {
 		super();
 		this.selectorHolder = selector;
 		this.socketChannel = client;
