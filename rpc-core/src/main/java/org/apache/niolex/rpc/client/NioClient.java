@@ -98,9 +98,9 @@ public class NioClient implements IClient, Runnable {
 	private SelectorHolder selectorHolder;
 
 	/**
-	 * The socket container hold all the sockets.
+	 * The NIO socket channel container hold all the socket channels.
 	 */
-	private final NioConnManager socketHolder;
+	private final NioConnManager connManager;
 
 	/**
 	 * The configured server address array.
@@ -113,7 +113,11 @@ public class NioClient implements IClient, Runnable {
 	private int addressIdx = 0;
 
 	/**
-	 * Constructor
+	 * The only Constructor, create an empty instance.
+	 * <p>
+	 * Please call {@link #setServerAddress(String)} and then
+	 * call {@link #connect()} to make this instance ready.
+	 * <p>
 	 * @throws IOException
 	 */
 	public NioClient() throws IOException {
@@ -121,12 +125,13 @@ public class NioClient implements IClient, Runnable {
 		this.selector = Selector.open();
 		this.thread = new Thread(this);
 		selectorHolder = new SelectorHolder(thread, selector);
-		socketHolder = new NioConnManager(this);
+		connManager = new NioConnManager(this);
 	}
 
 	/**
-	 * Run the selector.
+	 * Run the selector, the main method.
 	 * This is the override of super method.
+	 *
 	 * @see java.lang.Runnable#run()
 	 */
 	@Override
@@ -145,7 +150,7 @@ public class NioClient implements IClient, Runnable {
 	            addClientChannels();
 	        }
 		} catch (Exception e) {
-            LOG.error("Error occured while nio client is listening. The client will now shutdown.", e);
+            LOG.error("Error occured while nio client is running. The client will now shutdown.", e);
             stop();
 		}
 	}
@@ -171,7 +176,7 @@ public class NioClient implements IClient, Runnable {
         	if (e instanceof CancelledKeyException || e instanceof ClosedChannelException) {
         		return;
         	}
-            LOG.info("Failed to handle socket: {}", e.toString());
+            LOG.info("Failed to handle socket event: {}", e.toString());
         }
     }
 
@@ -182,16 +187,16 @@ public class NioClient implements IClient, Runnable {
 	@Override
 	public void connect() throws IOException {
 		this.isWorking = true;
+		connManager.needReady(connectionNumber / 2 + 1);
 		addClientChannels();
-		socketHolder.needReady(connectionNumber / 2 + 1);
 		thread.start();
 		try {
-			socketHolder.waitReady();
+			connManager.waitReady();
 		} catch (InterruptedException e) {}
 	}
 
 	/**
-	 * Add more client channels if not full.
+	 * Add more client channels if the manager is not full.
 	 */
 	public void addClientChannels() {
 		while (validCnt.get() < connectionNumber) {
@@ -216,7 +221,7 @@ public class NioClient implements IClient, Runnable {
 			ch.socket().setTcpNoDelay(true);
 			ch.socket().setSoLinger(false, 0);
 			ch.connect(remote);
-			new NioConnCore(selectorHolder, ch, socketHolder);
+			new NioConnCore(selectorHolder, ch, connManager);
 		} catch (IOException e) {
 			validCnt.decrementAndGet();
 			LOG.error("Failed to create channel to address: {}", remote, e);
@@ -229,7 +234,7 @@ public class NioClient implements IClient, Runnable {
 	 */
 	public void closeChannel(NioConnCore clientCore) {
 		validCnt.decrementAndGet();
-		Exception ex = new RpcException("Client closed.", RpcException.Type.CONNECTION_LOST, null);
+		Exception ex = new RpcException("Connection closed.", RpcException.Type.CONNECTION_LOST, null);
 		blocker.release(clientCore, ex);
 	}
 
@@ -241,7 +246,7 @@ public class NioClient implements IClient, Runnable {
 	 */
 	public WaitOn<Packet> asyncInvoke(Packet sc) {
 		sc.setSerial((short) 1);
-		NioConnCore cli = socketHolder.take(connectTimeout);
+		NioConnCore cli = connManager.take(connectTimeout);
 		if (cli != null) {
 			WaitOn<Packet> on = blocker.initWait(cli);
 			cli.prepareWrite(sc);
@@ -260,6 +265,8 @@ public class NioClient implements IClient, Runnable {
 		WaitOn<Packet> on = asyncInvoke(sc);
 		try {
 			return on.waitForResult(rpcHandleTimeout);
+		} catch (RpcException e) {
+		    throw e;
 		} catch (Exception e) {
 			if (e instanceof InterruptedException) {
 				throw new RpcException("Rpc timeout.", RpcException.Type.TIMEOUT, e);

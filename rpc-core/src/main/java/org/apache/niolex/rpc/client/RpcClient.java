@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.niolex.commons.reflect.MethodUtil;
+import org.apache.niolex.commons.util.SystemUtil;
 import org.apache.niolex.network.Config;
 import org.apache.niolex.network.IClient;
 import org.apache.niolex.network.Packet;
@@ -147,14 +148,11 @@ public class RpcClient implements InvocationHandler {
 	 * Check the client status before doing remote call.
 	 */
 	private void checkStatus() {
-		RpcException rep = null;
 		switch (connStatus) {
 			case INNITIAL:
-				rep = new RpcException("Client not connected.", RpcException.Type.NOT_CONNECTED, null);
-				throw rep;
+			    throw new RpcException("Client not connected.", RpcException.Type.NOT_CONNECTED, null);
 			case CLOSED:
-				rep = new RpcException("Client closed.", RpcException.Type.CONNECTION_CLOSED, null);
-				throw rep;
+			    throw new RpcException("Client closed.", RpcException.Type.CONNECTION_CLOSED, null);
 		}
 	}
 
@@ -165,7 +163,6 @@ public class RpcClient implements InvocationHandler {
 	@Override
 	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 		checkStatus();
-		RpcException rep = null;
 		Short rei = executeMap.get(method);
 		if (rei != null) {
 			// 1. Prepare parameters
@@ -176,19 +173,18 @@ public class RpcClient implements InvocationHandler {
 				arr = clientProtocol.serializeParams(args);
 			}
 			// 2. Create Packet
-			Packet rc = new Packet(rei, arr);
+			Packet sendPk = new Packet(rei, arr);
 
-			// 3. Invoke client and wait for result.
-			Packet sc = null;
+			// 3. Invoke client and wait for result. Client will serialize the packet.
+			Packet recvPk = null;
 			try {
-				sc = client.sendAndReceive(rc);
+				recvPk = client.sendAndReceive(sendPk);
 			} catch (Exception e) {
 				if (e instanceof RpcException) {
 					throw (RpcException)e;
 				}
 				if (e instanceof SocketTimeoutException) {
-					rep = new RpcException("Timeout for this remote procedure call.", RpcException.Type.TIMEOUT, e);
-					throw rep;
+				    throw new RpcException("Timeout for this remote procedure call.", RpcException.Type.TIMEOUT, e);
 				} else if (e instanceof IOException) {
 					handleConnectionLose();
 					throw new RpcException("Failed to write packet to socket or read from socket.",
@@ -199,22 +195,20 @@ public class RpcClient implements InvocationHandler {
 			}
 
 			// 4. Process result.
-			if (sc == null) {
+			if (recvPk == null) {
 				checkStatus();
 				return null;
 			} else {
-				boolean isException = sc.getSerial() < 0;
-				Object ret = prepareReturn(sc.getData(), method.getGenericReturnType(), isException);
+				boolean isException = recvPk.getSerial() < 0;
+				Object ret = prepareReturn(recvPk.getData(), method.getGenericReturnType(), isException);
 				if (isException) {
-					rep = (RpcException) ret;
-					throw rep;
+				    throw (RpcException) ret;
 				}
 				return ret;
 			}
 		} else {
-			rep = new RpcException("The method you want to invoke is not a remote procedure call.",
+		    throw new RpcException("The method you want to invoke is not a remote procedure call.",
 					RpcException.Type.METHOD_NOT_FOUND, null);
-			throw rep;
 		}
 	}
 
@@ -235,17 +229,33 @@ public class RpcClient implements InvocationHandler {
 		}
 	}
 
+    /**
+     * De-serialize returned byte array into objects.
+     * @param ret
+     * @param type
+     * @param isException false for returned objects, true for RpcException.
+     * @return the result
+     * @throws Exception
+     */
+    protected Object prepareReturn(byte[] ret, Type type, boolean isException) throws Exception {
+        if (isException) {
+            type = RpcException.class;
+        } else if (type == null || type.toString().equalsIgnoreCase("void")) {
+            return null;
+        }
+        if (ret == null || ret.length == 0) {
+            return null;
+        }
+        return clientProtocol.prepareReturn(ret, type);
+    }
+
 	/**
 	 * Try to re-connect to server, iterate connectRetryTimes
 	 * @return true if connected to server.
 	 */
 	private boolean retryConnect() {
 		for (int i = 0; i < connectRetryTimes; ++i) {
-			try {
-				Thread.sleep(sleepBetweenRetryTime);
-			} catch (InterruptedException e1) {
-				// It's OK.
-			}
+		    SystemUtil.sleep(sleepBetweenRetryTime);
 			LOG.info("RPC Client try to reconnect to server round {} ...", i);
 			try {
 				client.connect();
@@ -261,7 +271,7 @@ public class RpcClient implements InvocationHandler {
 
 	/**
 	 * Get Connection Status of this client.
-	 * @return
+	 * @return the status
 	 */
 	public Status getConnStatus() {
 		return connStatus;
@@ -292,7 +302,7 @@ public class RpcClient implements InvocationHandler {
 	}
 
 	/**
-	 * Set the Rpc Configs, this method will parse all the configurations and generate execute map.
+	 * Set the Rpc Configurations, this method will parse all the configurations and generate execute map.
 	 * @param interfs
 	 */
 	public void addInferface(Class<?> interfs) {
@@ -300,32 +310,9 @@ public class RpcClient implements InvocationHandler {
 		for (Method m : arr) {
 			if (m.isAnnotationPresent(RpcMethod.class)) {
 				RpcMethod rp = m.getAnnotation(RpcMethod.class);
-				Short rei = executeMap.put(m, rp.value());
-				if (rei != null) {
-					LOG.warn("Duplicate configuration for code: {}", rp.value());
-				}
+				executeMap.put(m, rp.value());
 			}
-		} // End of arr
-	}
-
-	/**
-	 * De-serialize returned byte array into objects.
-	 * @param ret
-	 * @param type
-	 * @param exp false for returned objects, true for RpcException.
-	 * @return
-	 * @throws Exception
-	 */
-	protected Object prepareReturn(byte[] ret, Type type, boolean isException) throws Exception {
-		if (isException) {
-			type = RpcException.class;
-		} else if (type == null || type.toString().equalsIgnoreCase("void")) {
-			return null;
 		}
-		if (ret == null || ret.length == 0) {
-			return null;
-		}
-		return clientProtocol.prepareReturn(ret, type);
 	}
 
 	/**

@@ -31,7 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This is the Client core of client packet processing component.
+ * This is the Client side nio connection core of client packet processing component.
  * This is definitely the core of the whole non blocking network client.
  * This class handle network problem and reading, writing.
  * After data is ready, encapsulate it into Packet.
@@ -76,7 +76,7 @@ public class NioConnCore {
     /**
      * The socket container hold all the sockets, including this one.
      */
-    private final NioConnManager socketHolder;
+    private final NioConnManager connManager;
 
     /**
      * The socket selection key of this channel.
@@ -98,14 +98,14 @@ public class NioConnCore {
      *
      * @param selector
      * @param client
-     * @param socketHolder
+     * @param connManager
      * @throws IOException
      */
-    public NioConnCore(SelectorHolder selector, SocketChannel client, NioConnManager socketHolder) throws IOException {
+    public NioConnCore(SelectorHolder selector, SocketChannel client, NioConnManager connManager) throws IOException {
 		super();
 		this.selectorHolder = selector;
 		this.socketChannel = client;
-		this.socketHolder = socketHolder;
+		this.connManager = connManager;
 		this.selectionKey = client.register(selector.getSelector(), SelectionKey.OP_CONNECT, this);
     }
 
@@ -117,7 +117,7 @@ public class NioConnCore {
     	try {
 	    	socketChannel.finishConnect();
 	    	selectionKey.interestOps(0);
-	    	socketHolder.ready(this);
+	    	connManager.ready(this);
     	} catch (Exception e) {
     		handleClose();
     		return;
@@ -147,7 +147,7 @@ public class NioConnCore {
     		byteBuffer = ByteBuffer.allocate(8);
     		PacketUtil.putHeader(packet, byteBuffer);
     	}
-    	// Make buffer ready for read.
+    	// Make buffer ready for write.
     	byteBuffer.flip();
     	selectorHolder.changeInterestOps(selectionKey, SelectionKey.OP_WRITE);
     }
@@ -157,8 +157,8 @@ public class NioConnCore {
      * Send packets to server.
      *
      * Status change summary:
-     * HEADER -> Sending a packet, header now
-     * BODY -> Sending a packet body
+     * SEND_HEADER -> Sending a packet, header now
+     * SEND_BODY -> Sending a packet body
      *
      */
     public void handleWrite() {
@@ -187,6 +187,7 @@ public class NioConnCore {
      */
     public void writeFinished() {
     	// Send OK, try read.
+        LOG.debug("Packet sent. desc {}, length {}.", packet.descriptor(), packet.getLength());
     	status = Status.RECEVE_HEADER;
     	byteBuffer = ByteBuffer.allocate(8);
     	selectionKey.interestOps(SelectionKey.OP_READ);
@@ -196,8 +197,8 @@ public class NioConnCore {
      * handle read request. called by NIO selector.
      *
      * Read status change summary:
-     * HEADER -> Need read header, means nothing is read by now
-     * BODY -> Header is read, need to read body now
+     * RECEVE_HEADER -> Need read header, means nothing is read by now
+     * RECEVE_BODY -> Header is read, need to read body now
      *
      *@return true if read finished.
      */
@@ -234,7 +235,7 @@ public class NioConnCore {
      * @param blocker use this to release the result.
      */
     public void readFinished(Blocker<Packet> blocker) {
-    	LOG.debug("Packet received. desc {}, size {}.", packet.descriptor(), packet.getLength());
+    	LOG.debug("Packet received. desc {}, length {}.", packet.descriptor(), packet.getLength());
     	if (packet.getCode() == Config.CODE_HEART_BEAT) {
             // Let's ignore the heart beat packet here.
     	    return;
@@ -243,7 +244,7 @@ public class NioConnCore {
     	blocker.release(this, packet);
     	// Return this resource to the pool.
     	selectionKey.interestOps(0);
-    	socketHolder.ready(this);
+    	connManager.ready(this);
     }
 
     /**
@@ -272,13 +273,12 @@ public class NioConnCore {
             socketChannel.close();
             // Write LOG.
             StringBuilder sb = new StringBuilder();
-            sb.append("Client disconnected from Remote [").append(remoteName);
-            sb.append("].");
+            sb.append("Client disconnected from Remote [").append(remoteName).append("].");
             LOG.info(sb.toString());
         } catch (IOException e) {
-            LOG.info("Failed to close client socket: {}", e.getMessage());
+            LOG.info("Failed to close client connection: {}", e.getMessage());
         } finally {
-        	socketHolder.close(this);
+        	connManager.close(this);
         }
     }
 }
