@@ -43,12 +43,12 @@ public class SelectorHolder {
 	/**
 	 * This thread is the thread running the selector.
 	 */
-	private Thread thread;
+	private final Thread thread;
 
 	/**
 	 * This is the selector being held.
 	 */
-	private Selector selector;
+	private final Selector selector;
 
 
 	/**
@@ -90,7 +90,7 @@ public class SelectorHolder {
 	}
 
 	/**
-	 * Server use this method of change all the interest operations.
+	 * Server use this method to change all the interest operations.
 	 */
 	public void changeAllInterestOps() {
 		isAwake.set(false);

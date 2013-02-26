@@ -58,12 +58,12 @@ public class Invocation implements Runnable {
 	 */
 	@Override
 	public void run() {
-		Packet pc = rpcCore.readFinished();
-		pc = invoker.process(pc);
-		if (pc == null) {
-			prepareError("Rpc Invoker returned null.", pc);
+		Packet pam = rpcCore.readFinished();
+		Packet res = invoker.process(pam);
+		if (res == null) {
+			prepareError("Rpc Invoker returned null.", pam);
 		} else {
-			rpcCore.prepareWrite(pc);
+			rpcCore.prepareWrite(res);
 		}
 	}
 

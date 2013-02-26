@@ -26,6 +26,7 @@ import java.net.SocketTimeoutException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.niolex.commons.codec.StringUtil;
 import org.apache.niolex.commons.reflect.MethodUtil;
 import org.apache.niolex.commons.util.SystemUtil;
 import org.apache.niolex.network.Config;
@@ -199,6 +200,10 @@ public class RpcClient implements InvocationHandler {
 				checkStatus();
 				return null;
 			} else {
+			    if (recvPk.getCode() == Config.CODE_RPC_ERROR) {
+			        throw new RpcException(StringUtil.utf8ByteToStr(recvPk.getData()),
+			                RpcException.Type.ERROR_SERVER, null);
+			    }
 				boolean isException = recvPk.getSerial() < 0;
 				Object ret = prepareReturn(recvPk.getData(), method.getGenericReturnType(), isException);
 				if (isException) {

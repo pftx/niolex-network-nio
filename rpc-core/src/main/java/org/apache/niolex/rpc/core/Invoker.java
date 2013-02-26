@@ -21,7 +21,7 @@ import org.apache.niolex.network.Packet;
 
 
 /**
- * The Packet Handler Interface.
+ * The Packet Invoker Interface.
  * @author Xie, Jiyun
  *
  */
