@@ -19,7 +19,7 @@ package org.apache.niolex.rpc.demo;
 
 import java.io.IOException;
 
-import org.apache.niolex.rpc.RpcConfig;
+import org.apache.niolex.rpc.core.CoreTest;
 import org.apache.niolex.rpc.protocol.JsonProtocol;
 import org.apache.niolex.rpc.server.MultiNioServer;
 import org.apache.niolex.rpc.server.RpcInvoker;
@@ -32,32 +32,29 @@ import org.apache.niolex.rpc.server.RpcInvoker;
  */
 public class JsonRpcServer {
 
-    private static MultiNioServer s = new MultiNioServer();
+    private static MultiNioServer multiSvr = new MultiNioServer();
+    public static boolean isServerStarted;
 
     /**
      * The Server Demo
      * @param args
      */
     public static void main(String[] args) throws IOException {
-        s.setPort(8808);
-        RpcInvoker handler = new RpcInvoker(new JsonProtocol());
-        s.setInvoker(handler);
         if (args != null && args.length != 0) {
-        	s.setSelectorsNumber(Integer.parseInt(args[0]));
-        	s.setInvokersNumber(Integer.parseInt(args[1]));
+            multiSvr.setSelectorsNumber(Integer.parseInt(args[0]));
+            multiSvr.setInvokersNumber(Integer.parseInt(args[1]));
         }
+        multiSvr.setPort(CoreTest.PORT);
+        RpcInvoker invoker = new RpcInvoker(new JsonProtocol());
+        multiSvr.setInvoker(invoker);
+        invoker.exportObject(new RpcServiceImpl());
 
-        RpcConfig[] confs = new RpcConfig[1];
-        RpcConfig c = new RpcConfig();
-        c.setInterface(RpcService.class);
-        c.setTarget(new RpcServiceImpl());
-        confs[0] = c;
-		handler.setRpcConfigs(confs);
-
-        s.start();
+        multiSvr.start();
+        isServerStarted = true;
     }
 
     public static void stop() {
-        s.stop();
+        multiSvr.stop();
+        isServerStarted = false;
     }
 }

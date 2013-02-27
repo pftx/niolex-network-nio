@@ -20,6 +20,7 @@ package org.apache.niolex.rpc.core;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 
+import org.apache.niolex.rpc.client.SocketClient;
 import org.apache.niolex.rpc.demo.JsonRpcServer;
 import org.junit.Test;
 
@@ -29,14 +30,16 @@ import org.junit.Test;
  */
 public class CoreTest {
 
-    public static final int PORT = 8808;
+    public static final int PORT = 9909;
     public static boolean isOk;
     public static final InetSocketAddress SERVER_ADDRESS = new InetSocketAddress("localhost", PORT);
     public static final String SERVER_ADDRESS_STR = "localhost:" + PORT;
 
     static {
         try {
-            JsonRpcServer.main(null);
+            if (!tryConnect()) {
+                JsonRpcServer.main(null);
+            }
             isOk = true;
         } catch (IOException e) {
             isOk = false;
@@ -46,6 +49,19 @@ public class CoreTest {
 
     public static final void startSvc() {
         // Do nothing here.
+    }
+
+    /**
+     * @return
+     */
+    private static boolean tryConnect() {
+        SocketClient c = new SocketClient(CoreTest.SERVER_ADDRESS);
+        try {
+            c.connect();
+            c.stop();
+            return true;
+        } catch (Exception e) { }
+        return false;
     }
 
     public static final void stop() {

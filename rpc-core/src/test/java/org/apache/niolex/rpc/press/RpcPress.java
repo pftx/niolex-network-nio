@@ -107,7 +107,7 @@ public class RpcPress {
 	}
 
 	public static RpcClient create() throws IOException {
-		SocketClient c = new SocketClient(new InetSocketAddress(ADDR, 8808));
+		SocketClient c = new SocketClient(new InetSocketAddress(ADDR, 9909));
 		RpcClient client = new RpcClient(c, new JsonProtocol());
 		client.connect();
 		return client;

@@ -17,13 +17,10 @@
  */
 package org.apache.niolex.rpc.protocol;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.lang.reflect.Type;
 
 import org.apache.niolex.commons.compress.JacksonUtil;
-import org.apache.niolex.network.Config;
-import org.codehaus.jackson.map.type.TypeFactory;
 
 /**
  * The Json Rpc Protocol. We implement both side protocol just in one class.
@@ -51,12 +48,9 @@ public class JsonProtocol implements IClientProtocol, IServerProtocol {
 	 * This is the override of super method.
 	 * @see org.apache.niolex.rpc.protocol.IClientProtocol#prepareReturn(byte[], java.lang.reflect.Type)
 	 */
-	@SuppressWarnings("deprecation")
 	@Override
 	public Object prepareReturn(byte[] ret, Type type) throws Exception {
-		ByteArrayInputStream in = new ByteArrayInputStream(ret);
-		Object r = JacksonUtil.readObj(in, TypeFactory.type(type));
-		return r;
+		return JacksonUtil.bin2Obj(ret, new JsonUtil.TypeRe<Object>(type));
 	}
 
 	/**
@@ -74,7 +68,7 @@ public class JsonProtocol implements IClientProtocol, IServerProtocol {
 	 */
 	@Override
 	public byte[] serializeReturn(Object ret) throws Exception {
-		return JacksonUtil.obj2Str(ret).getBytes(Config.SERVER_ENCODING);
+		return JacksonUtil.obj2bin(ret);
 	}
 
 }

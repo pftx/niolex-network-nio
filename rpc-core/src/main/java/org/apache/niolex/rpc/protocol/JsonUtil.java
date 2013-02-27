@@ -41,7 +41,7 @@ public abstract class JsonUtil {
 	 * @version 1.0.0
 	 * @since 2012-7-24
 	 */
-	private static class TypeRe<T> extends TypeReference<T> {
+    public static class TypeRe<T> extends TypeReference<T> {
 		private Type type;
 
 		public TypeRe(Type type) {

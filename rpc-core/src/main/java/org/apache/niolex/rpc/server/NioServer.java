@@ -206,7 +206,7 @@ public class NioServer implements IServer {
         	if (e instanceof CancelledKeyException || e instanceof ClosedChannelException) {
         		return;
         	}
-            LOG.info("Failed to handle socket: {}", e.toString());
+            LOG.info("Failed to handle socket event: {}", e.toString());
         }
     }
 

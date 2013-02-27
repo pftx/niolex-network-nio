@@ -17,13 +17,13 @@
  */
 package org.apache.niolex.rpc.demo;
 
-import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.niolex.commons.test.Benchmark;
 import org.apache.niolex.rpc.client.RpcClient;
 import org.apache.niolex.rpc.client.SocketClient;
+import org.apache.niolex.rpc.core.CoreTest;
 import org.apache.niolex.rpc.protocol.JsonProtocol;
 import org.junit.Assert;
 
@@ -40,10 +40,7 @@ public class JsonRpcClient {
 	 * @param args
 	 */
 	public static void main(String[] args) throws Exception {
-		SocketClient c = new SocketClient(new InetSocketAddress("localhost", 8808));
-//		NioClient c = new NioClient();
-//		c.setConnectionNumber(10);
-//		c.setServerAddress("localhost:8808");
+	    SocketClient c = new SocketClient(CoreTest.SERVER_ADDRESS);
 		RpcClient client = new RpcClient(c);
 		client.setClientProtocol(new JsonProtocol());
 		client.connect();

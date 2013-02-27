@@ -56,7 +56,7 @@ public class ProtobufProtocol implements IClientProtocol, IServerProtocol {
 			return RpcUtil.serializeRpcException((RpcException) ret);
 		} else {
 			throw new RpcException("Message is not protobuf type: " + ret.getClass(),
-					RpcException.Type.ERROR_PARSE_PARAMS, null);
+					RpcException.Type.ERROR_SER_RETURN, null);
 		}
 	}
 

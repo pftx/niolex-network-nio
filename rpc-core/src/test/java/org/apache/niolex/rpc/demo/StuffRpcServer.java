@@ -19,7 +19,6 @@ package org.apache.niolex.rpc.demo;
 
 import java.io.IOException;
 
-import org.apache.niolex.rpc.RpcConfig;
 import org.apache.niolex.rpc.protocol.StuffProtocol;
 import org.apache.niolex.rpc.server.MultiNioServer;
 import org.apache.niolex.rpc.server.RpcInvoker;
@@ -37,20 +36,14 @@ public class StuffRpcServer {
      * @param args
      */
     public static void main(String[] args) throws IOException {
+        if (args != null && args.length != 0) {
+            s.setSelectorsNumber(Integer.parseInt(args[0]));
+            s.setInvokersNumber(Integer.parseInt(args[1]));
+        }
         s.setPort(8808);
         RpcInvoker handler = new RpcInvoker(new StuffProtocol());
         s.setInvoker(handler);
-        if (args != null && args.length != 0) {
-        	s.setSelectorsNumber(Integer.parseInt(args[0]));
-        	s.setInvokersNumber(Integer.parseInt(args[1]));
-        }
-
-        RpcConfig[] confs = new RpcConfig[1];
-        RpcConfig c = new RpcConfig();
-        c.setInterface(RpcService.class);
-        c.setTarget(new RpcServiceImpl());
-        confs[0] = c;
-		handler.setRpcConfigs(confs);
+		handler.exportObject(new RpcServiceImpl());
 
         s.start();
     }

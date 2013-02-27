@@ -78,8 +78,7 @@ public class RpcInvoker implements Invoker {
 		RpcExecuteItem ei = executeMap.get(sc.getCode());
 		RpcException rep = null;
 		if (ei != null) {
-			RpcExecute re = new RpcExecute(ei.getTarget(), ei.getMethod(), sc);
-			return re.execute();
+			return execute(ei.getTarget(), ei.getMethod(), sc);
 		} else {
 			rep = new RpcException("The method you want to invoke doesn't exist.",
 					RpcException.Type.METHOD_NOT_FOUND, null);
@@ -88,51 +87,30 @@ public class RpcInvoker implements Invoker {
 	}
 
 	/**
-	 * Internal usage, Run the detailed Rpc execution.
-	 *
-	 * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
-	 * @version 1.0.0
-	 * @since 2012-6-1
+	 * Do the method execution.
+	 * @return the result
 	 */
-	private class RpcExecute {
-		private Object host;
-		private Method method;
-		private Packet sc;
-
-		public RpcExecute(Object host, Method method, Packet sc) {
-			super();
-			this.host = host;
-			this.method = method;
-			this.sc = sc;
-		}
-
-		/**
-		 * Do the method execution.
-		 * @return
-		 */
-		private Packet execute() {
-			RpcException rep = null;
-			Object[] args = null;
-			try {
-				Type[] generic = method.getGenericParameterTypes();
-				if (generic != null && generic.length > 0) {
-					args = serverProtocol.prepareParams(sc.getData(), generic);
-				}
-			} catch (Exception e1) {
-				rep = new RpcException("Error occured when prepare params.",
-						RpcException.Type.ERROR_PARSE_PARAMS, e1);
-				return handleReturn(sc, rep, 1);
+	private Packet execute(Object host, Method method, Packet sc) {
+		RpcException rep = null;
+		Object[] args = null;
+		try {
+			Type[] generic = method.getGenericParameterTypes();
+			if (generic != null && generic.length > 0) {
+				args = serverProtocol.prepareParams(sc.getData(), generic);
 			}
-			try {
-				Object ret = method.invoke(host, args);
-				return handleReturn(sc, ret, 0);
-			} catch (Exception e1) {
-				rep = new RpcException("Error occured when invoke method.",
-						RpcException.Type.ERROR_INVOKE, e1);
-				return handleReturn(sc, rep, 1);
-			}
+		} catch (Exception e1) {
+			rep = new RpcException("Error occured when prepare params.",
+					RpcException.Type.ERROR_PARSE_PARAMS, e1);
+			return handleReturn(sc, rep, 1);
 		}
-
+		try {
+			Object ret = method.invoke(host, args);
+			return handleReturn(sc, ret, 0);
+		} catch (Exception e1) {
+			rep = new RpcException("Error occured when invoke method.",
+					RpcException.Type.ERROR_INVOKE, e1);
+			return handleReturn(sc, rep, 1);
+		}
 	}
 
 	/**
@@ -170,20 +148,46 @@ public class RpcInvoker implements Invoker {
 	 */
 	public void setRpcConfigs(RpcConfig[] confs) {
 		for (RpcConfig conf : confs) {
-			Method[] arr = MethodUtil.getMethods(conf.getInterface());
-			for (Method m : arr) {
-				if (m.isAnnotationPresent(RpcMethod.class)) {
-					RpcMethod rp = m.getAnnotation(RpcMethod.class);
-					RpcExecuteItem rei = new RpcExecuteItem();
-					rei.setMethod(m);
-					rei.setTarget(conf.getTarget());
-					rei = executeMap.put(rp.value(), rei);
-					if (rei != null) {
-						LOG.warn("Duplicate configuration for code: {}", rp.value());
-					}
-				}
-			} // End of arr
-		} // End of confs
+		    setRpcConfig(conf);
+		}
+	}
+
+	/**
+	 * Set one rpc config. This method can be called multi-times. System will collect all the configurations.
+	 * @param conf
+	 */
+	public void setRpcConfig(RpcConfig conf) {
+	    addRpcConfig(conf.getInterface(), conf.getTarget());
+	}
+
+	/**
+     * Add one rpc config. This method can be called multi-times. System will collect all the configurations.
+	 *
+	 * @param interfaces
+	 * @param target
+	 */
+	public void addRpcConfig(Class<?> interfaces, Object target) {
+	    Method[] arr = MethodUtil.getMethods(interfaces);
+        for (Method m : arr) {
+            if (m.isAnnotationPresent(RpcMethod.class)) {
+                RpcMethod rp = m.getAnnotation(RpcMethod.class);
+                RpcExecuteItem rei = new RpcExecuteItem();
+                rei.setMethod(m);
+                rei.setTarget(target);
+                rei = executeMap.put(rp.value(), rei);
+                if (rei != null) {
+                    LOG.warn("Duplicate configuration for code: {}", rp.value());
+                }
+            }
+        }
+	}
+
+	/**
+	 * Export this object for remote access. The first interface will be used to export Rpc config.
+	 * @param exportObj
+	 */
+	public void exportObject(Object exportObj) {
+	    addRpcConfig(exportObj.getClass().getInterfaces()[0], exportObj);
 	}
 
 	/**
