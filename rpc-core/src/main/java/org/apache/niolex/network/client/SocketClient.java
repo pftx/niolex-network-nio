@@ -29,7 +29,6 @@ import org.apache.niolex.commons.stream.StreamUtil;
 import org.apache.niolex.commons.util.SystemUtil;
 import org.apache.niolex.network.Config;
 import org.apache.niolex.network.Packet;
-import org.apache.niolex.rpc.client.NioClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

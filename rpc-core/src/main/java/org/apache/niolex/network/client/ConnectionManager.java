@@ -21,8 +21,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.niolex.rpc.client.NioClient;
-
 /**
  * Hold all the ready connections. Every connection is represented as
  * a client core instance.
