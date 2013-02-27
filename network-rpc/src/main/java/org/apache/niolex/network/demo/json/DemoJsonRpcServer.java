@@ -49,11 +49,7 @@ public class DemoJsonRpcServer {
         }
         handler.setConverter(new JsonConverter());
         s.setPacketHandler(handler);
-
-        ConfigItem c = new ConfigItem();
-        c.setInterface(RpcService.class);
-        c.setTarget(new RpcServiceImpl());
-		handler.addRpcConfig(c);
+		handler.addRpcConfig(new ConfigItem(RpcService.class, new RpcServiceImpl()));
 
         s.start();
     }
