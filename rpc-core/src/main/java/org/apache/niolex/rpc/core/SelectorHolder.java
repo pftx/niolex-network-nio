@@ -63,7 +63,7 @@ public class SelectorHolder {
 	}
 
 	/**
-	 * #RpcCore & #NioConnCore use this method to register the wish to change interest operations.
+	 * #RpcCore & #ConnectionCore use this method to register the wish to change interest operations.
 	 * This method will decide make the change now or wait for the next wakeup.
 	 *
 	 * @param selectionKey

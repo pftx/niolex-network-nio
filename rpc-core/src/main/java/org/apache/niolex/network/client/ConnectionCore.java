@@ -1,5 +1,5 @@
 /**
- * NioConnCore.java
+ * ConnectionCore.java
  *
  * Copyright 2012 Niolex, Inc.
  *
@@ -40,8 +40,8 @@ import org.slf4j.LoggerFactory;
  * @version 1.0.0
  * @since 2012-8-17
  */
-public class NioConnCore {
-	private static final Logger LOG = LoggerFactory.getLogger(NioConnCore.class);
+public class ConnectionCore {
+	private static final Logger LOG = LoggerFactory.getLogger(ConnectionCore.class);
 
 	/**
 	 * The max buffer size. for packets small than this threshold will be send at one time.
@@ -49,7 +49,7 @@ public class NioConnCore {
 	private static final int MAX_BUFFER_SIZE = Config.SERVER_NIO_BUFFER_SIZE;
 
     /**
-     * Internal used in NioConnCore. Please ignore.
+     * Internal used in ConnectionCore. Please ignore.
      * Status indicate the current running status of read and write.
      * RECEVE_HEADER -> Waiting to Read header from Remote
      * SEND_HEADER -> Waiting to Write header into Socket Channel
@@ -76,7 +76,7 @@ public class NioConnCore {
     /**
      * The socket container hold all the sockets, including this one.
      */
-    private final NioConnManager connManager;
+    private final ConnectionManager connManager;
 
     /**
      * The socket selection key of this channel.
@@ -99,14 +99,14 @@ public class NioConnCore {
     private Packet packet;
 
     /**
-     * Constructor of NioConnCore, manage a SocketChannel inside.
+     * Constructor of ConnectionCore, manage a SocketChannel inside.
      *
      * @param selector
      * @param client
      * @param connManager
      * @throws IOException
      */
-    public NioConnCore(SelectorHolder selector, SocketChannel client, NioConnManager connManager) throws IOException {
+    public ConnectionCore(SelectorHolder selector, SocketChannel client, ConnectionManager connManager) throws IOException {
 		super();
 		this.selectorHolder = selector;
 		this.socketChannel = client;
