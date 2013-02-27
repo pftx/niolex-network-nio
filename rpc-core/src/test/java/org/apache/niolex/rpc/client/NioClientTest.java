@@ -48,7 +48,7 @@ public class NioClientTest {
         NioClient cli = new NioClient();
         cli.setServerAddress(CoreTest.SERVER_ADDRESS_STR);
         cli.setConnectionNumber(10);
-        RpcClient rpc = new RpcClient(cli, new JsonProtocol());
+        RpcProxy rpc = new RpcProxy(cli, new JsonProtocol());
         rpc.connect();
         final RpcService service = rpc.getService(RpcService.class);
         MultiPerformance perf = new MultiPerformance(10, 10, 300){
@@ -73,7 +73,7 @@ public class NioClientTest {
         NioClient cli = new NioClient();
         cli.setServerAddress(CoreTest.SERVER_ADDRESS_STR);
         cli.setConnectionNumber(1);
-        RpcClient rpc = new RpcClient(cli, new JsonProtocol());
+        RpcProxy rpc = new RpcProxy(cli, new JsonProtocol());
         rpc.setConnectTimeout(100);
         rpc.connect();
         final RpcService service = rpc.getService(RpcService.class);

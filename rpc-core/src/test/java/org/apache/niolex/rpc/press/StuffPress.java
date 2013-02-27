@@ -25,8 +25,8 @@ import org.apache.niolex.commons.test.MockUtil;
 import org.apache.niolex.commons.test.StopWatch;
 import org.apache.niolex.commons.test.StopWatch.Stop;
 import org.apache.niolex.commons.util.SystemUtil;
-import org.apache.niolex.rpc.client.RpcClient;
-import org.apache.niolex.rpc.client.SocketClient;
+import org.apache.niolex.network.client.SocketClient;
+import org.apache.niolex.rpc.client.RpcProxy;
 import org.apache.niolex.rpc.demo.RpcService;
 import org.apache.niolex.rpc.demo.RpcService.IntArray;
 import org.apache.niolex.rpc.protocol.StuffProtocol;
@@ -59,7 +59,7 @@ public class StuffPress {
         }
 		// Warm server.
 		for (int i = 0; i < 10; ++i) {
-			RpcClient cli = create();
+			RpcProxy cli = create();
 			RpcService service = cli.getService(RpcService.class);
 			Stop s = stopWatch.start();
 			String ok = service.concat("Hello " + i, " world.");
@@ -73,7 +73,7 @@ public class StuffPress {
 		// Start many threads to run press test.
 		Thread[] ts = new Thread[THREAD_NUM];
 		for (int i = 0; i < THREAD_NUM; ++i) {
-			RpcClient cli = create();
+			RpcProxy cli = create();
 			Rpc r = new Rpc(cli, "Hello " + i, " world.");
 			Thread t = new Thread(r);
 			t.start();
@@ -82,7 +82,7 @@ public class StuffPress {
 		stopWatch.begin(true);
 		// Shuffle, call some function to disturb the main testing threads.
 		for (int i = 0; i < SHUFFLE_NUM; ++i) {
-			RpcClient cli = create();
+			RpcProxy cli = create();
 			RpcService service = cli.getService(RpcService.class);
 			Stop s = stopWatch.start();
 			String ok = service.concat("Hello " + i, " world.");
@@ -103,25 +103,25 @@ public class StuffPress {
 		System.out.println("Done..... error = " + ERROR_CNT.cnt());
 	}
 
-	public static RpcClient create() throws IOException {
+	public static RpcProxy create() throws IOException {
 		SocketClient c = new SocketClient(new InetSocketAddress(ADDR, 8808));
-		RpcClient client = new RpcClient(c, new StuffProtocol());
+		RpcProxy client = new RpcProxy(c, new StuffProtocol());
 		client.connect();
 		return client;
 	}
 
 	public static class Rpc implements Runnable {
-		RpcClient cli;
+		RpcProxy cli;
 		RpcService service;
 		String a = "hello ", b = "world!";
 
-		public Rpc(RpcClient cli) {
+		public Rpc(RpcProxy cli) {
 			super();
 			this.cli = cli;
 			this.service = cli.getService(RpcService.class);
 		}
 
-		public Rpc(RpcClient cli, String a, String b) {
+		public Rpc(RpcProxy cli, String a, String b) {
 			super();
 			this.cli = cli;
 			this.service = cli.getService(RpcService.class);

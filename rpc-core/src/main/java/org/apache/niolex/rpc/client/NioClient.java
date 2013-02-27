@@ -32,8 +32,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.niolex.commons.concurrent.Blocker;
 import org.apache.niolex.commons.concurrent.WaitOn;
 import org.apache.niolex.network.Config;
-import org.apache.niolex.network.IClient;
 import org.apache.niolex.network.Packet;
+import org.apache.niolex.network.client.BaseClient;
+import org.apache.niolex.network.client.NioConnCore;
+import org.apache.niolex.network.client.NioConnManager;
 import org.apache.niolex.rpc.RpcException;
 import org.apache.niolex.rpc.core.SelectorHolder;
 import org.slf4j.Logger;
@@ -48,7 +50,7 @@ import org.slf4j.LoggerFactory;
  * @version 1.0.0
  * @since 2012-8-19
  */
-public class NioClient implements IClient, Runnable {
+public class NioClient extends BaseClient implements Runnable {
 	private static final Logger LOG = LoggerFactory.getLogger(NioClient.class);
 
 	/**

@@ -19,6 +19,8 @@ package org.apache.niolex.network;
 
 import java.io.IOException;
 
+import org.apache.niolex.commons.concurrent.WaitOn;
+
 
 /**
  * The client interface.
@@ -29,6 +31,17 @@ import java.io.IOException;
  */
 public interface IClient {
 
+    /**
+     * The connections status of the Client.
+     *
+     * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
+     * @version 1.0.0
+     * @since 2012-6-2
+     */
+    public static enum Status {
+        INNITIAL, CONNECTED, RETRYING, CLOSED
+    }
+
 	/**
 	 * Do real connect action, connect to server.
 	 * This method will return only after we get connected.
@@ -37,12 +50,19 @@ public interface IClient {
 	 */
 	public void connect() throws IOException;
 
+	/**
+     * Asynchronously send the request to server.
+     *
+     * @param sc
+     * @return the wait on object.
+     */
+    public WaitOn<Packet> asyncInvoke(Packet sc) throws IOException;
+
     /**
      * Handle the Packet, and return result.
      *
      * @param sc The Packet need to be send
      * @return the Packet returned from server
-     *
      * @throws IOException
      */
     public Packet sendAndReceive(Packet sc) throws IOException;
@@ -53,8 +73,16 @@ public interface IClient {
 	public void stop();
 
 	/**
+     * Get connection status of this client.
+     *
+     * @return the status
+     */
+    public Status getStatus();
+
+	/**
 	 * Test whether this client is working now
-	 * @return
+	 *
+	 * @return true if working
 	 */
 	public boolean isWorking();
 

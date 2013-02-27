@@ -1,5 +1,5 @@
 /**
- * RpcClient.java
+ * RpcProxy.java
  *
  * Copyright 2012 Niolex, Inc.
  *
@@ -28,26 +28,27 @@ import java.util.Map;
 
 import org.apache.niolex.commons.codec.StringUtil;
 import org.apache.niolex.commons.reflect.MethodUtil;
-import org.apache.niolex.commons.util.SystemUtil;
 import org.apache.niolex.network.Config;
 import org.apache.niolex.network.IClient;
 import org.apache.niolex.network.Packet;
 import org.apache.niolex.rpc.RpcException;
 import org.apache.niolex.rpc.RpcMethod;
 import org.apache.niolex.rpc.protocol.IClientProtocol;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
- * The based RpcClient, send and receive Rpc packets.
+ * The based RpcProxy, send and receive Rpc packets.
  * Use getService to Get the Rpc Service Client Stub.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
  * @since 2012-6-1
  */
-public class RpcClient implements InvocationHandler {
-	private static final Logger LOG = LoggerFactory.getLogger(RpcClient.class);
+public class RpcProxy implements InvocationHandler {
+
+    /**
+     * Save the execution map.
+     */
+    private Map<Method, Short> executeMap = new HashMap<Method, Short>();
 
 	/**
 	 * The PacketClient to send and receive Rpc packets.
@@ -60,77 +61,28 @@ public class RpcClient implements InvocationHandler {
 	private IClientProtocol clientProtocol;
 
 	/**
-	 * Save the execution map.
-	 */
-	private Map<Method, Short> executeMap = new HashMap<Method, Short>();
-
-	/**
-	 * The time to sleep between retry.
-	 */
-	private int sleepBetweenRetryTime = Config.RPC_SLEEP_BT_RETRY;
-
-	/**
-	 * Times to retry get connected.
-	 */
-	private int connectRetryTimes = Config.RPC_CONNECT_RETRY_TIMES;
-
-	/**
-	 * The status of this Client.
-	 */
-	private Status connStatus;
-
-	/**
-	 * The connections status of this RpcClient.
-	 *
-	 * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
-	 * @version 1.0.0
-	 * @since 2012-6-2
-	 */
-	public static enum Status {
-		INNITIAL, CONNECTED, CLOSED
-	}
-
-	/**
-	 * Create a RpcClient with this IClient as the backed communication tool.
-	 * The Client will be managed internally, please use #RpcClient.connect() and #RpcClient.stop() to connect and stop.
+	 * Create a RpcProxy with this IClient as the backed communication tool.
+	 * The Client will be managed internally, please use #RpcProxy.connect() and #RpcProxy.stop() to connect and stop.
 	 *
 	 * Constructor
 	 * @param client
 	 */
-	public RpcClient(IClient client) {
+	public RpcProxy(IClient client) {
 		super();
 		this.client = client;
-		this.connStatus = Status.INNITIAL;
 	}
 
 	/**
-	 * Create a RpcClient with this IClient as the backed communication tool,
+	 * Create a RpcProxy with this IClient as the backed communication tool,
 	 * the clientProtocol to do the serialization.
 	 *
 	 * @param client
 	 * @param clientProtocol
 	 */
-	public RpcClient(IClient client, IClientProtocol clientProtocol) {
+	public RpcProxy(IClient client, IClientProtocol clientProtocol) {
 		super();
 		this.client = client;
 		this.clientProtocol = clientProtocol;
-	}
-
-	/**
-	 * Connect the backed communication Client, and set the internal status.
-	 * @throws IOException
-	 */
-	public void connect() throws IOException {
-		this.client.connect();
-		this.connStatus = Status.CONNECTED;
-	}
-
-	/**
-	 * Stop this client, and stop the backed communication Client.
-	 */
-	public void stop() {
-		this.connStatus = Status.CLOSED;
-		this.client.stop();
 	}
 
 	/**
@@ -141,7 +93,7 @@ public class RpcClient implements InvocationHandler {
 	@SuppressWarnings("unchecked")
     public <T> T getService(Class<T> c) {
 		this.addInferface(c);
-		return (T) Proxy.newProxyInstance(RpcClient.class.getClassLoader(),
+		return (T) Proxy.newProxyInstance(RpcProxy.class.getClassLoader(),
                 new Class[] {c}, this);
 	}
 
@@ -149,9 +101,11 @@ public class RpcClient implements InvocationHandler {
 	 * Check the client status before doing remote call.
 	 */
 	private void checkStatus() {
-		switch (connStatus) {
+		switch (client.getStatus()) {
 			case INNITIAL:
 			    throw new RpcException("Client not connected.", RpcException.Type.NOT_CONNECTED, null);
+			case RETRYING:
+			    throw new RpcException("Client is retrying to connect to server.", RpcException.Type.NOT_CONNECTED, null);
 			case CLOSED:
 			    throw new RpcException("Client closed.", RpcException.Type.CONNECTION_CLOSED, null);
 		}
@@ -180,19 +134,15 @@ public class RpcClient implements InvocationHandler {
 			Packet recvPk = null;
 			try {
 				recvPk = client.sendAndReceive(sendPk);
+			} catch (RpcException e) {
+			    throw e;
+			} catch (SocketTimeoutException e) {
+			    throw new RpcException("Timeout for this remote procedure call.", RpcException.Type.TIMEOUT, e);
+			} catch (IOException e) {
+			    throw new RpcException("Failed to write packet to socket or read from socket.",
+			            RpcException.Type.CONNECTION_LOST, e);
 			} catch (Exception e) {
-				if (e instanceof RpcException) {
-					throw (RpcException)e;
-				}
-				if (e instanceof SocketTimeoutException) {
-				    throw new RpcException("Timeout for this remote procedure call.", RpcException.Type.TIMEOUT, e);
-				} else if (e instanceof IOException) {
-					handleConnectionLose();
-					throw new RpcException("Failed to write packet to socket or read from socket.",
-							RpcException.Type.CONNECTION_LOST, e);
-				}
-				throw new RpcException("Failed to write packet to socket or read from socket.",
-						RpcException.Type.UNKNOWN, e);
+				throw new RpcException("Failed due to unknown error.", RpcException.Type.UNKNOWN, e);
 			}
 
 			// 4. Process result.
@@ -217,23 +167,6 @@ public class RpcClient implements InvocationHandler {
 		}
 	}
 
-	/**
-	 * Handle connection lose, Try to reconnect.
-	 */
-	public void handleConnectionLose() {
-		if (this.connStatus == Status.CLOSED) {
-			return;
-		}
-		// We will retry to connect in this method.
-		this.connStatus = Status.INNITIAL;
-		client.stop();
-		if (!retryConnect()) {
-			LOG.error("Exception occured when try to re-connect to server. Client will stop.");
-			// Try to shutdown this Client, inform all the threads.
-			this.connStatus = Status.CLOSED;
-		}
-	}
-
     /**
      * De-serialize returned byte array into objects.
      * @param ret
@@ -254,49 +187,20 @@ public class RpcClient implements InvocationHandler {
         return clientProtocol.prepareReturn(ret, type);
     }
 
-	/**
-	 * Try to re-connect to server, iterate connectRetryTimes
-	 * @return true if connected to server.
-	 */
-	private boolean retryConnect() {
-		for (int i = 0; i < connectRetryTimes; ++i) {
-		    SystemUtil.sleep(sleepBetweenRetryTime);
-			LOG.info("RPC Client try to reconnect to server round {} ...", i);
-			try {
-				client.connect();
-				this.connStatus = Status.CONNECTED;
-				return true;
-			} catch (IOException e) {
-				// Not connected.
-				LOG.info("Try to re-connect to server failed. {}", e.toString());
-			}
-		}
-		return false;
-	}
+    /**
+     * Connect the backed communication Client, and set the internal status.
+     * @throws IOException
+     */
+    public void connect() throws IOException {
+        this.client.connect();
+    }
 
-	/**
-	 * Get Connection Status of this client.
-	 * @return the status
-	 */
-	public Status getConnStatus() {
-		return connStatus;
-	}
-
-	/**
-	 * Set the sleep time between retry, default to 1 second.
-	 * @param sleepBetweenRetryTime
-	 */
-	public void setSleepBetweenRetryTime(int sleepBetweenRetryTime) {
-		this.sleepBetweenRetryTime = sleepBetweenRetryTime;
-	}
-
-	/**
-	 * Set the number of times to retry we connection lost from server.
-	 * @param connectRetryTimes
-	 */
-	public void setConnectRetryTimes(int connectRetryTimes) {
-		this.connectRetryTimes = connectRetryTimes;
-	}
+    /**
+     * Stop this client, and stop the backed communication Client.
+     */
+    public void stop() {
+        this.client.stop();
+    }
 
 	/**
 	 * Set the socket connection timeout, please set before connect.

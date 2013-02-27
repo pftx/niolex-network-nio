@@ -21,8 +21,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.niolex.commons.test.Benchmark;
-import org.apache.niolex.rpc.client.RpcClient;
-import org.apache.niolex.rpc.client.SocketClient;
+import org.apache.niolex.network.client.SocketClient;
+import org.apache.niolex.rpc.client.RpcProxy;
 import org.apache.niolex.rpc.core.CoreTest;
 import org.apache.niolex.rpc.protocol.JsonProtocol;
 import org.junit.Assert;
@@ -41,7 +41,7 @@ public class JsonRpcClient {
 	 */
 	public static void main(String[] args) throws Exception {
 	    SocketClient c = new SocketClient(CoreTest.SERVER_ADDRESS);
-		RpcClient client = new RpcClient(c);
+		RpcProxy client = new RpcProxy(c);
 		client.setClientProtocol(new JsonProtocol());
 		client.connect();
 
