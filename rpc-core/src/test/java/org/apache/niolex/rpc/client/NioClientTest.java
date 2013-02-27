@@ -77,7 +77,7 @@ public class NioClientTest {
         rpc.setConnectTimeout(100);
         rpc.connect();
         final RpcService service = rpc.getService(RpcService.class);
-        MultiPerformance perf = new MultiPerformance(3, 10, 100){
+        MultiPerformance perf = new MultiPerformance(10, 10, 300){
             @Override
             protected void run() {
                 int a = MockUtil.ranInt(10240);
