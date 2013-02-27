@@ -18,11 +18,19 @@
 package org.apache.niolex.rpc.client;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.niolex.network.Packet;
 import org.apache.niolex.network.client.BaseClient;
+import org.apache.niolex.network.client.SocketClient;
 
 /**
+ * This client encapsulate the {@link SocketClient}, provide
+ * a container to handle multiple server addresses.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.5
@@ -31,13 +39,47 @@ import org.apache.niolex.network.client.BaseClient;
 public class MultiAddressClient extends BaseClient {
 
     /**
+     * Store the client list.
+     */
+    private final List<SocketClient> clientList = new ArrayList<SocketClient>();
+
+    /**
+     * The current server index.
+     */
+    private final AtomicInteger curIdx = new AtomicInteger(-1);
+
+    /**
+     * Create a MultiAddressClient with this server address.
+     * address must in this format:
+     * IP:PORT/CONNECTION_NUMBER;IP:PORT/CONNECTION_NUMBER ...
+     * Multiple address separated by ";"
+     *
+     * @param serverAddress the multiple server addresses.
+     */
+    public MultiAddressClient(String serverAddress) {
+        super();
+        String[] arr = serverAddress.split(" *[,;] *");
+        for (String addr : arr) {
+            String[] ddr = addr.split(" *[:/] *");
+            int k = Integer.parseInt(ddr[2]);
+            InetSocketAddress inetAddr = new InetSocketAddress(ddr[0], Integer.parseInt(ddr[1]));
+            for (int j = 0; j < k; ++j) {
+                clientList.add(new SocketClient(inetAddr));
+            }
+        }
+        Collections.shuffle(clientList);
+    }
+
+    /**
      * Override super method
      * @see org.apache.niolex.network.IClient#connect()
      */
     @Override
     public void connect() throws IOException {
-        // TODO Auto-generated method stub
-
+        for (SocketClient cli : clientList) {
+            cli.connect();
+        }
+        this.connStatus = Status.CONNECTED;
     }
 
     /**
@@ -46,8 +88,20 @@ public class MultiAddressClient extends BaseClient {
      */
     @Override
     public Packet sendAndReceive(Packet sc) throws IOException {
-        // TODO Auto-generated method stub
-        return null;
+        while (true) {
+            SocketClient cli = nextClient();
+            if (cli.getStatus() == Status.CONNECTED) {
+                return cli.sendAndReceive(sc);
+            }
+        }
+    }
+
+    private SocketClient nextClient() {
+        int k = curIdx.incrementAndGet();
+        if (k > Integer.MAX_VALUE - 1000) {
+            curIdx.set(-1);
+        }
+        return clientList.get(k % clientList.size());
     }
 
     /**
@@ -56,8 +110,30 @@ public class MultiAddressClient extends BaseClient {
      */
     @Override
     public void stop() {
-        // TODO Auto-generated method stub
+        for (SocketClient cli : clientList) {
+            cli.stop();
+        }
+        this.connStatus = Status.CLOSED;
+    }
 
+    /**
+     * Set the sleep time between retry, default to 1 second.
+     * @param sleepBetweenRetryTime
+     */
+    public void setSleepBetweenRetryTime(int sleepBetweenRetryTime) {
+        for (SocketClient cli : clientList) {
+            cli.setSleepBetweenRetryTime(sleepBetweenRetryTime);
+        }
+    }
+
+    /**
+     * Set the number of times to retry we connection lost from server.
+     * @param connectRetryTimes
+     */
+    public void setConnectRetryTimes(int connectRetryTimes) {
+        for (SocketClient cli : clientList) {
+            cli.setConnectRetryTimes(connectRetryTimes);
+        }
     }
 
 }

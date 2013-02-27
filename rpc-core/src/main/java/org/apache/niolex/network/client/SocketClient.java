@@ -149,7 +149,7 @@ public class SocketClient extends BaseClient {
 	 * @see org.apache.niolex.network.IClient#sendAndReceive(org.apache.niolex.network.Packet)
 	 */
 	@Override
-	public Packet sendAndReceive(Packet sc) throws IOException {
+	public synchronized Packet sendAndReceive(Packet sc) throws IOException {
 	    try {
     		// 1. Generate serial number
     		serialPacket(sc);
