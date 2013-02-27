@@ -114,9 +114,10 @@ public class JsonProtocolTest {
 	 */
 	@Test
 	public void testSerializeParams() throws Exception {
-		byte[] abc = con.serializeParams(new Object[] {"ab", new Date(), "gcc", new Integer(443),
-				new Bean(123, 'c')});
+		byte[] abc = con.serializeParams(new Object[] {"ab", new Date(1361944310437l), "gcc", new Integer(443),
+				new Bean(653423, 'c')});
 		System.out.println(new String(abc));
+		assertEquals("\"ab\"1361944310437\"gcc\"443{\"a\":653423,\"b\":\"c\"}", new String(abc));
 	}
 
 	/**
@@ -136,7 +137,8 @@ public class JsonProtocolTest {
 	 */
 	@Test
 	public void testSerializeReturn() throws Exception {
-		con.serializeReturn(new Bean(123, 'c'));
+	    byte[] abc = con.serializeReturn(new Bean(13523, 'c'));
+	    assertEquals("{\"a\":13523,\"b\":\"c\"}", new String(abc));
 	}
 
 }
