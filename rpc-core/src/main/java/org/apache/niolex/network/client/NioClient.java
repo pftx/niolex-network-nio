@@ -271,10 +271,9 @@ public class NioClient extends BaseClient implements Runnable {
 			return on.waitForResult(rpcHandleTimeout);
 		} catch (RpcException e) {
 		    throw e;
+		} catch (InterruptedException e) {
+		    throw new RpcException("Rpc timeout.", RpcException.Type.TIMEOUT, e);
 		} catch (Exception e) {
-			if (e instanceof InterruptedException) {
-				throw new RpcException("Rpc timeout.", RpcException.Type.TIMEOUT, e);
-			}
 			throw new RpcException("Error get result.", RpcException.Type.ERROR_INVOKE, e);
 		}
 	}
@@ -286,6 +285,7 @@ public class NioClient extends BaseClient implements Runnable {
 	@Override
 	public void stop() {
 		this.isWorking = false;
+		this.connStatus = Status.CLOSED;
 		for (SelectionKey skey : new HashSet<SelectionKey>(selector.keys())) {
         	try {
         		skey.channel().close();
@@ -299,7 +299,6 @@ public class NioClient extends BaseClient implements Runnable {
     	} catch(Exception e) {
     		LOG.error("Error occured when stop the nio client.", e);
     	}
-		this.connStatus = Status.CLOSED;
 	}
 
 	/**

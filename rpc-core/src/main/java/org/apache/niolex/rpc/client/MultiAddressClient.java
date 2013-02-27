@@ -27,6 +27,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.niolex.network.Packet;
 import org.apache.niolex.network.client.BaseClient;
 import org.apache.niolex.network.client.SocketClient;
+import org.apache.niolex.rpc.RpcException;
 
 /**
  * This client encapsulate the {@link SocketClient}, provide
@@ -88,14 +89,20 @@ public class MultiAddressClient extends BaseClient {
      */
     @Override
     public Packet sendAndReceive(Packet sc) throws IOException {
-        while (true) {
+        for (int i = 0; i < clientList.size(); ++i) {
             SocketClient cli = nextClient();
             if (cli.getStatus() == Status.CONNECTED) {
                 return cli.sendAndReceive(sc);
             }
         }
+        throw new RpcException("No connection is ready.", RpcException.Type.CLIENT_BUSY, null);
     }
 
+    /**
+     * Get the next client from the client list.
+     *
+     * @return the next client
+     */
     private SocketClient nextClient() {
         int k = curIdx.incrementAndGet();
         if (k > Integer.MAX_VALUE - 1000) {
@@ -110,10 +117,10 @@ public class MultiAddressClient extends BaseClient {
      */
     @Override
     public void stop() {
+        this.connStatus = Status.CLOSED;
         for (SocketClient cli : clientList) {
             cli.stop();
         }
-        this.connStatus = Status.CLOSED;
     }
 
     /**

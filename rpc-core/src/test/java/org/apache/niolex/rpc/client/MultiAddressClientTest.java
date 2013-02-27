@@ -45,9 +45,7 @@ public class MultiAddressClientTest {
      */
     @Test
     public void testRun() throws IOException {
-        NioClient cli = new NioClient();
-        cli.setServerAddress(CoreTest.SERVER_ADDRESS_STR);
-        cli.setConnectionNumber(10);
+        MultiAddressClient cli = new MultiAddressClient("localhost:9909/3; localhost:9909/5; localhost:9909/2");
         RpcProxy rpc = new RpcProxy(cli, new JsonProtocol());
         rpc.connect();
         final RpcService service = rpc.getService(RpcService.class);
@@ -70,9 +68,7 @@ public class MultiAddressClientTest {
      */
     @Test
     public void testConnect() throws IOException {
-        NioClient cli = new NioClient();
-        cli.setServerAddress(CoreTest.SERVER_ADDRESS_STR);
-        cli.setConnectionNumber(1);
+        MultiAddressClient cli = new MultiAddressClient("localhost:9909/1");
         RpcProxy rpc = new RpcProxy(cli, new JsonProtocol());
         rpc.setConnectTimeout(100);
         rpc.connect();
