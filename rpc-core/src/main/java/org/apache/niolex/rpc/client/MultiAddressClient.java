@@ -17,7 +17,10 @@
  */
 package org.apache.niolex.rpc.client;
 
-import org.apache.niolex.network.IClient;
+import java.io.IOException;
+
+import org.apache.niolex.network.Packet;
+import org.apache.niolex.network.client.BaseClient;
 
 /**
  *
@@ -25,6 +28,36 @@ import org.apache.niolex.network.IClient;
  * @version 1.0.5
  * @since 2013-2-27
  */
-public class MultiAddressClient implements IClient {
+public class MultiAddressClient extends BaseClient {
+
+    /**
+     * Override super method
+     * @see org.apache.niolex.network.IClient#connect()
+     */
+    @Override
+    public void connect() throws IOException {
+        // TODO Auto-generated method stub
+
+    }
+
+    /**
+     * Override super method
+     * @see org.apache.niolex.network.IClient#sendAndReceive(org.apache.niolex.network.Packet)
+     */
+    @Override
+    public Packet sendAndReceive(Packet sc) throws IOException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /**
+     * Override super method
+     * @see org.apache.niolex.network.IClient#stop()
+     */
+    @Override
+    public void stop() {
+        // TODO Auto-generated method stub
+
+    }
 
 }

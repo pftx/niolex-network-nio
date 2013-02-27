@@ -195,6 +195,7 @@ public class NioClient extends BaseClient implements Runnable {
 		try {
 			connManager.waitReady();
 		} catch (InterruptedException e) {}
+		this.connStatus = Status.CONNECTED;
 	}
 
 	/**
@@ -246,6 +247,7 @@ public class NioClient extends BaseClient implements Runnable {
 	 * @param sc
 	 * @return the wait on object.
 	 */
+	@Override
 	public WaitOn<Packet> asyncInvoke(Packet sc) {
 		sc.setSerial((short) 1);
 		ConnectionCore cli = connManager.take(connectTimeout);
@@ -297,6 +299,7 @@ public class NioClient extends BaseClient implements Runnable {
     	} catch(Exception e) {
     		LOG.error("Error occured when stop the nio client.", e);
     	}
+		this.connStatus = Status.CLOSED;
 	}
 
 	/**

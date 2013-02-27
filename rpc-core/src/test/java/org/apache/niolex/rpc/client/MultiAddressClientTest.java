@@ -1,5 +1,5 @@
 /**
- * NioClientTest.java
+ * MultiAddressClientTest.java
  *
  * Copyright 2012 Niolex, Inc.
  *
@@ -33,7 +33,7 @@ import org.junit.Test;
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.5, $Date: 2012-12-4$
  */
-public class NioClientTest {
+public class MultiAddressClientTest {
 
     static {
         CoreTest.startSvc();
