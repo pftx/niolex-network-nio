@@ -30,7 +30,7 @@ import org.apache.niolex.rpc.RpcException;
 import org.apache.niolex.rpc.RpcExecuteItem;
 import org.apache.niolex.rpc.RpcMethod;
 import org.apache.niolex.rpc.core.Invoker;
-import org.apache.niolex.rpc.protocol.ServerProtocol;
+import org.apache.niolex.rpc.protocol.IServerProtocol;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,7 +50,7 @@ public class RpcInvoker implements Invoker {
 	/**
 	 * The server side protocol to handle serialization.
 	 */
-	private ServerProtocol serverProtocol;
+	private IServerProtocol serverProtocol;
 
 
 	/**
@@ -64,7 +64,7 @@ public class RpcInvoker implements Invoker {
 	 * Create a RpcInvoker with this specified protocol.
 	 * @param serverProtocol
 	 */
-	public RpcInvoker(ServerProtocol serverProtocol) {
+	public RpcInvoker(IServerProtocol serverProtocol) {
 		super();
 		this.serverProtocol = serverProtocol;
 	}
@@ -190,7 +190,7 @@ public class RpcInvoker implements Invoker {
 	 * Set the server side serialization protocol.
 	 * @param serverProtocol
 	 */
-	public void setServerProtocol(ServerProtocol serverProtocol) {
+	public void setServerProtocol(IServerProtocol serverProtocol) {
 		this.serverProtocol = serverProtocol;
 	}
 

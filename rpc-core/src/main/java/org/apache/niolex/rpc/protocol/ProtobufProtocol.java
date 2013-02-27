@@ -32,11 +32,11 @@ import com.google.protobuf.GeneratedMessage;
  * @version 1.0.0
  * @since 2012-6-5
  */
-public class ProtobufProtocol implements ClientProtocol, ServerProtocol {
+public class ProtobufProtocol implements IClientProtocol, IServerProtocol {
 
 	/**
 	 * Override super method
-	 * @see org.apache.niolex.rpc.protocol.ServerProtocol#prepareParams(byte[], java.lang.reflect.Type[])
+	 * @see org.apache.niolex.rpc.protocol.IServerProtocol#prepareParams(byte[], java.lang.reflect.Type[])
 	 */
 	@Override
 	public Object[] prepareParams(byte[] data, Type[] generic) throws Exception {
@@ -45,7 +45,7 @@ public class ProtobufProtocol implements ClientProtocol, ServerProtocol {
 
 	/**
 	 * Override super method
-	 * @see org.apache.niolex.rpc.protocol.ServerProtocol#serializeReturn(java.lang.Object)
+	 * @see org.apache.niolex.rpc.protocol.IServerProtocol#serializeReturn(java.lang.Object)
 	 */
 	@Override
 	public byte[] serializeReturn(Object ret) throws Exception {
@@ -62,7 +62,7 @@ public class ProtobufProtocol implements ClientProtocol, ServerProtocol {
 
 	/**
 	 * Override super method
-	 * @see org.apache.niolex.rpc.protocol.ClientProtocol#serializeParams(java.lang.Object[])
+	 * @see org.apache.niolex.rpc.protocol.IClientProtocol#serializeParams(java.lang.Object[])
 	 */
 	@Override
 	public byte[] serializeParams(Object[] args) throws Exception {
@@ -71,7 +71,7 @@ public class ProtobufProtocol implements ClientProtocol, ServerProtocol {
 
 	/**
 	 * Override super method
-	 * @see org.apache.niolex.rpc.protocol.ClientProtocol#prepareReturn(byte[], java.lang.reflect.Type)
+	 * @see org.apache.niolex.rpc.protocol.IClientProtocol#prepareReturn(byte[], java.lang.reflect.Type)
 	 */
 	@Override
 	public Object prepareReturn(byte[] ret, Type type) throws Exception {

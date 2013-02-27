@@ -1,5 +1,5 @@
 /**
- * ServerProtocol.java
+ * IServerProtocol.java
  *
  * Copyright 2012 Niolex, Inc.
  *
@@ -25,13 +25,13 @@ import java.lang.reflect.Type;
  * One can implement this interface to extend the rpc-core to support
  * new protocols.
  *
- * @see ClientProtocol
+ * @see IClientProtocol
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
  * @since 2012-8-19
  */
-public interface ServerProtocol {
+public interface IServerProtocol {
 
 	/**
 	 * Read parameters from the data.
@@ -39,7 +39,7 @@ public interface ServerProtocol {
 	 *
 	 * @param data
 	 * @param generic
-	 * @return
+	 * @return the result
 	 * @throws Exception
 	 */
 	public Object[] prepareParams(byte[] data, Type[] generic) throws Exception;
@@ -49,7 +49,7 @@ public interface ServerProtocol {
 	 * ret can not be null, we already checked.
 	 *
 	 * @param ret
-	 * @return
+	 * @return the result
 	 * @throws Exception
 	 */
 	public byte[] serializeReturn(Object ret) throws Exception;

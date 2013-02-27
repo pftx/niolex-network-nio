@@ -32,11 +32,11 @@ import org.codehaus.jackson.map.type.TypeFactory;
  * @version 1.0.0
  * @since 2012-6-2
  */
-public class JsonProtocol implements ClientProtocol, ServerProtocol {
+public class JsonProtocol implements IClientProtocol, IServerProtocol {
 
 	/**
 	 * This is the override of super method.
-	 * @see org.apache.niolex.rpc.protocol.ClientProtocol#serializeParams(java.lang.Object[])
+	 * @see org.apache.niolex.rpc.protocol.IClientProtocol#serializeParams(java.lang.Object[])
 	 */
 	@Override
 	public byte[] serializeParams(Object[] args) throws Exception {
@@ -49,7 +49,7 @@ public class JsonProtocol implements ClientProtocol, ServerProtocol {
 
 	/**
 	 * This is the override of super method.
-	 * @see org.apache.niolex.rpc.protocol.ClientProtocol#prepareReturn(byte[], java.lang.reflect.Type)
+	 * @see org.apache.niolex.rpc.protocol.IClientProtocol#prepareReturn(byte[], java.lang.reflect.Type)
 	 */
 	@SuppressWarnings("deprecation")
 	@Override
@@ -61,7 +61,7 @@ public class JsonProtocol implements ClientProtocol, ServerProtocol {
 
 	/**
 	 * This is the override of super method.
-	 * @see org.apache.niolex.rpc.protocol.ServerProtocol#prepareParams(byte[], java.lang.reflect.Type[])
+	 * @see org.apache.niolex.rpc.protocol.IServerProtocol#prepareParams(byte[], java.lang.reflect.Type[])
 	 */
 	@Override
 	public Object[] prepareParams(byte[] data, Type[] generic) throws Exception {
@@ -70,7 +70,7 @@ public class JsonProtocol implements ClientProtocol, ServerProtocol {
 
 	/**
 	 * This is the override of super method.
-	 * @see org.apache.niolex.rpc.protocol.ServerProtocol#serializeReturn(java.lang.Object)
+	 * @see org.apache.niolex.rpc.protocol.IServerProtocol#serializeReturn(java.lang.Object)
 	 */
 	@Override
 	public byte[] serializeReturn(Object ret) throws Exception {

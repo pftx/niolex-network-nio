@@ -35,6 +35,7 @@ public class Invocation implements Runnable {
 
 	private RpcCore rpcCore;
 	private Invoker invoker;
+	private Packet parameter;
 
 	/**
 	 * The Constructor.
@@ -46,6 +47,7 @@ public class Invocation implements Runnable {
 		super();
 		this.rpcCore = rpcCore;
 		this.invoker = invoker;
+		this.parameter = rpcCore.readFinished();
 	}
 
 
@@ -58,10 +60,9 @@ public class Invocation implements Runnable {
 	 */
 	@Override
 	public void run() {
-		Packet pam = rpcCore.readFinished();
-		Packet res = invoker.process(pam);
+		Packet res = invoker.process(parameter);
 		if (res == null) {
-			prepareError("Rpc Invoker returned null.", pam);
+			prepareError("Rpc Invoker returned null.");
 		} else {
 			rpcCore.prepareWrite(res);
 		}
@@ -73,9 +74,9 @@ public class Invocation implements Runnable {
 	 * @param e
 	 * @param pc
 	 */
-	public void prepareError(String e, Packet pc) {
+	public void prepareError(String e) {
 		Packet ret = new Packet(Config.CODE_RPC_ERROR, StringUtil.strToUtf8Byte(e));
-		ret.setSerial(pc.getSerial());
+		ret.setSerial(parameter.getSerial());
 		rpcCore.prepareWrite(ret);
 	}
 
@@ -93,8 +94,7 @@ public class Invocation implements Runnable {
 		} else {
 			s = "Server internal error.";
 		}
-		Packet pc = rpcCore.readFinished();
-		prepareError(s, pc);
+		prepareError(s);
 	}
 
 }

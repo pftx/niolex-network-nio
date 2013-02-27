@@ -1,5 +1,5 @@
 /**
- * ClientProtocol.java
+ * IClientProtocol.java
  *
  * Copyright 2012 Niolex, Inc.
  *
@@ -28,12 +28,12 @@ import java.lang.reflect.Type;
  * @version 1.0.0
  * @since 2012-8-19
  */
-public interface ClientProtocol {
+public interface IClientProtocol {
 
 	/**
 	 * Serialize arguments objects into byte array.
 	 * @param args
-	 * @return
+	 * @return the result
 	 * @throws Exception
 	 */
 	public byte[] serializeParams(Object[] args) throws Exception;
@@ -42,7 +42,7 @@ public interface ClientProtocol {
 	 * De-serialize returned byte array into objects.
 	 * @param ret
 	 * @param type
-	 * @return
+	 * @return the result
 	 * @throws Exception
 	 */
 	public Object prepareReturn(byte[] ret, Type type) throws Exception;

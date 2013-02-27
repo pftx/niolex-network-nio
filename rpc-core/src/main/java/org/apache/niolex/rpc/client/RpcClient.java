@@ -34,7 +34,7 @@ import org.apache.niolex.network.IClient;
 import org.apache.niolex.network.Packet;
 import org.apache.niolex.rpc.RpcException;
 import org.apache.niolex.rpc.RpcMethod;
-import org.apache.niolex.rpc.protocol.ClientProtocol;
+import org.apache.niolex.rpc.protocol.IClientProtocol;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,7 +57,7 @@ public class RpcClient implements InvocationHandler {
 	/**
 	 * The client protocol to serial data.
 	 */
-	private ClientProtocol clientProtocol;
+	private IClientProtocol clientProtocol;
 
 	/**
 	 * Save the execution map.
@@ -110,7 +110,7 @@ public class RpcClient implements InvocationHandler {
 	 * @param client
 	 * @param clientProtocol
 	 */
-	public RpcClient(IClient client, ClientProtocol clientProtocol) {
+	public RpcClient(IClient client, IClientProtocol clientProtocol) {
 		super();
 		this.client = client;
 		this.clientProtocol = clientProtocol;
@@ -325,7 +325,7 @@ public class RpcClient implements InvocationHandler {
 	 *
 	 * @param clientProtocol
 	 */
-	public void setClientProtocol(ClientProtocol clientProtocol) {
+	public void setClientProtocol(IClientProtocol clientProtocol) {
 		this.clientProtocol = clientProtocol;
 	}
 
