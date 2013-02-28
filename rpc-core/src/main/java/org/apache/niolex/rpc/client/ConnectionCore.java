@@ -269,7 +269,6 @@ public class ConnectionCore {
     	return this.selectionKey.isValid();
     }
 
-
     /**
      * Error occurred when read or write.
      * Anyway, socket is closed.

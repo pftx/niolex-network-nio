@@ -30,6 +30,10 @@ import org.apache.niolex.rpc.RpcException;
 /**
  * This client encapsulate the {@link SocketClient}, provide
  * a container to handle multiple server addresses.
+ * <p>
+ * Server address need to be the following format:
+ * IP:PORT/CONNECTION_NUMBER;IP:PORT/CONNECTION_NUMBER
+ * i.e. -> 10.1.2.3:8090/10;10.1.2.4:8090/8
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.5
@@ -60,7 +64,10 @@ public class MultiAddressClient extends BaseClient {
         String[] arr = serverAddress.split(" *[,;] *");
         for (String addr : arr) {
             String[] ddr = addr.split(" *[:/] *");
-            int k = Integer.parseInt(ddr[2]);
+            int k = 1;
+            if (ddr.length == 3) {
+                k = Integer.parseInt(ddr[2]);
+            }
             InetSocketAddress inetAddr = new InetSocketAddress(ddr[0], Integer.parseInt(ddr[1]));
             for (int j = 0; j < k; ++j) {
                 clientList.add(new SocketClient(inetAddr));
@@ -93,7 +100,7 @@ public class MultiAddressClient extends BaseClient {
                 return cli.sendAndReceive(sc);
             }
         }
-        throw new RpcException("No connection is ready.", RpcException.Type.CLIENT_BUSY, null);
+        throw new RpcException("No connection ready for use, Please check server status.", RpcException.Type.CLIENT_BUSY, null);
     }
 
     /**
@@ -103,7 +110,8 @@ public class MultiAddressClient extends BaseClient {
      */
     private SocketClient nextClient() {
         int k = curIdx.incrementAndGet();
-        if (k > Integer.MAX_VALUE - 1000) {
+        // MAX_INT - 1K
+        if (k > 2147482647) {
             curIdx.set(-1);
         }
         return clientList.get(k % clientList.size());

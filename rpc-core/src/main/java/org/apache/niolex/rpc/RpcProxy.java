@@ -34,7 +34,8 @@ import org.apache.niolex.network.Packet;
 import org.apache.niolex.rpc.protocol.IClientProtocol;
 
 /**
- * The based RpcProxy, send and receive Rpc packets.
+ * The RpcProxy is the facade of client side.
+ * It manipulate the IClient, send and receive Rpc packets.
  * Use getService to Get the Rpc Service Client Stub.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>

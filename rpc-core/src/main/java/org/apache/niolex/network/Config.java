@@ -82,7 +82,7 @@ public interface Config {
 	 * Rpc retry times try to connect to rpc server. If the client can not get a valid
 	 * connection after this times of retry, client will stop.
 	 */
-	int RPC_CONNECT_RETRY_TIMES = 3;
+	int RPC_CONNECT_RETRY_TIMES = 86400;
 
 	/**
 	 * Socket connect and read timeout. this is the low level timeout. Please do not configure

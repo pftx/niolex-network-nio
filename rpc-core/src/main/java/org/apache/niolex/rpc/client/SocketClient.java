@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
 /**
  * The blocking implementation of IClient. This client can only be used in one
  * thread. If you want to reuse client in multithreading, use
- * {@link NioClient}
+ * {@link NioClient} or {@link MultiAddressClient}
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
@@ -208,7 +208,6 @@ public class SocketClient extends BaseClient {
             LOG.info("RPC Client try to reconnect to server round {} ...", i);
             try {
                 this.connect();
-                this.connStatus = Status.CONNECTED;
                 return true;
             } catch (IOException e) {
                 // Not connected.
