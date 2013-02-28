@@ -1,5 +1,5 @@
 /**
- * MultiAddressClientTest.java
+ * NioClientTest.java
  *
  * Copyright 2012 Niolex, Inc.
  *
@@ -34,7 +34,7 @@ import org.junit.Test;
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.5, $Date: 2012-12-4$
  */
-public class MultiAddressClientTest {
+public class NioClientTest {
 
     static {
         CoreTest.startSvc();
@@ -46,7 +46,9 @@ public class MultiAddressClientTest {
      */
     @Test
     public void testRun() throws IOException {
-        MultiAddressClient cli = new MultiAddressClient("localhost:9909/3; localhost:9909/5; localhost:9909/2");
+        NioClient cli = new NioClient();
+        cli.setServerAddress(CoreTest.SERVER_ADDRESS_STR);
+        cli.setConnectionNumber(10);
         RpcProxy rpc = new RpcProxy(cli, new JsonProtocol());
         rpc.connect();
         final RpcService service = rpc.getService(RpcService.class);
@@ -69,7 +71,9 @@ public class MultiAddressClientTest {
      */
     @Test
     public void testConnect() throws IOException {
-        MultiAddressClient cli = new MultiAddressClient("localhost:9909/1");
+        NioClient cli = new NioClient();
+        cli.setServerAddress(CoreTest.SERVER_ADDRESS_STR);
+        cli.setConnectionNumber(1);
         RpcProxy rpc = new RpcProxy(cli, new JsonProtocol());
         rpc.setConnectTimeout(100);
         rpc.connect();

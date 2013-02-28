@@ -20,7 +20,7 @@ package org.apache.niolex.rpc.core;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 
-import org.apache.niolex.network.client.SocketClient;
+import org.apache.niolex.rpc.client.SocketClient;
 import org.apache.niolex.rpc.demo.JsonRpcServer;
 import org.junit.Test;
 

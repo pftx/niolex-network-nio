@@ -25,8 +25,6 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.niolex.network.Packet;
-import org.apache.niolex.network.client.BaseClient;
-import org.apache.niolex.network.client.SocketClient;
 import org.apache.niolex.rpc.RpcException;
 
 /**
