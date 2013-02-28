@@ -54,7 +54,7 @@ public class RpcClient implements PoolableInvocationHandler, IPacketHandler {
 	/**
 	 * The serial generator.
 	 */
-	private final AtomicInteger auto = new AtomicInteger(1);
+	private final AtomicInteger auto = new AtomicInteger(-1);
 
 	/**
 	 * The time to sleep between retry.
@@ -218,7 +218,7 @@ public class RpcClient implements PoolableInvocationHandler, IPacketHandler {
 	 * @param rc
 	 */
 	private void serialPacket(PacketData rc) {
-		short seri = (short) (auto.getAndAdd(2));
+		short seri = (short) (auto.addAndGet(2));
 		rc.setReserved((byte) seri);
 		rc.setVersion((byte) (seri >> 8));
 	}
