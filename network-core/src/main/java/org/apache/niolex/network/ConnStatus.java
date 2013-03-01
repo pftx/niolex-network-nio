@@ -26,8 +26,8 @@ package org.apache.niolex.network;
  */
 public enum ConnStatus {
 
-    INNITIAL("The connection is innitialized, but not start to connect yet."),
-    CONNECTING("System is trying to connect to server."),
+    INNITIAL("The connection is initializing."),
+    CONNECTING("Trying to connect to server."),
     CONNECTED("Connection is ready for use."),
     CLOSED("Connection is closed.");
 

@@ -79,12 +79,26 @@ public class ClientManagerTest {
      * Test method for {@link org.apache.niolex.network.client.ClientManager#retryConnect()}.
      */
     @Test(expected=IllegalArgumentException.class)
-    public void testRetryConnect() {
+    public void testConnectInvalid() {
         SocketClient sc = new SocketClient();
         ClientManager<SocketClient> cm = new ClientManager<SocketClient>(sc);
         boolean b = cm.connect();
         assertTrue(b);
         assertTrue(cm.connect());
+    }
+
+    /**
+     * Test method for {@link org.apache.niolex.network.client.ClientManager#retryConnect()}.
+     */
+    @Test
+    public void testRetryConnect() {
+        SocketClient sc = new SocketClient();
+        ClientManager<SocketClient> cm = new ClientManager<SocketClient>(sc);
+        cm.setConnectRetryTimes(1);
+        cm.setSleepBetweenRetryTime(1);
+        cm.setAddressList(Arrays.asList(new InetSocketAddress("127.0.0.1", 8090)));
+        boolean b = cm.retryConnect();
+        assertFalse(b);
     }
 
     /**

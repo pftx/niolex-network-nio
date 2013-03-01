@@ -84,7 +84,8 @@ public class FastCore extends BasePacketWriter {
     /**
      * The head byte buffer.
      */
-    private final ByteBuffer headBuffer = ByteBuffer.allocate(8);
+    private final ByteBuffer sendHeadBuffer = ByteBuffer.allocate(8);
+    private final ByteBuffer recvHeadBuffer = ByteBuffer.allocate(8);
 
     /**
      * The name of the client side of this socket.
@@ -131,7 +132,7 @@ public class FastCore extends BasePacketWriter {
 		// Initialize local variables.
         sendStatus = Status.NONE;
         receiveStatus = Status.HEADER;
-        receiveBuffer = getHeadBuffer();
+        receiveBuffer = getHeadBuffer(false);
         remoteName = client.socket().getRemoteSocketAddress().toString();
         StringBuilder sb = new StringBuilder();
         sb.append("Remote Client [").append(remoteName);
@@ -145,9 +146,14 @@ public class FastCore extends BasePacketWriter {
      *
      * @return the head buffer
      */
-    private ByteBuffer getHeadBuffer() {
-        headBuffer.clear();
-        return headBuffer;
+    private ByteBuffer getHeadBuffer(boolean isSend) {
+        if (isSend) {
+            sendHeadBuffer.clear();
+            return sendHeadBuffer;
+        } else {
+            recvHeadBuffer.clear();
+            return recvHeadBuffer;
+        }
     }
 
     /**
@@ -240,7 +246,7 @@ public class FastCore extends BasePacketWriter {
     		packetHandler.handleRead(receivePacket, this);
     	}
     	receiveStatus = Status.HEADER;
-    	receiveBuffer = getHeadBuffer();
+    	receiveBuffer = getHeadBuffer(false);
     }
 
     /**
@@ -332,7 +338,7 @@ public class FastCore extends BasePacketWriter {
     	} else {
     		// Packet too large, we will send it multiple times.
     		sendStatus = Status.HEADER;
-    		sendBuffer = getHeadBuffer();
+    		sendBuffer = getHeadBuffer(true);
     		sendPacket.putHeader(sendBuffer);
     	}
     	sendBuffer.flip();
