@@ -29,6 +29,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.niolex.commons.reflect.MethodUtil;
 import org.apache.niolex.commons.util.SystemUtil;
 import org.apache.niolex.network.Config;
+import org.apache.niolex.network.ConnStatus;
 import org.apache.niolex.network.IClient;
 import org.apache.niolex.network.IPacketHandler;
 import org.apache.niolex.network.IPacketWriter;
@@ -84,17 +85,7 @@ public class RpcClient implements PoolableInvocationHandler, IPacketHandler {
 	/**
 	 * The status of this Client.
 	 */
-	private Status connStatus;
-
-	/**
-	 * The connection status of this RpcClient.
-	 *
-	 * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
-	 * @version 1.0.0, Date: 2012-6-2
-	 */
-	public static enum Status {
-		INNITIAL, CONNECTED, CLOSED
-	}
+	private ConnStatus connStatus;
 
 	/**
 	 * Create a RpcClient with this client as the backed communication tool.
@@ -110,7 +101,7 @@ public class RpcClient implements PoolableInvocationHandler, IPacketHandler {
 		this.invoker = invoker;
 		this.converter = converter;
 		this.client.setPacketHandler(this);
-		this.connStatus = Status.INNITIAL;
+		this.connStatus = ConnStatus.INNITIAL;
 	}
 
 	/**
@@ -119,14 +110,14 @@ public class RpcClient implements PoolableInvocationHandler, IPacketHandler {
 	 */
 	public void connect() throws IOException {
 		this.client.connect();
-		this.connStatus = Status.CONNECTED;
+		this.connStatus = ConnStatus.CONNECTED;
 	}
 
 	/**
 	 * Stop this client, and stop the backed communication client.
 	 */
 	public void stop() {
-		this.connStatus = Status.CLOSED;
+		this.connStatus = ConnStatus.CLOSED;
 		this.client.stop();
 	}
 
@@ -137,6 +128,7 @@ public class RpcClient implements PoolableInvocationHandler, IPacketHandler {
 	 * @return the stub
 	 */
 	@SuppressWarnings("unchecked")
+	@Override
     public <T> T getService(Class<T> c) {
 		this.addInferface(c);
 		return (T) Proxy.newProxyInstance(RpcClient.class.getClassLoader(),
@@ -227,6 +219,7 @@ public class RpcClient implements PoolableInvocationHandler, IPacketHandler {
 	 * Set the Rpc Configs, this method will parse all the configurations and generate execute map.
 	 * @param interfs
 	 */
+	@Override
 	public void addInferface(Class<?> interfs) {
 		Method[] arr = MethodUtil.getMethods(interfs);
 		for (Method m : arr) {
@@ -277,14 +270,14 @@ public class RpcClient implements PoolableInvocationHandler, IPacketHandler {
 	 */
 	@Override
 	public void handleClose(IPacketWriter wt) {
-		if (this.connStatus == Status.CLOSED) {
+		if (this.connStatus == ConnStatus.CLOSED) {
 			return;
 		}
-		this.connStatus = Status.INNITIAL;
+		this.connStatus = ConnStatus.CONNECTING;
 		if (!retryConnect()) {
 			LOG.error("We can not re-connect to server after retry times, RpcClient with stop.");
 			// Try to shutdown this Client, inform all the threads.
-			this.connStatus = Status.CLOSED;
+			this.connStatus = ConnStatus.CLOSED;
 			this.client.stop();
 			this.invoker.handleClose(wt);
 		}
@@ -301,7 +294,7 @@ public class RpcClient implements PoolableInvocationHandler, IPacketHandler {
 			LOG.info("RPC Client try to reconnect to server round {} ...", i);
 			try {
 				client.connect();
-				this.connStatus = Status.CONNECTED;
+				this.connStatus = ConnStatus.CONNECTED;
 				return true;
 			} catch (IOException e) {
 				// Not connected.
@@ -316,7 +309,7 @@ public class RpcClient implements PoolableInvocationHandler, IPacketHandler {
 	 *
 	 * @return current status
 	 */
-	public Status getConnStatus() {
+	public ConnStatus getConnStatus() {
 		return connStatus;
 	}
 
@@ -326,7 +319,7 @@ public class RpcClient implements PoolableInvocationHandler, IPacketHandler {
 	 * @return true if this RpcClient is valid and ready to work.
 	 */
 	public boolean isValid() {
-        return connStatus == Status.CONNECTED;
+        return connStatus == ConnStatus.CONNECTED;
     }
 
 	/**

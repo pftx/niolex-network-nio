@@ -17,21 +17,19 @@
  */
 package org.apache.niolex.network.rpc;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
 
 import org.apache.niolex.commons.reflect.MethodUtil;
+import org.apache.niolex.network.ConnStatus;
 import org.apache.niolex.network.CoreRunner;
 import org.apache.niolex.network.client.PacketClient;
 import org.apache.niolex.network.demo.json.DemoJsonRpcServer;
 import org.apache.niolex.network.demo.json.RpcService;
-import org.apache.niolex.network.rpc.RpcClient;
-import org.apache.niolex.network.rpc.RpcClient.Status;
-import org.apache.niolex.network.rpc.PacketInvoker;
-import org.apache.niolex.network.rpc.RpcException;
 import org.apache.niolex.network.rpc.conv.JsonConverter;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -70,7 +68,7 @@ public class JsonRpcClientTest {
 		client.addInferface(RpcService.class);
 		client.setConnectTimeout(1234);
 		assertTrue(client.isValid());
-		assertTrue(client.getConnStatus() == Status.CONNECTED);
+		assertTrue(client.getConnStatus() == ConnStatus.CONNECTED);
 	}
 
 	/**
@@ -101,7 +99,7 @@ public class JsonRpcClientTest {
 		DemoJsonRpcServer.main(null);
 		//client.handleError(null);
 		Thread.sleep(10 * CoreRunner.CO_SLEEP);
-		assertTrue(client.getConnStatus() == Status.CONNECTED);
+		assertTrue(client.getConnStatus() == ConnStatus.CONNECTED);
 	}
 
 }

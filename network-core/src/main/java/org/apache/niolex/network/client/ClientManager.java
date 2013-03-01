@@ -26,6 +26,7 @@ import java.util.concurrent.CountDownLatch;
 import org.apache.niolex.commons.util.Runner;
 import org.apache.niolex.commons.util.SystemUtil;
 import org.apache.niolex.network.Config;
+import org.apache.niolex.network.ConnStatus;
 import org.apache.niolex.network.IClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,16 +53,6 @@ public class ClientManager<T extends IClient> {
     private static final Logger LOG = LoggerFactory.getLogger(ClientManager.class);
 
     /**
-     * The connection status of the managed Client.
-     *
-     * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
-     * @version 1.0.0, Date: 2012-6-2
-     */
-    public static enum Status {
-        INNITIAL, CONNECTING, CONNECTED, CLOSED
-    }
-
-    /**
      * The time to sleep between retry.
      */
     private int sleepBetweenRetryTime = Config.RPC_SLEEP_BT_RETRY;
@@ -74,7 +65,7 @@ public class ClientManager<T extends IClient> {
     /**
      * The status of this Client.
      */
-    private Status connStatus;
+    private ConnStatus connStatus;
 
     /**
      * The latch to wait for this manager to finally get a connection.
@@ -104,7 +95,7 @@ public class ClientManager<T extends IClient> {
     public ClientManager(IClient client) {
         super();
         this.client = client;
-        this.connStatus = Status.INNITIAL;
+        this.connStatus = ConnStatus.INNITIAL;
         this.connLatch = new CountDownLatch(1);
     }
 
@@ -147,7 +138,7 @@ public class ClientManager<T extends IClient> {
         if (client.isWorking()) {
             return true;
         }
-        this.connStatus = Status.CONNECTING;
+        this.connStatus = ConnStatus.CONNECTING;
         if (connLatch.getCount() == 0) {
             this.connLatch = new CountDownLatch(1);
         }
@@ -162,7 +153,7 @@ public class ClientManager<T extends IClient> {
                 LOG.info("Try to re-connect to server failed. {}", e.toString());
             }
         }
-        this.connStatus = Status.CLOSED;
+        this.connStatus = ConnStatus.CLOSED;
         this.connLatch.countDown();
         return false;
     }
@@ -176,7 +167,7 @@ public class ClientManager<T extends IClient> {
         addressIndex = (addressIndex + 1) % addressList.size();
         client.setServerAddress(addressList.get(addressIndex));
         client.connect();
-        this.connStatus = Status.CONNECTED;
+        this.connStatus = ConnStatus.CONNECTED;
         connLatch.countDown();
     }
 
@@ -193,7 +184,7 @@ public class ClientManager<T extends IClient> {
      */
     public boolean waitForConnected() throws InterruptedException {
         this.connLatch.await();
-        return this.connStatus == Status.CONNECTED;
+        return this.connStatus == ConnStatus.CONNECTED;
     }
 
     /**
@@ -207,7 +198,7 @@ public class ClientManager<T extends IClient> {
     public void close() {
         this.connectRetryTimes = 0;
         this.client.stop();
-        this.connStatus = Status.CLOSED;
+        this.connStatus = ConnStatus.CLOSED;
     }
 
     /**
@@ -215,7 +206,7 @@ public class ClientManager<T extends IClient> {
      *
      * @return current status
      */
-    public Status getConnStatus() {
+    public ConnStatus getConnStatus() {
         return connStatus;
     }
 

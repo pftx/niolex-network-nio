@@ -19,6 +19,8 @@ package org.apache.niolex.network.rpc;
 
 import java.lang.reflect.InvocationHandler;
 
+import org.apache.niolex.network.ConnStatus;
+
 /**
  * This interface is for {@link org.apache.niolex.network.cli.PoolHandler}. We user
  * want to use PoolHandler, He will need to implement this interface.
@@ -28,6 +30,28 @@ import java.lang.reflect.InvocationHandler;
  * @since 2012-12-19
  */
 public interface PoolableInvocationHandler extends InvocationHandler {
+
+    /**
+     * Get the Rpc Service Client Stub powered by this handler.
+     *
+     * @param c The interface you want to have stub.
+     * @return the stub
+     */
+    public <T> T getService(Class<T> c);
+
+    /**
+     * Set the interface this handler need to handle.
+     *
+     * @param interfs
+     */
+    public void addInferface(Class<?> interfs);
+
+    /**
+     * Get Connection Status of this handler.
+     *
+     * @return current status
+     */
+    public ConnStatus getConnStatus();
 
     /**
      * @return The string representation of the remote peer. i.e. The IP address.

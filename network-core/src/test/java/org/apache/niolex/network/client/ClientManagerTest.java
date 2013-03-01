@@ -24,6 +24,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.niolex.network.ConnStatus;
 import org.junit.Test;
 
 /**
@@ -45,7 +46,7 @@ public class ClientManagerTest {
         cm.setAddressList(Arrays.asList(new InetSocketAddress("www.baidu.com", 80)));
         boolean b = cm.connect();
         assertTrue(b);
-        assertEquals(cm.getConnStatus(), ClientManager.Status.CONNECTED);
+        assertEquals(cm.getConnStatus(), ConnStatus.CONNECTED);
         assertTrue(cm.connect());
         assertTrue(cm.retryConnect());
         cm.close();
@@ -71,7 +72,7 @@ public class ClientManagerTest {
         boolean b = cm.connect();
         assertFalse(b);
         cm.close();
-        assertEquals(cm.getConnStatus(), ClientManager.Status.CLOSED);
+        assertEquals(cm.getConnStatus(), ConnStatus.CLOSED);
     }
 
     /**
@@ -139,7 +140,7 @@ public class ClientManagerTest {
         cm.setSleepBetweenRetryTime(1);
         boolean b = cm.retryConnect();
         assertFalse(b);
-        assertEquals(cm.getConnStatus(), ClientManager.Status.CLOSED);
+        assertEquals(cm.getConnStatus(), ConnStatus.CLOSED);
     }
 
     /**
