@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * The packet invoker which is able to handle multiple threads.
- * Use this invoker along with the {@link PacketClient} or
+ * Use this invoker along with the {@link org.apache.niolex.network.client.PacketClient} or
  * {@link org.apache.niolex.network.client.BlockingClient}
  *
  * @see org.apache.niolex.network.client.PacketClient

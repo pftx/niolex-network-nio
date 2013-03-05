@@ -24,7 +24,7 @@ import org.apache.niolex.network.cli.IServiceHandler;
 import org.apache.niolex.network.cli.RpcServiceHandler;
 import org.apache.niolex.network.cli.conf.RpcConfigBean;
 import org.apache.niolex.network.cli.init.ServiceHandlerBuilder;
-import org.apache.niolex.network.client.PacketClient;
+import org.apache.niolex.network.client.BlockingClient;
 import org.apache.niolex.network.rpc.PacketInvoker;
 import org.apache.niolex.network.rpc.RpcClient;
 import org.apache.niolex.network.rpc.conv.JsonConverter;
@@ -47,7 +47,7 @@ public class JsonRpcBuilder implements ServiceHandlerBuilder {
 	@Override
 	public IServiceHandler build(RpcConfigBean bean, String completeUrl) throws Exception {
 		URI u = new URI(completeUrl);
-		PacketClient pc = new PacketClient(new InetSocketAddress(u.getHost(), u.getPort()));
+		BlockingClient pc = new BlockingClient(new InetSocketAddress(u.getHost(), u.getPort()));
 		PacketInvoker invoker = new PacketInvoker();
 		RpcClient cli = new RpcClient(pc, invoker, new JsonConverter());
 		cli.setConnectTimeout(bean.connectTimeout);

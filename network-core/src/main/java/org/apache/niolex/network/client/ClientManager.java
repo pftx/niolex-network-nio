@@ -264,8 +264,9 @@ public class ClientManager<T extends IClient> {
     /**
      * Set the socket connect timeout.
      *
-     * @see {@link org.apache.niolex.network.IClient#setConnectTimeout(int)}
      * @param timeout the new connect timeout
+     *
+     * @see org.apache.niolex.network.IClient#setConnectTimeout(int)
      */
     public void setConnectTimeout(int timeout) {
         this.client.setConnectTimeout(timeout);
