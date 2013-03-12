@@ -305,6 +305,33 @@ public class RpcClient implements PoolableInvocationHandler, IPacketHandler {
 	}
 
 	/**
+	 * @return The string representation of the remote peer. i.e. The IP address.
+	 */
+	public String getRemoteName() {
+	    return client.getRemoteName();
+	}
+
+	/**
+	 * Set the socket connect timeout.
+	 * This method must be called before {@link #connect()}
+	 *
+	 * @param timeout
+	 */
+	public void setConnectTimeout(int timeout) {
+	    this.client.setConnectTimeout(timeout);
+	}
+
+	/**
+	 * Set the server Internet address this client want to connect
+	 * This method must be called before {@link #connect()}
+	 *
+	 * @param serverAddress
+	 */
+	public void setServerAddress(InetSocketAddress serverAddress) {
+	    client.setServerAddress(serverAddress);
+	}
+
+	/**
 	 * Get Connection Status of this rpc client.
 	 *
 	 * @return current status
@@ -323,11 +350,14 @@ public class RpcClient implements PoolableInvocationHandler, IPacketHandler {
     }
 
 	/**
-     * @return The string representation of the remote peer. i.e. The IP address.
-     */
-	public String getRemoteName() {
-        return client.getRemoteName();
-    }
+	 * Get the time in milliseconds that client with sleep between retry to connect
+	 * to server.
+	 *
+	 * @return the time in milliseconds
+	 */
+	public int getSleepBetweenRetryTime() {
+	    return sleepBetweenRetryTime;
+	}
 
     /**
 	 * Set the time in milliseconds that client with sleep between retry to connect
@@ -340,6 +370,15 @@ public class RpcClient implements PoolableInvocationHandler, IPacketHandler {
 	}
 
 	/**
+	 * Get the retry times
+	 *
+	 * @return the retry times
+	 */
+    public int getConnectRetryTimes() {
+        return connectRetryTimes;
+    }
+
+    /**
 	 * Set retry times.
 	 *
 	 * @param connectRetryTimes
@@ -347,25 +386,5 @@ public class RpcClient implements PoolableInvocationHandler, IPacketHandler {
 	public void setConnectRetryTimes(int connectRetryTimes) {
 		this.connectRetryTimes = connectRetryTimes;
 	}
-
-	/**
-	 * Set the socket connect timeout.
-	 * This method must be called before {@link #connect()}
-	 *
-	 * @param timeout
-	 */
-	public void setConnectTimeout(int timeout) {
-		this.client.setConnectTimeout(timeout);
-	}
-
-	/**
-     * Set the server Internet address this client want to connect
-     * This method must be called before {@link #connect()}
-     *
-     * @param serverAddress
-     */
-    public void setServerAddress(InetSocketAddress serverAddress) {
-        client.setServerAddress(serverAddress);
-    }
 
 }

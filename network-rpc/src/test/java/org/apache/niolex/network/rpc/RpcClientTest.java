@@ -24,6 +24,8 @@ import static org.mockito.Mockito.mock;
 import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
 
+import org.junit.Assert;
+
 import org.apache.niolex.commons.reflect.MethodUtil;
 import org.apache.niolex.network.client.PacketClient;
 import org.apache.niolex.network.demo.json.RpcService;
@@ -99,7 +101,8 @@ public class RpcClientTest {
 		rr.addInferface(RpcService.class);
 		rr.getRemoteName();
 		rr.setSleepBetweenRetryTime(10);
-		rr.setConnectTimeout(10);
+		Assert.assertEquals(10, rr.getSleepBetweenRetryTime());
+		rr.setConnectTimeout(120);
 		rr.stop();
 		rr.handleClose(pc);
 	}
@@ -113,6 +116,7 @@ public class RpcClientTest {
 	    rr.setSleepBetweenRetryTime(10);
 	    rr.setConnectTimeout(10);
 	    rr.setConnectRetryTimes(1);
+	    Assert.assertEquals(1, rr.getConnectRetryTimes());
 	    rr.handleClose(pc);
 	}
 

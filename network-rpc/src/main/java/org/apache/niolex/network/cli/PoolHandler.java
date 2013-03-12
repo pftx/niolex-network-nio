@@ -117,7 +117,7 @@ public class PoolHandler<CLI extends PoolableInvocationHandler> implements Invoc
                 cause = e;
             } finally {
                 // Return the resource.
-                readyQueue.offer(core);
+                offer(core);
             }
         } // End of while.
         throw new RpcException("Failed to service " + method.getName() + ": exceeds retry time [" + retryTimes + "].",
