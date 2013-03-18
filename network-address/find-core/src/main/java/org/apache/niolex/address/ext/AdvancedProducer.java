@@ -109,6 +109,23 @@ public class AdvancedProducer extends Producer {
         }
     }
 
+    /**
+     * Parse the meta signature.
+     *
+     * @param data
+     * @return the map
+     */
+    public HashMap<String, String> parseMap(byte[] data) {
+        HashMap<String, String> map = new HashMap<String, String>();
+        String[] arr = StringUtil.utf8ByteToStr(data).split(" *\r*\n");
+        for (String item : arr) {
+            String[] kv = item.split(" *= *", 2);
+            if (kv.length == 2) {
+                map.put(kv[0], kv[1]);
+            }
+        }
+        return map;
+    }
 
     /**
      * The inner class to really watch node data changes and invoke listener.
@@ -178,24 +195,6 @@ public class AdvancedProducer extends Producer {
                     parseMetaData(path, entry.getKey());
                 }
             }
-        }
-
-        /**
-         * Parse the meta signature.
-         *
-         * @param data
-         * @return the map
-         */
-        private HashMap<String, String> parseMap(byte[] data) {
-            HashMap<String, String> map = new HashMap<String, String>();
-            String[] arr = StringUtil.utf8ByteToStr(data).split(" *\r*\n");
-            for (String item : arr) {
-                String[] kv = item.split(" *= *", 2);
-                if (kv.length == 2) {
-                    map.put(kv[0], kv[1]);
-                }
-            }
-            return map;
         }
 
         /**
