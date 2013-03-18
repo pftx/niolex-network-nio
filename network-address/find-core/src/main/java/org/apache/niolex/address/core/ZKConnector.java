@@ -244,7 +244,7 @@ public class ZKConnector {
      * @param path the path to get
      * @return the children list
      */
-    protected List<String> getChildren(String path) {
+    public List<String> getChildren(String path) {
         try {
             return this.zk.getChildren(path, false);
         } catch (Exception e) {
