@@ -1,0 +1,173 @@
+/**
+ * PathUtil.java
+ *
+ * Copyright 2013 The original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.niolex.address.util;
+
+/**
+ * The whole path of service is:
+ * /<root>/services/<service>/versions/<version>/<state>/<node>
+ *
+ * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
+ * @version 1.0.5
+ * @since 2013-3-15
+ */
+public abstract class PathUtil {
+    public static final String SERVICES = "services";
+    public static final String OPS = "operators";
+    public static final String CLIENTS = "clients";
+    public static final String SERVERS = "servers";
+    public static final String VERSIONS = "versions";
+
+    /**
+     * Make the service to version path.
+     *
+     * @param root
+     * @param service
+     * @return the path
+     */
+    public static String makeService2VersionPath(String root, String service) {
+        StringBuilder path = new StringBuilder();
+        path.append(root).append("/").append(SERVICES).append("/").append(service).append("/").append(VERSIONS);
+        return path.toString();
+    }
+
+    /**
+     * Make the service to state path.
+     *
+     * @param root
+     * @param service
+     * @param version
+     * @return the path
+     */
+    public static String makeService2StatePath(String root, String service, int version) {
+        StringBuilder path = new StringBuilder();
+        path.append(root).append("/").append(SERVICES).append("/").append(service).append("/").append(VERSIONS);
+        path.append("/").append(version);
+        return path.toString();
+    }
+
+    /**
+     * Make the service to state path.
+     *
+     * @param root
+     * @param service
+     * @param version
+     * @param state
+     * @return the path
+     */
+    public static String makeService2NodePath(String root, String service, int version, String state) {
+        StringBuilder path = new StringBuilder();
+        path.append(root).append("/").append(SERVICES).append("/").append(service).append("/").append(VERSIONS);
+        path.append("/").append(version).append("/").append(state);
+        return path.toString();
+    }
+
+
+    /**
+     * We only support three kinds of version:
+     *
+     * 1 the fixed format.
+     * 1+ use the current highest version greater than 1
+     * 1-3 use the current highest version between 1 and 3
+     *
+     * @param version
+     * @return validation result
+     */
+    public static final VersionRes validateVersion(String version) {
+        VersionRes res = new VersionRes();
+        res.setValid(true);
+        if (version.matches("\\d+")) {
+            int ver = Integer.parseInt(version);
+            res.setRange(false);
+            res.setLow(ver);
+        } else if (version.matches("\\d+\\+")) {
+            int ver = Integer.parseInt(version.substring(0, version.length() - 1));
+            res.setRange(true);
+            res.setLow(ver);
+            res.setHigh(Integer.MAX_VALUE);
+        } else if (version.matches("\\d+\\-\\d+")) {
+            res.setRange(true);
+            String[] lh = version.split("-");
+            res.setLow(Integer.parseInt(lh[0]));
+            res.setHigh(Integer.parseInt(lh[1]));
+        } else {
+            res.setValid(false);
+        }
+        return res;
+    }
+
+    public static class VersionRes {
+        private boolean isValid;
+        private boolean isRange;
+        private int low;
+        private int high;
+        /**
+         * @return the isValid
+         */
+        public boolean isValid() {
+            return isValid;
+        }
+        /**
+         * @param isValid the isValid to set
+         */
+        public void setValid(boolean isValid) {
+            this.isValid = isValid;
+        }
+        /**
+         * @return the isRange
+         */
+        public boolean isRange() {
+            return isRange;
+        }
+        /**
+         * @param isRange the isRange to set
+         */
+        public void setRange(boolean isRange) {
+            this.isRange = isRange;
+        }
+        /**
+         * @return the low
+         */
+        public int getLow() {
+            return low;
+        }
+        /**
+         * @param low the low to set
+         */
+        public void setLow(int low) {
+            this.low = low;
+        }
+        /**
+         * @return the high
+         */
+        public int getHigh() {
+            return high;
+        }
+        /**
+         * @param high the high to set
+         */
+        public void setHigh(int high) {
+            this.high = high;
+        }
+
+        @Override
+        public String toString() {
+            return "V[isValid=" + isValid + ", isRange=" + isRange + ", low=" + low + ", high=" + high + "]";
+        }
+
+    }
+}
