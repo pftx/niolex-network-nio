@@ -71,7 +71,7 @@ public class Consumer extends ZKConnector {
      * Get the int version according to the string version. We will find the greatest version for you.
      * 根据输入的字符串version获取当前最高的可用版本号。
      *
-     * @param service 服务的唯一名称，例如com.Niolex.ad.find
+     * @param service 服务的唯一名称，例如org.apache.niolex.address.Test
      * @param version 支持3种格式，参考[version的格式]章节
      * @return 当前最高的可用版本号
      */
@@ -130,7 +130,7 @@ public class Consumer extends ZKConnector {
      * 如果想要在状态（分区）信息发生变化的时候知晓，请在{@link org.apache.niolex.commons.bean.MutableOne}
      * 上面添加监听器。返回值里面的数据是动态更新的，您不需要再次调用本接口。
      *
-     * @param service 服务的唯一名称，例如com.Niolex.ad.find
+     * @param service 服务的唯一名称，例如org.apache.niolex.address.Test
      * @param version 支持3种格式，参考[version的格式]章节
      * @return 当前的服务的状态信息列表；系统会监听该列表的变化，将信息变化设置到返回的MutableOne里
      * @throws FindException 当发生异常时
@@ -160,7 +160,7 @@ public class Consumer extends ZKConnector {
      * 如果想要在地址信息列表发生变化的时候知晓，请在{@link org.apache.niolex.commons.bean.MutableOne}
      * 上面添加监听器。返回值里面的数据是动态更新的，您不需要再次调用本接口。
      *
-     * @param service 服务的唯一名称，例如com.Niolex.ad.find
+     * @param service 服务的唯一名称，例如org.apache.niolex.address.Test
      * @param version 支持3种格式，参考[version的格式]章节
      * @param stat 服务的状态信息，例如分区的服务则用这个表示不同的分区
      * @return 当前的服务地址信息列表；系统会监听该列表的变化，将信息变化设置到返回的MutableOne里
@@ -190,7 +190,7 @@ public class Consumer extends ZKConnector {
      * 如果想要在地址信息列表发生变化的时候知晓，请在{@link org.apache.niolex.commons.bean.MutableOne}
      * 上面添加监听器。返回值里面的数据是动态更新的，您不需要再次调用本接口。
      *
-     * @param service 服务的唯一名称，例如com.Niolex.ad.find
+     * @param service 服务的唯一名称，例如org.apache.niolex.address.Test
      * @param version 当前的数字版本
      * @param stat 服务的状态信息，例如分区的服务则用这个表示不同的分区
      * @return 当前的服务地址信息列表；系统会监听该列表的变化，将信息变化设置到返回的MutableOne里

@@ -1,5 +1,5 @@
 /**
- * QuotaInfo.java, 2012-8-13. 
+ * QuotaInfo.java, 2012-8-13.
  *
  * Copyright 2012 Niolex, Inc.
  *
@@ -17,41 +17,35 @@
  */
 package org.apache.niolex.address.ext;
 
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * The quota info bean
- * 
+ *
  * @author Xie, Jiyun
  */
 public class QuotaInfo {
 
     /**
-     * Parse the quota string into quota map.
-     * 
-     * @param quotas the quota string
+     * Parse the quota string into quota bean.
+     *
+     * @param quotaStr the quota string
      * @return the quota map
      */
-    public static Map<String, QuotaInfo> parse(String quotas) {
-        Map<String, QuotaInfo> map = new HashMap<String, QuotaInfo>();
-        String[] qqs = quotas.split(" *[;:] *");
-        for (String s : qqs) {
-            QuotaInfo i = new QuotaInfo(s);
-            if (i.getClientName() != null)
-                map.put(i.getClientName(), i);
+    public static QuotaInfo parse(String quotaStr) {
+        String[] items = quotaStr.split(" *[,;:] *");
+        QuotaInfo i = new QuotaInfo();
+        if (items.length >= 2) {
+            i.secondQuota = Integer.parseInt(items[0]);
+            i.minuteQuota = Integer.parseInt(items[1]);
         }
-        return map;
+        return i;
     }
 
-    // Client Name
-    private String clientName;
-
     // The total quota for one client
-    private int totalQuota;
+    private int secondQuota;
 
     // The quota for one server of one client
-    private int singleQuota;
+    private int minuteQuota;
 
     /**
      * An empty constructor, for user to create a new QuotaInfo.
@@ -60,64 +54,35 @@ public class QuotaInfo {
     }
 
     /**
-     * Create a QuotaInfo by this string.
-     * 
-     * @param commaSepStr the quota string
+     * @return the second quota
      */
-    public QuotaInfo(String commaSepStr) {
-        if (commaSepStr != null) {
-            String[] items = commaSepStr.split(",");
-            if (items.length == 3) {
-                clientName = items[0];
-                totalQuota = Integer.parseInt(items[1]);
-                singleQuota = Integer.parseInt(items[2]);
-            }
-        }
+    public int getSecondQuota() {
+        return secondQuota;
     }
 
     /**
-     * @return the clientName
+     * Set the second quota
+     *
+     * @param secondQuota
      */
-    public String getClientName() {
-        return clientName;
+    public void setSecondQuota(int secondQuota) {
+        this.secondQuota = secondQuota;
     }
 
     /**
-     * @param clientName
-     *            the clientName to set
+     * @return get the minute quota
      */
-    public void setClientName(String clientName) {
-        this.clientName = clientName;
+    public int getMinuteQuota() {
+        return minuteQuota;
     }
 
     /**
-     * @return the totalQuota
+     * Set the minute quota
+     *
+     * @param minuteQuota
      */
-    public int getTotalQuota() {
-        return totalQuota;
-    }
-
-    /**
-     * @param totalQuota
-     *            the totalQuota to set
-     */
-    public void setTotalQuota(int totalQuota) {
-        this.totalQuota = totalQuota;
-    }
-
-    /**
-     * @return the singleQuota
-     */
-    public int getSingleQuota() {
-        return singleQuota;
-    }
-
-    /**
-     * @param singleQuota
-     *            the singleQuota to set
-     */
-    public void setSingleQuota(int singleQuota) {
-        this.singleQuota = singleQuota;
+    public void setMinuteQuota(int minuteQuota) {
+        this.minuteQuota = minuteQuota;
     }
 
     /**
@@ -127,8 +92,7 @@ public class QuotaInfo {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("{cN=").append(clientName)
-                .append(", tQ=").append(totalQuota).append(", sQ=").append(singleQuota).append("}");
+        builder.append("{secQ=").append(secondQuota).append(", minQ=").append(minuteQuota).append("}");
         return builder.toString();
     }
 
@@ -140,9 +104,8 @@ public class QuotaInfo {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((clientName == null) ? 0 : clientName.hashCode());
-        result = prime * result + singleQuota;
-        result = prime * result + totalQuota;
+        result = prime * result + secondQuota;
+        result = prime * result + minuteQuota;
         return result;
     }
 
@@ -155,9 +118,7 @@ public class QuotaInfo {
         if (this == obj) return true;
         if (!(obj instanceof QuotaInfo)) return false;
         QuotaInfo other = (QuotaInfo) obj;
-        if (clientName == null) return false;
-        return clientName.equals(other.clientName) && singleQuota == other.singleQuota &&
-                totalQuota == other.totalQuota;
+        return secondQuota == other.secondQuota && minuteQuota == other.minuteQuota;
     }
 
 }

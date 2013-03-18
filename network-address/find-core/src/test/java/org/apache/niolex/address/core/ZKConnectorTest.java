@@ -129,7 +129,7 @@ public class ZKConnectorTest {
 
     @Test(expected=FindException.class)
     public void testDeleteNode() {
-        zKConnector.deleteNode("/dev/com.Niolex.ad.find/1/shard/TestNode4");
+        zKConnector.deleteNode(path + "/TestNode4");
     }
 
 	/**

@@ -8,8 +8,6 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.Collection;
 
-import org.apache.niolex.address.ext.MetaData;
-import org.apache.niolex.address.ext.QuotaInfo;
 import org.junit.Test;
 
 
@@ -20,16 +18,11 @@ public class MetaDataTest {
 
     @Test
     public void testFindExceptionStringThrowable() {
-        MetaData kd = new MetaData();
-        QuotaInfo info = new QuotaInfo();
-        info.setClientName("abc");
-        kd.getBeanMap().put("abc", info);
-        info = new QuotaInfo();
-        info.setClientName("123");
-        kd.getBeanMap().put("123", info);
+        MetaData kd = MetaData.parse("IPS=10.1.2.3,10.1.2.4\nQUOTA=100,6000\nUTIME=2013-03-18 16:06:37".getBytes());
         // ----
         Collection<Object> list = kd.getBeanMap().values();
+        System.out.println(kd);
         assertEquals(list.size(), 2);
     }
-    
+
 }

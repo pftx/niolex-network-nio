@@ -48,7 +48,7 @@ public class Producer extends Consumer {
      * Publish the service address to zookeeper.
      * 将当前服务的地址信息发布到zookeeper集群。
      *
-     * @param service 服务的唯一名称，例如com.Niolex.ad.find
+     * @param service 服务的唯一名称，例如org.apache.niolex.address.Test
      * @param version 服务的版本信息，例如100
      * @param stat 服务的状态信息，例如分区的服务则用这个表示不同的分区
      * @param address 服务的地址信息，这就是本机打算发布的信息
@@ -63,7 +63,7 @@ public class Producer extends Consumer {
      * Publish the service address to zookeeper.
      * 将当前服务的地址信息发布到zookeeper集群。
      *
-     * @param service 服务的唯一名称，例如com.Niolex.ad.find
+     * @param service 服务的唯一名称，例如org.apache.niolex.address.Test
      * @param version 服务的版本信息，例如100
      * @param stat 服务的状态信息，例如分区的服务则用这个表示不同的分区
      * @param address 服务的地址信息，这就是本机打算发布的信息
@@ -79,7 +79,7 @@ public class Producer extends Consumer {
      * Publish the service address to zookeeper.
      * 将当前服务的地址信息发布到zookeeper集群。
      *
-     * @param service 服务的唯一名称，例如com.Niolex.ad.find
+     * @param service 服务的唯一名称，例如org.apache.niolex.address.Test
      * @param version 服务的版本信息，例如100
      * @param stat 服务的状态信息，例如分区的服务则用这个表示不同的分区
      * @param address 服务的地址信息，这就是本机打算发布的信息
@@ -111,7 +111,7 @@ public class Producer extends Consumer {
      * 将当前的服务地址信息从zookeeper集群撤销。
      * 该方法用于撤销永久节点，临时节点zookeeper会自己管理。
      *
-     * @param service 服务的唯一名称，例如com.Niolex.ad.find
+     * @param service 服务的唯一名称，例如org.apache.niolex.address.Test
      * @param version 服务的版本信息，例如100
      * @param stat 服务的状态信息，例如分区的服务则用这个表示不同的分区
      * @param address 服务的地址信息，这就是本机打算撤销的地址

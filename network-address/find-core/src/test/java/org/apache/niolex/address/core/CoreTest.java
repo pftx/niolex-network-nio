@@ -20,9 +20,9 @@ package org.apache.niolex.address.core;
 import java.io.IOException;
 
 import org.apache.niolex.address.client.Consumer;
+import org.apache.niolex.address.ext.AdvancedProducer;
 import org.apache.niolex.address.op.OPMain;
 import org.apache.niolex.address.op.ServerMain;
-import org.apache.niolex.address.server.Producer;
 import org.junit.Test;
 
 /**
@@ -36,12 +36,12 @@ public class CoreTest {
     public static final String ZK_ADDR = "10.22.241.233:8181";
     public static final String ZK_ROOT = "find";
     public static final String TEST_SERVICE = "org.apache.niolex.address.Test";
-    public static Producer PRO_DU;
+    public static AdvancedProducer PRO_DU;
     public static Consumer CON_SU;
 
     static {
         try {
-            PRO_DU = new Producer(ZK_ADDR, 5000);
+            PRO_DU = new AdvancedProducer(ZK_ADDR, 5000);
             PRO_DU.setRoot(ZK_ROOT);
             PRO_DU.addAuthInfo(ServerMain.SVR_NAME, ServerMain.SVR_PASSWORD);
             // --------------------
@@ -53,7 +53,7 @@ public class CoreTest {
         }
     }
 
-    public static Producer getProducer() {
+    public static AdvancedProducer getProducer() {
         return PRO_DU;
     }
 

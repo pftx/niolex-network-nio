@@ -224,6 +224,35 @@ public class ZKConnector {
     }
 
     /**
+     * Get the ZNode data of the specified path.
+     *
+     * @param path the path to get
+     * @return the ZNode data
+     */
+    public byte[] getData(String path) {
+        try {
+            Stat st = new Stat();
+            return this.zk.getData(path, false, st);
+        } catch (Exception e) {
+            throw FindException.makeInstance("Failed to get Data.", e);
+        }
+    }
+
+    /**
+     * Get the children of the specified path.
+     *
+     * @param path the path to get
+     * @return the children list
+     */
+    protected List<String> getChildren(String path) {
+        try {
+            return this.zk.getChildren(path, false);
+        } catch (Exception e) {
+            throw FindException.makeInstance("Failed to get Children.", e);
+        }
+    }
+
+    /**
      * Create node and add request to local map if it is a temporary node.
      * Temporary node will be recreated when reconnected to zookeeper.
      *

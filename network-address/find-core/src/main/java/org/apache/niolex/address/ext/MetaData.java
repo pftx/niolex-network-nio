@@ -1,6 +1,6 @@
 /**
  * MetaData.java
- * 
+ *
  * Copyright 2013 Niolex, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,85 +21,68 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.niolex.commons.bean.MutableOne;
 import org.apache.niolex.commons.codec.StringUtil;
 
 /**
  * 元数据的Java表现形式。
- * 
+ *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.5
  * @since 2013-1-6
  */
 public class MetaData {
-    
+
+    public static final String KEY_IPS = "IPS";
+    public static final String KEY_QUOTA = "QUOTA";
+
     /**
-     * Wrap the raw meta data into Java bean style meta data.
-     * 
-     * @param rawData the raw meta data
+     * Parse meta data from this byte array.
+     *
+     * @param data the byte array
      * @return the Java bean style meta data
      */
-    public static MutableOne<MetaData> wrap(MutableOne<byte[]> rawData) {
+    public static MetaData parse(byte[] data) {
+        String s = StringUtil.utf8ByteToStr(data);
+        String[] carr = s.split("\r*\n");
         final MetaData m = new MetaData();
-        final MutableOne<MetaData> ret = new MutableOne<MetaData>(m);
-        // Listen to data change.
-        rawData.addListener(new MutableOne.DataChangeListener<byte[]>() {
-            @Override
-            public void onDataChange(byte[] newData) {
-                m.parse(newData);
-                ret.updateData(m);
-            }});
-        // Parse the first data.
-        m.parse(rawData.data());
-        return ret;
+        for (String item : carr) {
+            String[] c2 = item.split(" *= *", 2);
+            if (c2.length == 2) {
+                m.propMap.put(c2[0], c2[1]);
+            }
+        }
+        m.constructBeans();
+        return m;
     }
-    
+
     /**
      * Store all the meta data here.
      */
     private final Map<String, String> propMap = new HashMap<String, String>();
-    
+
     /**
      * This map is for store java bean, extra help.
      */
     private final Map<String, Object> beanMap = new HashMap<String, Object>();
-    
-    /**
-     * Parse meta data from this byte array.
-     * 
-     * @param data the byte array
-     */
-    public void parse(byte[] data) {
-        String s = StringUtil.utf8ByteToStr(data);
-        String[] carr = s.split("\r*\n");
-        propMap.clear();
-        for (String item : carr) {
-            String[] c2 = item.split(" *= *", 2);
-            if (c2.length == 2) {
-                propMap.put(c2[0], c2[1]);
-            }
-        }
-        constructBeans();
-    }
-    
+
     /**
      * Construct Beans when properties updated.
      */
     protected void constructBeans() {
         beanMap.clear();
-        String ips = propMap.get("IPS");
+        String ips = propMap.get(KEY_IPS);
         if (ips != null) {
-            beanMap.put("IPS", Arrays.asList(ips.split(" *[,;:] *")));
+            beanMap.put(KEY_IPS, Arrays.asList(ips.split(" *[,;:] *")));
         }
-        String quotas = propMap.get("QUOTAS");
-        if (quotas != null) {
-            beanMap.put("QUOTAS", QuotaInfo.parse(quotas));
+        String quota = propMap.get(KEY_QUOTA);
+        if (quota != null) {
+            beanMap.put(KEY_QUOTA, QuotaInfo.parse(quota));
         }
     }
-    
+
     /**
      * Serialize this meta data into byte array.
-     * 
+     *
      * @return the byte array
      */
     public byte[] toByteArray() {

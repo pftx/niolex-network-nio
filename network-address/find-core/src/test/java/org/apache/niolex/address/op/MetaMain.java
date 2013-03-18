@@ -1,5 +1,5 @@
 /**
- * @(#)OPMain.java, 2012-8-20. Copyright 2012 Niolex, Inc. All rights reserved.
+ * @(#)MetaMain.java, 2012-8-20. Copyright 2012 Niolex, Inc. All rights reserved.
  */
 package org.apache.niolex.address.op;
 
@@ -22,10 +22,13 @@ import org.apache.zookeeper.data.Stat;
 /**
  * @author Xie, Jiyun
  */
-public class OPMain {
+public class MetaMain {
 
-    public static String OP_NAME = "operator";
-    public static String OP_PASSWORD = "djidf3jdd23";
+    private static String OP_NAME = "operator";
+    private static String OP_PASSWORD = "djidf3jdd23";
+
+    public static String SVR_NAME = "find-svr";
+    public static String SVR_PASSWORD = "Niolex";
 
     public static String CLI_NAME = "find-cli";
     public static String CLI_PASSWORD = "mailto:xiejiyun";
@@ -36,6 +39,16 @@ public class OPMain {
         String pwd = Base64Util.byteToBase64(Base16Util.base16toByte(SHAUtil.sha1(OP_NAME + ":" + OP_PASSWORD)));
         Id sid = new Id("digest", OP_NAME + ":" + pwd);
         ACL su = new ACL(Perms.ALL, sid);
+        acls.add(su);
+        return acls;
+    }
+
+    public static List<ACL> getRead4Server() throws Exception {
+        List<ACL> acls = new ArrayList<ACL>();
+
+        String pwd = Base64Util.byteToBase64(Base16Util.base16toByte(SHAUtil.sha1(SVR_NAME + ":" + SVR_PASSWORD)));
+        Id sid = new Id("digest", SVR_NAME + ":" + pwd);
+        ACL su = new ACL(Perms.READ, sid);
         acls.add(su);
         return acls;
     }
@@ -69,33 +82,19 @@ public class OPMain {
         }
 
         zk.addAuthInfo("digest", "operator:djidf3jdd23".getBytes());
-        String param = args[0];
+        String param = "/find/services/org.apache.niolex.address.Test";
 
-        if (param != null && param.equals("init")) {
-            zk.create("/find", null, getAll4Op(), CreateMode.PERSISTENT);
-            zk.create("/find/services", null, getAll4Op(), CreateMode.PERSISTENT);
-            zk.create("/find/operators", null, getAll4Op(), CreateMode.PERSISTENT);
-            zk.create("/find/operators/operator", null, getAll4Op(), CreateMode.PERSISTENT);
-            zk.create("/find/clients", null, getAll4Op(), CreateMode.PERSISTENT);
-            zk.create("/find/servers", null, getAll4Op(), CreateMode.PERSISTENT);
+        List<ACL> list = getRead4Client();
+        list.addAll(getAll4Op());
+        list.addAll(getRead4Server());
+        zk.create(param + "/clients", null, list, CreateMode.PERSISTENT);
+        zk.create(param + "/clients/1", "find-cli=1".getBytes(), list, CreateMode.PERSISTENT);
+        String meta = "IPS=10.1.2.3,10.1.2.4\nQUOTA=100,6000";
+        zk.create(param + "/clients/1/find-cli", meta.getBytes(), list, CreateMode.PERSISTENT);
 
-            Stat stat = new Stat();
-            List<ACL> list = zk.getACL("/find/operators/operator", stat);
-            System.out.println("Op created, ACL: " + list);
-        } else {
-            zk.create("/find/services/" + param, null, getAll4Op(), CreateMode.PERSISTENT);
-            List<ACL> list = getRead4Client();
-            list.addAll(getAll4Op());
-            zk.create("/find/services/" + param + "/versions", null, list, CreateMode.PERSISTENT);
-            zk.create("/find/services/" + param + "/versions/1", null, list, CreateMode.PERSISTENT);
-            zk.create("/find/services/" + param + "/versions/2", null, list, CreateMode.PERSISTENT);
-            zk.create("/find/services/" + param + "/versions/3", null, list, CreateMode.PERSISTENT);
-            zk.create("/find/services/" + param + "/versions/4", null, list, CreateMode.PERSISTENT);
-
-            Stat stat = new Stat();
-            list = zk.getACL("/find/services/" + param + "/versions/4", stat);
-            System.out.println("[" + param + "] created, ACL: " + list);
-        }
+        Stat stat = new Stat();
+        list = zk.getACL(param + "/clients/1", stat);
+        System.out.println("[META] created, ACL: " + list);
     }
 
 }

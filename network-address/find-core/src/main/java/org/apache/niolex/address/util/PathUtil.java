@@ -78,6 +78,22 @@ public abstract class PathUtil {
 
 
     /**
+     * Make the meta data path.
+     *
+     * @param root
+     * @param service
+     * @param version
+     * @return the path
+     */
+    public static String makeMetaPath(String root, String service, int version) {
+        StringBuilder path = new StringBuilder();
+        path.append(root).append("/").append(SERVICES).append("/").append(service).append("/").append(CLIENTS);
+        path.append("/").append(version);
+        return path.toString();
+    }
+
+
+    /**
      * We only support three kinds of version:
      *
      * 1 the fixed format.

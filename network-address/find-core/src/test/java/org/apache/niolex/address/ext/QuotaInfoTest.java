@@ -17,11 +17,10 @@
  */
 package org.apache.niolex.address.ext;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
-import java.util.Map;
-
-import org.apache.niolex.address.ext.QuotaInfo;
 import org.junit.Test;
 
 /**
@@ -33,25 +32,13 @@ public class QuotaInfoTest {
 
 	static QuotaInfo info = new QuotaInfo();
 
-	/**
-	 * Test method for {@link org.apache.niolex.find.bean.QuotaInfo#getClientId()}.
-	 */
-	@Test
-	public void testGetClientId() {
-		info.setClientName("fasd");
-		assertEquals(info.getClientName(), "fasd");
-		Map<String, QuotaInfo> map = QuotaInfo.parse("find,300,10000;xoa,10,5000;abc-10-20");
-		System.out.println(map);
-		assertEquals("{xoa={cN=xoa, tQ=10, sQ=5000}, find={cN=find, tQ=300, sQ=10000}}", map.toString());
-	}
-
 	@Test
 	public void testEqu() {
-	    QuotaInfo in2fo = new QuotaInfo(null);
+	    QuotaInfo in2fo = new QuotaInfo();
 	    assertFalse(in2fo.equals("info"));
-	    assertFalse(in2fo.equals(info));
-	    QuotaInfo in3fo = new QuotaInfo(null);
-	    assertFalse(in2fo.equals(in3fo));
+	    assertTrue(in2fo.equals(info));
+	    QuotaInfo in3fo = new QuotaInfo();
+	    assertTrue(in2fo.equals(in3fo));
 	    assertEquals(in2fo.hashCode(), in3fo.hashCode());
 	}
 
@@ -59,9 +46,9 @@ public class QuotaInfoTest {
 	 * Test method for {@link org.apache.niolex.find.bean.QuotaInfo#getTotalQuota()}.
 	 */
 	@Test
-	public void testGetTotalQuota() {
-		info.setTotalQuota(987423);
-		assertEquals(info.getTotalQuota(), 987423);
+	public void testGetMinuteQuota() {
+		info.setMinuteQuota(987423);
+		assertEquals(info.getMinuteQuota(), 987423);
 	}
 
 	/**
@@ -69,8 +56,8 @@ public class QuotaInfoTest {
 	 */
 	@Test
 	public void testGetSingleQuota() {
-		QuotaInfo in2fo = new QuotaInfo("test,10,100");
-        QuotaInfo in3fo = new QuotaInfo("test,10,100");
+		QuotaInfo in2fo = QuotaInfo.parse("10,100");
+        QuotaInfo in3fo = QuotaInfo.parse("10,100");
         assertTrue(in2fo.equals(in3fo));
 	}
 
