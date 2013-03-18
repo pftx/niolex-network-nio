@@ -219,7 +219,7 @@ public class AdvancedProducer extends Producer {
 
         /**
          * Override super method
-         * @see org.apache.niolex.find.core.RecoverableWatcher#reconnected(java.lang.String)
+         * @see org.apache.niolex.address.core.RecoverableWatcher#reconnected(java.lang.String)
          */
         @Override
         public void reconnected(String path) {

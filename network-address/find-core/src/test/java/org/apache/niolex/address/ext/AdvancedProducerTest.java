@@ -103,7 +103,7 @@ public class AdvancedProducerTest {
      */
     @Test
     public void testGetMetaDataStringInt() throws IOException {
-        AdvancedProducer pro = new AdvancedProducer("10.22.241.233:8181", 5000);
+        AdvancedProducer pro = new AdvancedProducer(CoreTest.ZK_ADDR, 5000);
         pro.addAuthInfo(OPMain.CLI_NAME, OPMain.CLI_PASSWORD);
         pro.setRoot("find");
         ConcurrentHashMap<String, MetaData> map = pro.getMetaData(CoreTest.TEST_SERVICE, "1+");
@@ -113,14 +113,14 @@ public class AdvancedProducerTest {
 
     @Test(expected = IllegalStateException.class)
     public void testGetMetaData1() throws Exception {
-        AdvancedProducer sub = new AdvancedProducer("10.22.241.233:8181", 5000);
+        AdvancedProducer sub = new AdvancedProducer(CoreTest.ZK_ADDR, 5000);
         sub.addAuthInfo("redis", "mailto:xiejiyun");
         sub.getMetaData("org.apache.niolex.address.Test", 3);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testGetMetaData2() throws Exception {
-        AdvancedProducer sub = new AdvancedProducer("10.22.241.233:8181", 5000);
+        AdvancedProducer sub = new AdvancedProducer(CoreTest.ZK_ADDR, 5000);
         sub.addAuthInfo("redis", "mailto:xiejiyun");
         sub.setRoot("dev");
         sub.getMetaData("org.apache.niolex.address.Test", 0);

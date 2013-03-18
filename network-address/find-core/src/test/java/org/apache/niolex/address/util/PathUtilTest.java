@@ -1,6 +1,6 @@
 /**
  * PathUtilTest.java
- * 
+ *
  * Copyright 2013 The original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -34,7 +34,9 @@ public class PathUtilTest {
      */
     @Test
     public void testMakeService2VersionPath() {
-        fail("Not yet implemented");
+        String s = PathUtil.makeService2VersionPath("/online", "org.lex.Good");
+        System.out.println(s);
+        assertEquals("/online/services/org.lex.Good/versions", s);
     }
 
     /**
@@ -42,7 +44,9 @@ public class PathUtilTest {
      */
     @Test
     public void testMakeService2StatePath() {
-        fail("Not yet implemented");
+        String s = PathUtil.makeService2StatePath("/online", "org.lex.Good", 5);
+        System.out.println(s);
+        assertEquals("/online/services/org.lex.Good/versions/5", s);
     }
 
     /**
@@ -50,7 +54,9 @@ public class PathUtilTest {
      */
     @Test
     public void testMakeService2NodePath() {
-        fail("Not yet implemented");
+        String s = PathUtil.makeService2NodePath("/online", "org.lex.Good",5, "default");
+        System.out.println(s);
+        assertEquals("/online/services/org.lex.Good/versions/5/default", s);
     }
 
     /**
@@ -58,7 +64,9 @@ public class PathUtilTest {
      */
     @Test
     public void testValidateVersion() {
-        fail("Not yet implemented");
+        String s = PathUtil.makeMetaPath("/online", "org.lex.Good", 4);
+        System.out.println(s);
+        assertEquals("/online/services/org.lex.Good/clients/4", s);
     }
 
 }
