@@ -9,7 +9,6 @@ import java.util.List;
 
 import org.apache.niolex.address.core.CoreTest;
 import org.apache.niolex.commons.bean.MutableOne;
-import org.junit.Test;
 
 /**
  *
@@ -26,11 +25,6 @@ public class ConsumerMain {
         Thread.sleep(1000000);
     }
 
-
-    /**
-     * Test method for {@link org.apache.niolex.find.client.Consumer#getAddressList(java.lang.String, java.lang.String, java.lang.String, org.apache.niolex.find.server.IPChangeListener)}.
-     */
-    @Test
     public static void testGetAddressAndListenChange() throws Exception {
         // It's good.
         MutableOne<List<String>> st = CoreTest.CON_SU.getAddressList(CoreTest.TEST_SERVICE, "1-5", "A");

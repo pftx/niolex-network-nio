@@ -85,7 +85,7 @@ public class ConsumerTest {
     public void testGetAllStats() {
         MutableOne<List<String>> allStats = common.getAllStats(CoreTest.TEST_SERVICE, "1");
         System.out.println("[STATES] " + allStats.data());
-        assertEquals(3, allStats.data().size());
+        assertEquals(4, allStats.data().size());
     }
 
     @Test
