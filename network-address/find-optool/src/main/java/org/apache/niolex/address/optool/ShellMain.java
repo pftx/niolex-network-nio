@@ -150,13 +150,13 @@ public class ShellMain {
         // ====================================
         // Command Line Options
         // ====================================
-        private String host = "127.0.0.1:2181";
+        protected String host = "127.0.0.1:2181";
 
-        private int timeout = 30000;
+        protected int timeout = 30000;
 
-        private String auth = null;
+        protected String auth = null;
 
-        private String root = null;
+        protected String root = null;
 
         private List<String> cmdArgs = null;
 
@@ -165,6 +165,8 @@ public class ShellMain {
         private String curpath = "/";
 
         private boolean isSuper = false;
+
+        private boolean isInit = false;
 
         public String getCommand() {
             return command;
@@ -196,7 +198,9 @@ public class ShellMain {
                         auth = it.next();
                     } else if (opt.equals("-root")) {
                         root = it.next();
-                        curpath += root;
+                        curpath = "/" + root;
+                    } else if (opt.equals("--init")) {
+                        isInit = true;
                     }
                 } catch (NoSuchElementException e) {
                     System.err.println("Error: no argument found for option " + opt);
@@ -261,6 +265,21 @@ public class ShellMain {
 
     public ShellMain(String args[]) throws Exception {
         cl.parseOptions(args);
+        if (cl.isInit) {
+            System.out.println("                              Attention!!!");
+            System.out.println("  System will now try to init a new root [" + cl.root +"]. [" + cl.auth + "] will be the");
+            System.out.println("super user. Once proceed, this process can not be undone.");
+            System.out.println("Are you sure to continue?(y/n):");
+            int input = System.in.read();
+            if (input == 'y') {
+                System.out.println("\nSystem is initializing the root ...");
+                OPToolInit.initRoot(cl);
+                System.out.println("Init done.");
+            } else {
+                System.out.println("Init abouted.");
+                System.exit(0);
+            }
+        }
         System.out.println("Connecting to " + cl.host);
         initOPTool();
     }
@@ -716,7 +735,9 @@ public class ShellMain {
      */
     public String formatACL(ACL acl) {
         String name = acl.getId().getId();
-        name = name.substring(0, name.indexOf(':'));
+        int i = name.indexOf(':');
+        if (i != -1)
+            name = name.substring(0, i);
         String perm = "";
         int p = acl.getPerms();
         if ((p & Perms.ADMIN) != 0) {
