@@ -90,7 +90,7 @@ public class AdvancedProducer extends Producer {
         }
         String path = PathUtil.makeMetaPath(root, service, version);
         try {
-            LOG.info("Try to get meta data from: {}.", path);
+            LOG.info("Try to get meta data from: {}", path);
             ConcurrentHashMap<String, MetaData> map = new ConcurrentHashMap<String, MetaData>();
             DataWatcher wat = new DataWatcher(map);
             byte[] b = (byte[]) this.submitWatcher(path, wat, false);
@@ -191,7 +191,7 @@ public class AdvancedProducer extends Producer {
             for (Entry<String, String> entry : afterMap.entrySet()) {
                 String be = beforeMap.get(entry.getKey());
                 if (be == null || !be.equals(entry.getValue())) {
-                    LOG.info("Meta data changed for: {}/{}.", path, entry.getKey());
+                    LOG.info("Meta data changed for: {}/{}", path, entry.getKey());
                     parseMetaData(path, entry.getKey());
                 }
             }

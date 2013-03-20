@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.niolex.address.ext.AdvancedProducer;
+import org.apache.niolex.commons.codec.StringUtil;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.data.ACL;
@@ -110,6 +111,16 @@ public class OPTool extends AdvancedProducer {
     }
 
     /**
+     * Set data to a node.
+     *
+     * @param fullpath
+     * @param data
+     */
+    public void setData(String fullpath, byte[] data) throws KeeperException, InterruptedException {
+        zk.setData(fullpath, data, -1);
+    }
+
+    /**
      * Get data from a node.
      *
      * @param fullpath
@@ -192,19 +203,30 @@ public class OPTool extends AdvancedProducer {
         return svsms;
     }
 
-    private String byte2str(byte[] bytes) {
+    /**
+     * Convert bytes into string by the UTF-8 encoding.
+     *
+     * @param bytes
+     * @return the string
+     */
+    public String byte2str(byte[] bytes) {
         if (bytes == null || bytes.length == 0) {
             return null;
         } else {
-            return new String(bytes);
+            return StringUtil.utf8ByteToStr(bytes);
         }
     }
 
-    private byte[] str2byte(String str) {
+    /**
+     * Convert string into bytes by the UTF-8 encoding.
+     * @param str
+     * @return the bytes
+     */
+    public byte[] str2byte(String str) {
         if (str == null || str.isEmpty()) {
             return null;
         } else {
-            return str.getBytes();
+            return StringUtil.strToUtf8Byte(str);
         }
     }
 

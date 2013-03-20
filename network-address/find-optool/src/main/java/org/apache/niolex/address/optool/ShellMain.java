@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -14,7 +15,9 @@ import java.util.Set;
 
 import jline.console.ConsoleReader;
 
+import org.apache.niolex.address.core.FindException;
 import org.apache.niolex.address.optool.OPTool.SVSM;
+import org.apache.niolex.address.util.PathUtil;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.ZooDefs.Perms;
 import org.apache.zookeeper.data.ACL;
@@ -39,10 +42,14 @@ public class ShellMain {
     protected OPToolService optool;
 
     private static final String USAGE =
-            "\n OPTool -server host:port -timeout <timeout> -auth username:password -root <root>\n\n"
+            " OPTool -server host:port -timeout <timeout> -auth username:password -root <root>\n\n"
                     +
-                    " Node Path Struct is /<root>/services/<service>/versions/<version>/<stats>/<node>\n" +
-                    "                                               /clients/<version>/<clientName> ==> [data]\n\n"
+                    " Node Path Structure is\n" +
+                    " \t/<root>/services/<service>/versions/<version>/<stats>/<node>\n" +
+                    " \t........................../clients/<version>/<clientName> ==> [data]\n" +
+                    " \t......./operators/<operator>\n" +
+                    " \t......./servers/<server>\n" +
+                    " \t......./clients/<client>\n\n"
                     +
                     " COMMON COMMANDS\n\n"
                     +
@@ -82,9 +89,9 @@ public class ShellMain {
                     +
                     "\t addServer <userName> <password>\n"
                     +
-                    "\t addAuth <fullpath|relativepath> <userName>\n\t\t--Only Work For Version Node\n"
+                    "\t addAuth <fullpath|relativepath> <userName>\n\t\t--Only Work For Service Node\n"
                     +
-                    "\t deleteAuth <fullpath|relativepath> <userName>\n\t\t--Only Work For Version Node\n"
+                    "\t deleteAuth <fullpath|relativepath> <userName>\n\t\t--Only Work For Service Node\n"
                     +
                     "\t listAuth <fullpath|relativepath>\n"
                     +
@@ -92,9 +99,9 @@ public class ShellMain {
                     +
                     " META OPERATIONS\n\n"
                     +
-                    "\t getMeta <key>\n\t\t--Must in a <version> directory\n"
+                    "\t getMeta <userName> <key|empty for get all metas>\n\t\t--Must in a <version> directory\n"
                     +
-                    "\t setMeta <Key> <Value>\n\t\t--Must in a <version> directory\n"
+                    "\t setMeta <userName> <Key> <Value>\n\t\t--Must in a <version> directory\n"
                     +
                     "\n"
                     +
@@ -282,34 +289,38 @@ public class ShellMain {
             reader.addCompleter(new OPToolCompletor(this));
             System.out.println("JLine enabled, please use <tab> key to help you speed up.");
             while ((line = reader.readLine(getPrompt())) != null) {
-                try {
-                    executeLine(line);
-                } catch (KeeperException.NoAuthException e) {
-                    System.err.println("NO AUTH!");
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+                executeLine(line);
             }
         } else {
             System.out.println("JLine disabled, fall back to native console");
             BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
             while ((line = br.readLine()) != null) {
-                try {
-                    executeLine(line);
-                } catch (KeeperException.NoAuthException e) {
-                    System.err.println("NO AUTH!");
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+                executeLine(line);
                 System.out.print(getPrompt());
             }
         }
     }
 
-    public void executeLine(String line) throws Exception {
-        if (!line.isEmpty()) {
-            cl.parseCommand(line);
-            processCmd(cl);
+    public void executeLine(String line) {
+        try {
+            if (!line.isEmpty()) {
+                cl.parseCommand(line);
+                processCmd(cl);
+            }
+        } catch (FindException e) {
+            if (e.getCause() instanceof KeeperException.NoNodeException) {
+                System.err.println("NO NODE: " + ((KeeperException)e.getCause()).getPath());
+            } else if (e.getCause() instanceof KeeperException.NoAuthException) {
+                System.err.println("NO AUTH!");
+            } else {
+                e.printStackTrace();
+            }
+        } catch (KeeperException.NoAuthException e) {
+            System.err.println("NO AUTH!");
+        } catch (KeeperException.NoNodeException e) {
+            System.err.println("NO NODE: " + e.getPath());
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -384,8 +395,8 @@ public class ShellMain {
             if (args.length == 4) {
                 copyClients = Boolean.parseBoolean(args[3]);
             }
-            if (!optool.isInSideServicePath(cl.curpath)) {
-                System.err.println("copyVersion Only work inside a Service node!");
+            if (!optool.isAtServicePath(cl.curpath)) {
+                System.err.println("copyVersion Only work at a Service node!");
                 return;
             }
             // 1. copy version node.
@@ -468,7 +479,111 @@ public class ShellMain {
             } else {
                 System.err.println("This Server Already Exists!");
             }
-        } else if (cmd.equals("listAuth") && args.length == 2) {
+        } else if (cmd.equals("addAuth") && args.length == 3) {
+            String path = this.genAbstractPath(args[1]);
+            if (!optool.isAtServicePath(path)) {
+                System.err.println("addAuth Only work at a Service node!");
+                return;
+            }
+            String clientName = args[2];
+            List<ACL> clientACL = null;
+            boolean isClient = false;
+            List<String> cli = optool.getChildren(optool.getClientsPath());
+            for (String c : cli) {
+                if (c.equals(clientName)) {
+                    isClient = true;
+                    clientACL = optool.getACLs(optool.getClientsPath() + "/" + clientName);
+                    break;
+                }
+            }
+            boolean isServer = false;
+            if (!isClient) {
+                List<String> svrli = optool.getChildren(optool.getServersPath());
+                for (String svr : svrli) {
+                    if (svr.equals(clientName)) {
+                        isServer = true;
+                        clientACL = optool.getACLs(optool.getServersPath() + "/" + clientName);
+                        break;
+                    }
+                }
+            }
+            if (!isClient && !isServer) {
+                System.err.println("addAuth Only work for Client or Server Account!");
+                return;
+            }
+            // We will start to add ACL.
+            if (optool.exists(path)) {
+                // Add ACL for service.
+                optool.addACLs(path, clientACL);
+                List<String> list = optool.getChildren(path);
+                // versions or clients
+                for (String spVer : list) {
+                    optool.addACLs(path + "/" + spVer, clientACL);
+                    List<String> vers = optool.getChildren(path + "/" + spVer);
+                    // versions
+                    for (String v : vers) {
+                        optool.addACLs(path + "/" + spVer + "/" + v, clientACL);
+                        List<String> stats = optool.getChildren(path + "/" + spVer + "/" + v);
+                        List<ACL> statAcl = null;
+                        if (spVer.equals(PathUtil.VERSIONS) && !stats.isEmpty() && isServer) {
+                            // For server, we want to add CDR to the states node.
+                            statAcl = new ArrayList<ACL>();
+                            statAcl.add(new ACL(Perms.CREATE | Perms.DELETE | Perms.READ, clientACL.get(0).getId()));
+                        } else {
+                            statAcl = clientACL;
+                        }
+                        // stats
+                        for (String st : stats) {
+                            optool.addACLs(path + "/" + spVer + "/" + v + "/" + st, statAcl);
+                        }
+                    }
+                }
+                System.out.println("addAuth Done.");
+            } else {
+                System.err.println("This Path does not exist!");
+            }
+        }  else if (cmd.equals("deleteAuth") && args.length == 3) {
+            String path = this.genAbstractPath(args[1]);
+            if (!optool.isAtServicePath(path)) {
+                System.err.println("deleteAuth Only work at a Service node!");
+                return;
+            }
+            String clientName = args[2];
+            List<ACL> clientACL = null;
+            boolean isClient = false;
+            List<String> cli = optool.getChildren(optool.getClientsPath());
+            for (String c : cli) {
+                if (c.equals(clientName)) {
+                    isClient = true;
+                    clientACL = optool.getACLs(optool.getClientsPath() + "/" + clientName);
+                    break;
+                }
+            }
+            boolean isServer = false;
+            if (!isClient) {
+                List<String> svrli = optool.getChildren(optool.getServersPath());
+                for (String svr : svrli) {
+                    if (svr.equals(clientName)) {
+                        isServer = true;
+                        clientACL = optool.getACLs(optool.getServersPath() + "/" + clientName);
+                        break;
+                    }
+                }
+            }
+            if (clientACL == null) {
+                System.err.println("deleteAuth Only work for Client or Server Account!");
+                return;
+            }
+            // We will start to delete ACL.
+            if (optool.exists(path)) {
+                System.out.println("deleteAuth Will be supported latter....");
+                if (isServer) {
+                    System.out.println("Server is Good.");
+                }
+            } else {
+                System.err.println("This Path does not exist!");
+            }
+        }else if (cmd.equals("listAuth") && args.length == 2) {
             String path = this.genAbstractPath(args[1]);
             if (optool.exists(path)) {
                 List<ACL> list = optool.getACLs(path);
@@ -478,6 +593,48 @@ public class ShellMain {
             } else {
                 System.err.println("This Path does not exist!");
             }
+        }else if (cmd.equals("getMeta") && (args.length == 2 || args.length == 3)) {
+            String path = this.genAbstractPath(cl.curpath);
+            if (!optool.isInsideVersionPath(path)) {
+                System.err.println("getMeta only Work inside a Version Node.");
+                return;
+            }
+            path = this.makeClientVersionPath(path);
+            byte[] data = optool.getData(path + "/" + args[1]);
+            if (args.length == 2) {
+                System.out.println(optool.byte2str(data));
+            } else {
+                String key = args[2];
+                HashMap<String, String> lines = optool.parseMap(data);
+                if (lines.containsKey(key)) {
+                    System.out.println("\t[" + key + "] = " + lines.get(key));
+                } else {
+                    System.out.println("\t[" + key + "] NOT FOUND.");
+                }
+            }
+        }else if (cmd.equals("setMeta") && args.length == 4) {
+            String path = this.genAbstractPath(cl.curpath);
+            if (!optool.isInsideVersionPath(path)) {
+                System.err.println("setMeta only Work inside a Version Node.");
+                return;
+            }
+            path = this.makeClientVersionPath(path);
+            List<String> cli = optool.getChildren(path);
+            if (!cli.contains(args[1])) {
+                // Client not exist, so we need to create it.
+                List<ACL> ali = optool.getACLs(path);
+                optool.create(path + "/" + args[1], args[2] + "=" + args[3], ali);
+            } else {
+                // Client already Exist.
+                byte[] data = optool.getData(path + "/" + args[1]);
+                HashMap<String, String> lines = optool.parseMap(data);
+                lines.put(args[2], args[3]);
+                data = optool.toByteArray(lines);
+                optool.setData(path + "/" + args[1], data);
+            }
+            // Update the client trigger.
+            optool.updateClientTrigger(path, args[1]);
+            System.out.println("setMeta Done.");
         } else if (cmd.equals("listService") && args.length == 3) {
             if (args[1].equals("byname")) {
                 List<String> ss = optool.listServiceByPrefix(optool.getServicePath(), args[2]);
@@ -495,6 +652,12 @@ public class ShellMain {
         }
     }
 
+    /**
+     * Format the relative path into abstract path.
+     *
+     * @param appendix
+     * @return the abstract path
+     */
     protected String genAbstractPath(String appendix) {
         if (appendix.charAt(0) == '/') {
             return appendix;
@@ -528,6 +691,21 @@ public class ShellMain {
             ret.append('/').append(breads[i]);
         }
         return ret.length() == 0 ? "/" : ret.toString();
+    }
+
+    /**
+     * Make the version path to a new version path walk through the clients.
+     *
+     * @param path
+     * @return the path
+     */
+    protected String makeClientVersionPath(String path) {
+        String[] curl = path.split("/");
+        StringBuilder ret = new StringBuilder();
+        ret.append(optool.getRoot()).append("/").append(PathUtil.SERVICES).append("/");
+        ret.append(curl[3]).append("/").append(PathUtil.CLIENTS).append("/");
+        ret.append(curl[5]);
+        return ret.toString();
     }
 
     /**

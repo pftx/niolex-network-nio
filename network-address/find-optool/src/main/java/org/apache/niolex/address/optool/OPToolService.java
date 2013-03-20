@@ -289,18 +289,18 @@ public class OPToolService extends OPTool {
      * @return true if in service path
      */
     public boolean isInServicePath(String path) {
-        return path.startsWith(root + "/" + PathUtil.SERVICES);
+        return path.startsWith(root + "/" + PathUtil.SERVICES) && countPath(path) >= 3;
     }
 
     /**
-     * Check whether the path is inside the service path: /root/services/xxx...
-     *
-     * @param path the path to check
-     * @return true if inside service path
+     * Check whether the path is at the service path: /root/services/xxx
      */
-    public boolean isInSideServicePath(String path) {
-        String serviceRoot = root + "/" + PathUtil.SERVICES;
-        return path.startsWith(serviceRoot) && path.length() > serviceRoot.length() + 1;
+    public boolean isAtServicePath(String path) {
+        if (path.startsWith(root + "/" + PathUtil.SERVICES) && countPath(path) == 3 && !path.endsWith("/")) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     /**
