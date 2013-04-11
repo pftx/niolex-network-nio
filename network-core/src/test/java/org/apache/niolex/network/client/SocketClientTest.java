@@ -140,7 +140,7 @@ public class SocketClientTest {
 	        flag = true;
 	    }
 	    assertTrue(flag);
-	    Thread.sleep(10);
+	    Thread.sleep(100);
 	    verify(hand).handleClose(sc);
 	}
 

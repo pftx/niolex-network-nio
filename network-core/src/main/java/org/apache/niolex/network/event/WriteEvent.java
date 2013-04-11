@@ -22,7 +22,7 @@ import org.apache.niolex.network.PacketData;
 
 /**
  * Packet write event.
- * Our system use asynchronization way to send data.
+ * Our system use asynchronous way to send data.
  * That is, when you call #IPacketWriter.handleWrite, we just put the packet in to
  * the out going queue. System will send it when network is ready.
  *

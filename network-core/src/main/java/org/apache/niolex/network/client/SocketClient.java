@@ -122,7 +122,8 @@ public class SocketClient extends BaseClient {
 		    // When IO exception occurred, this socket is invalid, we close it.
 		    if (this.isWorking) {
 		        stop();
-		        // Notify the handler.
+		        // Notify the handler. We use a new thread to do this, because the packet handler might
+		        // want to recover the connection status, which will be time-consuming.
 		        Runner.run(packetHandler, "handleClose", this);
 		    }
 		    // Throw an exception to the invoker.
