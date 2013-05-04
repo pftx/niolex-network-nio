@@ -18,7 +18,6 @@
 package org.apache.niolex.address.core;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -26,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
+import org.apache.niolex.commons.codec.StringUtil;
 import org.apache.niolex.commons.util.SystemUtil;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException;
@@ -121,12 +121,8 @@ public class ZKConnector {
      * @param password
      */
     public void addAuthInfo(String username, String password) {
-        try {
-            auth = (username + ":" + password).getBytes("utf8");
-            this.zk.addAuthInfo("digest", auth);
-        } catch (UnsupportedEncodingException e) {
-            LOG.error("Failed to add auth info because your jdk doesn't support utf8.", e);
-        }
+        auth = StringUtil.strToUtf8Byte(username + ":" + password);
+        this.zk.addAuthInfo("digest", auth);
     }
 
     /**

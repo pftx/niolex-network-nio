@@ -1,7 +1,6 @@
 package org.apache.niolex.address.optool;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,11 +37,7 @@ public class OPTool extends AdvancedProducer {
      * @param userPwd
      */
     public void addAuthInfo(String userPwd) {
-        try {
-            this.zk.addAuthInfo("digest", userPwd.getBytes("utf8"));
-        } catch (UnsupportedEncodingException e) {
-            LOG.error("Failed to add auth info because your jdk doesn't support utf8.", e);
-        }
+        this.zk.addAuthInfo("digest", StringUtil.strToUtf8Byte(userPwd));
     }
 
     /**

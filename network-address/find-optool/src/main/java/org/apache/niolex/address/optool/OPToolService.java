@@ -18,7 +18,6 @@
 package org.apache.niolex.address.optool;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -65,9 +64,8 @@ public class OPToolService extends OPTool {
      * @param passwd
      * @return the generated digest
      * @throws NoSuchAlgorithmException
-     * @throws UnsupportedEncodingException
      */
-    public Id generateDigest(String userName, String passwd) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+    public Id generateDigest(String userName, String passwd) throws NoSuchAlgorithmException {
         String pwd = Base64Util.byteToBase64(Base16Util.base16toByte(SHAUtil.sha1(userName + ":" + passwd)));
         return new Id("digest", userName + ":" + pwd);
     }
