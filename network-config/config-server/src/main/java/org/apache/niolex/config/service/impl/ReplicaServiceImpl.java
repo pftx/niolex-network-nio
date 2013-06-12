@@ -110,7 +110,7 @@ public class ReplicaServiceImpl implements ReplicaService {
 						client.getServerAddress(), e.toString());
 				try {
 					if (sleepTime < DateTimeUtil.MINUTE * 10) {
-						sleepTime += 3000 + MockUtil.ranInt(10000);
+						sleepTime += 3000 + MockUtil.randInt(10000);
 					}
 					Thread.sleep(sleepTime);
 				} catch (InterruptedException e1) {}

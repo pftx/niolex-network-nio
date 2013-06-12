@@ -55,9 +55,9 @@ public class NioClientTest {
         MultiPerformance perf = new MultiPerformance(10, 10, 300){
             @Override
             protected void run() {
-                int a = MockUtil.ranInt(10240);
-                int b = MockUtil.ranInt(10240);
-                int c = MockUtil.ranInt(10240);
+                int a = MockUtil.randInt(10240);
+                int b = MockUtil.randInt(10240);
+                int c = MockUtil.randInt(10240);
                 assertEquals(a + b + c, service.sum(new IntArray(a, b, c)).i);
             }
         };
@@ -81,9 +81,9 @@ public class NioClientTest {
         MultiPerformance perf = new MultiPerformance(10, 10, 300){
             @Override
             protected void run() {
-                int a = MockUtil.ranInt(10240);
-                int b = MockUtil.ranInt(10240);
-                int c = MockUtil.ranInt(10240);
+                int a = MockUtil.randInt(10240);
+                int b = MockUtil.randInt(10240);
+                int c = MockUtil.randInt(10240);
                 assertEquals(a + b + c, service.sum(new IntArray(a, b, c)).i);
             }
         };

@@ -133,9 +133,9 @@ public class StuffPress {
 		public void run() {
 			int i = SIZE;
 			int lennn = a.length() + b.length();
-			int z = MockUtil.ranInt(10240);
-            int y = MockUtil.ranInt(10240);
-            int x = MockUtil.ranInt(10240);
+			int z = MockUtil.randInt(10240);
+            int y = MockUtil.randInt(10240);
+            int x = MockUtil.randInt(10240);
 			while (i-- > 0) {
 				Stop s;
 				// -------------------------

@@ -123,7 +123,7 @@ public class SocketRpcPress {
 
 		@Override
 		public void run() {
-		    int i = MockUtil.ranInt(102192133);
+		    int i = MockUtil.randInt(102192133);
 		    int LEN = a.length() + b.length();
 			while (CNT.getAndIncrement() < SIZE) {
 			    --i;

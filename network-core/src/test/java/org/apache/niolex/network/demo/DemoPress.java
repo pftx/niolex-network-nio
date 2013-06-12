@@ -47,15 +47,15 @@ public class DemoPress {
 		byte[] b1 = a.getData();
 		byte[] b2 = b.getData();
 		if (b1.length == b2.length) {
-			int k = MockUtil.ranInt(b1.length);
+			int k = MockUtil.randInt(b1.length);
 			if (b1[k] != b2[k]) {
 				return false;
 			}
-			k = MockUtil.ranInt(b1.length);
+			k = MockUtil.randInt(b1.length);
 			if (b1[k] != b2[k]) {
 				return false;
 			}
-			k = MockUtil.ranInt(b1.length);
+			k = MockUtil.randInt(b1.length);
 			if (b1[k] != b2[k]) {
 				return false;
 			}
