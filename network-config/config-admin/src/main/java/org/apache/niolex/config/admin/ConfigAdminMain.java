@@ -23,6 +23,7 @@ import jline.console.ConsoleReader;
 import jline.console.completer.StringsCompleter;
 
 import org.apache.niolex.commons.file.FileUtil;
+import org.apache.niolex.network.Config;
 
 /**
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
@@ -31,7 +32,8 @@ import org.apache.niolex.commons.file.FileUtil;
  */
 public class ConfigAdminMain {
 
-	private static final String USAGE = FileUtil.getCharacterFileContentFromClassPath("usage.txt", ConfigAdminMain.class, "utf8");
+	private static final String USAGE = FileUtil.getCharacterFileContentFromClassPath("usage.txt", ConfigAdminMain.class,
+	        Config.SERVER_ENCODING);
 	/**
 	 * @param args
 	 * @throws Exception

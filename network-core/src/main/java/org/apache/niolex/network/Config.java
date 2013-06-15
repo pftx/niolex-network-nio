@@ -17,6 +17,10 @@
  */
 package org.apache.niolex.network;
 
+import java.nio.charset.Charset;
+
+import org.apache.niolex.commons.codec.StringUtil;
+
 /**
  * The main configuration file.
  *
@@ -102,7 +106,7 @@ public interface Config {
 	/**
 	 * Server internal character encoding. UTF-8 is commonly used.
 	 */
-	String SERVER_ENCODING = "UTF-8";
+	Charset SERVER_ENCODING = StringUtil.UTF_8;
 
 	/**
 	 * Field separator of name service.
