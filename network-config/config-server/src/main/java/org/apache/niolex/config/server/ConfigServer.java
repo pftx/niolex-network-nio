@@ -21,7 +21,7 @@ import java.net.InetSocketAddress;
 
 import org.apache.niolex.commons.codec.StringUtil;
 import org.apache.niolex.commons.compress.JacksonUtil;
-import org.apache.niolex.commons.download.DownloadUtil;
+import org.apache.niolex.commons.net.DownloadUtil;
 import org.apache.niolex.commons.util.Runme;
 import org.apache.niolex.config.admin.AddAuthHandler;
 import org.apache.niolex.config.admin.AddConfigHandler;

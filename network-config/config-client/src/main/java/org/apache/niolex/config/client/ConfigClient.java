@@ -34,8 +34,9 @@ import org.apache.niolex.commons.concurrent.Blocker;
 import org.apache.niolex.commons.concurrent.ConcurrentUtil;
 import org.apache.niolex.commons.concurrent.WaitOn;
 import org.apache.niolex.commons.config.PropUtil;
-import org.apache.niolex.commons.download.DownloadUtil;
+import org.apache.niolex.commons.file.DirUtil;
 import org.apache.niolex.commons.file.FileUtil;
+import org.apache.niolex.commons.net.DownloadUtil;
 import org.apache.niolex.commons.util.Runme;
 import org.apache.niolex.commons.util.SystemUtil;
 import org.apache.niolex.config.bean.ConfigGroup;
@@ -150,7 +151,7 @@ public class ConfigClient {
     	// Default to 1 hour.
     	REFRESH_INTERVAL = PropUtil.getLong("server.refresh.interval", 3600000);
     	STORAGE_PATH = PropUtil.getProperty("local.storage.path", "/data/config-client/storage");
-    	FileUtil.mkdirsIfAbsent(STORAGE_PATH);
+    	DirUtil.mkdirsIfAbsent(STORAGE_PATH);
     	// Start to init connection in this main thread.
     	initConnection();
     }
