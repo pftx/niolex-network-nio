@@ -24,9 +24,9 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.niolex.commons.codec.StringUtil;
+import org.apache.niolex.commons.net.NetUtil;
 import org.apache.niolex.commons.test.MockUtil;
 import org.apache.niolex.commons.util.DateTimeUtil;
-import org.apache.niolex.commons.util.SystemUtil;
 import org.apache.niolex.config.core.CodeMap;
 import org.apache.niolex.config.handler.GroupAddedHandler;
 import org.apache.niolex.config.handler.GroupDiffHandler;
@@ -50,7 +50,7 @@ import org.springframework.stereotype.Service;
 public class ReplicaServiceImpl implements ReplicaService {
 	private static final Logger LOG = LoggerFactory.getLogger(ReplicaServiceImpl.class);
 	private static final String AUTH = "3836a809b1bd88a0f093916a4bc46a6b";
-	private static final Set<InetAddress> IP_SET = SystemUtil.getAllLocalAddresses();
+	private static final Set<InetAddress> IP_SET = NetUtil.getAllLocalAddresses();
 
 	private final Map<String, PacketClient> otherServers = new HashMap<String, PacketClient>();
 
