@@ -43,14 +43,14 @@ public class PacketInvoker implements RemoteInvoker {
 
 
 	/**
+	 * The current waiting blocker.
+	 */
+	private final Blocker<PacketData> blocker = new Blocker<PacketData>();
+
+	/**
 	 * The rpc handle timeout in milliseconds.
 	 */
 	private int rpcHandleTimeout = Config.RPC_HANDLE_TIMEOUT;
-
-	/**
-	 * The current waiting blocker.
-	 */
-	private Blocker<PacketData> blocker = new Blocker<PacketData>();
 
 	/**
 	 * Override super method

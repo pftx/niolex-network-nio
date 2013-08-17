@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
 public class DispatchPacketHandler implements IPacketHandler {
 	private static final Logger LOG = LoggerFactory.getLogger(DispatchPacketHandler.class);
 
-    private Map<Short, IPacketHandler> dispatchMap = new HashMap<Short, IPacketHandler>();
+    private final Map<Short, IPacketHandler> dispatchMap = new HashMap<Short, IPacketHandler>();
     private IPacketHandler defaultHandler;
 
     /**

@@ -46,11 +46,11 @@ public class HeartBeatAdapter implements IPacketHandler, WriteEventListener, Run
 	 * The iterator of this queue will not throw ConcurrentModificationException in multiple
 	 * thread modification.
 	 */
-	private ConcurrentLinkedQueue<IPacketWriter> clientQueue = new ConcurrentLinkedQueue<IPacketWriter>();
+	private final ConcurrentLinkedQueue<IPacketWriter> clientQueue = new ConcurrentLinkedQueue<IPacketWriter>();
 
 
 	// The Handler need to be adapted.
-	private IPacketHandler other;
+	private final IPacketHandler other;
 
     /**
      * The interval to send heart beat if no packet sent between this time.
@@ -65,7 +65,7 @@ public class HeartBeatAdapter implements IPacketHandler, WriteEventListener, Run
     /**
      * The status of this adapter.
      */
-    private boolean isWorking;
+    private volatile boolean isWorking;
 
 	/**
 	 * The internal thread.

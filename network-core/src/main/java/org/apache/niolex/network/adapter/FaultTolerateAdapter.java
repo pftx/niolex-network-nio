@@ -61,7 +61,7 @@ public class FaultTolerateAdapter implements IPacketHandler, WriteEventListener 
 
 	private static final int RR_SIZE = Config.SERVER_CACHE_TOLERATE_PACKETS_SIZE;
 
-	private Map<String, ConcurrentLinkedQueue<PacketData>> dataMap =
+	private final Map<String, ConcurrentLinkedQueue<PacketData>> dataMap =
 			new LRUHashMap<String, ConcurrentLinkedQueue<PacketData>>(Config.SERVER_FAULT_TOLERATE_MAP_SIZE);
 
 	// The Handler need to be adapted.

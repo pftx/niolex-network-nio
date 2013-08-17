@@ -37,9 +37,9 @@ import org.apache.niolex.network.PacketData;
  * @since 2012-5-30
  */
 public class PacketTransformer {
-	private static PacketTransformer INSTANCE = new PacketTransformer();
+	private static final PacketTransformer INSTANCE = new PacketTransformer();
 
-	private Map<Short, ISerializer<?>> serMap = new HashMap<Short, ISerializer<?>>();
+	private final Map<Short, ISerializer<?>> serMap = new HashMap<Short, ISerializer<?>>();
 
 
 	/**

@@ -65,12 +65,12 @@ public class ClientManager<T extends IClient> {
     /**
      * The status of this Client.
      */
-    private ConnStatus connStatus;
+    private volatile ConnStatus connStatus;
 
     /**
      * The latch to wait for this manager to finally get a connection.
      */
-    private CountDownLatch connLatch;
+    private volatile CountDownLatch connLatch;
 
     /**
      * The server address list

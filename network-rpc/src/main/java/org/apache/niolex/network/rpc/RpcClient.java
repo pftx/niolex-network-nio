@@ -85,7 +85,7 @@ public class RpcClient implements PoolableInvocationHandler, IPacketHandler {
 	/**
 	 * The status of this Client.
 	 */
-	private ConnStatus connStatus;
+	private volatile ConnStatus connStatus;
 
 	/**
 	 * Create a RpcClient with this client as the backed communication tool.
