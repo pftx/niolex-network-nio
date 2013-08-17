@@ -38,7 +38,7 @@ public class ConsumerMain {
         System.out.println("[S] Current StateList ==> " + st.data());
         st.addListener(new MutableOne.DataChangeListener<List<String>>() {
             @Override
-            public void onDataChange(List<String> newData) {
+            public void onDataChange(List<String> old, List<String> newData) {
                 System.out.println("[S] New StateList ==> " + newData);
             }
         });
@@ -50,7 +50,7 @@ public class ConsumerMain {
         System.out.println("[X] Current AddressList ==> " + st.data());
         st.addListener(new MutableOne.DataChangeListener<List<String>>() {
             @Override
-            public void onDataChange(List<String> newData) {
+            public void onDataChange(List<String> old, List<String> newData) {
                 System.out.println("[X] New AddressList ==> " + newData);
             }
         });

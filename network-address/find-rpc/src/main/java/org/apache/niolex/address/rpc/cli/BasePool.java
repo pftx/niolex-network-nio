@@ -1,6 +1,6 @@
 /**
  * BasePool.java
- * 
+ *
  * Copyright 2012 Niolex, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -31,13 +31,13 @@ import org.slf4j.LoggerFactory;
 
 /**
  * The Base Client Pool, Manage the server addresses here.
- * 
+ *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.5, $Date: 2013-03-30$
  */
 public abstract class BasePool<T> implements MutableOne.DataChangeListener<List<String>> {
     private static final Logger LOG = LoggerFactory.getLogger(BasePool.class);
-    
+
     /**
      * The network connection parameters.
      */
@@ -50,25 +50,25 @@ public abstract class BasePool<T> implements MutableOne.DataChangeListener<List<
      */
     protected int rpcTimeout = Constants.CLIENT_RPC_TIMEOUT;
     protected int rpcErrorRetryTimes = Constants.CLIENT_RPC_RETRY_TIMES;
-    
+
     /**
      * The internal pool size, could not be changed after creation.
      */
     protected final int poolSize;
     protected double weightShare;
-    
+
     protected final Set<NodeInfo> readySet = new HashSet<NodeInfo>();
-    
+
     protected final Class<T> interfaze;
     protected T stub;
-    
+
     protected PoolHandler<RpcClient> poolHandler;
-    
+
     protected boolean isWorking;
-    
+
     /**
      * Create a Base Pool with this pool size and interface.
-     * 
+     *
      * @param poolSize the client pool size.
      * @param interfaze the service interface.
      * @param mutableOne the server address list of this service.
@@ -80,20 +80,20 @@ public abstract class BasePool<T> implements MutableOne.DataChangeListener<List<
         this.isWorking = false;
         mutableOne.addListener(this);
         // Fire the first change.
-        this.onDataChange(mutableOne.data());
+        this.onDataChange(null, mutableOne.data());
     }
 
     /**
      * This method scan for the change of server list, and try to maintain a stable
      * client pool. We will not build the client pool here.
-     * 
+     *
      * Please Fire Rpc client build manually.
-     * 
+     *
      * Override super method
-     * @see org.apache.niolex.commons.bean.MutableOne.DataChangeListener#onDataChange(java.lang.Object)
+     * @see org.apache.niolex.commons.bean.MutableOne.DataChangeListener#onDataChange(java.lang.Object, java.lang.Object)
      */
     @Override
-    public void onDataChange(List<String> nodeList) {
+    public void onDataChange(List<String> oldList, List<String> nodeList) {
         HashSet<NodeInfo> infoSet = new HashSet<NodeInfo>();
         HashSet<NodeInfo> delSet = new HashSet<NodeInfo>();
         HashSet<NodeInfo> addSet = new HashSet<NodeInfo>();
@@ -133,17 +133,17 @@ public abstract class BasePool<T> implements MutableOne.DataChangeListener<List<
             readySet.addAll(addSet);
         }
     }
-    
+
     /**
      * Mark the deleted node as not retry, and move it from ready set into delete set.
-     * 
+     *
      * @param delSet the node info list waiting to be deleted
      */
     protected abstract void markDeleted(HashSet<NodeInfo> delSet);
-    
+
     /**
      * Add new server addresses to this pool, subclass need to connect to these new servers.
-     * 
+     *
      * @param addSet the node info list waiting to be added
      */
     protected abstract void markNew(HashSet<NodeInfo> addSet);
@@ -152,12 +152,12 @@ public abstract class BasePool<T> implements MutableOne.DataChangeListener<List<
      * Build this pool for use. This method can only be called once.
      */
     public abstract BasePool<T> build();
-    
+
     /**
      * Destroy this pool, disconnect all the connections.
      */
     public abstract void destroy();
-    
+
     /**
      * Get the Rpc Service Client Side Stub powered by this rpc client pool.
      *
@@ -169,12 +169,12 @@ public abstract class BasePool<T> implements MutableOne.DataChangeListener<List<
         }
         return stub;
     }
-    
-    
+
+
     //-------------------------------------------------------------------------
     // GETTERS & SETTERS
     //-------------------------------------------------------------------------
-    
+
     /**
      * @return the connectTimeout
      */

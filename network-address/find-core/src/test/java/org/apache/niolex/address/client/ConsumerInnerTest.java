@@ -34,7 +34,7 @@ public class ConsumerInnerTest {
         MutableOne<List<String>> listener = new MutableOne<List<String>>();
         listener.addListener(new MutableOne.DataChangeListener<List<String>>() {
             @Override
-            public void onDataChange(List<String> newData) {
+            public void onDataChange(List<String> old, List<String> newData) {
                 System.out.println("[X] New AddressList ==> " + newData);
                 i.incrementAndGet();
             }
