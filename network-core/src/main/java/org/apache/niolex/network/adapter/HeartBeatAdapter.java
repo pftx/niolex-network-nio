@@ -20,6 +20,7 @@ package org.apache.niolex.network.adapter;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import org.apache.niolex.commons.concurrent.ThreadUtil;
 import org.apache.niolex.network.Config;
 import org.apache.niolex.network.IPacketHandler;
 import org.apache.niolex.network.IPacketWriter;
@@ -31,6 +32,11 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handle the heart beat problem of the writers attached with this adapter.
+ * <br>
+ * If user set {@link #forceHeartBeat}, then we will heart beat all the clients,
+ * otherwise only heart beat those registered with {@link Config.CODE_REGR_HBEAT}.
+ * <br>
+ * User can set the heart beat interval with {@link #setHeartBeatInterval(int)}.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
@@ -42,12 +48,11 @@ public class HeartBeatAdapter implements IPacketHandler, WriteEventListener, Run
 	private static final String KEY = Config.ATTACH_KEY_HEART_BEAT;
 
 	/**
-	 * The queue to save all the clients who need heart beat.
+	 * The queue to save all the clients who needs heart beat.
 	 * The iterator of this queue will not throw ConcurrentModificationException in multiple
 	 * thread modification.
 	 */
 	private final ConcurrentLinkedQueue<IPacketWriter> clientQueue = new ConcurrentLinkedQueue<IPacketWriter>();
-
 
 	// The Handler need to be adapted.
 	private final IPacketHandler other;
@@ -58,9 +63,9 @@ public class HeartBeatAdapter implements IPacketHandler, WriteEventListener, Run
     private int heartBeatInterval = Config.SERVER_HEARTBEAT_INTERVAL;
 
     /**
-     * The max heart beat error.
+     * The max heart beat relaxation time.
      */
-    private int maxHeartBeatError = heartBeatInterval / 8;
+    private int maxHeartBeatRelaxation = heartBeatInterval / 8;
 
     /**
      * The status of this adapter.
@@ -92,7 +97,7 @@ public class HeartBeatAdapter implements IPacketHandler, WriteEventListener, Run
      */
     public void start() {
     	isWorking = true;
-    	thread = new Thread(this);
+    	thread = new Thread(this, "HeartBeatAdapter");
     	thread.setDaemon(true);
     	thread.start();
     }
@@ -103,16 +108,14 @@ public class HeartBeatAdapter implements IPacketHandler, WriteEventListener, Run
     public void stop() {
     	isWorking = false;
     	thread.interrupt();
-    	try {
-    		thread.join();
-		} catch (InterruptedException e) {
-			// Failed to join is ok.
-		}
+    	ThreadUtil.join(thread);
     }
 
 	/**
+	 * {@inheritDoc}
+	 *
 	 * Override super method
-	 * @see org.apache.niolex.network.IPacketHandler#handlePacket(org.apache.niolex.network.PacketData, org.apache.niolex.network.IPacketWriter)
+	 * @see org.apache.niolex.network.IPacketHandler#handlePacket(PacketData, IPacketWriter)
 	 */
 	@Override
 	public void handlePacket(PacketData sc, IPacketWriter wt) {
@@ -144,20 +147,19 @@ public class HeartBeatAdapter implements IPacketHandler, WriteEventListener, Run
 
 	/**
 	 * Override super method
-	 * @see org.apache.niolex.network.event.WriteEventListener#afterSend(org.apache.niolex.network.event.WriteEvent)
+	 * @see org.apache.niolex.network.event.WriteEventListener#afterSend(WriteEvent)
 	 */
 	@Override
 	public void afterSend(WriteEvent wEvent) {
 		IPacketWriter wt = wEvent.getPacketWriter();
-		Long ttm = wt.getAttached(KEY);
-		if (ttm != null) {
+		if (wt.getAttached(KEY) != null) {
 	    	wt.attachData(KEY, System.currentTimeMillis());
 		}
 	}
 
 	/**
 	 * Override super method
-	 * @see org.apache.niolex.network.IPacketHandler#handleClose(org.apache.niolex.network.IPacketWriter)
+	 * @see org.apache.niolex.network.IPacketHandler#handleClose(IPacketWriter)
 	 */
 	@Override
 	public void handleClose(IPacketWriter wt) {
@@ -175,18 +177,13 @@ public class HeartBeatAdapter implements IPacketHandler, WriteEventListener, Run
 	public void run() {
 		while (isWorking) {
 			handleHeartBeat();
-			try {
-				Thread.sleep(heartBeatInterval / 4);
-			} catch (InterruptedException e) {
-				// Failed to sleep is ok.
-			}
+			ThreadUtil.sleep(heartBeatInterval / 4);
 		}
 	}
 
 
     /**
      * Handle the heart beat problem of the writers attached with this adapter.
-     * Any sub class with there own writers will need to invoke this method.
      */
     protected void handleHeartBeat() {
     	Iterator<IPacketWriter> it = clientQueue.iterator();
@@ -196,7 +193,7 @@ public class HeartBeatAdapter implements IPacketHandler, WriteEventListener, Run
     		if (ttm != null) {
     			// Send heart beat if and only if last send time is earlier than
     			// One heart beat interval.
-    			if (ttm + heartBeatInterval < System.currentTimeMillis() + maxHeartBeatError) {
+    			if (ttm + heartBeatInterval < System.currentTimeMillis() + maxHeartBeatRelaxation) {
     				wt.handleWrite(PacketData.getHeartBeatPacket());
     				wt.attachData(KEY, System.currentTimeMillis());
     			}
@@ -215,13 +212,13 @@ public class HeartBeatAdapter implements IPacketHandler, WriteEventListener, Run
 
     /**
 	 * The heartBeatInterval to set
-	 * There will be a +-(12.5%) max error for heart beat.
+	 * There will be a +-(12.5%) max relaxation for heart beat.
 	 *
 	 * @param heartBeatInterval
 	 */
 	public void setHeartBeatInterval(int heartBeatInterval) {
         this.heartBeatInterval = heartBeatInterval;
-        this.maxHeartBeatError = heartBeatInterval / 8;
+        this.maxHeartBeatRelaxation = heartBeatInterval / 8;
     }
 
 	/**

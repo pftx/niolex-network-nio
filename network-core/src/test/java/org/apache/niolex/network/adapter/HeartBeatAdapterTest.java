@@ -20,14 +20,14 @@ package org.apache.niolex.network.adapter;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
-import java.util.concurrent.CountDownLatch;
-
 import org.apache.niolex.network.Config;
 import org.apache.niolex.network.IPacketHandler;
 import org.apache.niolex.network.IPacketWriter;
 import org.apache.niolex.network.PacketData;
 import org.apache.niolex.network.TBasePacketWriter;
 import org.apache.niolex.network.event.WriteEvent;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
@@ -37,17 +37,112 @@ import org.junit.Test;
  */
 public class HeartBeatAdapterTest {
 
-	/**
-	 * Test method for {@link org.apache.niolex.network.adapter.HeartBeatAdapter#start()}.
-	 * @throws Exception
-	 */
+    public static final IPacketHandler other = mock(IPacketHandler.class);
+    public static final HeartBeatAdapter ha = new HeartBeatAdapter(other);
+
+    /**
+     * Test method for {@link org.apache.niolex.network.adapter.HeartBeatAdapter#start()}.
+     * @throws Exception
+     */
+    @BeforeClass
+    public static void setup() {
+        ha.setHeartBeatInterval(20);
+        ha.start();
+    }
+
+    @AfterClass
+    public static void stop() {
+        ha.stop();
+        assertFalse(ha.isWorking());
+    }
+
+    @Test
+    public void testHandlePacketForce() throws Exception {
+        ha.setForceHeartBeat(true);
+        // started now.
+        IPacketWriter wt = spy(new TBasePacketWriter());
+        PacketData sc = new PacketData();
+        ha.handlePacket(sc, wt);
+        verify(wt, atLeast(1)).attachData(anyString(), anyObject());
+        verify(wt).addEventListener(ha);
+    }
+
+    @Test
+    public void testHandlePacketForceAlready() throws Exception {
+        ha.setForceHeartBeat(true);
+        // started now.
+        IPacketWriter wt = spy(new TBasePacketWriter());
+        wt.attachData(Config.ATTACH_KEY_HEART_BEAT, System.currentTimeMillis());
+        PacketData sc = new PacketData();
+        ha.handlePacket(sc, wt);
+        verify(wt, times(1)).attachData(anyString(), anyObject());
+        verify(wt, never()).addEventListener(ha);
+    }
+
+    @Test
+    public void testHandlePacketNotForce() throws Exception {
+        ha.setForceHeartBeat(false);
+        // started now.
+        IPacketWriter wt = spy(new TBasePacketWriter());
+        PacketData sc = new PacketData();
+        ha.handlePacket(sc, wt);
+        verify(wt, times(0)).attachData(anyString(), anyObject());
+        verify(wt, never()).addEventListener(ha);
+    }
+
+    @Test
+    public void testHandlePacketRegi() throws Exception {
+        ha.setForceHeartBeat(false);
+        // started now.
+        IPacketWriter wt = spy(new TBasePacketWriter());
+        PacketData sc = new PacketData(Config.CODE_REGR_HBEAT, new byte[0]);
+        ha.handlePacket(sc, wt);
+        verify(wt).attachData(anyString(), anyObject());
+        verify(wt).addEventListener(ha);
+        // handle again, will not do anything this time.
+        ha.handlePacket(sc, wt);
+        verify(wt).attachData(anyString(), anyObject());
+        verify(wt).addEventListener(ha);
+    }
+
+    @Test
+    public void testAfterSendOK() throws Exception {
+        IPacketWriter wt = spy(new TBasePacketWriter());
+        wt.attachData(Config.ATTACH_KEY_HEART_BEAT, System.currentTimeMillis());
+        WriteEvent wEvent = new WriteEvent();
+        wEvent.setPacketWriter(wt);
+        ha.afterSend(wEvent);
+        verify(wt, times(2)).attachData(anyString(), anyObject());
+    }
+
+    @Test
+    public void testAfterSendNotAttach() throws Exception {
+        IPacketWriter wt = spy(new TBasePacketWriter());
+        WriteEvent wEvent = new WriteEvent();
+        wEvent.setPacketWriter(wt);
+        ha.afterSend(wEvent);
+        verify(wt, never()).attachData(anyString(), anyObject());
+    }
+
+    @Test
+    public void testHandleClose() throws Exception {
+        IPacketWriter wt = spy(new TBasePacketWriter());
+        ha.handleClose(wt);
+        verify(wt).attachData(Config.ATTACH_KEY_HEART_BEAT, null);
+    }
+
+    @Test
+    public void testRun() throws Exception {
+        HeartBeatAdapter ada = new HeartBeatAdapter(null);
+        ada.run();
+        assertFalse(ada.isWorking());
+    }
+
 	@Test
-	public void testStart() throws Exception {
-		IPacketHandler other = mock(IPacketHandler.class);
-		HeartBeatAdapter ha = new HeartBeatAdapter(other);
-		ha.setHeartBeatInterval(200);
-		ha.start();
+	public void testHandleHeartBeat() throws Exception {
 		assertTrue(ha.isWorking());
+		ha.setForceHeartBeat(false);
+		reset(other);
 
 		// started now.
 		IPacketWriter wt = spy(new TBasePacketWriter());
@@ -68,15 +163,19 @@ public class HeartBeatAdapterTest {
 		IPacketWriter wt2 = spy(new TBasePacketWriter());
 
 		// Regi heart beat.
-		ha.handlePacket(sc, wt2);
+		ha.handlePacket(sc2, wt2);
 
 		Thread.sleep(100);
+
+		ha.handlePacket(sc, wt2);
 
 		// wt2 has to send a packet.
 		WriteEvent wEvent = new WriteEvent();
 		wEvent.setPacketData(sc2);
 		wEvent.setPacketWriter(wt2);
 		ha.afterSend(wEvent);
+
+		wt2.attachData(Config.ATTACH_KEY_HEART_BEAT, null);
 
 		Thread.sleep(150);
 
@@ -93,10 +192,6 @@ public class HeartBeatAdapterTest {
 		// After then, heart beat should be ready now.
 		verify(wt, atLeast(2)).handleWrite(PacketData.getHeartBeatPacket());
 		verify(wt2, never()).handleWrite(PacketData.getHeartBeatPacket());
-
-		// stoped now.
-		ha.stop();
-		assertFalse(ha.isWorking());
 	}
 
 	/**
@@ -126,37 +221,4 @@ public class HeartBeatAdapterTest {
 		ada.stop();
 	}
 
-	@Test
-	public void testHeartBeatInterrupt() throws Exception {
-	    IPacketHandler other = mock(IPacketHandler.class);
-	    final HeartBeatAdapter ada = new HeartBeatAdapter(other);
-	    ada.setHeartBeatInterval(10);
-	    ada.setForceHeartBeat(true);
-	    // started now.
-	    IPacketWriter wt = new TBasePacketWriter() {
-	        @Override
-	        public void handleWrite(PacketData sc) {
-	            try {
-                    Thread.sleep(30);
-                } catch (InterruptedException e) {}
-                try {
-                    Thread.sleep(30);
-                } catch (InterruptedException e) {}
-	        }
-	    };
-	    PacketData sc = new PacketData(789, new byte[0]);
-	    ada.handlePacket(sc, wt);
-	    ada.start();
-	    Thread.sleep(20);
-	    final CountDownLatch latch = new CountDownLatch(1);
-	    Thread t = new Thread() {
-	        public void run() {
-	            latch.countDown();
-	            ada.stop();
-	        }
-	    };
-	    t.start();
-	    latch.await();
-	    t.interrupt();
-	}
 }
