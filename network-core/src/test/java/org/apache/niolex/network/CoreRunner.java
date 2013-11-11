@@ -29,7 +29,7 @@ import org.apache.niolex.network.server.NioServer;
  * @version 1.0.0
  * @since 2012-5-30
  */
-public class CoreRunner {
+public class CoreRunner implements Config {
 
 	public static NioServer nioServer;
 	public static boolean isOn;
@@ -54,6 +54,7 @@ public class CoreRunner {
 		nioServer.setPort(PORT);
 		nioServer.start();
 		isOn = true;
+		System.out.println("CoreRunner#createServer() - " + SERVER_ENCODING);
 	}
 
 	public static void shutdown() throws Exception {

@@ -47,7 +47,7 @@ public class LastTalkFactory implements IHandlerFactory {
             public void handleRead(PacketData sc, IPacketWriter wt) {
                 String thisTalk = new String(sc.getData());
                 if (lastTalk == null) {
-                    lastTalk= "Hello, " + wt.getRemoteName() + ", we will do last talk reply.";
+                    lastTalk = "Hello " + wt.getRemoteName() + ", we will do last talk replay.";
                 }
                 sc.setData(lastTalk.getBytes());
                 sc.setLength(sc.getData().length);

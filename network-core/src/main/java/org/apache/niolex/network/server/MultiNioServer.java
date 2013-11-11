@@ -160,7 +160,7 @@ public class MultiNioServer extends NioServer {
 		public RunnableSelector(ThreadGroup tPool) throws IOException {
 			super();
 			this.selector = Selector.open();
-			this.thread = new Thread(tPool, this, "Selector-" + threadInitNumber++);
+			this.thread = new Thread(tPool, this, "selector-" + threadInitNumber++);
 			this.selectorHolder = new SelectorHolder(thread, selector);
 			thread.start();
 		}

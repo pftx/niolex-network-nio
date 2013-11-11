@@ -37,6 +37,10 @@ public class DemoUtil {
      */
     public static final void parseArgs(String[] args) {
         if (args == null || args.length == 0) {
+            HOST = "localhost";
+            PORT = 8808;
+            TIMEOUT = 600000;
+            POOL_SIZE = 0;
             LAST = -1;
             return;
         }

@@ -52,7 +52,7 @@ public class PrintPacketHandlerTest {
 	public void testCoverMain() throws Exception {
 		DemoServer a = new DemoServer();
 		DemoClient b = new DemoClient();
-		DemoServer.main(new String[]{"2"});
+		DemoServer.main(new String[]{"-x", "2"});
 	    Thread.sleep(10);
 	    String cons = "4\nNice to meet you!\n4\nNice to meet you!\n-1\n";
 	    DemoClient.setIn(new ByteArrayInputStream(cons.getBytes()));

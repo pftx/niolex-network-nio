@@ -43,31 +43,46 @@ public class DemoUtilTest extends DemoUtil {
     @Test
     public void testParseArgs3() throws Exception {
         parseArgs(new String[] {"-p", "5868"});
+        assertEquals(5868, PORT);
     }
 
     @Test
     public void testParseArgs4() throws Exception {
-        System.out.println("not yet implemented");
+        parseArgs(new String[] {"-p", "5878", "-h", "1.2.8.68"});
+        assertEquals(5878, PORT);
+        assertEquals("1.2.8.68", HOST);
     }
 
     @Test
     public void testParseArgs5() throws Exception {
-        System.out.println("not yet implemented");
+        parseArgs(new String[] {"-x", "5878", "-h", "1.2.8.68"});
+        assertEquals(5878, POOL_SIZE);
+        assertEquals("1.2.8.68", HOST);
     }
 
     @Test
     public void testParseArgs6() throws Exception {
-        System.out.println("not yet implemented");
+        parseArgs(new String[] {"-P", "5878", "-h", "1.2.8.68", "-t", "660000"});
+        assertEquals(5878, POOL_SIZE);
+        assertEquals("1.2.8.68", HOST);
+        assertEquals(660000, TIMEOUT);
     }
 
     @Test
     public void testParseArgs7() throws Exception {
-        System.out.println("not yet implemented");
+        parseArgs(new String[] {"-s", "5878", "-h", "1.2.8.68", "-t", "660000", "55"});
+        assertEquals(5878, POOL_SIZE);
+        assertEquals("1.2.8.68", HOST);
+        assertEquals(660000, TIMEOUT);
+        assertEquals(55, LAST);
     }
 
     @Test
     public void testParseArgs8() throws Exception {
-        System.out.println("not yet implemented");
+        parseArgs(new String[] {"5878", "-h", "1.2.8.68", "-t", "660000"});
+        assertEquals("1.2.8.68", HOST);
+        assertEquals(660000, TIMEOUT);
+        assertEquals(5878, LAST);
     }
 
 }

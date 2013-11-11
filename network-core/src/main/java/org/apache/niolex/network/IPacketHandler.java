@@ -20,7 +20,7 @@ package org.apache.niolex.network;
 
 /**
  * The Packet Handler Interface.
- * This is the main and raw interface user application want to implement.
+ * This is the main and raw interface user application needs to implement.
  *
  * @author Xie, Jiyun
  *
@@ -31,8 +31,8 @@ public interface IPacketHandler {
      * Handle the Packet, and write results to IPacketWriter if you want.
      * You can write many results or nothing. [0 .. N]
      *
-     * @param sc The Packet need Handle
-     * @param wt Write results
+     * @param sc The packet need to be Handled
+     * @param wt the packet writer to write results
      */
     public void handleRead(PacketData sc, IPacketWriter wt);
 

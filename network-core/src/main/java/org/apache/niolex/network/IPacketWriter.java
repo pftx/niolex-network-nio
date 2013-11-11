@@ -62,10 +62,10 @@ public interface IPacketWriter {
 
     /**
      * Attach some data to this object, please use your unique key, all system internal data key
-     * will start will SYS_, please keep away from them.
+     * will start with <b>SYS_</b>, please keep away from them.
      *
-     * @param key
-     * @param value
+     * @param key the user defined key
+     * @param value the user attachment
      * @return The current stored object, or null if nothing is stored now.
      */
     public Object attachData(String key, Object value);
@@ -73,7 +73,7 @@ public interface IPacketWriter {
     /**
      * Get the attached data from this Writer, or null if nothing is stored.
      *
-     * @param key
+     * @param key the attachment key
      * @return the attached object
      */
     public <T> T getAttached(String key);
