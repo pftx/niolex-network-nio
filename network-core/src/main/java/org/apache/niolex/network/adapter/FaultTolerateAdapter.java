@@ -85,55 +85,89 @@ public class FaultTolerateAdapter implements IPacketHandler, WriteEventListener 
 			other.handlePacket(sc, wt);
 		} else {
 			String ssid = transformer.getDataObject(sc);
-			ConcurrentLinkedQueue<PacketData> data = dataMap.get(ssid);
-
-			// Do the real fault tolerate.
-			if (data != null && wt instanceof BasePacketWriter) {
-				BasePacketWriter bpw = (BasePacketWriter) wt;
-				bpw.replaceQueue(data);
-				// We do this poll and write to trigger client attach itself to write.
-				sc = data.poll();
-				bpw.handleWrite(sc);
-				LOG.info("Fault tolerate recoverd for client [{}] list size {}.", ssid, data.size());
-				dataMap.remove(ssid);
+			if (wt instanceof BasePacketWriter) {
+			    restorePackets(ssid, (BasePacketWriter) wt);
 			}
-
 			// Prepare environment for the next fault tolerate.
 			wt.attachData(KEY_UUID, ssid);
-			CircularList<PacketData> list = new CircularList<PacketData>(RR_SIZE);
-			wt.attachData(KEY_RRLIST, list);
+			wt.attachData(KEY_RRLIST, new CircularList<PacketData>(RR_SIZE));
 			// Attach it self to listen all the write events.
 			wt.addEventListener(this);
 		}
 	}
 
+	/**
+	 * Restore the stored packets into the recovered client.
+	 *
+	 * @param ssid the client session ID
+	 * @param bpw the basic packet writer
+	 */
+	protected void restorePackets(String ssid, BasePacketWriter bpw) {
+	    ConcurrentLinkedQueue<PacketData> data = dataMap.get(ssid);
+        if (data == null) {
+            return;
+        }
+        dataMap.remove(ssid);
+        PacketData sc;
+        ConcurrentLinkedQueue<PacketData> newQueue = bpw.getRemainQueue();
+        final int size = data.size();
+        // We do this poll and write to add all the data in the new queue to the back of this old queue.
+        while ((sc = newQueue.poll()) != null) {
+            data.add(sc);
+        }
+        // Do the real fault tolerance.
+        while ((sc = data.poll()) != null) {
+            bpw.handleWrite(sc);
+        }
+        LOG.info("Fault tolerate recoverd for client [{}] list size {}.", ssid, size);
+	}
+
 	@Override
     public void handleClose(IPacketWriter wt) {
 		other.handleClose(wt);
-		String ssid = wt.getAttached(KEY_UUID);
-		if (ssid != null && wt instanceof BasePacketWriter) {
-			BasePacketWriter bpw = (BasePacketWriter) wt;
-			// Store the non-send data.
-			ConcurrentLinkedQueue<PacketData> els = bpw.getRemainQueue();
-			// The rrlist is to store the last N packets send to client.
-			CircularList<PacketData> list = wt.getAttached(KEY_RRLIST);
-			/**
-			 * Due to the network buffer, the last N packets may have send to client or
-			 * not. We try to re-send them when client re-connected.
-			 */
-			if (list != null) {
-				PacketData sc;
-				int end = list.size();
-				for (int i = 0; i < end; ++i) {
-					sc = list.get(i);
-					els.add(sc);
-				}
-			}
-			if (els.size() > 0) {
-				dataMap.put(ssid, els);
-				LOG.info("Fault tolerate received for client [{}] remain size {}.", ssid, els.size());
-			}
+		if (wt instanceof BasePacketWriter) {
+		    String ssid = wt.getAttached(KEY_UUID);
+		    // The list is the last N packets sent to client.
+		    CircularList<PacketData> list = wt.getAttached(KEY_RRLIST);
+		    wt.attachData(KEY_RRLIST, null);
+		    storePackets(ssid, (BasePacketWriter) wt, list);
 		}
+	}
+
+	/**
+	 * Store the non-sent packets into the internal data map.
+	 *
+	 * @param ssid the session ID
+	 * @param bpw the basic packet writer
+	 * @param list the non-sent list
+	 */
+	protected void storePackets(String ssid, BasePacketWriter bpw, CircularList<PacketData> list) {
+	    // Check ssid first.
+	    if (ssid == null) {
+	        return;
+	    }
+	    // Store the non-send data.
+        ConcurrentLinkedQueue<PacketData> els = bpw.getRemainQueue();
+        int remainSize = els.size();
+        /**
+         * Due to the network buffer, the last N packets may have send to client or
+         * not. We try to re-send them when client re-connected.
+         */
+        if (list != null) {
+            // Add the last N packets into the queue.
+            int end = list.size();
+            for (int i = 0; i < end; ++i) {
+                els.add(list.get(i));
+            }
+            // Poll the elements of this queue and add them to the back.
+            while (remainSize-- > 0) {
+                els.add(els.poll());
+            }
+        }
+        if (els.size() > 0) {
+            dataMap.put(ssid, els);
+            LOG.info("Fault tolerate stored for client [{}] remain size {}.", ssid, els.size());
+        }
 	}
 
 	/**

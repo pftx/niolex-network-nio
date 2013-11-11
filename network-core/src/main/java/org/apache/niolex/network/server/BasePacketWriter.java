@@ -172,14 +172,4 @@ public abstract class BasePacketWriter implements IPacketWriter {
 		return sendPacketsQueue;
 	}
 
-	/**
-	 * Replace the internal packet queue. The packets in the old internal queue will
-	 * not be send to client any more.
-	 * Attention!! Please use this with cautious! This might cause packet lost.
-	 *
-	 * @param list
-	 */
-	public void replaceQueue(ConcurrentLinkedQueue<PacketData> list) {
-		this.sendPacketsQueue = list;
-	}
 }

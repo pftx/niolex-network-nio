@@ -17,14 +17,17 @@
  */
 package org.apache.niolex.network;
 
-import org.apache.niolex.network.demo.LastTalkFactory;
+import org.apache.niolex.commons.concurrent.ThreadUtil;
+import org.apache.niolex.network.handler.IHandlerFactory;
 
 /**
+ * For test use, when code == 5, we sleep.
+ *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
  * @since 2012-5-31
  */
-public class TLastTalkFactory extends LastTalkFactory {
+public class TLastTalkFactory implements IHandlerFactory {
 
 	@Override
     public IPacketHandler createHandler(IPacketWriter wt) {
@@ -38,21 +41,17 @@ public class TLastTalkFactory extends LastTalkFactory {
 
             @Override
             public void handlePacket(PacketData sc, IPacketWriter wt) {
-                String thisTalk = new String(sc.getData());
+                String thisTalk = new String(sc.getData(), Config.SERVER_ENCODING);
                 if (lastTalk == null) {
                     lastTalk= "Hello, " + wt.getRemoteName();
                 }
                 sc.setData(lastTalk.getBytes());
                 sc.setLength(sc.getData().length);
-                System.out.println("Read.------------\nLast talk: "
-                		+ lastTalk + "\nThis talk: " + thisTalk
-                		+ "\n-----------------");
+                System.out.println("Ready.\n------------\nLast talk: "
+                		+ lastTalk + "\nThis talk: " + thisTalk + "\n-----------------");
                 lastTalk = thisTalk;
                 if (sc.getCode() == 5) {
-                	try {
-						Thread.sleep(CoreRunner.CO_SLEEP);
-					} catch (InterruptedException e) {
-					}
+                    ThreadUtil.sleep(CoreRunner.CO_SLEEP);
                 }
                 if (sc.getCode() == 6) {
                 	wt.handleWrite(PacketData.getHeartBeatPacket());

@@ -1,5 +1,5 @@
 /**
- * FaultTolerateTest.java
+ * FaultTolerateRuntimeTest.java
  *
  * Copyright 2012 Niolex, Inc.
  *
@@ -18,12 +18,8 @@
 package org.apache.niolex.network.adapter;
 
 import static org.junit.Assert.assertArrayEquals;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Matchers.*;
+import static org.mockito.Mockito.*;
 
 import java.net.InetSocketAddress;
 
@@ -31,7 +27,7 @@ import org.apache.niolex.network.Config;
 import org.apache.niolex.network.CoreRunner;
 import org.apache.niolex.network.IPacketHandler;
 import org.apache.niolex.network.PacketData;
-import org.apache.niolex.network.client.PacketClient;
+import org.apache.niolex.network.client.SocketClient;
 import org.apache.niolex.network.packet.PacketTransformer;
 import org.apache.niolex.network.packet.StringSerializer;
 import org.junit.AfterClass;
@@ -49,11 +45,11 @@ import org.mockito.runners.MockitoJUnitRunner;
  * @since 2012-5-31
  */
 @RunWith(MockitoJUnitRunner.class)
-public class FaultTolerateTest {
+public class FaultTolerateRuntimeTest {
 
 	@Mock
 	private IPacketHandler packetHandler;
-	private PacketClient packetClient;
+	private SocketClient client;
 	PacketTransformer pt;
 
 	@BeforeClass
@@ -70,49 +66,51 @@ public class FaultTolerateTest {
 	 * Test method for {@link org.apache.niolex.network.packet.PacketTransformer#getInstance()}.
 	 */
 	@Before
-	public void testGetInstance() {
+	public void testGetInstance() throws Exception {
 		pt = PacketTransformer.getInstance();
 		pt.addSerializer(new StringSerializer(Config.CODE_REGR_UUID));
+		client = new SocketClient(new InetSocketAddress("localhost", CoreRunner.PORT));
+		client.setPacketHandler(packetHandler);
+		client.connect();
 	}
 
-	@Test
 	/**
 	 * make fault tolerate work again.
 	 *
 	 * @throws Exception
 	 */
+	@Test
 	public void test() throws Exception {
-		packetClient = new PacketClient(new InetSocketAddress("localhost", CoreRunner.PORT));
-		packetClient.setPacketHandler(packetHandler);
-		packetClient.connect();
+		final PacketData sc0 = pt.getPacketData(Config.CODE_REGR_UUID, "Fault-Tolerate-Runtime-Test");
+		// 1. register SSID
+		client.setAutoRead(false);
+		client.handleWrite(sc0);
 
-		final PacketData sc0 = pt.getPacketData(Config.CODE_REGR_UUID, "FaultTolerateTest");
-		packetClient.handleWrite(sc0);
-		verify(packetHandler, never()).handlePacket(any(PacketData.class), eq(packetClient));
-
+		// 2. write to last talk handler
+		client.setAutoRead(true);
 		byte[] arr = "Wre rea had to estt this project, please keep clean.".getBytes();
 		final PacketData sc1 = new PacketData(4, arr);
-		packetClient.handleWrite(sc1);
-		Thread.sleep(2  * CoreRunner.CO_SLEEP);
+		client.handleWrite(sc1);
+		verify(packetHandler, times(1)).handlePacket(any(PacketData.class), eq(client));
 
-		verify(packetHandler, times(1)).handlePacket(any(PacketData.class), eq(packetClient));
+		// 3. write to last talk handler
 		final PacketData sc2 = new PacketData(5, arr);
-		packetClient.handleWrite(sc2);
-		Thread.sleep(20);
-		packetClient.stop();
+		client.handleWrite(sc2);
+		verify(packetHandler, times(2)).handlePacket(any(PacketData.class), eq(client));
+		client.stop();
 
-		Thread.sleep(5 * CoreRunner.CO_SLEEP);
+		Thread.sleep(CoreRunner.CO_SLEEP);
 		System.out.println("--------------------------------------------");
 
 		packetHandler = mock(IPacketHandler.class);
-		packetClient.setPacketHandler(packetHandler);
-		packetClient.connect();
-		packetClient.handleWrite(sc0);
-		Thread.sleep(5 * CoreRunner.CO_SLEEP);
+		client.setPacketHandler(packetHandler);
+		client.connect();
+		client.handleWrite(sc0);
+		client.handleWrite(sc1);
 
 		ArgumentCaptor<PacketData> argument = ArgumentCaptor.forClass(PacketData.class);
-		verify(packetHandler, times(2)).handlePacket(argument.capture(), eq(packetClient));
+		verify(packetHandler, times(2)).handlePacket(argument.capture(), eq(client));
 		assertArrayEquals(arr, argument.getValue().getData());
-		packetClient.stop();
+		client.stop();
 	}
 }
