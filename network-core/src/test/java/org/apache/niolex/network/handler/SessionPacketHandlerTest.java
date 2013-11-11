@@ -60,9 +60,9 @@ public class SessionPacketHandlerTest {
 			IPacketWriter ip = spy(new TBasePacketWriter());
 			IPacketWriter wt = spy(new TBasePacketWriter());
 			IPacketWriter qt = spy(new TBasePacketWriter());
-			sessionPacketHandler.handleRead(sc, wt);
-			sessionPacketHandler.handleRead(sc, ip);
-			sessionPacketHandler.handleRead(sc, wt);
+			sessionPacketHandler.handlePacket(sc, wt);
+			sessionPacketHandler.handlePacket(sc, ip);
+			sessionPacketHandler.handlePacket(sc, wt);
 			sessionPacketHandler.handleClose(wt);
 			sessionPacketHandler.handleClose(qt);
 			verify(pHandler1, times(1)).handleClose(wt);
@@ -71,30 +71,30 @@ public class SessionPacketHandlerTest {
 		}
 
 	@Test
-	public void testHandleRead() {
-		PacketData sc = mock(PacketData.class);
-		when(sc.getCode()).thenReturn((short)3, (short)3, (short)4);
-		IPacketWriter ip = spy(new TBasePacketWriter());
-		IPacketWriter wt = spy(new TBasePacketWriter());
-		IPacketWriter qt = spy(new TBasePacketWriter());
-		sessionPacketHandler.handleRead(sc, wt);
-		sessionPacketHandler.handleRead(sc, qt);
-		sessionPacketHandler.handleRead(sc, ip);
-		sessionPacketHandler.handleRead(sc, wt);
-		sessionPacketHandler.handleRead(sc, qt);
-		sessionPacketHandler.handleRead(sc, ip);
-		sessionPacketHandler.handleRead(sc, wt);
-		sessionPacketHandler.handleRead(sc, qt);
-		sessionPacketHandler.handleRead(sc, ip);
-		PacketData qc = mock(PacketData.class);
-		sessionPacketHandler.handleRead(qc, qt);
-		sessionPacketHandler.handleRead(qc, ip);
-		verify(factory, times(3)).createHandler(any(IPacketWriter.class));
-		verify(pHandler1, times(9)).handleRead(eq(sc), any(IPacketWriter.class));
-		verify(pHandler1, times(2)).handleRead(eq(qc), any(IPacketWriter.class));
-		verify(pHandler1, times(4)).handleRead(any(PacketData.class), eq(ip));
-		verify(pHandler1, times(3)).handleRead(any(PacketData.class), eq(wt));
-	}
+    	public void testHandlePacket() {
+    		PacketData sc = mock(PacketData.class);
+    		when(sc.getCode()).thenReturn((short)3, (short)3, (short)4);
+    		IPacketWriter ip = spy(new TBasePacketWriter());
+    		IPacketWriter wt = spy(new TBasePacketWriter());
+    		IPacketWriter qt = spy(new TBasePacketWriter());
+    		sessionPacketHandler.handlePacket(sc, wt);
+    		sessionPacketHandler.handlePacket(sc, qt);
+    		sessionPacketHandler.handlePacket(sc, ip);
+    		sessionPacketHandler.handlePacket(sc, wt);
+    		sessionPacketHandler.handlePacket(sc, qt);
+    		sessionPacketHandler.handlePacket(sc, ip);
+    		sessionPacketHandler.handlePacket(sc, wt);
+    		sessionPacketHandler.handlePacket(sc, qt);
+    		sessionPacketHandler.handlePacket(sc, ip);
+    		PacketData qc = mock(PacketData.class);
+    		sessionPacketHandler.handlePacket(qc, qt);
+    		sessionPacketHandler.handlePacket(qc, ip);
+    		verify(factory, times(3)).createHandler(any(IPacketWriter.class));
+    		verify(pHandler1, times(9)).handlePacket(eq(sc), any(IPacketWriter.class));
+    		verify(pHandler1, times(2)).handlePacket(eq(qc), any(IPacketWriter.class));
+    		verify(pHandler1, times(4)).handlePacket(any(PacketData.class), eq(ip));
+    		verify(pHandler1, times(3)).handlePacket(any(PacketData.class), eq(wt));
+    	}
 
 	@Test
 	public void testGetFactory() {

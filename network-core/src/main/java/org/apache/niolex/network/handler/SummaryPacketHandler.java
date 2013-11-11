@@ -50,10 +50,10 @@ public class SummaryPacketHandler implements IPacketHandler {
 	 * We both log the packet summary to console and write it back to client.
 	 *
 	 * Override super method
-	 * @see org.apache.niolex.network.IPacketHandler#handleRead(org.apache.niolex.network.PacketData, org.apache.niolex.network.IPacketWriter)
+	 * @see org.apache.niolex.network.IPacketHandler#handlePacket(org.apache.niolex.network.PacketData, org.apache.niolex.network.IPacketWriter)
 	 */
 	@Override
-    public void handleRead(PacketData sc, IPacketWriter wt) {
+    public void handlePacket(PacketData sc, IPacketWriter wt) {
         StringBuilder sb = new StringBuilder();
         sb.append("---------------------Packet Summary:----------------------\ncode\t");
         sb.append(sc.getCode()).append("\nversion\t").append(sc.getVersion());

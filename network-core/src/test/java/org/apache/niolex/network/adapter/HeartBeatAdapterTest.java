@@ -54,21 +54,21 @@ public class HeartBeatAdapterTest {
 		PacketData sc = new PacketData(Config.CODE_REGR_HBEAT, new byte[0]);
 
 		// Regi heart beat.
-		ha.handleRead(sc, wt);
+		ha.handlePacket(sc, wt);
 
 		// Send data.
 		PacketData sc2 = new PacketData(3, "This is hearrr".getBytes());
-		ha.handleRead(sc2, wt);
+		ha.handlePacket(sc2, wt);
 
 		// verify
-		verify(other, times(0)).handleRead(sc, wt);
-		verify(other).handleRead(sc2, wt);
+		verify(other, times(0)).handlePacket(sc, wt);
+		verify(other).handlePacket(sc2, wt);
 
 		// Create another
 		IPacketWriter wt2 = spy(new TBasePacketWriter());
 
 		// Regi heart beat.
-		ha.handleRead(sc, wt2);
+		ha.handlePacket(sc, wt2);
 
 		Thread.sleep(100);
 
@@ -118,7 +118,7 @@ public class HeartBeatAdapterTest {
 		// started now.
 		IPacketWriter wt = spy(new TBasePacketWriter());
 		PacketData sc = new PacketData(789, new byte[0]);
-		ada.handleRead(sc, wt);
+		ada.handlePacket(sc, wt);
 		assertEquals(10, ada.getHeartBeatInterval());
 		ada.start();
 		Thread.sleep(100);
@@ -145,7 +145,7 @@ public class HeartBeatAdapterTest {
 	        }
 	    };
 	    PacketData sc = new PacketData(789, new byte[0]);
-	    ada.handleRead(sc, wt);
+	    ada.handlePacket(sc, wt);
 	    ada.start();
 	    Thread.sleep(20);
 	    final CountDownLatch latch = new CountDownLatch(1);

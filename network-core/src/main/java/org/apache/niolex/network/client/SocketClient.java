@@ -146,7 +146,7 @@ public class SocketClient extends BaseClient {
             	// Let's ignore the heart beat packet here.
             	continue;
             }
-			packetHandler.handleRead(readPacket, this);
+			packetHandler.handlePacket(readPacket, this);
 			break;
 		}
 	}

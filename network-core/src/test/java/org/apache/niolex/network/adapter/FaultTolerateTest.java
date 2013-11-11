@@ -88,14 +88,14 @@ public class FaultTolerateTest {
 
 		final PacketData sc0 = pt.getPacketData(Config.CODE_REGR_UUID, "FaultTolerateTest");
 		packetClient.handleWrite(sc0);
-		verify(packetHandler, never()).handleRead(any(PacketData.class), eq(packetClient));
+		verify(packetHandler, never()).handlePacket(any(PacketData.class), eq(packetClient));
 
 		byte[] arr = "Wre rea had to estt this project, please keep clean.".getBytes();
 		final PacketData sc1 = new PacketData(4, arr);
 		packetClient.handleWrite(sc1);
 		Thread.sleep(2  * CoreRunner.CO_SLEEP);
 
-		verify(packetHandler, times(1)).handleRead(any(PacketData.class), eq(packetClient));
+		verify(packetHandler, times(1)).handlePacket(any(PacketData.class), eq(packetClient));
 		final PacketData sc2 = new PacketData(5, arr);
 		packetClient.handleWrite(sc2);
 		Thread.sleep(20);
@@ -111,7 +111,7 @@ public class FaultTolerateTest {
 		Thread.sleep(5 * CoreRunner.CO_SLEEP);
 
 		ArgumentCaptor<PacketData> argument = ArgumentCaptor.forClass(PacketData.class);
-		verify(packetHandler, times(2)).handleRead(argument.capture(), eq(packetClient));
+		verify(packetHandler, times(2)).handlePacket(argument.capture(), eq(packetClient));
 		assertArrayEquals(arr, argument.getValue().getData());
 		packetClient.stop();
 	}

@@ -80,9 +80,9 @@ public class FaultTolerateAdapter implements IPacketHandler, WriteEventListener 
 	}
 
 	@Override
-    public void handleRead(PacketData sc, IPacketWriter wt) {
+    public void handlePacket(PacketData sc, IPacketWriter wt) {
 		if (sc.getCode() != Config.CODE_REGR_UUID) {
-			other.handleRead(sc, wt);
+			other.handlePacket(sc, wt);
 		} else {
 			String ssid = transformer.getDataObject(sc);
 			ConcurrentLinkedQueue<PacketData> data = dataMap.get(ssid);

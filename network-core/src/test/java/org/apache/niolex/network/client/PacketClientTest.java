@@ -110,7 +110,7 @@ public class PacketClientTest {
 
 		ArgumentCaptor<PacketData> argument = ArgumentCaptor
 				.forClass(PacketData.class);
-		verify(packetHandler).handleRead(argument.capture(),
+		verify(packetHandler).handlePacket(argument.capture(),
 				any(IPacketWriter.class));
 		assertEquals((short) 4, argument.getValue().getCode());
 		assertEquals((byte) 8, argument.getValue().getVersion());
@@ -206,7 +206,7 @@ public class PacketClientTest {
 				++received;
 				return s;
 			}
-		}).when(packetHandler).handleRead(any(PacketData.class),
+		}).when(packetHandler).handlePacket(any(PacketData.class),
 				any(IPacketWriter.class));
 
 		packetClient.connect();

@@ -34,15 +34,15 @@ public interface IPacketHandler {
      * @param sc The packet need to be Handled
      * @param wt the packet writer to write results
      */
-    public void handleRead(PacketData sc, IPacketWriter wt);
+    public void handlePacket(PacketData sc, IPacketWriter wt);
 
     /**
-     * The remote peer identified by this IPacketWriter is broken.
+     * The remote peer identified by this {@link IPacketWriter} is broken.
      * User need to do private data clean here.
      * It's Guaranteed by the system there will be no more data send to user application
      * after this method been called.
      *
-     * @param wt
+     * @param wt the broken packet writer
      */
     public void handleClose(IPacketWriter wt);
 

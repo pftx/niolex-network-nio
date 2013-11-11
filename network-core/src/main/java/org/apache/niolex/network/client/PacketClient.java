@@ -158,7 +158,7 @@ public class PacketClient extends BaseClient {
                     	// Let's ignore the heart beat packet here.
                     	continue;
                     }
-                    packetHandler.handleRead(readPacket, PacketClient.this);
+                    packetHandler.handlePacket(readPacket, PacketClient.this);
                 }
             } catch(Exception e) {
                 if (isWorking) {

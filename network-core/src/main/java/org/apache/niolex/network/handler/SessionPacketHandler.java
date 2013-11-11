@@ -78,17 +78,17 @@ public class SessionPacketHandler implements IPacketHandler {
      * we will create a new one.
      *
      * Override super method
-     * @see org.apache.niolex.network.IPacketHandler#handleRead(org.apache.niolex.network.PacketData, org.apache.niolex.network.IPacketWriter)
+     * @see org.apache.niolex.network.IPacketHandler#handlePacket(org.apache.niolex.network.PacketData, org.apache.niolex.network.IPacketWriter)
      */
     @Override
-    public void handleRead(PacketData sc, IPacketWriter wt) {
+    public void handlePacket(PacketData sc, IPacketWriter wt) {
         IPacketHandler h = wt.getAttached(KEY);
         if (h == null) {
             h = factory.createHandler(wt);
             wt.attachData(KEY, h);
             LOG.info("Session created for remote: {}", wt.getRemoteName());
         }
-        h.handleRead(sc, wt);
+        h.handlePacket(sc, wt);
     }
 
     /**

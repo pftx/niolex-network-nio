@@ -243,7 +243,7 @@ public class FastCore extends BasePacketWriter {
     	if (receivePacket.getCode() == Config.CODE_HEART_BEAT) {
     		handleWrite(receivePacket);
     	} else {
-    		packetHandler.handleRead(receivePacket, this);
+    		packetHandler.handlePacket(receivePacket, this);
     	}
     	receiveStatus = Status.HEADER;
     	receiveBuffer = getHeadBuffer(false);

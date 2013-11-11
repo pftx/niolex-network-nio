@@ -32,20 +32,20 @@ import org.junit.Test;
 public class PrintPacketHandlerTest {
 
 	@Test
-	public void testHandleRead() {
-		PacketData sc = mock(PacketData.class);
-		when(sc.getData()).thenReturn("NullPointerException".getBytes());
-		when(sc.getCode()).thenReturn((short)3, (short)3, (short)4);
-		IPacketWriter ip = mock(IPacketWriter.class);
-		PrintPacketHandler p = new PrintPacketHandler();
-		p.handleClose(ip);
-		p.handleRead(sc, ip);
-		LastTalkFactory l = new LastTalkFactory();
-		IPacketHandler pp = l.createHandler(ip);
-		pp.handleClose(ip);
-		pp.handleRead(sc, ip);
-		verify(sc).getCode();
-	}
+    	public void testHandlePacket() {
+    		PacketData sc = mock(PacketData.class);
+    		when(sc.getData()).thenReturn("NullPointerException".getBytes());
+    		when(sc.getCode()).thenReturn((short)3, (short)3, (short)4);
+    		IPacketWriter ip = mock(IPacketWriter.class);
+    		PrintPacketHandler p = new PrintPacketHandler();
+    		p.handleClose(ip);
+    		p.handlePacket(sc, ip);
+    		LastTalkFactory l = new LastTalkFactory();
+    		IPacketHandler pp = l.createHandler(ip);
+    		pp.handleClose(ip);
+    		pp.handlePacket(sc, ip);
+    		verify(sc).getCode();
+    	}
 
 	@SuppressWarnings("unused")
 	@Test

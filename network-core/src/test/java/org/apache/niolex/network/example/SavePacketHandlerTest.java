@@ -46,14 +46,14 @@ public class SavePacketHandlerTest {
 	}
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.example.SavePacketHandler#handleRead(org.apache.niolex.network.PacketData, org.apache.niolex.network.IPacketWriter)}.
-	 */
-	@Test
-	public void testHandleRead() {
-		PacketData sc = new PacketData(3, new byte[0]);
-		savePacketHandler.handleRead(sc, null);
-		verify(list).add(sc);
-	}
+    	 * Test method for {@link org.apache.niolex.network.example.SavePacketHandler#handlePacket(org.apache.niolex.network.PacketData, org.apache.niolex.network.IPacketWriter)}.
+    	 */
+    	@Test
+    	public void testHandlePacket() {
+    		PacketData sc = new PacketData(3, new byte[0]);
+    		savePacketHandler.handlePacket(sc, null);
+    		verify(list).add(sc);
+    	}
 
 	/**
 		 * Test method for {@link org.apache.niolex.network.example.SavePacketHandler#handleClose(org.apache.niolex.network.IPacketWriter)}.

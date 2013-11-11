@@ -142,7 +142,7 @@ public class PacketDataTest {
 				LOG.info(s);
 				return s;
 			}
-		}).when(packetHandler).handleRead(any(PacketData.class),
+		}).when(packetHandler).handlePacket(any(PacketData.class),
 				any(IPacketWriter.class));
 
 		PacketClient packetClient1 = new PacketClient(new InetSocketAddress("localhost", PORT));

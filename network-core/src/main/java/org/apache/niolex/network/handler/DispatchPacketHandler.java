@@ -74,15 +74,15 @@ public class DispatchPacketHandler implements IPacketHandler {
      * If we can not find one, we will do a warning log.
      *
      * Override super method
-     * @see org.apache.niolex.network.IPacketHandler#handleRead(org.apache.niolex.network.PacketData, org.apache.niolex.network.IPacketWriter)
+     * @see org.apache.niolex.network.IPacketHandler#handlePacket(org.apache.niolex.network.PacketData, org.apache.niolex.network.IPacketWriter)
      */
     @Override
-    public void handleRead(PacketData sc, IPacketWriter wt) {
+    public void handlePacket(PacketData sc, IPacketWriter wt) {
         IPacketHandler h = dispatchMap.get(sc.getCode());
         if (h != null) {
-            h.handleRead(sc, wt);
+            h.handlePacket(sc, wt);
         } else if (defaultHandler != null) {
-            defaultHandler.handleRead(sc, wt);
+            defaultHandler.handlePacket(sc, wt);
         } else {
             LOG.warn("No handler registered for Packet with code {}", sc.getCode());
         }

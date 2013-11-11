@@ -96,7 +96,7 @@ public class NioServerTest {
         Thread.sleep(3 * CoreRunner.CO_SLEEP);
         c.stop();
         ArgumentCaptor<PacketData> argument = ArgumentCaptor.forClass(PacketData.class);
-        verify(packetHandler).handleRead(argument.capture(), any(IPacketWriter.class));
+        verify(packetHandler).handlePacket(argument.capture(), any(IPacketWriter.class));
         assertEquals((short)4, argument.getValue().getCode());
         assertEquals((byte)1, argument.getValue().getVersion());
         assertEquals(0, argument.getValue().getLength());
@@ -119,7 +119,7 @@ public class NioServerTest {
 		Thread.sleep(5 * CoreRunner.CO_SLEEP);
 		c.stop();
 		ArgumentCaptor<PacketData> argument = ArgumentCaptor.forClass(PacketData.class);
-		verify(packetHandler).handleRead(argument.capture(), any(IPacketWriter.class));
+		verify(packetHandler).handlePacket(argument.capture(), any(IPacketWriter.class));
 		assertEquals((short)4, argument.getValue().getCode());
 		assertEquals((byte)1, argument.getValue().getVersion());
 		assertEquals(1024 * 1024 + 6, argument.getValue().getLength());
@@ -148,7 +148,7 @@ public class NioServerTest {
 		Thread.sleep(5 * CoreRunner.CO_SLEEP);
 		c.stop();
 		ArgumentCaptor<PacketData> argument = ArgumentCaptor.forClass(PacketData.class);
-		verify(packetHandler).handleRead(argument.capture(), any(IPacketWriter.class));
+		verify(packetHandler).handlePacket(argument.capture(), any(IPacketWriter.class));
 		assertEquals((short)4, argument.getValue().getCode());
 		assertEquals((byte)1, argument.getValue().getVersion());
 		assertEquals(1024 * 1024 + 6, argument.getValue().getLength());
@@ -156,7 +156,7 @@ public class NioServerTest {
 		assertEquals((byte)145, argument.getValue().getData()[77]);
 		assertEquals((byte)63, argument.getValue().getData()[145]);
 		argument = ArgumentCaptor.forClass(PacketData.class);
-		verify(h, times(1)).handleRead(argument.capture(), any(IPacketWriter.class));
+		verify(h, times(1)).handlePacket(argument.capture(), any(IPacketWriter.class));
 		assertEquals((short)4, argument.getValue().getCode());
 		assertEquals((byte)1, argument.getValue().getVersion());
 		assertEquals(1024 * 1024 + 6, argument.getValue().getLength());
@@ -184,8 +184,8 @@ public class NioServerTest {
         }
 		Thread.sleep(5 * CoreRunner.CO_SLEEP);
 		c.stop();
-		verify(h, times(4)).handleRead(any(PacketData.class), any(IPacketWriter.class));
-		verify(packetHandler, times(4)).handleRead(any(PacketData.class), any(IPacketWriter.class));
+		verify(h, times(4)).handlePacket(any(PacketData.class), any(IPacketWriter.class));
+		verify(packetHandler, times(4)).handlePacket(any(PacketData.class), any(IPacketWriter.class));
 	}
 
 	@Test
@@ -208,8 +208,8 @@ public class NioServerTest {
 		}
 		Thread.sleep(3 * CoreRunner.CO_SLEEP);
 		c.stop();
-		verify(h, times(2)).handleRead(any(PacketData.class), any(IPacketWriter.class));
-		verify(packetHandler, times(2)).handleRead(any(PacketData.class), any(IPacketWriter.class));
+		verify(h, times(2)).handlePacket(any(PacketData.class), any(IPacketWriter.class));
+		verify(packetHandler, times(2)).handlePacket(any(PacketData.class), any(IPacketWriter.class));
 	}
 
 }

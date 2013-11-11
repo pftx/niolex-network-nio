@@ -37,7 +37,7 @@ public class TLastTalkFactory extends LastTalkFactory {
             }
 
             @Override
-            public void handleRead(PacketData sc, IPacketWriter wt) {
+            public void handlePacket(PacketData sc, IPacketWriter wt) {
                 String thisTalk = new String(sc.getData());
                 if (lastTalk == null) {
                     lastTalk= "Hello, " + wt.getRemoteName();

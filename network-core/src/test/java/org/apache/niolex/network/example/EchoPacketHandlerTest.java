@@ -48,15 +48,15 @@ public class EchoPacketHandlerTest {
 		}
 
 	@Test
-	public void testHandleRead() {
-		PacketData sc = mock(PacketData.class);
-		when(sc.getCode()).thenReturn((short)3, (short)3, (short)4);
-		IPacketWriter ip = mock(IPacketWriter.class);
-		handler.handleRead(sc , ip);
-		handler.handleRead(sc , ip);
-		handler.handleRead(sc , ip);
-		verify(ip, times(3)).handleWrite(sc);
-		verify(ip, times(3)).getRemoteName();
-	}
+    	public void testHandlePacket() {
+    		PacketData sc = mock(PacketData.class);
+    		when(sc.getCode()).thenReturn((short)3, (short)3, (short)4);
+    		IPacketWriter ip = mock(IPacketWriter.class);
+    		handler.handlePacket(sc , ip);
+    		handler.handlePacket(sc , ip);
+    		handler.handlePacket(sc , ip);
+    		verify(ip, times(3)).handleWrite(sc);
+    		verify(ip, times(3)).getRemoteName();
+    	}
 
 }

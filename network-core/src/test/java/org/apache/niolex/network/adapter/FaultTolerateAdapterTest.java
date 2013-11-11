@@ -96,72 +96,72 @@ public class FaultTolerateAdapterTest {
 	}
 
 	/**
-	 * Test method for
-	 * {@link org.apache.niolex.network.handler.FaultTolerateAdapter#handleClose(org.apache.niolex.network.IPacketWriter)}
-	 * .
-	 */
-	@SuppressWarnings("unchecked")
-	@Test
-	public void testHandleRead() {
-		PacketData sc = new PacketData(Config.CODE_REGR_UUID, "AJFIUEALKD".getBytes());
+    	 * Test method for
+    	 * {@link org.apache.niolex.network.handler.FaultTolerateAdapter#handleClose(org.apache.niolex.network.IPacketWriter)}
+    	 * .
+    	 */
+    	@SuppressWarnings("unchecked")
+    	@Test
+    	public void testHandlePacket() {
+    		PacketData sc = new PacketData(Config.CODE_REGR_UUID, "AJFIUEALKD".getBytes());
+    
+    		TBasePacketWriter wt0 = spy(new TBasePacketWriter());
+    		doReturn("Mock").when(wt0).getRemoteName();
+    
+    		PacketData sc2 = new PacketData(3, "AJ231FIUEALKD".getBytes());
+    		// Regi
+    		faultTolerateSPacketHandler.handlePacket(sc, wt0);
+    		// Data
+    		faultTolerateSPacketHandler.handlePacket(sc2, wt0);
+    		verify(h, times(0)).handlePacket(sc, wt0);
+    		verify(h, times(1)).handlePacket(sc2, wt0);
+    
+    		wt0.handleWrite(sc2);
+    		verify(wt0).attachData(Config.ATTACH_KEY_FAULTTO_UUID, "AJFIUEALKD");
+    		faultTolerateSPacketHandler.handleClose(wt0);
+    		// after this, we have 1 data for tolerate: sc2 which is not sent
+    
+    		// after ERROR, client closed. create a new one.
+    		TBasePacketWriter wt = spy(new TBasePacketWriter());
+    		// regi again, should handle fault tolerate.
+    		faultTolerateSPacketHandler.handlePacket(sc, wt);
+    		ArgumentCaptor<Object> argument = ArgumentCaptor.forClass(Object.class);
+    		verify(wt, times(1)).replaceQueue((ConcurrentLinkedQueue<PacketData>) argument.capture());
+    		ConcurrentLinkedQueue<PacketData> aa = (ConcurrentLinkedQueue<PacketData>) argument.getValue();
+    		assertEquals(sc2, aa.peek());
+    
+    		faultTolerateSPacketHandler.handleClose(wt);
+    	}
 
-		TBasePacketWriter wt0 = spy(new TBasePacketWriter());
-		doReturn("Mock").when(wt0).getRemoteName();
+	/**
+    	 * Test method for
+    	 * {@link org.apache.niolex.network.handler.FaultTolerateAdapter#handlePacket(org.apache.niolex.network.PacketData, org.apache.niolex.network.IPacketWriter)}
+    	 * .
+    	 */
+    	@Test
+    	public void testHandlePacketNotRegi() {
+    		PacketData sc = mock(PacketData.class);
+    		IPacketWriter wt = mock(IPacketWriter.class);
+    		faultTolerateSPacketHandler.handlePacket(sc, wt);
+    		verify(h, times(1)).handlePacket(sc, wt);
+    	}
 
-		PacketData sc2 = new PacketData(3, "AJ231FIUEALKD".getBytes());
-		// Regi
-		faultTolerateSPacketHandler.handleRead(sc, wt0);
-		// Data
-		faultTolerateSPacketHandler.handleRead(sc2, wt0);
-		verify(h, times(0)).handleRead(sc, wt0);
-		verify(h, times(1)).handleRead(sc2, wt0);
-
-		wt0.handleWrite(sc2);
-		verify(wt0).attachData(Config.ATTACH_KEY_FAULTTO_UUID, "AJFIUEALKD");
-		faultTolerateSPacketHandler.handleClose(wt0);
-		// after this, we have 1 data for tolerate: sc2 which is not sent
-
-		// after ERROR, client closed. create a new one.
-		TBasePacketWriter wt = spy(new TBasePacketWriter());
-		// regi again, should handle fault tolerate.
-		faultTolerateSPacketHandler.handleRead(sc, wt);
-		ArgumentCaptor<Object> argument = ArgumentCaptor.forClass(Object.class);
-		verify(wt, times(1)).replaceQueue((ConcurrentLinkedQueue<PacketData>) argument.capture());
-		ConcurrentLinkedQueue<PacketData> aa = (ConcurrentLinkedQueue<PacketData>) argument.getValue();
-		assertEquals(sc2, aa.peek());
-
-		faultTolerateSPacketHandler.handleClose(wt);
-	}
+	/**
+    	 * Test method for
+    	 * {@link org.apache.niolex.network.handler.FaultTolerateAdapter#handlePacket(org.apache.niolex.network.PacketData, org.apache.niolex.network.IPacketWriter)}
+    	 * .
+    	 */
+    	@Test
+    	public void testHandlePacketRegi() {
+    		PacketData sc = new PacketData(Config.CODE_REGR_UUID, "AJFIUEALKD".getBytes());
+    		IPacketWriter wt = mock(IPacketWriter.class);
+    		faultTolerateSPacketHandler.handlePacket(sc, wt);
+    		verify(wt).attachData(Config.ATTACH_KEY_FAULTTO_UUID, "AJFIUEALKD");
+    	}
 
 	/**
 	 * Test method for
-	 * {@link org.apache.niolex.network.handler.FaultTolerateAdapter#handleRead(org.apache.niolex.network.PacketData, org.apache.niolex.network.IPacketWriter)}
-	 * .
-	 */
-	@Test
-	public void testHandleReadNotRegi() {
-		PacketData sc = mock(PacketData.class);
-		IPacketWriter wt = mock(IPacketWriter.class);
-		faultTolerateSPacketHandler.handleRead(sc, wt);
-		verify(h, times(1)).handleRead(sc, wt);
-	}
-
-	/**
-	 * Test method for
-	 * {@link org.apache.niolex.network.handler.FaultTolerateAdapter#handleRead(org.apache.niolex.network.PacketData, org.apache.niolex.network.IPacketWriter)}
-	 * .
-	 */
-	@Test
-	public void testHandleReadRegi() {
-		PacketData sc = new PacketData(Config.CODE_REGR_UUID, "AJFIUEALKD".getBytes());
-		IPacketWriter wt = mock(IPacketWriter.class);
-		faultTolerateSPacketHandler.handleRead(sc, wt);
-		verify(wt).attachData(Config.ATTACH_KEY_FAULTTO_UUID, "AJFIUEALKD");
-	}
-
-	/**
-	 * Test method for
-	 * {@link org.apache.niolex.network.handler.FaultTolerateAdapter#handleRead(org.apache.niolex.network.PacketData, org.apache.niolex.network.IPacketWriter)}
+	 * {@link org.apache.niolex.network.handler.FaultTolerateAdapter#handlePacket(org.apache.niolex.network.PacketData, org.apache.niolex.network.IPacketWriter)}
 	 * .
 	 */
 	@Test
@@ -176,7 +176,7 @@ public class FaultTolerateAdapterTest {
 
 	/**
 	 * Test method for
-	 * {@link org.apache.niolex.network.handler.FaultTolerateAdapter#handleRead(org.apache.niolex.network.PacketData, org.apache.niolex.network.IPacketWriter)}
+	 * {@link org.apache.niolex.network.handler.FaultTolerateAdapter#handlePacket(org.apache.niolex.network.PacketData, org.apache.niolex.network.IPacketWriter)}
 	 * .
 	 */
 	@Test
@@ -184,7 +184,7 @@ public class FaultTolerateAdapterTest {
 	public void testHandleRROk() {
 		PacketData sc = new PacketData(Config.CODE_REGR_UUID, "AJFIUEALKD".getBytes());
 		IPacketWriter wt = new TBasePacketWriter();
-		faultTolerateSPacketHandler.handleRead(sc, wt);
+		faultTolerateSPacketHandler.handlePacket(sc, wt);
 		WriteEvent w = new WriteEvent();
 		PacketData sc2 = new PacketData(3, "AJ231FIU3212312EALKD".getBytes());
 		w.setPacketData(sc2);
@@ -195,11 +195,11 @@ public class FaultTolerateAdapterTest {
 		// after error.
 		IPacketWriter wt2 = mock(IPacketWriter.class);
 		// regi again
-		faultTolerateSPacketHandler.handleRead(sc, wt2);
+		faultTolerateSPacketHandler.handlePacket(sc, wt2);
 		verify(wt2).attachData(Config.ATTACH_KEY_FAULTTO_UUID, "AJFIUEALKD");
 
 		TBasePacketWriter wt3 = spy(new TBasePacketWriter());
-		faultTolerateSPacketHandler.handleRead(sc, wt3);
+		faultTolerateSPacketHandler.handlePacket(sc, wt3);
 		verify(wt3).attachData(Config.ATTACH_KEY_FAULTTO_UUID, "AJFIUEALKD");
 
 		ArgumentCaptor<Object> argument = ArgumentCaptor.forClass(Object.class);

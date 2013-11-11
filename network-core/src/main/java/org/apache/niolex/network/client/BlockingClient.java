@@ -143,7 +143,7 @@ public class BlockingClient extends BaseClient {
                             // Let's ignore the heart beat packet here.
                             continue;
                         }
-                        packetHandler.handleRead(readPacket, BlockingClient.this);
+                        packetHandler.handlePacket(readPacket, BlockingClient.this);
                     } catch (SocketTimeoutException e) {
                         handleWrite(PacketData.getHeartBeatPacket());
                     }
