@@ -21,7 +21,7 @@ import org.apache.niolex.commons.codec.Base16Util;
 
 /**
  * The basic data structure of this framework.
- * Use #PacketData instead in user application.
+ * Use {@link PacketData} instead in user application.
  *
  * @author Xie, Jiyun
  *

@@ -17,179 +17,115 @@
  */
 package org.apache.niolex.network;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.spy;
+import static org.junit.Assert.*;
 
-import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Random;
-import java.util.Set;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.nio.ByteBuffer;
 
-import org.apache.niolex.network.client.PacketClient;
-import org.apache.niolex.network.example.EchoPacketHandler;
-import org.apache.niolex.network.server.NioServer;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.runners.MockitoJUnitRunner;
-import org.mockito.stubbing.Answer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-
-@RunWith(MockitoJUnitRunner.class)
 public class PacketDataTest {
-	private static final Logger LOG = LoggerFactory.getLogger(PacketDataTest.class);
-	private static final int PORT = 8908;
 
-	@Mock
-	private IPacketHandler packetHandler;
+    @Test
+    public void testMakeCopy() throws Exception {
+        byte[] arr = "lex implemented".getBytes();
+        PacketData pc = new PacketData((short) 56, arr);
+        PacketData qc = pc.makeCopy();
+        assertArrayEquals(qc.getData(), pc.getData());
+        assertEquals(qc.getCode(), pc.getCode());
+    }
 
-	private IPacketHandler packetHandlerServer;
+    @Test
+    public void testPutHeader() throws Exception {
+        byte[] arr = "lex implemented".getBytes();
+        PacketData pc = new PacketData(47, arr);
+        ByteBuffer ba = ByteBuffer.allocate(8);
+        pc.putHeader(ba);
+        ba.flip();
+        assertEquals(1, ba.get());
+        assertEquals(0, ba.get());
+        assertEquals(47, ba.getShort());
+        assertEquals(15, ba.getInt());
+    }
 
-	private NioServer nioServer;
-	private Set<String> received = new HashSet<String>();
 
-	@Before
-	public void createPacketClient() throws Exception {
-		nioServer = new NioServer();
-		packetHandlerServer = spy(new EchoPacketHandler());
-		nioServer.setPacketHandler(packetHandlerServer);
-		nioServer.setPort(PORT);
-		nioServer.start();
-	}
+    @Test
+    public void testGenerateData() throws Exception {
+        byte[] arr = "lex implemented".getBytes();
+        PacketData pc = new PacketData(47, arr);
+        ByteArrayOutputStream bout = new ByteArrayOutputStream();
+        DataOutputStream out = new DataOutputStream(bout);
+        pc.generateData(out);
+        ByteBuffer ba = ByteBuffer.wrap(bout.toByteArray());
+        assertEquals(1, ba.get());
+        assertEquals(0, ba.get());
+        assertEquals(47, ba.getShort());
+        assertEquals(15, ba.getInt());
+    }
 
-	@After
-	public void stopNioServer() throws Exception {
-		nioServer.stop();
-	}
+    @Test
+    public void testparseHeader() {
+        PacketData pc = new PacketData();
+        ByteBuffer ba = ByteBuffer.allocate(8);
+        ba.putInt(12345);
+        ba.putInt(10485760);
+        ba.flip();
+        pc.parseHeader(ba);
+        assertEquals(10485760, pc.getLength());
+    }
 
-	private byte[] generateRandom(int len, Random r) {
-		byte[] ret = new byte[len];
-		r.nextBytes(ret);
-		return ret;
-	}
+    @Test(expected=IllegalStateException.class)
+    public void testparseHeaderExceedMax() {
+        PacketData pc = new PacketData();
+        ByteBuffer ba = ByteBuffer.allocate(8);
+        ba.putInt(12345);
+        ba.putInt(10485761);
+        ba.flip();
+        pc.parseHeader(ba);
+        assertEquals(10485760, pc.getLength());
+    }
 
-	private void assertArrayEquals(byte[] a, byte[] b) {
-		if (a.length == b.length) {
-			for (int k = 0; k < a.length; k += a.length / 100 + 1) {
-				if (a[k] != b[k]) {
-					assertFalse("Index at " + k, true);
-					return;
-				}
-			}
-		} else {
-			assertFalse("Invalid length", true);
-		}
-	}
+    @Test
+    public void testParsePacket() throws IOException {
+        byte[] arr = "lex implemented".getBytes();
+        PacketData pc = new PacketData(47, arr);
+        ByteArrayOutputStream bout = new ByteArrayOutputStream();
+        DataOutputStream out = new DataOutputStream(bout);
+        pc.generateData(out);
+        DataInputStream in = new DataInputStream(new ByteArrayInputStream(bout.toByteArray()));
+        PacketData qc = new PacketData();
+        qc.parsePacket(in);
+        assertArrayEquals(qc.getData(), pc.getData());
+        assertEquals(qc.getCode(), pc.getCode());
+        assertEquals(qc.getVersion(), pc.getVersion());
+    }
 
-	/**
-	 * Test method for
-	 * {@link org.apache.niolex.network.client.PacketClient#handleWrite(org.apache.niolex.network.PacketData)}
-	 * .
-	 */
-	@Test
-	public void testHandleWrite() throws Exception {
-		final PacketData sc0 = new PacketData();
-		final PacketData sc1 = new PacketData();
-		final PacketData sc2 = new PacketData();
-		final PacketData sc3 = new PacketData();
-		final PacketData sc4 = new PacketData();
-		final PacketData sc5 = new PacketData();
+    @Test(expected=IOException.class)
+    public void testParsePacketEOF() throws IOException {
+        byte[] b = new byte[9];
+        for (int i = 0; i < 7; ++i) {
+            b[i] = 0;
+        }
+        b[7] = b[8] = 10;
+        DataInputStream in = new DataInputStream(new ByteArrayInputStream(b));
+        PacketData p = PacketData.getHeartBeatPacket();
+        p.parsePacket(in);
+    }
 
-		sc5.setReserved((byte)5);
-		assertEquals(sc5.getReserved(), 5);
+    @Test(expected=IOException.class)
+    public void testparsePacketTooLarge() throws IOException {
+        PacketData pc = new PacketData();
+        ByteBuffer ba = ByteBuffer.allocate(12);
+        ba.putInt(12345);
+        ba.putInt(10485761);
+        ba.putInt(10485761);
 
-		doAnswer(new Answer<String>() {
-			public String answer(InvocationOnMock invocation) {
-				Object[] args = invocation.getArguments();
-				PacketData sc = (PacketData) args[0];
-				switch (sc.getCode()) {
-				case 1:
-					assertArrayEquals(sc0.getData(), sc.getData());
-					break;
-				case 2:
-					assertArrayEquals(sc1.getData(), sc.getData());
-					break;
-				case 3:
-					assertArrayEquals(sc2.getData(), sc.getData());
-					break;
-				case 4:
-					assertArrayEquals(sc3.getData(), sc.getData());
-					break;
-				case 5:
-					assertArrayEquals(sc4.getData(), sc.getData());
-					break;
-				case 6:
-					assertArrayEquals(sc5.getData(), sc.getData());
-					break;
-				default:
-					System.out.println("!!!Code Not Expected: " + sc.getCode());
-					break;
-				}
-				IPacketWriter ip = (IPacketWriter)args[1];
-				received.add(ip.getRemoteName() + ", code: " + sc.getCode());
-				String s = "called with arguments: " + args.length + ", code: " + sc.getCode()
-						+ ", client: " + ip.getRemoteName();
-				LOG.info(s);
-				return s;
-			}
-		}).when(packetHandler).handlePacket(any(PacketData.class),
-				any(IPacketWriter.class));
+        pc.parsePacket(new DataInputStream(new ByteArrayInputStream(ba.array())));
+        assertEquals(10485760, pc.getLength());
+    }
 
-		PacketClient packetClient1 = new PacketClient(new InetSocketAddress("localhost", PORT));
-		packetClient1.setPacketHandler(packetHandler);
-		PacketClient packetClient2 = new PacketClient(new InetSocketAddress("localhost", PORT));
-		packetClient2.setPacketHandler(packetHandler);
-		PacketClient packetClient3 = new PacketClient(new InetSocketAddress("localhost", PORT));
-		packetClient3.setPacketHandler(packetHandler);
-		PacketClient packetClient4 = new PacketClient(new InetSocketAddress("localhost", PORT));
-		packetClient4.setPacketHandler(packetHandler);
-
-		packetClient1.connect();
-		packetClient2.connect();
-		packetClient3.connect();
-		packetClient4.connect();
-
-		List<PacketData> list = new ArrayList<PacketData>();
-		list.add(sc0);
-		list.add(sc1);
-		list.add(sc2);
-		list.add(sc3);
-		list.add(sc4);
-		list.add(sc5);
-		Random r = new Random(System.nanoTime());
-
-		for (int i = 0; i < 6; ++i) {
-			PacketData sc = list.get(i);
-			sc.setCode((short) (i + 1));
-			sc.setVersion((byte) 8);
-			int len = (r.nextInt(1024) + 1) * 1024;
-			sc.setLength(len);
-			sc.setData(generateRandom(len, r));
-			packetClient1.handleWrite(sc);
-			packetClient2.handleWrite(sc);
-			packetClient3.handleWrite(sc);
-			packetClient4.handleWrite(sc);
-		}
-		int i = 30;
-		while (i-- > 0) {
-			if (received.size() == 24)
-				break;
-			Thread.sleep(10 * CoreRunner.CO_SLEEP);
-		}
-		packetClient1.stop();
-		packetClient2.stop();
-		packetClient3.stop();
-		packetClient4.stop();
-		assertEquals(24, received.size());
-	}
 }

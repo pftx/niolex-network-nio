@@ -20,6 +20,7 @@ package org.apache.niolex.network;
 import java.nio.charset.Charset;
 
 import org.apache.niolex.commons.codec.StringUtil;
+import org.apache.niolex.commons.util.Const;
 
 /**
  * The main configuration file.
@@ -28,7 +29,7 @@ import org.apache.niolex.commons.codec.StringUtil;
  * @version 1.0.0
  * @since 2012-5-31
  */
-public interface Config {
+public interface Config extends Const {
 
 	/**
 	 * Server internal configuration, do not change them if you don't
@@ -38,12 +39,12 @@ public interface Config {
 	/**
 	 * The NIO Byte buffer size for server socket.
 	 */
-	int SERVER_NIO_BUFFER_SIZE = 8192;
+	int SERVER_NIO_BUFFER_SIZE = 8 * K;
 
 	/**
 	 * The max packet size for this server. Default to 10MB
 	 */
-	int SERVER_MAX_PACKET_SIZE = 1024 * 10240;
+	int SERVER_MAX_PACKET_SIZE = 10 * M;
 
 	/**
 	 * The fault tolerate map size, which contains all the fault client data.

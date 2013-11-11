@@ -31,8 +31,9 @@ import org.apache.niolex.commons.codec.StringUtil;
  * @author Xie, Jiyun
  */
 public class PacketData extends Packet {
+    private static final byte[] STUB = new byte[0];
     // The HEART_BEAT Packet is for test the connectivity between server and client
-    private static final PacketData HEART_BEAT = new PacketData((short)0, new byte[0]);
+    private static final PacketData HEART_BEAT = new PacketData((short)0, STUB);
     private static final int MAX_SIZE = Config.SERVER_MAX_PACKET_SIZE;
 
     /**
@@ -45,7 +46,7 @@ public class PacketData extends Packet {
     }
 
     /**
-     * Default constructor
+     * Default constructor.
      * version is set to 1.
      * All other fields are not set, set them before use the packet.
      */
@@ -58,28 +59,28 @@ public class PacketData extends Packet {
      * Create a packet with only packet code.
      * packet data will be set to an array of 0 length.
      *
-     * @param code
+     * @param code the packet code
      */
     public PacketData(int code) {
-    	this(code, new byte[0]);
+    	this(code, STUB);
     }
 
     /**
      * Create a packet with packet code and String data.
      * String will be encoded as UTF-8.
      *
-     * @param code
-     * @param data
+     * @param code the packet code
+     * @param data the packet data in string format
      */
     public PacketData(int code, String data) {
     	this(code, StringUtil.strToUtf8Byte(data));
     }
 
     /**
-     * Create packet by code and data
+     * Create packet by packet code and data.
      *
-     * @param code
-     * @param data
+     * @param code the packet code
+     * @param data the packet data in byte array
      */
     public PacketData(int code, byte[] data) {
     	this((short)code, data);
@@ -88,8 +89,8 @@ public class PacketData extends Packet {
     /**
      * Create packet by code and data
      *
-     * @param code
-     * @param data
+     * @param code the packet code
+     * @param data the packet data in byte array
      */
     public PacketData(short code, byte[] data) {
         super();
@@ -116,7 +117,7 @@ public class PacketData extends Packet {
      * Generate Data from this Packet into the ByteBuffer.
      * Please make sure there are at least 8 bytes left in the buffer.
      *
-     * @param bb
+     * @param bb byte buffer used to put the header
      */
     public void putHeader(ByteBuffer bb) {
         bb.put(version);
@@ -129,7 +130,7 @@ public class PacketData extends Packet {
      * Write this Packet into the DataOutputStream.
      * Only return when finished write or IOException
      *
-     * @param out
+     * @param out the data output stream
      * @throws IOException For any I/O error occurs.
      */
     public void generateData(DataOutputStream out) throws IOException {
@@ -142,11 +143,12 @@ public class PacketData extends Packet {
     }
 
     /**
-     * Parse Packet header from ByteBuffer.
-     * We will create the data array for you to put in the packet content.
+     * Parse Packet header from the ByteBuffer.
+     * We will create the data array for you to put in the packet content, but
+     * user need to put data into the body themselves.
      *
-     * @param bb
-     * @throws IllegalStateException If packet is too large
+     * @param bb the header byte buffer
+     * @throws IllegalStateException if the packet is larger than 10MB
      */
     public void parseHeader(ByteBuffer bb) {
         version = bb.get();
@@ -163,9 +165,9 @@ public class PacketData extends Packet {
 
     /**
      * Parse Packet from this DataInputStream.
-     * Only return when finish parse
+     * Only return when finish parse or IOException
      *
-     * @param in
+     * @param in the data input stream
      * @throws IOException For any I/O error occurs.
      * @throws IllegalStateException If packet is too large
      */
