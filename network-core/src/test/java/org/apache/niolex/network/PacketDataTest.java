@@ -112,7 +112,7 @@ public class PacketDataTest {
         }
         b[7] = b[8] = 10;
         DataInputStream in = new DataInputStream(new ByteArrayInputStream(b));
-        PacketData p = PacketData.getHeartBeatPacket();
+        PacketData p = PacketData.getHeartBeatPacket().makeCopy();
         p.parsePacket(in);
     }
 
