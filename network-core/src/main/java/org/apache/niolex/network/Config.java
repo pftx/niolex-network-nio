@@ -32,7 +32,7 @@ public interface Config {
 
 	/**
 	 * Server internal configuration, do not change them if you don't
-	 * understand.
+	 * understand the meaning.
 	 */
 
 	/**

@@ -17,6 +17,8 @@
  */
 package org.apache.niolex.network.demo;
 
+import static org.apache.niolex.network.demo.DemoUtil.*;
+
 import java.io.IOException;
 
 import org.apache.niolex.network.example.EchoPacketHandler;
@@ -41,14 +43,15 @@ public class DemoServer {
     private static MultiNioServer s = new MultiNioServer();
 
     /**
-     * The Server Demo
+     * The Server Demo, use it in command line.
+     *
      * @param args
      */
     public static void main(String[] args) throws IOException {
-        s.setPort(8808);
-        if (args != null && args.length != 0) {
-        	s.setThreadsNumber(Integer.parseInt(args[0]));
-        }
+        DemoUtil.parseArgs(args);
+        s.setPort(PORT);
+        if (POOL_SIZE != 0)
+            s.setThreadsNumber(POOL_SIZE);
         DispatchPacketHandler handler = new DispatchPacketHandler();
         handler.addHandler((short)2, new EchoPacketHandler());
         handler.addHandler((short)3, new SummaryPacketHandler());
@@ -60,4 +63,5 @@ public class DemoServer {
     public static void stop() {
         s.stop();
     }
+
 }

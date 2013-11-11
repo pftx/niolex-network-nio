@@ -36,6 +36,8 @@ import org.slf4j.LoggerFactory;
  */
 public class MultiNioServer extends NioServer {
 	private static final Logger LOG = LoggerFactory.getLogger(MultiNioServer.class);
+	/* For auto numbering the threads in this pool. */
+    private static int threadInitNumber = 0;
 
 	// The Thread pool size
     private int threadsNumber = 8;
@@ -158,7 +160,7 @@ public class MultiNioServer extends NioServer {
 		public RunnableSelector(ThreadGroup tPool) throws IOException {
 			super();
 			this.selector = Selector.open();
-			this.thread = new Thread(tPool, this);
+			this.thread = new Thread(tPool, this, "Selector-" + threadInitNumber++);
 			this.selectorHolder = new SelectorHolder(thread, selector);
 			thread.start();
 		}

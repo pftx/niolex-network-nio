@@ -17,6 +17,8 @@
  */
 package org.apache.niolex.network.demo;
 
+import static org.apache.niolex.network.demo.DemoUtil.*;
+
 import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.util.Scanner;
@@ -26,7 +28,7 @@ import org.apache.niolex.network.client.BlockingClient;
 
 
 /**
- * DemoClient, use PacketClient to connect to localhost, read data from console and send it
+ * DemoClient, use BlockingClient to connect to localhost, read data from console and send it
  * to server, print results to console.
  *
  * @author Xie, Jiyun
@@ -41,9 +43,10 @@ public class DemoClient {
      * @param args
      */
     public static void main(String[] args) throws Exception {
-        BlockingClient c = new BlockingClient(new InetSocketAddress("localhost", 8808));
+        DemoUtil.parseArgs(args);
+        BlockingClient c = new BlockingClient(new InetSocketAddress(HOST, PORT));
         // Set timeout to 10 minutes.
-        c.setConnectTimeout(600000);
+        c.setConnectTimeout(TIMEOUT);
         c.setPacketHandler(new PrintPacketHandler());
         c.connect();
         for (int i = 1; i < 5; ++i) {

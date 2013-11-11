@@ -127,7 +127,7 @@ public class NioServer implements IServer {
 			            stop();
 					}
                 }
-        	});
+        	}, "NioServer");
         	selectorHolder = new SelectorHolder(mainThread, mainSelector);
         	mainThread.start();
         } catch (Exception e) {
