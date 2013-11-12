@@ -33,7 +33,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * The blocking implementation of IClient. This client can only be used in one
- * thread. If you want to reuse client in multithreading, use #PacketClient
+ * thread. If you want to reuse client in multithreading, use {@link PacketClient}
+ * or {@link BlockingClient}.
  *
  * We will try to read one packet from remote after send on packet. If you are
  * in the situation that server will not respond, please use {@link #setAutoRead(boolean)}
@@ -55,7 +56,7 @@ public class SocketClient extends BaseClient {
     private boolean autoRead = true;
 
     /**
-     * Crate a SocketClient without any server address
+     * Crate a SocketClient without any server address.<br>
      * Call setter to set serverAddress before connect
      */
 	public SocketClient() {

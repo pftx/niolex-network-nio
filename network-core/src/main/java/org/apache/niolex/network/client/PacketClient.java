@@ -29,6 +29,7 @@ import java.net.Socket;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.niolex.commons.concurrent.ThreadUtil;
 import org.apache.niolex.commons.stream.StreamUtil;
 import org.apache.niolex.network.Config;
 import org.apache.niolex.network.PacketData;
@@ -57,7 +58,7 @@ public class PacketClient extends BaseClient {
 
 
     /**
-     * Create a PacketClient without any Server Address
+     * Create a PacketClient without any Server Address.<br>
      * Call setter to set serverAddress before connect
      */
     public PacketClient() {
@@ -65,7 +66,8 @@ public class PacketClient extends BaseClient {
 	}
 
 	/**
-     * Create a PacketClient with this Server Address
+     * Create a PacketClient with this Server Address.<br>
+     *
      * @param serverAddress
      */
     public PacketClient(InetSocketAddress serverAddress) {
@@ -74,6 +76,7 @@ public class PacketClient extends BaseClient {
     }
 
     /**
+     * {@inheritDoc}
      * Start two separate threads for reads and writes.
      *
 	 * This is the override of super method.
@@ -89,9 +92,9 @@ public class PacketClient extends BaseClient {
         socket.setTcpNoDelay(true);
         socket.connect(serverAddress);
         this.isWorking = true;
-        writeThread = new Thread(new WriteLoop(socket.getOutputStream()));
+        writeThread = new Thread(new WriteLoop(socket.getOutputStream()), "PacketClientW");
         writeThread.start();
-        Thread tr = new Thread(new ReadLoop(socket.getInputStream()));
+        Thread tr = new Thread(new ReadLoop(socket.getInputStream()), "PacketClientR");
         tr.start();
         LOG.info("Packet client connected to address: {}", serverAddress);
     }
@@ -105,9 +108,7 @@ public class PacketClient extends BaseClient {
         this.isWorking = false;
         if (writeThread != null) {
             writeThread.interrupt();
-            try {
-                writeThread.join();
-            } catch (InterruptedException e) {}
+            ThreadUtil.join(writeThread);
             writeThread = null;
         }
     }
@@ -174,9 +175,9 @@ public class PacketClient extends BaseClient {
                 } else {
                     LOG.info("Read loop stoped.");
                 }
-            } finally {
-                StreamUtil.closeStream(in);
             }
+            // finally, we close the input stream.
+            StreamUtil.closeStream(in);
         }
     }
 
@@ -223,10 +224,10 @@ public class PacketClient extends BaseClient {
                 LOG.info("Write loop stoped.");
             } catch(Exception e) {
                 LOG.error("Error occured in write loop.", e);
-            } finally {
-                StreamUtil.closeStream(out);
-                safeClose();
             }
+            // finally, we close the output stream.
+            StreamUtil.closeStream(out);
+            safeClose();
         }
 
         /**

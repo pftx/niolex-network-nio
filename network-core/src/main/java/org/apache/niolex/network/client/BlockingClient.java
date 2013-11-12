@@ -155,7 +155,7 @@ public class BlockingClient extends BaseClient {
                     LOG.error("Error occured in read loop.", e);
                     // Notice!
                     /**
-                     * Packet Client Error will be handled in the Read Loop.
+                     * Blocking Client Error will be handled in the Read Loop.
                      * So the Write Loop will just return, so there will be just one Error to the
                      * Upper layer.
                      */

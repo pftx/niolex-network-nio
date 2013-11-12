@@ -17,35 +17,27 @@
  */
 package org.apache.niolex.network.client;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
+import static org.junit.Assert.*;
+import static org.mockito.Matchers.*;
+import static org.mockito.Mockito.*;
 
-import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.concurrent.CountDownLatch;
 
+import org.apache.niolex.commons.bean.One;
 import org.apache.niolex.network.CoreRunner;
 import org.apache.niolex.network.IPacketHandler;
 import org.apache.niolex.network.IPacketWriter;
 import org.apache.niolex.network.PacketData;
-import org.apache.niolex.network.example.EchoPacketHandler;
-import org.apache.niolex.network.server.NioServer;
-import org.junit.After;
-import org.junit.Before;
+import org.apache.niolex.network.client.PacketClient.ReadLoop;
+import org.apache.niolex.network.client.PacketClient.WriteLoop;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.runners.MockitoJUnitRunner;
-import org.mockito.stubbing.Answer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
 /**
@@ -53,39 +45,17 @@ import org.slf4j.LoggerFactory;
  * @version 1.0.0
  * @since 2012-5-28
  */
-@RunWith(MockitoJUnitRunner.class)
 public class PacketClientTest {
-	private static final Logger LOG = LoggerFactory.getLogger(PacketClientTest.class);
 
-	@Mock
-	private IPacketHandler packetHandler;
-	private PacketClient packetClient;
+	@BeforeClass
+    public static void setup() throws Exception {
+        CoreRunner.createServer();
+    }
 
-	private IPacketHandler serverHandler;
-	private NioServer nioServer;
-
-	private int port = CoreRunner.PORT;
-	private int received = 0;
-
-	@Before
-	public void createPacketClient() throws Exception {
-		packetClient = new PacketClient();
-		InetSocketAddress ina = new InetSocketAddress("localhost", port);
-		packetClient.setServerAddress(ina);
-		assertEquals(packetClient.getServerAddress(), ina);
-		packetClient.setPacketHandler(packetHandler);
-
-		nioServer = new NioServer();
-		serverHandler = spy(new EchoPacketHandler());
-		nioServer.setPacketHandler(serverHandler);
-		nioServer.setPort(port);
-		nioServer.start();
-	}
-
-	@After
-	public void stopNioServer() throws Exception {
-		nioServer.stop();
-	}
+    @AfterClass
+    public static void stop2() throws Exception {
+        CoreRunner.shutdown();
+    }
 
 	/**
 	 * Test method for
@@ -93,152 +63,115 @@ public class PacketClientTest {
 	 */
 	@Test
 	public void testConnect() throws Exception {
+	    PacketClient packetClient = new PacketClient();
 		assertEquals(false, packetClient.isWorking());
 		packetClient.setConnectTimeout(1234);
 		assertEquals(1234, packetClient.getConnectTimeout());
+
+		final CountDownLatch latch = new CountDownLatch(1);
+		final One<PacketData> one = new One<PacketData>();
+        IPacketHandler h = new IPacketHandler(){
+
+            @Override
+            public void handlePacket(PacketData sc, IPacketWriter wt) {
+                if (sc.getCode() == 2) {
+                    latch.countDown();
+                    one.a = sc;
+                }
+            }
+
+            @Override
+            public void handleClose(IPacketWriter wt) {
+            }};;
+
+		packetClient.setPacketHandler(h);
+		packetClient.setServerAddress(CoreRunner.SERVER_ADDR);
 		packetClient.connect();
+
+		packetClient.handleWrite(new PacketData(3, "Hellow, world.".getBytes()));
 		PacketData sc = new PacketData();
-		sc.setCode((short) 4);
+		sc.setCode((short) 2);
 		sc.setVersion((byte) 8);
 		sc.setLength(1024 * 1024 + 6);
 		sc.setData(new byte[1024 * 1024 + 6]);
 		sc.getData()[9] = (byte) 145;
 		sc.getData()[145] = (byte) 63;
 		packetClient.handleWrite(sc);
-		Thread.sleep(2 * CoreRunner.CO_SLEEP);
+		latch.await();
 		packetClient.stop();
 
-		ArgumentCaptor<PacketData> argument = ArgumentCaptor
-				.forClass(PacketData.class);
-		verify(packetHandler).handlePacket(argument.capture(),
-				any(IPacketWriter.class));
-		assertEquals((short) 4, argument.getValue().getCode());
-		assertEquals((byte) 8, argument.getValue().getVersion());
-		assertEquals(1024 * 1024 + 6, argument.getValue().getLength());
-		assertEquals(1024 * 1024 + 6, argument.getValue().getData().length);
-		assertEquals((byte) 145, argument.getValue().getData()[9]);
-		assertEquals((byte) 63, argument.getValue().getData()[145]);
+		assertEquals((short) 2, one.a.getCode());
+		assertEquals((byte) 8, one.a.getVersion());
+		assertEquals(1024 * 1024 + 6, one.a.getLength());
+		assertEquals(1024 * 1024 + 6, one.a.getData().length);
+		assertEquals((byte) 145, one.a.getData()[9]);
+		assertEquals((byte) 63, one.a.getData()[145]);
+
+		// Test stop again.
+		packetClient.stop();
+		assertEquals(0, packetClient.size());
 	}
+
+	@Test
+    public void testReadLoopFalse() throws IOException {
+	    final PacketClient pc = new PacketClient();
+        InputStream in = mock(InputStream.class);
+        ReadLoop r = pc.new ReadLoop(in);
+        r.run();
+	}
+
+	@Test
+    public void testReadLoop() throws IOException {
+        final PacketClient pc = new PacketClient();
+        byte[] abc = new byte[10];
+        InputStream in = new ByteArrayInputStream(abc);
+        ReadLoop r = pc.new ReadLoop(in);
+        pc.isWorking = true;
+
+        IPacketHandler h = mock(IPacketHandler.class);
+        pc.setPacketHandler(h);
+
+        r.run();
+        assertFalse(pc.isWorking);
+        verify(h, never()).handlePacket(any(PacketData.class), eq(pc));
+        verify(h, times(1)).handleClose(pc);
+    }
 
 	/**
 	 * Test method for
-	 * {@link org.apache.niolex.network.client.PacketClient#getRemoteName()}
+	 * {@link org.apache.niolex.network.client.PacketClient#handleWrite(PacketData)}
 	 * .
 	 */
 	@Test
-	public void testGetRemoteName() throws Exception {
-		assertEquals("localhost/127.0.0.1:8809-0000", packetClient.getRemoteName());
-		packetClient.connect();
-		packetClient.setConnectTimeout(4);
-		packetClient.handleWrite(PacketData.getHeartBeatPacket());
-		Thread.sleep(CoreRunner.CO_SLEEP);
-		nioServer.stop();
-		packetClient.handleWrite(PacketData.getHeartBeatPacket());
-		Thread.sleep(CoreRunner.CO_SLEEP);
+	public void testHandleWrite() throws Exception {
+	    final PacketClient pc = new PacketClient(CoreRunner.SERVER_ADDR);
+	    OutputStream out = new ByteArrayOutputStream() {
+	        int cnt = 0;
 
-		verify(packetHandler).handleClose(packetClient);
-	}
+            /**
+             * This is the override of super method.
+             * @see java.io.ByteArrayOutputStream#write(int)
+             */
+            @Override
+            public synchronized void write(int b) {
+                if (cnt++ > 1)
+                    throw new NullPointerException("Fun.Run");
+            }
 
-	private byte[] generateRandom(int len, Random r) {
-		byte[] ret = new byte[len];
-		r.nextBytes(ret);
-		return ret;
-	}
-
-	private void assertArrayEquals(byte[] a, byte[] b) {
-		if (a.length == b.length) {
-			for (int k = 0; k < a.length; k += a.length / 157 + 1) {
-				if (a[k] != b[k]) {
-					assertFalse("Index at " + k, true);
-					return;
-				}
-			}
-		} else {
-			assertFalse("Invalid length", true);
-		}
-	}
-
-	/**
-	 * Test method for
-	 * {@link org.apache.niolex.network.client.PacketClient#handleWrite(org.apache.niolex.network.PacketData)}
-	 * .
-	 */
-	@Test
-	public void testHandleWriteLarge() throws Exception {
-		final PacketData sc0 = new PacketData();
-		final PacketData sc1 = new PacketData();
-		final PacketData sc2 = new PacketData();
-		final PacketData sc3 = new PacketData();
-		final PacketData sc4 = new PacketData();
-		final PacketData sc5 = new PacketData();
-
-		doAnswer(new Answer<String>() {
-			public String answer(InvocationOnMock invocation) {
-				Object[] args = invocation.getArguments();
-				PacketData sc = (PacketData) args[0];
-				switch (sc.getCode()) {
-				case 6:
-					assertArrayEquals(sc0.getData(), sc.getData());
-					break;
-				case 1:
-					assertArrayEquals(sc1.getData(), sc.getData());
-					break;
-				case 2:
-					assertArrayEquals(sc2.getData(), sc.getData());
-					break;
-				case 3:
-					assertArrayEquals(sc3.getData(), sc.getData());
-					break;
-				case 4:
-					assertArrayEquals(sc4.getData(), sc.getData());
-					break;
-				case 5:
-					assertArrayEquals(sc5.getData(), sc.getData());
-					break;
-				default:
-					System.out.println("Code: " + sc.getCode());
-					break;
-				}
-				IPacketWriter ip = (IPacketWriter)args[1];
-				String s = "called with arguments: " + args.length + ", code: " + sc.getCode()
-						+ ", client: " + ip.getRemoteName();
-				LOG.info(s);
-				++received;
-				return s;
-			}
-		}).when(packetHandler).handlePacket(any(PacketData.class),
-				any(IPacketWriter.class));
-
-		packetClient.connect();
-		List<PacketData> list = new ArrayList<PacketData>();
-		list.add(sc0);
-		list.add(sc1);
-		list.add(sc2);
-		list.add(sc3);
-		list.add(sc4);
-		list.add(sc5);
-		Random r = new Random(System.nanoTime());
-		for (int i = 0; i < 6; ++i) {
-			PacketData sc = list.get(i);
-			if (i == 0) {
-				sc.setCode((short) 6);
-			} else {
-				sc.setCode((short) i);
-			}
-			sc.setVersion((byte) 8);
-			int len = (r.nextInt(99) + 1) * 102400;
-			sc.setLength(len);
-			sc.setData(generateRandom(len, r));
-			packetClient.handleWrite(sc);
-		}
-		int i = 30;
-		while (i-- > 0) {
-			if (received == 6)
-				break;
-			Thread.sleep(CoreRunner.CO_SLEEP);
-		}
-		packetClient.stop();
-		assertEquals(6, received);
+            /**
+             * This is the override of super method.
+             * @see java.io.ByteArrayOutputStream#write(byte[], int, int)
+             */
+            @Override
+            public synchronized void write(byte[] b, int off, int len) {
+                if (cnt++ > 1)
+                    throw new NullPointerException("Fun.Run");
+            }
+	    };
+	    WriteLoop wl = pc.new WriteLoop(out);
+	    pc.setConnectTimeout(2);
+	    pc.isWorking = true;
+	    wl.run();
 	}
 
 }

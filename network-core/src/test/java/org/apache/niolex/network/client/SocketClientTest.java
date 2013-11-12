@@ -17,12 +17,8 @@
  */
 package org.apache.niolex.network.client;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -68,52 +64,28 @@ public class SocketClientTest {
 		sc.setConnectTimeout(90821);
 		sc.setPacketHandler(null);
 		assertEquals(inn, sc.getServerAddress());
+		sc.socket = mock(Socket.class);
+        when(sc.socket.getLocalPort()).thenReturn(3527);
+        try {
+            doThrow(new IOException("Moke#Mock#Make")).when(sc.socket).close();
+        } catch (IOException e) {
+        }
 		sc.stop();
 	}
 
-	/**
-	 * Test method for {@link org.apache.niolex.network.client.SocketClient#getRemoteName()}.
-	 * @throws IOException
-	 */
 	@Test
-	public void testGetRemoteName() throws IOException {
-		SocketClient scli = new SocketClient(new InetSocketAddress("localhost", 8808));
-		assertEquals("localhost/127.0.0.1:8808-0000", scli.getRemoteName());
-		try {
-			scli.attachData("adsfasdf", "adsfasdf");
-			assertTrue("Should not attache.", false);
-		} catch (Exception e) {
-			;
-		}
-		try {
-			scli.getAttached("adsfasdf");
-			assertTrue("Should not attache.", false);
-		} catch (Exception e) {
-			;
-		}
-		try {
-			scli.addEventListener(null);
-			assertTrue("Should not listen.", false);
-		} catch (Exception e) {
-			;
-		}
-		scli.socket = mock(Socket.class);
-        doThrow(new IOException("This is test testSafeClose.")).when(scli.socket).close();
-        scli.stop();
-	}
-
-	@Test
-	public void testConn() throws IOException {
-		SocketClient sc = new SocketClient();
-		InetSocketAddress inn = new InetSocketAddress("localhost", CoreRunner.PORT);
-		sc.setServerAddress(inn);
+	public void testConnect() throws IOException {
+		SocketClient sc = new SocketClient(CoreRunner.SERVER_ADDR);
 		List<PacketData> list = new ArrayList<PacketData>();
 		sc.setPacketHandler(new SavePacketHandler(list));
 		sc.connect();
+		sc.setAutoRead(true);
 		sc.handleWrite(new PacketData(6, "Good."));
 		assertEquals(list.size(), 1);
+		sc.setAutoRead(false);
+		sc.handleWrite(new PacketData(2, "Hellow, world.".getBytes()));
 		sc.stop();
-		sc.stop();
+		assertEquals(list.size(), 1);
 		boolean flag = false;
 		try {
 			sc.handleWrite(new PacketData(6, "Morning."));
@@ -121,10 +93,11 @@ public class SocketClientTest {
 			flag = true;
 		}
 		assertTrue(flag);
+        assertFalse(sc.isWorking());
 	}
 
 	@Test
-	public void testConn2Recon() throws Exception {
+	public void testConnRecon() throws Exception {
 	    SocketClient sc = new SocketClient();
 	    InetSocketAddress inn = new InetSocketAddress("localhost", CoreRunner.PORT);
 	    sc.setServerAddress(inn);
@@ -140,6 +113,7 @@ public class SocketClientTest {
 	        flag = true;
 	    }
 	    assertTrue(flag);
+	    assertFalse(sc.isWorking());
 	    Thread.sleep(100);
 	    verify(hand).handleClose(sc);
 	}
