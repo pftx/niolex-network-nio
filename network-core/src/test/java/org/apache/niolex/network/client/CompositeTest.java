@@ -18,27 +18,25 @@
 package org.apache.niolex.network.client;
 
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.*;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
-import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
+import org.apache.niolex.commons.test.MockUtil;
 import org.apache.niolex.network.CoreRunner;
 import org.apache.niolex.network.IPacketHandler;
 import org.apache.niolex.network.IPacketWriter;
 import org.apache.niolex.network.PacketData;
-import org.apache.niolex.network.example.EchoPacketHandler;
-import org.apache.niolex.network.server.NioServer;
-import org.junit.After;
-import org.junit.Before;
+import org.apache.niolex.network.example.SavePacketHandler;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
@@ -53,33 +51,47 @@ import org.slf4j.LoggerFactory;
 @RunWith(MockitoJUnitRunner.class)
 public class CompositeTest {
     private static final Logger LOG = LoggerFactory.getLogger(BaseClientTest.class);
-    private static final int PORT = 8908;
 
-    @Mock
-    private IPacketHandler packetHandler;
-
-    private IPacketHandler packetHandlerServer;
-
-    private NioServer nioServer;
-    private Set<String> received = new HashSet<String>();
-
-
-
-    @Before
-    public void createPacketClient() throws Exception {
-        nioServer = new NioServer();
-        packetHandlerServer = spy(new EchoPacketHandler());
-        nioServer.setPacketHandler(packetHandlerServer);
-        nioServer.setPort(PORT);
-        nioServer.start();
+    @BeforeClass
+    public static void start() throws Exception {
+        CoreRunner.createServer();
     }
 
-    @After
-    public void stopNioServer() throws Exception {
-        nioServer.stop();
+    @AfterClass
+    public static void stop() throws Exception {
+        CoreRunner.shutdown();
     }
 
+    @Test
+    public void testBlockingClient() throws Exception {
+        List<PacketData> clientSavePkList = new ArrayList<PacketData>();
+        List<PacketData> clientSendList = new ArrayList<PacketData>();
 
+        BlockingClient c = new BlockingClient(CoreRunner.SERVER_ADDR);
+        c.setPacketHandler(new SavePacketHandler(clientSavePkList));
+        c.connect();
+
+        for (int i = 0; i < 5000; ++i) {
+            PacketData sc = new PacketData();
+            sc.setCode((short) 2);
+            sc.setVersion((byte) 1);
+            byte[] data = MockUtil.randByteArray(60);
+            sc.setLength(data.length);
+            sc.setData(data);
+            c.handleWrite(sc);
+            clientSendList.add(sc);
+        }
+        int k = 100;
+        while (k-- > 0) {
+            if (clientSavePkList.size() == 5000)
+                break;
+            Thread.sleep(CoreRunner.CO_SLEEP);
+        }
+        c.stop();
+        for (int i = 0; i < 5000; ++i) {
+            assertArrayEquals(clientSavePkList.get(i).getData(), clientSendList.get(i).getData());
+        }
+    }
 
     private byte[] generateRandom(int len, Random r) {
         byte[] ret = new byte[len];
@@ -100,13 +112,8 @@ public class CompositeTest {
         }
     }
 
-    /**
-     * Test method for
-     * {@link org.apache.niolex.network.client.PacketClient#handleWrite(org.apache.niolex.network.PacketData)}
-     * .
-     */
     @Test
-    public void testHandleWrite() throws Exception {
+    public void testPacketClient() throws Exception {
         final PacketData sc0 = new PacketData();
         final PacketData sc1 = new PacketData();
         final PacketData sc2 = new PacketData();
@@ -114,14 +121,14 @@ public class CompositeTest {
         final PacketData sc4 = new PacketData();
         final PacketData sc5 = new PacketData();
 
-        sc5.setReserved((byte)5);
-        assertEquals(sc5.getReserved(), 5);
+        final IPacketHandler packetHandler = mock(IPacketHandler.class);
+        final Set<String> received = new HashSet<String>();
 
         doAnswer(new Answer<String>() {
             public String answer(InvocationOnMock invocation) {
                 Object[] args = invocation.getArguments();
                 PacketData sc = (PacketData) args[0];
-                switch (sc.getCode()) {
+                switch (sc.getReserved()) {
                 case 1:
                     assertArrayEquals(sc0.getData(), sc.getData());
                     break;
@@ -141,12 +148,12 @@ public class CompositeTest {
                     assertArrayEquals(sc5.getData(), sc.getData());
                     break;
                 default:
-                    System.out.println("!!!Code Not Expected: " + sc.getCode());
+                    assertFalse("!!!Code Not Expected: " + sc.getCode(), true);
                     break;
                 }
                 IPacketWriter ip = (IPacketWriter)args[1];
-                received.add(ip.getRemoteName() + ", code: " + sc.getCode());
-                String s = "called with arguments: " + args.length + ", code: " + sc.getCode()
+                received.add(ip.getRemoteName() + ", res: " + sc.getReserved());
+                String s = "called with arguments: " + args.length + ", res: " + sc.getReserved()
                         + ", client: " + ip.getRemoteName();
                 LOG.info(s);
                 return s;
@@ -154,13 +161,13 @@ public class CompositeTest {
         }).when(packetHandler).handlePacket(any(PacketData.class),
                 any(IPacketWriter.class));
 
-        PacketClient packetClient1 = new PacketClient(new InetSocketAddress("localhost", PORT));
+        PacketClient packetClient1 = new PacketClient(CoreRunner.SERVER_ADDR);
         packetClient1.setPacketHandler(packetHandler);
-        PacketClient packetClient2 = new PacketClient(new InetSocketAddress("localhost", PORT));
+        PacketClient packetClient2 = new PacketClient(CoreRunner.SERVER_ADDR);
         packetClient2.setPacketHandler(packetHandler);
-        PacketClient packetClient3 = new PacketClient(new InetSocketAddress("localhost", PORT));
+        PacketClient packetClient3 = new PacketClient(CoreRunner.SERVER_ADDR);
         packetClient3.setPacketHandler(packetHandler);
-        PacketClient packetClient4 = new PacketClient(new InetSocketAddress("localhost", PORT));
+        PacketClient packetClient4 = new PacketClient(CoreRunner.SERVER_ADDR);
         packetClient4.setPacketHandler(packetHandler);
 
         packetClient1.connect();
@@ -179,8 +186,9 @@ public class CompositeTest {
 
         for (int i = 0; i < 6; ++i) {
             PacketData sc = list.get(i);
-            sc.setCode((short) (i + 1));
+            sc.setCode((short) 2);
             sc.setVersion((byte) 8);
+            sc.setReserved((byte) (i + 1));
             int len = (r.nextInt(1024) + 1) * 1024;
             sc.setLength(len);
             sc.setData(generateRandom(len, r));
@@ -189,16 +197,119 @@ public class CompositeTest {
             packetClient3.handleWrite(sc);
             packetClient4.handleWrite(sc);
         }
-        int i = 30;
+        int i = 300;
         while (i-- > 0) {
             if (received.size() == 24)
                 break;
-            Thread.sleep(10 * CoreRunner.CO_SLEEP);
+            Thread.sleep(CoreRunner.CO_SLEEP);
         }
         packetClient1.stop();
         packetClient2.stop();
         packetClient3.stop();
         packetClient4.stop();
         assertEquals(24, received.size());
+    }
+
+    private int received = 0;
+
+    @Test
+    public void testHandleLarge() throws Exception {
+        PacketClient packetClient = new PacketClient(CoreRunner.SERVER_ADDR);
+        IPacketHandler packetHandler = mock(IPacketHandler.class);
+        received = 0;
+
+        final PacketData sc0 = new PacketData();
+        final PacketData sc1 = new PacketData();
+        final PacketData sc2 = new PacketData();
+        final PacketData sc3 = new PacketData();
+        final PacketData sc4 = new PacketData();
+        final PacketData sc5 = new PacketData();
+
+        doAnswer(new Answer<String>() {
+            public String answer(InvocationOnMock invocation) {
+                Object[] args = invocation.getArguments();
+                PacketData sc = (PacketData) args[0];
+                switch (sc.getReserved()) {
+                case 6:
+                    assertArrayEquals(sc0.getData(), sc.getData());
+                    break;
+                case 1:
+                    assertArrayEquals(sc1.getData(), sc.getData());
+                    break;
+                case 2:
+                    assertArrayEquals(sc2.getData(), sc.getData());
+                    break;
+                case 3:
+                    assertArrayEquals(sc3.getData(), sc.getData());
+                    break;
+                case 4:
+                    assertArrayEquals(sc4.getData(), sc.getData());
+                    break;
+                case 5:
+                    assertArrayEquals(sc5.getData(), sc.getData());
+                    break;
+                default:
+                    assertFalse("Invalid Code: " + sc.getReserved(), true);
+                    break;
+                }
+                IPacketWriter ip = (IPacketWriter)args[1];
+                String s = "called with arguments: " + args.length + ", code: " + sc.getReserved()
+                        + ", client: " + ip.getRemoteName();
+                LOG.info(s);
+                ++received;
+                return s;
+            }
+        }).when(packetHandler).handlePacket(any(PacketData.class),
+                any(IPacketWriter.class));
+
+        packetClient.setPacketHandler(packetHandler);
+        packetClient.connect();
+
+        List<PacketData> list = new ArrayList<PacketData>();
+        list.add(sc0);
+        list.add(sc1);
+        list.add(sc2);
+        list.add(sc3);
+        list.add(sc4);
+        list.add(sc5);
+        Random r = new Random(System.nanoTime());
+        for (int i = 0; i < 6; ++i) {
+            PacketData sc = list.get(i);
+            if (i == 0) {
+                sc.setReserved((byte) 6);
+            } else {
+                sc.setReserved((byte) i);
+            }
+            sc.setCode((short) 2);
+            sc.setVersion((byte) 8);
+            int len = (r.nextInt(99) + 1) * 102400;
+            sc.setLength(len);
+            sc.setData(generateRandom(len, r));
+            packetClient.handleWrite(sc);
+        }
+        int i = 300;
+        while (i-- > 0) {
+            if (received == 6)
+                break;
+            Thread.sleep(CoreRunner.CO_SLEEP);
+        }
+        packetClient.stop();
+        assertEquals(6, received);
+    }
+
+    /**
+     * Run too many times as main method.
+     *
+     * @param args
+     * @throws Exception
+     */
+    public static void main(String args[]) throws Exception {
+        start();
+        CompositeTest hdt = new CompositeTest();
+        for (int i = 0; i < 1000; ++i) {
+            System.out.println("Test iter .. " + i);
+            hdt.testBlockingClient();
+        }
+        stop();
     }
 }
