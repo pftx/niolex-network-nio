@@ -17,11 +17,7 @@
  */
 package org.apache.niolex.network.demo;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.io.ByteArrayInputStream;
+import static org.mockito.Mockito.*;
 
 import org.apache.niolex.network.IPacketHandler;
 import org.apache.niolex.network.IPacketWriter;
@@ -32,31 +28,41 @@ import org.junit.Test;
 public class PrintPacketHandlerTest {
 
 	@Test
-    	public void testHandlePacket() {
-    		PacketData sc = mock(PacketData.class);
-    		when(sc.getData()).thenReturn("NullPointerException".getBytes());
-    		when(sc.getCode()).thenReturn((short)3, (short)3, (short)4);
-    		IPacketWriter ip = mock(IPacketWriter.class);
-    		PrintPacketHandler p = new PrintPacketHandler();
-    		p.handleClose(ip);
-    		p.handlePacket(sc, ip);
-    		LastTalkFactory l = new LastTalkFactory();
-    		IPacketHandler pp = l.createHandler(ip);
-    		pp.handleClose(ip);
-    		pp.handlePacket(sc, ip);
-    		verify(sc).getCode();
-    	}
+	public void testHandlePacket() {
+		PacketData sc = mock(PacketData.class);
+		when(sc.getData()).thenReturn(")(DF*&@#KLJER".getBytes());
+		when(sc.getCode()).thenReturn((short)3, (short)3, (short)4);
+		IPacketWriter ip = mock(IPacketWriter.class);
 
-	@SuppressWarnings("unused")
+		PrintPacketHandler p = new PrintPacketHandler();
+		p.handleClose(ip);
+		p.handlePacket(sc, ip);
+		verify(sc).getCode();
+	}
+
 	@Test
-	public void testCoverMain() throws Exception {
-		DemoServer a = new DemoServer();
-		DemoClient b = new DemoClient();
-		DemoServer.main(new String[]{"-x", "2"});
+    public void testLastTalkFactory() {
+	    PacketData sc = mock(PacketData.class);
+        when(sc.getData()).thenReturn(")(DF*&@#KLJER".getBytes());
+        when(sc.getCode()).thenReturn((short)3, (short)3, (short)4);
+
+        IPacketWriter ip = mock(IPacketWriter.class);
+	    LastTalkFactory l = new LastTalkFactory();
+	    IPacketHandler pp = l.createHandler(ip);
+
+	    pp.handleClose(ip);
+	    pp.handlePacket(sc, ip);
+	    verify(ip).handleWrite(sc);
+	    pp.handlePacket(sc, ip);
+	    verify(ip, times(2)).handleWrite(sc);
+	}
+
+	@Test
+	public void testDemoMain() throws Exception {
+		new DemoServer();
+		new DemoClient();
+		DemoServer.main(new String[]{"-x", "1"});
 	    Thread.sleep(10);
-	    String cons = "4\nNice to meet you!\n4\nNice to meet you!\n-1\n";
-	    DemoClient.setIn(new ByteArrayInputStream(cons.getBytes()));
-	    DemoClient.main(null);
 	    DemoServer.stop();
 	}
 }

@@ -77,7 +77,7 @@ public class DemoClient {
             pk.setData(data);
             c.handleWrite(pk);
         }
-        Thread.sleep(1000);
+        Thread.sleep(100);
         c.stop();
     }
 

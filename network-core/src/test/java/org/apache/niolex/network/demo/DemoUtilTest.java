@@ -20,6 +20,8 @@ package org.apache.niolex.network.demo;
 
 import static org.junit.Assert.assertEquals;
 
+import java.io.ByteArrayInputStream;
+
 import org.junit.Test;
 
 /**
@@ -83,6 +85,31 @@ public class DemoUtilTest extends DemoUtil {
         assertEquals("1.2.8.68", HOST);
         assertEquals(660000, TIMEOUT);
         assertEquals(5878, LAST);
+    }
+
+    @Test
+    public void testParseArgs9() throws Exception {
+        parseArgs(new String[] {"5878", "-h", "1.2.8.68", "-k", "6k"});
+        assertEquals("1.2.8.68", HOST);
+        assertEquals(6144, BUF_SIZE);
+        assertEquals(5878, LAST);
+    }
+
+    @Test
+    public void testParseArgs10() throws Exception {
+        parseArgs(new String[] {"5878", "-h", "1.2.8.68", "-b", "29293"});
+        assertEquals("1.2.8.68", HOST);
+        assertEquals(29293, BUF_SIZE);
+        assertEquals(5878, LAST);
+    }
+
+    @Test
+    public void testServerAndClient() throws Exception {
+        DemoServer.main(null);
+        String cons = "4\nNice to meet you!\n4\nNice to meet you!\n-1\n";
+        DemoClient.setIn(new ByteArrayInputStream(cons.getBytes()));
+        DemoClient.main(null);
+        DemoServer.stop();
     }
 
 }

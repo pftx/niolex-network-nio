@@ -17,7 +17,11 @@
  */
 package org.apache.niolex.network.demo;
 
+import org.apache.niolex.commons.codec.IntegerUtil;
+
 /**
+ * The demo utility for parsing arguments.
+ *
  * @author <a href="mailto:xiejiyun@foxmail.com">Xie, Jiyun</a>
  * @version 1.0.0
  * @since 2013-11-8
@@ -28,6 +32,7 @@ public class DemoUtil {
     public static int PORT = 8808;
     public static int TIMEOUT = 600000;
     public static int POOL_SIZE = 0;
+    public static int BUF_SIZE = 4096;
     public static int LAST = 0;
 
     /**
@@ -41,6 +46,7 @@ public class DemoUtil {
             PORT = 8808;
             TIMEOUT = 600000;
             POOL_SIZE = 0;
+            BUF_SIZE = 4096;
             LAST = -1;
             return;
         }
@@ -59,6 +65,10 @@ public class DemoUtil {
                     case 'P':
                     case 's':
                         POOL_SIZE = Integer.parseInt(args[++i]);
+                        break;
+                    case 'k':
+                    case 'b':
+                        BUF_SIZE = (int) IntegerUtil.fromSize(args[++i]);
                         break;
                     case 't':
                         TIMEOUT = Integer.parseInt(args[++i]);
