@@ -50,7 +50,7 @@ public class BlockingClient extends BaseClient {
 	protected DataOutputStream out;
 
     /**
-     * Create a BlockingClient without any Server Address
+     * Create a BlockingClient without any Server Address.<br>
      * Call setter to set serverAddress before connect
      */
     public BlockingClient() {
@@ -58,7 +58,8 @@ public class BlockingClient extends BaseClient {
 	}
 
 	/**
-     * Create a BlockingClient with this Server Address
+     * Create a BlockingClient with this Server Address.
+     *
      * @param serverAddress
      */
     public BlockingClient(InetSocketAddress serverAddress) {
@@ -67,6 +68,7 @@ public class BlockingClient extends BaseClient {
     }
 
     /**
+     * {@inheritDoc}
      * Start one thread for read packets, write will be done in user thread.
      *
 	 * This is the override of super method.
@@ -83,7 +85,7 @@ public class BlockingClient extends BaseClient {
         socket.connect(serverAddress);
         this.isWorking = true;
         out = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
-        Thread tr = new Thread(new ReadLoop(socket.getInputStream()));
+        Thread tr = new Thread(new ReadLoop(socket.getInputStream()), "BlockingClient");
         tr.start();
         LOG.info("Blocking client connected to address: {}", serverAddress);
     }
@@ -162,8 +164,6 @@ public class BlockingClient extends BaseClient {
                 } else {
                     LOG.info("Read loop stoped.");
                 }
-            } finally {
-                StreamUtil.closeStream(in);
             }
         }
     }

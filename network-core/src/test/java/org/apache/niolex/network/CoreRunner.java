@@ -17,6 +17,8 @@
  */
 package org.apache.niolex.network;
 
+import java.net.InetSocketAddress;
+
 import org.apache.niolex.network.adapter.FaultTolerateAdapter;
 import org.apache.niolex.network.example.EchoPacketHandler;
 import org.apache.niolex.network.handler.DispatchPacketHandler;
@@ -35,6 +37,7 @@ public class CoreRunner implements Config {
 	public static boolean isOn;
 	public static final int PORT = 8809;
 	public static final int CO_SLEEP = 100;
+	public static final InetSocketAddress SERVER_ADDR = new InetSocketAddress("localhost", PORT);
 
 	public static void createServer() throws Exception {
 		if (isOn) {

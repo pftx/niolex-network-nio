@@ -59,6 +59,8 @@ public abstract class BaseClient implements IClient {
     protected int connectTimeout = Config.SO_CONNECT_TIMEOUT;
 
 	/**
+	 * {@inheritDoc}
+	 *
 	 * Override super method
 	 * @see org.apache.niolex.network.IPacketWriter#getRemoteName()
 	 */
@@ -87,7 +89,7 @@ public abstract class BaseClient implements IClient {
 
 	/**
 	 * Override super method
-	 * @see org.apache.niolex.network.IPacketWriter#addEventListener(org.apache.niolex.network.event.WriteEventListener)
+	 * @see org.apache.niolex.network.IPacketWriter#addEventListener(WriteEventListener)
 	 */
 	@Override
 	public void addEventListener(WriteEventListener listener) {
@@ -96,7 +98,7 @@ public abstract class BaseClient implements IClient {
 
 	/**
 	 * Override super method
-	 * @see org.apache.niolex.network.IPacketWriter#attachData(java.lang.String, java.lang.Object)
+	 * @see org.apache.niolex.network.IPacketWriter#attachData(String, Object)
 	 */
 	@Override
 	public Object attachData(String key, Object value) {
@@ -105,7 +107,7 @@ public abstract class BaseClient implements IClient {
 
 	/**
 	 * Override super method
-	 * @see org.apache.niolex.network.IPacketWriter#getAttached(java.lang.String)
+	 * @see org.apache.niolex.network.IPacketWriter#getAttached(String)
 	 */
 	@Override
 	public <T> T getAttached(String key) {
@@ -113,8 +115,10 @@ public abstract class BaseClient implements IClient {
 	}
 
     /**
+     * {@inheritDoc}
+     *
 	 * This is the override of super method.
-	 * @see org.apache.niolex.network.IClient#setPacketHandler(org.apache.niolex.network.IPacketHandler)
+	 * @see org.apache.niolex.network.IClient#setPacketHandler(IPacketHandler)
 	 */
     @Override
 	public void setPacketHandler(IPacketHandler packetHandler) {
@@ -122,6 +126,8 @@ public abstract class BaseClient implements IClient {
     }
 
 	/**
+	 * {@inheritDoc}
+	 *
 	 * This is the override of super method.
 	 * @see org.apache.niolex.network.IClient#getServerAddress()
 	 */
@@ -131,6 +137,8 @@ public abstract class BaseClient implements IClient {
 	}
 
 	/**
+	 * {@inheritDoc}
+	 *
 	 * This is the override of super method.
 	 * @see org.apache.niolex.network.IClient#setServerAddress(java.net.InetSocketAddress)
 	 */
@@ -140,6 +148,8 @@ public abstract class BaseClient implements IClient {
 	}
 
 	/**
+	 * {@inheritDoc}
+	 *
 	 * This is the override of super method.
 	 * @see org.apache.niolex.network.IClient#setServerAddress(java.lang.String)
 	 */
@@ -150,8 +160,6 @@ public abstract class BaseClient implements IClient {
 	}
 
 	/**
-	 * This is the override of super method.
-	 *
 	 * @return the socket connect timeout.
 	 */
 	public int getConnectTimeout() {
@@ -159,14 +167,19 @@ public abstract class BaseClient implements IClient {
 	}
 
 	/**
+	 * {@inheritDoc}
+	 *
 	 * Override super method
 	 * @see org.apache.niolex.network.IClient#setConnectTimeout(int)
 	 */
+	@Override
 	public void setConnectTimeout(int connectTimeout) {
 		this.connectTimeout = connectTimeout;
 	}
 
 	/**
+	 * {@inheritDoc}
+	 *
 	 * This is the override of super method.
 	 * @see org.apache.niolex.network.IClient#isWorking()
 	 */

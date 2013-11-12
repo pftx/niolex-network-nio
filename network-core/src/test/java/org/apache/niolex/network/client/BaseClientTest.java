@@ -18,53 +18,66 @@
 package org.apache.niolex.network.client;
 
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Random;
-import java.util.Set;
 
-import org.apache.niolex.network.CoreRunner;
 import org.apache.niolex.network.IPacketHandler;
-import org.apache.niolex.network.IPacketWriter;
 import org.apache.niolex.network.PacketData;
-import org.apache.niolex.network.PacketDataTest;
-import org.apache.niolex.network.example.EchoPacketHandler;
-import org.apache.niolex.network.server.NioServer;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.runners.MockitoJUnitRunner;
-import org.mockito.stubbing.Answer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.5, $Date: 2012-12-4$
  */
-@RunWith(MockitoJUnitRunner.class)
-public class BaseClientTest {
+public class BaseClientTest extends BaseClient {
 
-    private static final Logger LOG = LoggerFactory.getLogger(PacketDataTest.class);
-    private static final int PORT = 8908;
+    /**
+     * This is the override of super method.
+     * @see org.apache.niolex.network.IClient#connect()
+     */
+    @Override
+    public void connect() {
+        socket = mock(Socket.class);
+        when(socket.getLocalPort()).thenReturn(3527);
+        try {
+            doThrow(new IOException("Moke#Mock#Make")).when(socket).close();
+        } catch (IOException e) {
+        }
+    }
 
-    @Mock
-    private IPacketHandler packetHandler;
+    /**
+     * This is the override of super method.
+     * @see org.apache.niolex.network.IClient#stop()
+     */
+    @Override
+    public void stop() {
+        socket = null;
+    }
 
-    private IPacketHandler packetHandlerServer;
+    /**
+     * This is the override of super method.
+     * @see org.apache.niolex.network.IPacketWriter#handleWrite(org.apache.niolex.network.PacketData)
+     */
+    @Override
+    public void handleWrite(PacketData sc) {
+    }
 
-    private NioServer nioServer;
-    private Set<String> received = new HashSet<String>();
+    //------------------------------------------------------------------------------------------------
+    // START TEST
+    //------------------------------------------------------------------------------------------------
+
+    @Test
+    public void testGetRemoteName() throws Exception {
+        setServerAddress("localhost:8823");
+        stop();
+        assertEquals("localhost/127.0.0.1:8823-0000", getRemoteName());
+        connect();
+        assertEquals("localhost/127.0.0.1:8823-3527", getRemoteName());
+        stop();
+    }
 
     /**
      * Test method for {@link org.apache.niolex.network.client.BaseClient#safeClose()}.
@@ -72,18 +85,30 @@ public class BaseClientTest {
      */
     @Test
     public void testSafeClose() throws IOException {
-        BaseClient cli = new BaseClient(){
+        stop();
+        Exception e = safeClose();
+        assertNull(e);
+        connect();
+        e = safeClose();
+        assertEquals(e.getMessage(), "Moke#Mock#Make");
+        stop();
+    }
 
+    /**
+     * Test method for {@link org.apache.niolex.network.client.BaseClient#safeClose()}.
+     * @throws IOException
+     */
+    @Test
+    public void testSafeCloseOther() throws IOException {
+        BaseClient cli = new BaseClient(){
             @Override
             public void connect() throws IOException {
                 this.socket = mock(Socket.class);
-                doThrow(new IOException("This is test testSafeClose.")).when(socket).close();
             }
 
             @Override
             public void stop() {
             }
-
             @Override
             public void handleWrite(PacketData sc) {
 
@@ -91,143 +116,64 @@ public class BaseClientTest {
         cli.setServerAddress("localhost:8123");
         cli.connect();
         Exception e = cli.safeClose();
-        assertEquals(e.getMessage(), "This is test testSafeClose.");
+        assertNull(e);
     }
 
-
-    @Before
-    public void createPacketClient() throws Exception {
-        nioServer = new NioServer();
-        packetHandlerServer = spy(new EchoPacketHandler());
-        nioServer.setPacketHandler(packetHandlerServer);
-        nioServer.setPort(PORT);
-        nioServer.start();
+    @Test(expected=UnsupportedOperationException.class)
+    public void testAddEventListener() throws Exception {
+        addEventListener(null);
     }
 
-    @After
-    public void stopNioServer() throws Exception {
-        nioServer.stop();
+    @Test(expected=UnsupportedOperationException.class)
+    public void testAttachData() throws Exception {
+        attachData("abc", null);
     }
 
-    private byte[] generateRandom(int len, Random r) {
-        byte[] ret = new byte[len];
-        r.nextBytes(ret);
-        return ret;
+    @Test(expected=UnsupportedOperationException.class)
+    public void testGetAttached() throws Exception {
+        getAttached(null);
     }
 
-    private void assertArrayEquals(byte[] a, byte[] b) {
-        if (a.length == b.length) {
-            for (int k = 0; k < a.length; k += a.length / 100 + 1) {
-                if (a[k] != b[k]) {
-                    assertFalse("Index at " + k, true);
-                    return;
-                }
-            }
-        } else {
-            assertFalse("Invalid length", true);
-        }
-    }
-
-    /**
-     * Test method for
-     * {@link org.apache.niolex.network.client.PacketClient#handleWrite(org.apache.niolex.network.PacketData)}
-     * .
-     */
     @Test
-    public void testHandleWrite() throws Exception {
-        final PacketData sc0 = new PacketData();
-        final PacketData sc1 = new PacketData();
-        final PacketData sc2 = new PacketData();
-        final PacketData sc3 = new PacketData();
-        final PacketData sc4 = new PacketData();
-        final PacketData sc5 = new PacketData();
+    public void testSetPacketHandler() throws Exception {
+        IPacketHandler packetHandler = mock(IPacketHandler.class);
+        setPacketHandler(packetHandler);
+        assertEquals(packetHandler, this.packetHandler);
+    }
 
-        sc5.setReserved((byte)5);
-        assertEquals(sc5.getReserved(), 5);
+    @Test
+    public void testGetServerAddress() throws Exception {
+        setServerAddress("www.baidu.com:8123");
+        System.out.println(getServerAddress());
+    }
 
-        doAnswer(new Answer<String>() {
-            public String answer(InvocationOnMock invocation) {
-                Object[] args = invocation.getArguments();
-                PacketData sc = (PacketData) args[0];
-                switch (sc.getCode()) {
-                case 1:
-                    assertArrayEquals(sc0.getData(), sc.getData());
-                    break;
-                case 2:
-                    assertArrayEquals(sc1.getData(), sc.getData());
-                    break;
-                case 3:
-                    assertArrayEquals(sc2.getData(), sc.getData());
-                    break;
-                case 4:
-                    assertArrayEquals(sc3.getData(), sc.getData());
-                    break;
-                case 5:
-                    assertArrayEquals(sc4.getData(), sc.getData());
-                    break;
-                case 6:
-                    assertArrayEquals(sc5.getData(), sc.getData());
-                    break;
-                default:
-                    System.out.println("!!!Code Not Expected: " + sc.getCode());
-                    break;
-                }
-                IPacketWriter ip = (IPacketWriter)args[1];
-                received.add(ip.getRemoteName() + ", code: " + sc.getCode());
-                String s = "called with arguments: " + args.length + ", code: " + sc.getCode()
-                        + ", client: " + ip.getRemoteName();
-                LOG.info(s);
-                return s;
-            }
-        }).when(packetHandler).handlePacket(any(PacketData.class),
-                any(IPacketWriter.class));
+    @Test
+    public void testSetServerAddressInetSocketAddress() throws Exception {
+        setServerAddress(new InetSocketAddress("www.baidu.com", 8080));
+        System.out.println(getServerAddress());
+    }
 
-        PacketClient packetClient1 = new PacketClient(new InetSocketAddress("localhost", PORT));
-        packetClient1.setPacketHandler(packetHandler);
-        PacketClient packetClient2 = new PacketClient(new InetSocketAddress("localhost", PORT));
-        packetClient2.setPacketHandler(packetHandler);
-        PacketClient packetClient3 = new PacketClient(new InetSocketAddress("localhost", PORT));
-        packetClient3.setPacketHandler(packetHandler);
-        PacketClient packetClient4 = new PacketClient(new InetSocketAddress("localhost", PORT));
-        packetClient4.setPacketHandler(packetHandler);
+    @Test
+    public void testSetServerAddressString() throws Exception {
+        setServerAddress("localhost:9001");
+        assertEquals("localhost/127.0.0.1:9001", getServerAddress().toString());
+    }
 
-        packetClient1.connect();
-        packetClient2.connect();
-        packetClient3.connect();
-        packetClient4.connect();
+    @Test
+    public void testGetConnectTimeout() throws Exception {
+        setConnectTimeout(4352);
+        assertEquals(4352, getConnectTimeout());
+    }
 
-        List<PacketData> list = new ArrayList<PacketData>();
-        list.add(sc0);
-        list.add(sc1);
-        list.add(sc2);
-        list.add(sc3);
-        list.add(sc4);
-        list.add(sc5);
-        Random r = new Random(System.nanoTime());
+    @Test
+    public void testSetConnectTimeout() throws Exception {
+        setConnectTimeout(2344537);
+        assertEquals(2344537, getConnectTimeout());
+    }
 
-        for (int i = 0; i < 6; ++i) {
-            PacketData sc = list.get(i);
-            sc.setCode((short) (i + 1));
-            sc.setVersion((byte) 8);
-            int len = (r.nextInt(1024) + 1) * 1024;
-            sc.setLength(len);
-            sc.setData(generateRandom(len, r));
-            packetClient1.handleWrite(sc);
-            packetClient2.handleWrite(sc);
-            packetClient3.handleWrite(sc);
-            packetClient4.handleWrite(sc);
-        }
-        int i = 30;
-        while (i-- > 0) {
-            if (received.size() == 24)
-                break;
-            Thread.sleep(10 * CoreRunner.CO_SLEEP);
-        }
-        packetClient1.stop();
-        packetClient2.stop();
-        packetClient3.stop();
-        packetClient4.stop();
-        assertEquals(24, received.size());
+    @Test
+    public void testIsWorking() throws Exception {
+        assertFalse(isWorking());
     }
 
 }

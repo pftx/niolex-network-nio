@@ -169,7 +169,7 @@ public class PacketData extends Packet {
      *
      * @param in the data input stream
      * @throws IOException For any I/O error occurs.
-     * @throws IllegalStateException If packet is too large
+     * @throws IOException If packet is too large
      */
     public void parsePacket(DataInputStream in) throws IOException {
         version = in.readByte();

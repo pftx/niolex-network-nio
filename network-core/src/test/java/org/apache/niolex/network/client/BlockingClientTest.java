@@ -18,23 +18,24 @@
 package org.apache.niolex.network.client;
 
 import static org.junit.Assert.assertFalse;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Matchers.*;
+import static org.mockito.Mockito.*;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
-import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.SocketTimeoutException;
+import java.util.concurrent.CountDownLatch;
 
+import org.apache.niolex.network.CoreRunner;
 import org.apache.niolex.network.IPacketHandler;
+import org.apache.niolex.network.IPacketWriter;
 import org.apache.niolex.network.PacketData;
-import org.apache.niolex.network.client.BlockingClient.ReadLoop;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
@@ -43,7 +44,17 @@ import org.junit.Test;
  * @version 1.0.5
  * @since 2012-12-18
  */
-public class BlockingClientTest {
+public class BlockingClientTest extends BlockingClient {
+
+    @BeforeClass
+    public static void setup() throws Exception {
+        CoreRunner.createServer();
+    }
+
+    @AfterClass
+    public static void stop2() throws Exception {
+        CoreRunner.shutdown();
+    }
 
     /**
      * Test method for {@link org.apache.niolex.network.client.BlockingClient#BlockingClient()}.
@@ -63,8 +74,8 @@ public class BlockingClientTest {
      */
     @Test
     public void testBlockingClientInetSocketAddress() {
-        BlockingClient pc = new BlockingClient();
-        byte[] abc = new byte[8];
+        BlockingClient pc = new BlockingClient(CoreRunner.SERVER_ADDR);
+        byte[] abc = new byte[10];
         InputStream in = new ByteArrayInputStream(abc);
         ReadLoop r = pc.new ReadLoop(in);
         pc.isWorking = true;
@@ -77,40 +88,75 @@ public class BlockingClientTest {
 
     /**
      * Test method for {@link org.apache.niolex.network.client.BlockingClient#connect()}.
-     * @throws IOException
+     * @throws Exception
      */
     @Test
-    public void testConnect() throws IOException {
+    public void testConnect() throws Exception {
+        BlockingClient pc = new BlockingClient(CoreRunner.SERVER_ADDR);
+        final CountDownLatch latch = new CountDownLatch(1);
+        IPacketHandler h = new IPacketHandler(){
+
+            @Override
+            public void handlePacket(PacketData sc, IPacketWriter wt) {
+                if (sc.getCode() == 2) {
+                    latch.countDown();
+                }
+            }
+
+            @Override
+            public void handleClose(IPacketWriter wt) {
+            }};;
+        pc.setPacketHandler(h);
+        pc.connect();
+        pc.handleWrite(new PacketData(3, "Give me a hand.".getBytes()));
+        pc.handleWrite(new PacketData(2, "Hellow, world.".getBytes()));
+        latch.await();
+        pc.stop();
+    }
+
+    @Test
+    public void testReadLoop() throws IOException {
         final BlockingClient pc = new BlockingClient();
         InputStream in = mock(InputStream.class);
+        doThrow(new SocketTimeoutException("Abc")).when(in).read();
         doThrow(new SocketTimeoutException("Abc")).when(in).read(any(byte[].class), anyInt(), anyInt());
         ReadLoop r = pc.new ReadLoop(in);
         pc.isWorking = true;
-        IPacketHandler h = mock(IPacketHandler.class);
-        pc.setPacketHandler(h);
 
-        OutputStream o = new FilterOutputStream(null) {
+        OutputStream o = new ByteArrayOutputStream() {
 
             @Override
-            public void write(int b) throws IOException {
+            public void write(int b) {
                 pc.isWorking = false;
             }
 
             @Override
-            public void write(byte[] b) throws IOException {
+            public void write(byte[] b) {
                 pc.isWorking = false;
             }
 
             @Override
-            public void write(byte[] b, int off, int len) throws IOException {
+            public void write(byte[] b, int off, int len) {
                 pc.isWorking = false;
             }
 
         };
         pc.out = new DataOutputStream(o);
+        IPacketHandler h = mock(IPacketHandler.class);
+        pc.setPacketHandler(h);
 
         r.run();
         assertFalse(pc.isWorking);
+        verify(h, never()).handlePacket(any(PacketData.class), eq(pc));
+        verify(h, never()).handleClose(pc);
+    }
+
+    @Test(expected=NullPointerException.class)
+    public void testHandleWrite() throws Exception {
+        InputStream in = mock(InputStream.class);
+        ReadLoop r = new ReadLoop(in);
+        r.run();
+        handleWrite(PacketData.getHeartBeatPacket());
     }
 
 }
