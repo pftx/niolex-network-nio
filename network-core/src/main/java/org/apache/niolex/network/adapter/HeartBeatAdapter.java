@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
  * Handle the heart beat problem of the writers attached with this adapter.
  * <br>
  * If user set {@link #forceHeartBeat}, then we will heart beat all the clients,
- * otherwise only heart beat those registered with {@link Config.CODE_REGR_HBEAT}.
+ * otherwise only heart beat those registered with {@link Config#CODE_REGR_HBEAT}.
  * <br>
  * User can set the heart beat interval with {@link #setHeartBeatInterval(int)}.
  *
