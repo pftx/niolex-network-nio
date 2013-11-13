@@ -31,7 +31,7 @@ public interface WriteEventListener {
 
 	/**
 	 * This event is fired just after we send the packet to remote peer.
-	 *
+	 * <br>
 	 * Notion! We fire this event only indicate that the data is sent to network
 	 * buffer, it will be transfered to remote if no I/O error occur.
 	 * So you can not be 100% sure that the remote will get this packet.

@@ -31,16 +31,17 @@ import org.apache.niolex.network.PacketData;
  * @since 2012-5-31
  */
 public class SavePacketHandler implements IPacketHandler {
-	// The list to save data
-	private final Collection<PacketData> list;
+	// The collection to save data
+	private final Collection<PacketData> collection;
 
 	/**
-	 * Set the list to save data
-	 * @param list
+	 * Constructor.
+	 *
+	 * @param collection the collection to save data
 	 */
-	public SavePacketHandler(Collection<PacketData> list) {
+	public SavePacketHandler(Collection<PacketData> collection) {
 		super();
-		this.list = list;
+		this.collection = collection;
 	}
 
 	/**
@@ -49,7 +50,7 @@ public class SavePacketHandler implements IPacketHandler {
 	 */
 	@Override
 	public void handlePacket(PacketData sc, IPacketWriter wt) {
-		list.add(sc);
+		collection.add(sc);
 	}
 
 	/**

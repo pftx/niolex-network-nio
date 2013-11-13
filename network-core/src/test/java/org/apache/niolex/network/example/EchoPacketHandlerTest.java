@@ -29,34 +29,33 @@ import org.apache.niolex.network.example.EchoPacketHandler;
 import org.junit.Before;
 import org.junit.Test;
 
-
 public class EchoPacketHandlerTest {
-	EchoPacketHandler handler;
+    EchoPacketHandler handler;
 
-	@Before
-	public void setUp() throws Exception {
-		handler = new EchoPacketHandler();
-	}
+    @Before
+    public void setUp() throws Exception {
+        handler = new EchoPacketHandler();
+    }
 
-	@Test
-		public void testHandleClose() {
-			IPacketWriter ip = mock(IPacketWriter.class);
-			handler.handleClose(ip);
-			handler.handleClose(ip);
-			verify(ip, times(0)).handleWrite(any(PacketData.class));
-			verify(ip, times(2)).getRemoteName();
-		}
+    @Test
+    public void testHandleClose() {
+        IPacketWriter ip = mock(IPacketWriter.class);
+        handler.handleClose(ip);
+        handler.handleClose(ip);
+        verify(ip, times(0)).handleWrite(any(PacketData.class));
+        verify(ip, times(2)).getRemoteName();
+    }
 
-	@Test
-    	public void testHandlePacket() {
-    		PacketData sc = mock(PacketData.class);
-    		when(sc.getCode()).thenReturn((short)3, (short)3, (short)4);
-    		IPacketWriter ip = mock(IPacketWriter.class);
-    		handler.handlePacket(sc , ip);
-    		handler.handlePacket(sc , ip);
-    		handler.handlePacket(sc , ip);
-    		verify(ip, times(3)).handleWrite(sc);
-    		verify(ip, times(3)).getRemoteName();
-    	}
+    @Test
+    public void testHandlePacket() {
+        PacketData sc = mock(PacketData.class);
+        when(sc.getCode()).thenReturn((short) 3, (short) 3, (short) 4);
+        IPacketWriter ip = mock(IPacketWriter.class);
+        handler.handlePacket(sc, ip);
+        handler.handlePacket(sc, ip);
+        handler.handlePacket(sc, ip);
+        verify(ip, times(3)).handleWrite(sc);
+        verify(ip, times(3)).getRemoteName();
+    }
 
 }

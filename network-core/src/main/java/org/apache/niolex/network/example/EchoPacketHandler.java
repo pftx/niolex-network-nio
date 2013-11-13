@@ -39,7 +39,7 @@ public class EchoPacketHandler implements IPacketHandler {
 	 */
     @Override
     public void handleClose(IPacketWriter wt) {
-    	LOG.warn("Error occured from remote: " + wt.getRemoteName());
+    	LOG.info("Error occured from remote: " + wt.getRemoteName());
     }
 
     /**
@@ -49,7 +49,7 @@ public class EchoPacketHandler implements IPacketHandler {
     @Override
     public void handlePacket(PacketData sc, IPacketWriter wt) {
         wt.handleWrite(sc);
-        LOG.info("Packet with desc [{}] from remote [{}] echoed back.", sc.descriptor(),
+        LOG.debug("Packet with desc [{}] from remote [{}] echoed back.", sc.descriptor(),
         		wt.getRemoteName());
     }
 

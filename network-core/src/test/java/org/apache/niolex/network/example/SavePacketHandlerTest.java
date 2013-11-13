@@ -28,39 +28,42 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-@RunWith(MockitoJUnitRunner.class)
 /**
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
  * @since 2012-6-1
  */
+@RunWith(MockitoJUnitRunner.class)
 public class SavePacketHandlerTest {
 
-	@Mock
-	private List<PacketData> list;
-	private SavePacketHandler savePacketHandler;
+    @Mock
+    private List<PacketData> list;
+    private SavePacketHandler savePacketHandler;
 
-	@Before
-	public void createSavePacketHandler() throws Exception {
-		savePacketHandler = new SavePacketHandler(list);
-	}
+    @Before
+    public void createSavePacketHandler() throws Exception {
+        savePacketHandler = new SavePacketHandler(list);
+    }
 
-	/**
-    	 * Test method for {@link org.apache.niolex.network.example.SavePacketHandler#handlePacket(org.apache.niolex.network.PacketData, org.apache.niolex.network.IPacketWriter)}.
-    	 */
-    	@Test
-    	public void testHandlePacket() {
-    		PacketData sc = new PacketData(3, new byte[0]);
-    		savePacketHandler.handlePacket(sc, null);
-    		verify(list).add(sc);
-    	}
+    /**
+     * Test method for
+     * {@link org.apache.niolex.network.example.SavePacketHandler#handlePacket(PacketData, org.apache.niolex.network.IPacketWriter)}
+     * .
+     */
+    @Test
+    public void testHandlePacket() {
+        PacketData sc = new PacketData(3, new byte[0]);
+        savePacketHandler.handlePacket(sc, null);
+        verify(list).add(sc);
+    }
 
-	/**
-		 * Test method for {@link org.apache.niolex.network.example.SavePacketHandler#handleClose(org.apache.niolex.network.IPacketWriter)}.
-		 */
-		@Test
-		public void testHandleClose() {
-			savePacketHandler.handleClose(null);
-		}
+    /**
+     * Test method for
+     * {@link org.apache.niolex.network.example.SavePacketHandler#handleClose(org.apache.niolex.network.IPacketWriter)}.
+     */
+    @Test
+    public void testHandleClose() {
+        savePacketHandler.handleClose(null);
+    }
 
 }
