@@ -17,7 +17,7 @@
  */
 package org.apache.niolex.network.example;
 
-import java.util.List;
+import java.util.Collection;
 
 import org.apache.niolex.network.IPacketHandler;
 import org.apache.niolex.network.IPacketWriter;
@@ -32,13 +32,13 @@ import org.apache.niolex.network.PacketData;
  */
 public class SavePacketHandler implements IPacketHandler {
 	// The list to save data
-	private final List<PacketData> list;
+	private final Collection<PacketData> list;
 
 	/**
 	 * Set the list to save data
 	 * @param list
 	 */
-	public SavePacketHandler(List<PacketData> list) {
+	public SavePacketHandler(Collection<PacketData> list) {
 		super();
 		this.list = list;
 	}
