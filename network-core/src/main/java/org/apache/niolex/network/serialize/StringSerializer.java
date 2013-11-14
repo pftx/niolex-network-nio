@@ -21,55 +21,40 @@ import org.apache.niolex.commons.codec.StringUtil;
 
 
 /**
- * StringSerializer serialize String into byte array and vice-verser.
- * This is just a demo for user to refer.
+ * StringSerializer serialize String into byte array and vice-verser using UTF-8.
+ * This is just a demo for user to reference.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
  * @since 2012-5-30
  */
 public class StringSerializer extends BaseSerializer<String> {
-	private short code;
 
 	/**
 	 * Create a StringSerializer for this code.
+	 *
 	 * @param code
 	 */
 	public StringSerializer(short code) {
-		super();
-		this.code = code;
+		super(String.class, code);
 	}
 
-	public void setCode(short code) {
-		this.code = code;
-	}
+    /**
+     * This is the override of super method.
+     * @see org.apache.niolex.network.serialize.ISerializer#bytes2Obj(byte[])
+     */
+    @Override
+    public String bytes2Obj(byte[] array) {
+        return StringUtil.utf8ByteToStr(array);
+    }
 
-
-	/**
-	 * Override super method
-	 * @see org.apache.niolex.network.serialize.ISerializer#getCode()
-	 */
-	@Override
-	public short getCode() {
-		return this.code;
-	}
-
-	/**
-	 * Override super method
-	 * @see org.apache.niolex.network.serialize.BaseSerializer#serObj(java.lang.Object)
-	 */
-	@Override
-	public byte[] serObj(String t) {
-		return StringUtil.strToUtf8Byte(t);
-	}
-
-	/**
-	 * Override super method
-	 * @see org.apache.niolex.network.serialize.BaseSerializer#deserObj(byte[])
-	 */
-	@Override
-	public String deserObj(byte[] arr) {
-		return StringUtil.utf8ByteToStr(arr);
-	}
+    /**
+     * This is the override of super method.
+     * @see org.apache.niolex.network.serialize.BaseSerializer#serialize(Object)
+     */
+    @Override
+    public byte[] serialize(String t) {
+        return StringUtil.strToUtf8Byte(t);
+    }
 
 }

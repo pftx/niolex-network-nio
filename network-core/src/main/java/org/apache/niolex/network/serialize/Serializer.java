@@ -38,5 +38,5 @@ public @interface Serializer {
 	 *
 	 * @return the serializer class
 	 */
-	Class<?> value();
+	Class<? extends ISerializer> value();
 }

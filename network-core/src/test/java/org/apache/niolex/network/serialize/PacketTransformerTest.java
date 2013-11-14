@@ -19,6 +19,7 @@ package org.apache.niolex.network.serialize;
 
 import static org.junit.Assert.*;
 
+import org.apache.niolex.commons.codec.StringUtil;
 import org.apache.niolex.network.PacketData;
 import org.apache.niolex.network.serialize.PacketTransformer;
 import org.apache.niolex.network.serialize.StringSerializer;
@@ -55,28 +56,35 @@ public class PacketTransformerTest {
 	 * Test method for {@link org.apache.niolex.network.serialize.PacketTransformer#getDataObject(org.apache.niolex.network.PacketData)}.
 	 */
 	@Test(expected=IllegalStateException.class)
-	public void testGetDataObject() {
+	public void testGetDataObjectCanNotHandle() {
 		PacketData sc = new PacketData(3, new byte[0]);
 		pt.getDataObject(sc);
 	}
 
-	@Test(expected=IllegalStateException.class)
-	public void testGetDataObject3() {
-		PacketData sc = new PacketData(5, "mer#getP".getBytes());
+	@Test
+	public void testGetDataObject() {
+		PacketData sc = new PacketData(5, "mer#getP#价格没有数字".getBytes());
 		String c = pt.getDataObject(sc);
-		pt.getPacketData((short)6, c);
+		assertEquals("mer#getP#价格没有数字", c);
 	}
+
+	/**
+     * Test method for {@link org.apache.niolex.network.serialize.PacketTransformer#getPacketData(java.lang.Short, java.lang.Object)}.
+     */
+    @Test(expected=IllegalStateException.class)
+    public void testGetPacketDataCanNotHandle() {
+        pt.getPacketData((short)6, "Again, It's more like it.");
+    }
 
 	/**
 	 * Test method for {@link org.apache.niolex.network.serialize.PacketTransformer#getPacketData(java.lang.Short, java.lang.Object)}.
 	 */
 	@Test
 	public void testGetPacketData() {
-		PacketData sc = new PacketData(5, "mer#getP".getBytes());
-		String c = pt.getDataObject(sc);
-		PacketData qc = pt.getPacketData((short)5, c);
-		assertEquals("mer#getP", c);
-		assertArrayEquals(sc.getData(), qc.getData());
+	    String s = "原型继承与标识符查找";
+		PacketData qc = pt.getPacketData((short)5, s);
+		assertEquals(5, qc.getCode());
+		assertArrayEquals(s.getBytes(StringUtil.UTF_8), qc.getData());
 	}
 
 }

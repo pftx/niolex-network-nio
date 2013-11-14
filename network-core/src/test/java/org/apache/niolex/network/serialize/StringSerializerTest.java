@@ -19,19 +19,17 @@ package org.apache.niolex.network.serialize;
 
 import static org.junit.Assert.assertEquals;
 
-import org.apache.niolex.network.PacketData;
-import org.apache.niolex.network.serialize.StringSerializer;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 
-@RunWith(MockitoJUnitRunner.class)
 /**
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
  * @since 2012-5-30
  */
+@RunWith(MockitoJUnitRunner.class)
 public class StringSerializerTest {
 
 	private short code = 3;
@@ -58,16 +56,9 @@ public class StringSerializerTest {
 	@Test
 	public void testSerObjString() {
 		String q = "iolex.network.packet.StringSerializer#serObj(java.l";
-		byte[] arr = stringSerializer.serObj(q);
-		String s = stringSerializer.deserObj(arr);
+		byte[] arr = stringSerializer.obj2Bytes(q);
+		String s = (String) stringSerializer.bytes2Obj(arr);
 		assertEquals(q, s);
 	}
 
-	@Test
-	public void testSerObj() {
-		String q = "iolex.network.packet.StringSerializer#serObj(java.l";
-		PacketData sc = stringSerializer.obj2Data((short)4, q);
-		String s = stringSerializer.data2Obj(sc);
-		assertEquals(q, s);
-	}
 }

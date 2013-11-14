@@ -17,41 +17,39 @@
  */
 package org.apache.niolex.network.serialize;
 
-import org.apache.niolex.network.PacketData;
 
 /**
- * Handle the Packet serialization and de-serialization.
+ * Handle the Packet serialization and deserialization.
  * {@link PacketTransformer} use this interface to manage the user serializer to do
- * data and object translation.
+ * byte array and object transformation.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
  * @since 2012-5-30
  */
-public interface ISerializer<T> {
+public interface ISerializer {
 
 	/**
-	 * Get the code this Serializer is capable of.
+	 * Get the packet code this Serializer is capable of.
 	 *
-	 * @return the code
+	 * @return the packet code
 	 */
 	public short getCode();
 
 	/**
 	 * Translate object to byte array.
 	 *
-	 * @param code the packet code
-	 * @param o the object to be translated
+	 * @param o the object to be transformed
 	 * @return the result
 	 */
-	public PacketData obj2Data(short code, T o);
+	public byte[] obj2Bytes(Object o);
 
 	/**
 	 * Translate byte array to object.
 	 *
-	 * @param sc the packet data
+	 * @param array the packet data
 	 * @return the result
 	 */
-	public T data2Obj(PacketData sc);
+	public Object bytes2Obj(byte[] array);
 
 }

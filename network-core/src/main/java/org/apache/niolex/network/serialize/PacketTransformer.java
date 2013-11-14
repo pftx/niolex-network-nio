@@ -39,7 +39,7 @@ import org.apache.niolex.network.PacketData;
 public class PacketTransformer {
 	private static final PacketTransformer INSTANCE = new PacketTransformer();
 
-	private final Map<Short, ISerializer<?>> serMap = new HashMap<Short, ISerializer<?>>();
+	private final Map<Short, ISerializer> serMap = new HashMap<Short, ISerializer>();
 
 
 	/**
@@ -63,7 +63,7 @@ public class PacketTransformer {
 	 *
 	 * @param ser the serializer
 	 */
-	public void addSerializer(ISerializer<?> ser) {
+	public void addSerializer(ISerializer ser) {
 		serMap.put(ser.getCode(), ser);
 	}
 
@@ -86,11 +86,11 @@ public class PacketTransformer {
 	 */
 	@SuppressWarnings("unchecked")
 	public <T> T getDataObject(PacketData sc) {
-		ISerializer<T> ser = (ISerializer<T>) serMap.get(sc.getCode());
+		ISerializer ser = serMap.get(sc.getCode());
 		if (ser == null) {
 			throw new IllegalStateException("No Serializer found for Packet Code " + sc.getCode());
 		}
-		return ser.data2Obj(sc);
+		return (T) ser.bytes2Obj(sc.getData());
 	}
 
 	/**
@@ -102,10 +102,10 @@ public class PacketTransformer {
 	 * @throws IllegalStateException if we can not translate this packet
 	 */
 	public PacketData getPacketData(Short code, Object o) {
-		ISerializer<?> ser = serMap.get(code);
+		ISerializer ser = serMap.get(code);
 		if (ser == null) {
 			throw new IllegalStateException("No Serializer found for Packet Code " + code);
 		}
-		return null;//ser.obj2Data(code, o);
+		return new PacketData(code, ser.obj2Bytes(o));
 	}
 }

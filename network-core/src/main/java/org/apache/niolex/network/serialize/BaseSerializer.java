@@ -27,33 +27,54 @@ import org.apache.niolex.network.PacketData;
  * @version 1.0.0
  * @since 2012-5-30
  */
-public abstract class BaseSerializer<T> implements ISerializer<T> {
+public abstract class BaseSerializer<T> implements ISerializer {
 
-	@Override
-	public PacketData obj2Data(short code, T o) {
-		byte[] arr = serObj(o);
-		return new PacketData(code, arr);
-	}
+    private final Class<T> clazz;
+    private short code;
 
-	@Override
-	public T data2Obj(PacketData sc) {
-		return deserObj(sc.getData());
-	}
+    /**
+     * The Constructor.
+     *
+     * @param clazz the class this Serializer is handling
+     * @param code the packet code this Serializer is handling
+     */
+    public BaseSerializer(Class<T> clazz, short code) {
+        super();
+        this.clazz = clazz;
+        this.code = code;
+    }
 
-	/**
+    /**
+     * This is the override of super method.
+     * @see org.apache.niolex.network.serialize.ISerializer#obj2Bytes(java.lang.Object)
+     */
+    @Override
+    public byte[] obj2Bytes(Object o) {
+        return serialize(clazz.cast(o));
+    }
+
+    /**
 	 * serialize object to byte array.
 	 *
 	 * @param t the object
 	 * @return the result
 	 */
-	public abstract byte[] serObj(T t);
+	public abstract byte[] serialize(T t);
 
-	/**
-	 * Deserialize byte array to object.
-	 *
-	 * @param arr the byte array
-	 * @return the result
-	 */
-	public abstract T deserObj(byte[] arr);
+    /**
+     * This is the override of super method.
+     * @see org.apache.niolex.network.serialize.ISerializer#getCode()
+     */
+    @Override
+    public short getCode() {
+        return code;
+    }
+
+    /**
+     * @param code the code to set
+     */
+    public void setCode(short code) {
+        this.code = code;
+    }
 
 }
