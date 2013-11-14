@@ -24,7 +24,6 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
-import java.net.Socket;
 import java.net.SocketTimeoutException;
 
 import org.apache.niolex.commons.stream.StreamUtil;
@@ -76,13 +75,7 @@ public class BlockingClient extends BaseClient {
 	 */
     @Override
 	public void connect() throws IOException {
-        // Ensure resource closed.
-        stop();
-        // Start a new world.
-        socket = new Socket();
-        socket.setSoTimeout(connectTimeout);
-        socket.setTcpNoDelay(true);
-        socket.connect(serverAddress);
+        prepareSocket();
         this.isWorking = true;
         out = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
         Thread tr = new Thread(new ReadLoop(socket.getInputStream()), "BlockingClient");

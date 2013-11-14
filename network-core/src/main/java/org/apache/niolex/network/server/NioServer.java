@@ -98,6 +98,7 @@ public class NioServer implements IServer {
             ss = ServerSocketChannel.open();
             ss.configureBlocking(false);
             ServerSocket so = ss.socket();
+            so.setReceiveBufferSize(Config.SO_BUFFER_SIZE);
             so.bind(new InetSocketAddress(this.getPort()));
             mainSelector = Selector.open();
             ss.register(mainSelector, SelectionKey.OP_ACCEPT);

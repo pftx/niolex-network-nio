@@ -176,4 +176,10 @@ public class BaseClientTest extends BaseClient {
         assertFalse(isWorking());
     }
 
+    @Test
+    public void testGetSocketBufferSize() throws Exception {
+        setSocketBufferSize(10240);
+        assertEquals(10240, getSocketBufferSize());
+    }
+
 }

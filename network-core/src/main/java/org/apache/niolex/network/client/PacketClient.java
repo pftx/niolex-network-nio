@@ -25,7 +25,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
-import java.net.Socket;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
@@ -85,13 +84,7 @@ public class PacketClient extends BaseClient {
 	 */
     @Override
 	public void connect() throws IOException {
-        // Ensure resource closed.
-        stop();
-        // Start a new world.
-        socket = new Socket();
-        socket.setSoTimeout(connectTimeout);
-        socket.setTcpNoDelay(true);
-        socket.connect(serverAddress);
+        prepareSocket();
         this.isWorking = true;
         writeThread = new Thread(new WriteLoop(socket.getOutputStream()), "PacketClientW");
         writeThread.start();

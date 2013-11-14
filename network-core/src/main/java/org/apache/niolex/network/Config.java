@@ -37,6 +37,18 @@ public interface Config extends Const {
 	 */
     // --------------------------------------------------------------
 
+    /**
+     * The low level socket buffer size.
+     */
+    int SO_BUFFER_SIZE = 64 * K;
+
+    /**
+     * Socket connect and read timeout. this is the low level timeout. Please do not configure
+     * this time small than 20 seconds, for that there will be at least heart beat packets
+     * every 10 seconds.
+     */
+    int SO_CONNECT_TIMEOUT = 20000;
+
 	/**
 	 * The NIO Byte buffer size for server socket.
 	 */
@@ -76,6 +88,11 @@ public interface Config extends Const {
 	int SERVER_DEFAULT_PORT = 8808;
 
 	/**
+	 * Server internal character encoding. UTF-8 is commonly used.
+	 */
+	Charset SERVER_ENCODING = StringUtil.UTF_8;
+
+	/**
 	 * The max queue size of the {@link org.apache.niolex.network.client.PacketClient}, we set it
 	 * to 10000 for default.
 	 */
@@ -98,22 +115,10 @@ public interface Config extends Const {
 	int RPC_CONNECT_RETRY_TIMES = 3;
 
 	/**
-	 * Socket connect and read timeout. this is the low level timeout. Please do not configure
-	 * this time small than 20 seconds, for that there will be at least heart beat packets
-	 * every 10 seconds.
-	 */
-	int SO_CONNECT_TIMEOUT = 20000;
-
-	/**
 	 * Rpc handle timeout. If the client can not get response packet after this time, it will throw
 	 * an exception to the upper layer.
 	 */
 	int RPC_HANDLE_TIMEOUT = 30000;
-
-	/**
-	 * Server internal character encoding. UTF-8 is commonly used.
-	 */
-	Charset SERVER_ENCODING = StringUtil.UTF_8;
 
 	/**
 	 * Field separator of name service.

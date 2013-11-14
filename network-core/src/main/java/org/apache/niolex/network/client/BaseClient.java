@@ -17,6 +17,7 @@
  */
 package org.apache.niolex.network.client;
 
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 
@@ -57,6 +58,31 @@ public abstract class BaseClient implements IClient {
      * Socket connect timeout.
      */
     protected int connectTimeout = Config.SO_CONNECT_TIMEOUT;
+
+    /**
+     * Socket send & receive buffer size.
+     */
+    protected int socketBufferSize = Config.SO_BUFFER_SIZE;
+
+    /**
+     * Prepare socket and connect to the server address.
+     *
+     * @return the prepared socket
+     * @throws IOException
+     */
+    protected Socket prepareSocket() throws IOException {
+        // First, we must ensure the old socket is closed, or there will be resource leak.
+        safeClose();
+        // Then, we are ready to go.
+        socket = new Socket();
+        socket.setSendBufferSize(socketBufferSize);
+        socket.setReceiveBufferSize(socketBufferSize);
+        socket.setSoLinger(true, 3);
+        socket.setSoTimeout(connectTimeout);
+        socket.setTcpNoDelay(true);
+        socket.connect(serverAddress);
+        return socket;
+    }
 
 	/**
 	 * {@inheritDoc}
@@ -178,6 +204,20 @@ public abstract class BaseClient implements IClient {
 	}
 
 	/**
+     * @return the socket buffer size
+     */
+    public int getSocketBufferSize() {
+        return socketBufferSize;
+    }
+
+    /**
+     * @param socketBufferSize the socket buffer size to set
+     */
+    public void setSocketBufferSize(int socketBufferSize) {
+        this.socketBufferSize = socketBufferSize;
+    }
+
+    /**
 	 * {@inheritDoc}
 	 *
 	 * This is the override of super method.

@@ -23,7 +23,6 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.net.Socket;
 
 import org.apache.niolex.commons.util.Runner;
 import org.apache.niolex.network.Config;
@@ -78,13 +77,7 @@ public class SocketClient extends BaseClient {
 	 */
 	@Override
 	public void connect() throws IOException {
-	    // First, we must ensure the old socket is closed, or there will be resource leak.
-	    safeClose();
-	    // Then, we are ready to go.
-        socket = new Socket();
-        socket.setSoTimeout(connectTimeout);
-        socket.setTcpNoDelay(true);
-        socket.connect(serverAddress);
+	    prepareSocket();
         this.isWorking = true;
         inS = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
         outS = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
