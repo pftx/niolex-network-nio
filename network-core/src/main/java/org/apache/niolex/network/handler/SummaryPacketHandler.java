@@ -43,14 +43,14 @@ public class SummaryPacketHandler implements IPacketHandler {
 	 */
 	@Override
     public void handleClose(IPacketWriter wt) {
-    	LOG.warn("Error occured from remote: {}", wt.getRemoteName());
+    	LOG.info("Connection to remote: {} was closed.", wt.getRemoteName());
     }
 
 	/**
 	 * We both log the packet summary to console and write it back to client.
 	 *
 	 * Override super method
-	 * @see org.apache.niolex.network.IPacketHandler#handlePacket(org.apache.niolex.network.PacketData, org.apache.niolex.network.IPacketWriter)
+	 * @see org.apache.niolex.network.IPacketHandler#handlePacket(PacketData, IPacketWriter)
 	 */
 	@Override
     public void handlePacket(PacketData sc, IPacketWriter wt) {
@@ -63,7 +63,7 @@ public class SummaryPacketHandler implements IPacketHandler {
         sb.append("\n--------------------------------------------------------\n");
         PacketData bc = new PacketData(sc.getCode(), sb.toString());
         wt.handleWrite(bc);
-        LOG.info("summary sent to remote.\n{}", sb);
+        LOG.debug("summary sent to remote.\n{}", sb);
     }
 
 }

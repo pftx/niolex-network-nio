@@ -32,79 +32,81 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-
 @RunWith(MockitoJUnitRunner.class)
 public class DispatchPacketHandlerTest {
 
-	DispatchPacketHandler handler;
-	@Mock
-	IPacketHandler pHandler1;
+    DispatchPacketHandler handler;
 
-	@Mock
-	IPacketHandler pHandler2;
+    @Mock
+    IPacketHandler pHandler1;
 
-	@Mock
-	IPacketHandler pHandler3;
+    @Mock
+    IPacketHandler pHandler2;
 
-	@Before
-	public void setUp() {
-		handler = new DispatchPacketHandler();
-		handler.addHandler((short) 3, pHandler1);
-		handler.addHandler((short) 5, pHandler2);
-		handler.setDefaultHandler(pHandler3);
-	}
+    @Mock
+    IPacketHandler pHandler3;
 
-	@Test
-		public void testHandleClose() {
-			PacketData sc = mock(PacketData.class);
-			when(sc.getCode()).thenReturn((short)3, (short)3, (short)4);
-			IPacketWriter ip = mock(IPacketWriter.class);
-			handler.handlePacket(sc , ip);
-			handler.handlePacket(sc , ip);
-			handler.handlePacket(sc , ip);
-			handler.handlePacket(sc , ip);
-			handler.handleClose(ip);
-			handler.handleClose(ip);
-			handler.handleClose(ip);
-			verify(pHandler1, times(3)).handleClose(ip);
-			verify(pHandler2, times(3)).handleClose(ip);
-			verify(pHandler3, times(3)).handleClose(ip);
-			verify(pHandler3, times(2)).handlePacket(sc, ip);
-			assertEquals(2, handler.getDispatchSize());
-		}
+    @Before
+    public void setUp() {
+        handler = new DispatchPacketHandler();
+        handler.addHandler((short) 3, pHandler1);
+        handler.addHandler((short) 5, pHandler2);
+        handler.setDefaultHandler(pHandler3);
+    }
 
-	@Test
-    	public void testHandlePacket() {
-    		PacketData sc = mock(PacketData.class);
-    		when(sc.getCode()).thenReturn((short)3, (short)3, (short)4, (short)4, (short)5);
-    		IPacketWriter ip = mock(IPacketWriter.class);
-    		handler.setDefaultHandler(null);
-    		handler.handlePacket(sc , ip);
-    		handler.handlePacket(sc , ip);
-    		handler.handlePacket(sc , ip);
-    		handler.handlePacket(sc , ip);
-    		verify(pHandler1, times(2)).handlePacket(sc, ip);
-    		verify(pHandler2, times(1)).handlePacket(sc, ip);
-    		verify(pHandler3, times(0)).handlePacket(sc, ip);
-    		assertEquals(2, handler.getDispatchSize());
-    		handler.setDefaultHandler(pHandler3);
-    	}
+    @Test
+    public void testHandleClose() {
+        PacketData sc = mock(PacketData.class);
+        when(sc.getCode()).thenReturn((short) 3, (short) 3, (short) 4);
+        IPacketWriter ip = mock(IPacketWriter.class);
+        handler.handlePacket(sc, ip);
+        handler.handlePacket(sc, ip);
+        handler.handlePacket(sc, ip);
+        handler.handlePacket(sc, ip);
+        handler.handleClose(ip);
+        handler.handleClose(ip);
+        handler.handleClose(ip);
+        verify(pHandler1, times(3)).handleClose(ip);
+        verify(pHandler2, times(3)).handleClose(ip);
+        verify(pHandler3, times(3)).handleClose(ip);
+        verify(pHandler1, times(2)).handlePacket(sc, ip);
+        verify(pHandler2, times(0)).handlePacket(sc, ip);
+        verify(pHandler3, times(2)).handlePacket(sc, ip);
+        assertEquals(2, handler.getDispatchSize());
+    }
 
-	@Test
-    	public void testHandlePacket_NoDefault() {
-    	    PacketData sc = mock(PacketData.class);
-    	    when(sc.getCode()).thenReturn((short)3, (short)3, (short)4, (short)4, (short)5);
-    	    IPacketWriter ip = mock(IPacketWriter.class);
-    	    handler.handlePacket(sc , ip);
-    	    handler.handlePacket(sc , ip);
-    	    handler.handlePacket(sc , ip);
-    	    handler.handlePacket(sc , ip);
-    	    handler.handlePacket(sc , ip);
-    	    verify(pHandler1, times(2)).handlePacket(sc, ip);
-    	    verify(pHandler2, times(1)).handlePacket(sc, ip);
-    	    verify(pHandler3, times(2)).handlePacket(sc, ip);
-    	    assertEquals(2, handler.getDispatchSize());
-    	}
+    @Test
+    public void testHandlePacket_NoDefault() {
+        PacketData sc = mock(PacketData.class);
+        when(sc.getCode()).thenReturn((short) 3, (short) 3, (short) 4, (short) 4, (short) 5);
+        IPacketWriter ip = mock(IPacketWriter.class);
+        handler.setDefaultHandler(null);
+        handler.handlePacket(sc, ip);
+        handler.handlePacket(sc, ip);
+        handler.handlePacket(sc, ip);
+        handler.handlePacket(sc, ip);
+        verify(pHandler1, times(2)).handlePacket(sc, ip);
+        verify(pHandler2, times(1)).handlePacket(sc, ip);
+        verify(pHandler3, times(0)).handlePacket(sc, ip);
+        assertEquals(2, handler.getDispatchSize());
+        handler.setDefaultHandler(pHandler3);
+    }
+
+    @Test
+    public void testHandlePacket() {
+        PacketData sc = mock(PacketData.class);
+        when(sc.getCode()).thenReturn((short) 3, (short) 3, (short) 4, (short) 4, (short) 5);
+        IPacketWriter ip = mock(IPacketWriter.class);
+        handler.handlePacket(sc, ip);
+        handler.handlePacket(sc, ip);
+        handler.handlePacket(sc, ip);
+        handler.handlePacket(sc, ip);
+        handler.handlePacket(sc, ip);
+        verify(pHandler1, times(2)).handlePacket(sc, ip);
+        verify(pHandler2, times(1)).handlePacket(sc, ip);
+        verify(pHandler3, times(2)).handlePacket(sc, ip);
+        assertEquals(2, handler.getDispatchSize());
+    }
 
     @Test
     public void testSetDefaultHandler() throws Exception {

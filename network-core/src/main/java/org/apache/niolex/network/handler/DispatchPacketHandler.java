@@ -45,16 +45,18 @@ public class DispatchPacketHandler implements IPacketHandler {
     private IPacketHandler defaultHandler;
 
     /**
-     * Add a handler for code <code>
-     * @param code
-     * @param handler
+     * Add a handler for code <code>code</code>.
+     *
+     * @param code the packet code
+     * @param handler the packet handler
      */
     public void addHandler(Short code, IPacketHandler handler) {
         dispatchMap.put(code, handler);
     }
 
     /**
-     * Every Handler registered will be invoked for handleClose.
+     * Every Handler registered will be invoked for {@link #handleClose(IPacketWriter)} User need
+     * to decide what to do.
      *
      * Override super method
      * @see org.apache.niolex.network.IPacketHandler#handleClose(org.apache.niolex.network.IPacketWriter)
@@ -74,7 +76,7 @@ public class DispatchPacketHandler implements IPacketHandler {
      * If we can not find one, we will do a warning log.
      *
      * Override super method
-     * @see org.apache.niolex.network.IPacketHandler#handlePacket(org.apache.niolex.network.PacketData, org.apache.niolex.network.IPacketWriter)
+     * @see org.apache.niolex.network.IPacketHandler#handlePacket(PacketData, IPacketWriter)
      */
     @Override
     public void handlePacket(PacketData sc, IPacketWriter wt) {
@@ -84,7 +86,7 @@ public class DispatchPacketHandler implements IPacketHandler {
         } else if (defaultHandler != null) {
             defaultHandler.handlePacket(sc, wt);
         } else {
-            LOG.warn("No handler registered for Packet with code {}", sc.getCode());
+            LOG.warn("No handler registered for Packet with code {}.", sc.getCode());
         }
     }
 
