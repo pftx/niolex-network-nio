@@ -1,5 +1,5 @@
 /**
- * BaseSerializer.java
+ * ISerializer.java
  *
  * Copyright 2011 Niolex, Inc.
  *
@@ -15,46 +15,43 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.niolex.network.packet;
+package org.apache.niolex.network.serialize;
 
 import org.apache.niolex.network.PacketData;
 
 /**
- * The base class of ISerializer, deal with PacketData and dirty object cast.
- * User can extend this class to implement their own serializer.
+ * Handle the Packet serialization and de-serialization.
+ * {@link PacketTransformer} use this interface to manage the user serializer to do
+ * data and object translation.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
  * @since 2012-5-30
  */
-public abstract class BaseSerializer<T> implements ISerializer<T> {
-
-	@Override
-	public PacketData obj2Data(short code, Object o) {
-		@SuppressWarnings("unchecked")
-		byte[] arr = serObj((T)o);
-		return new PacketData(code, arr);
-	}
-
-	@Override
-	public T data2Obj(PacketData sc) {
-		return deserObj(sc.getData());
-	}
+public interface ISerializer<T> {
 
 	/**
-	 * serialize object to byte array.
+	 * Get the code this Serializer is capable of.
 	 *
-	 * @param t
-	 * @return the result
+	 * @return the code
 	 */
-	public abstract byte[] serObj(T t);
+	public short getCode();
 
 	/**
-	 * Deserialize byte array to object.
+	 * Translate object to byte array.
 	 *
-	 * @param arr
+	 * @param code the packet code
+	 * @param o the object to be translated
 	 * @return the result
 	 */
-	public abstract T deserObj(byte[] arr);
+	public PacketData obj2Data(short code, T o);
+
+	/**
+	 * Translate byte array to object.
+	 *
+	 * @param sc the packet data
+	 * @return the result
+	 */
+	public T data2Obj(PacketData sc);
 
 }

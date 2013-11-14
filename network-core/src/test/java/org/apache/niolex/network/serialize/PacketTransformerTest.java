@@ -15,11 +15,13 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.niolex.network.packet;
+package org.apache.niolex.network.serialize;
 
 import static org.junit.Assert.*;
 
 import org.apache.niolex.network.PacketData;
+import org.apache.niolex.network.serialize.PacketTransformer;
+import org.apache.niolex.network.serialize.StringSerializer;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -32,7 +34,7 @@ public class PacketTransformerTest {
 	PacketTransformer pt;
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.packet.PacketTransformer#getInstance()}.
+	 * Test method for {@link org.apache.niolex.network.serialize.PacketTransformer#getInstance()}.
 	 */
 	@Before
 	public void testGetInstance() {
@@ -41,7 +43,7 @@ public class PacketTransformerTest {
 	}
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.packet.PacketTransformer#canHandle(java.lang.Short)}.
+	 * Test method for {@link org.apache.niolex.network.serialize.PacketTransformer#canHandle(java.lang.Short)}.
 	 */
 	@Test
 	public void testCanHandle() {
@@ -50,7 +52,7 @@ public class PacketTransformerTest {
 	}
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.packet.PacketTransformer#getDataObject(org.apache.niolex.network.PacketData)}.
+	 * Test method for {@link org.apache.niolex.network.serialize.PacketTransformer#getDataObject(org.apache.niolex.network.PacketData)}.
 	 */
 	@Test(expected=IllegalStateException.class)
 	public void testGetDataObject() {
@@ -66,7 +68,7 @@ public class PacketTransformerTest {
 	}
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.packet.PacketTransformer#getPacketData(java.lang.Short, java.lang.Object)}.
+	 * Test method for {@link org.apache.niolex.network.serialize.PacketTransformer#getPacketData(java.lang.Short, java.lang.Object)}.
 	 */
 	@Test
 	public void testGetPacketData() {

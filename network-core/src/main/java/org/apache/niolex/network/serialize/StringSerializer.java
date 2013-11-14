@@ -15,7 +15,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.niolex.network.packet;
+package org.apache.niolex.network.serialize;
 
 import org.apache.niolex.commons.codec.StringUtil;
 
@@ -47,7 +47,7 @@ public class StringSerializer extends BaseSerializer<String> {
 
 	/**
 	 * Override super method
-	 * @see org.apache.niolex.network.packet.ISerializer#getCode()
+	 * @see org.apache.niolex.network.serialize.ISerializer#getCode()
 	 */
 	@Override
 	public short getCode() {
@@ -56,7 +56,7 @@ public class StringSerializer extends BaseSerializer<String> {
 
 	/**
 	 * Override super method
-	 * @see org.apache.niolex.network.packet.BaseSerializer#serObj(java.lang.Object)
+	 * @see org.apache.niolex.network.serialize.BaseSerializer#serObj(java.lang.Object)
 	 */
 	@Override
 	public byte[] serObj(String t) {
@@ -65,7 +65,7 @@ public class StringSerializer extends BaseSerializer<String> {
 
 	/**
 	 * Override super method
-	 * @see org.apache.niolex.network.packet.BaseSerializer#deserObj(byte[])
+	 * @see org.apache.niolex.network.serialize.BaseSerializer#deserObj(byte[])
 	 */
 	@Override
 	public String deserObj(byte[] arr) {

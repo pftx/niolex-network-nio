@@ -28,8 +28,8 @@ import org.apache.niolex.network.CoreRunner;
 import org.apache.niolex.network.IPacketHandler;
 import org.apache.niolex.network.PacketData;
 import org.apache.niolex.network.client.SocketClient;
-import org.apache.niolex.network.packet.PacketTransformer;
-import org.apache.niolex.network.packet.StringSerializer;
+import org.apache.niolex.network.serialize.PacketTransformer;
+import org.apache.niolex.network.serialize.StringSerializer;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -63,7 +63,7 @@ public class FaultTolerateRuntimeTest {
 	}
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.packet.PacketTransformer#getInstance()}.
+	 * Test method for {@link org.apache.niolex.network.serialize.PacketTransformer#getInstance()}.
 	 */
 	@Before
 	public void testGetInstance() throws Exception {

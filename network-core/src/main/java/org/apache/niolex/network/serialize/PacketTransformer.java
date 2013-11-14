@@ -15,7 +15,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.niolex.network.packet;
+package org.apache.niolex.network.serialize;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -24,13 +24,13 @@ import org.apache.niolex.network.PacketData;
 
 /**
  * Transform packet into object according to packet code.
- *
+ * <br>
  * The packet code is a 2-bytes short integer.
- * The system will use some this code, according to the following map:
+ * The system will use some this code, according to the following map:<pre>
  * CODE		USAGE
  * 0		Heart Beat
  * 1-65500	User Range
- * 65500-~	System Reserved
+ * 65500-~	System Reserved</pre>
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
@@ -60,7 +60,8 @@ public class PacketTransformer {
 
 	/**
 	 * Add a Serializer to the PacketTransformer.
-	 * @param ser
+	 *
+	 * @param ser the serializer
 	 */
 	public void addSerializer(ISerializer<?> ser) {
 		serMap.put(ser.getCode(), ser);
@@ -69,7 +70,7 @@ public class PacketTransformer {
 	/**
 	 * Whether this code can be handled.
 	 *
-	 * @param code
+	 * @param code the packet code
 	 * @return true if can handle, false otherwise
 	 */
 	public boolean canHandle(Short code) {
@@ -79,24 +80,24 @@ public class PacketTransformer {
 	/**
 	 * Translate PacketData to Object.
 	 *
-	 * @param sc
+	 * @param sc the packet
 	 * @return the result
 	 * @throws IllegalStateException if we can not translate this packet
 	 */
 	@SuppressWarnings("unchecked")
 	public <T> T getDataObject(PacketData sc) {
-		ISerializer<?> ser = serMap.get(sc.getCode());
+		ISerializer<T> ser = (ISerializer<T>) serMap.get(sc.getCode());
 		if (ser == null) {
 			throw new IllegalStateException("No Serializer found for Packet Code " + sc.getCode());
 		}
-		return (T) ser.data2Obj(sc);
+		return ser.data2Obj(sc);
 	}
 
 	/**
 	 * Translate Object to PacketData.
 	 *
-	 * @param code
-	 * @param o
+	 * @param code the packet code
+	 * @param o the object
 	 * @return the result
 	 * @throws IllegalStateException if we can not translate this packet
 	 */
@@ -105,6 +106,6 @@ public class PacketTransformer {
 		if (ser == null) {
 			throw new IllegalStateException("No Serializer found for Packet Code " + code);
 		}
-		return ser.obj2Data(code, o);
+		return null;//ser.obj2Data(code, o);
 	}
 }

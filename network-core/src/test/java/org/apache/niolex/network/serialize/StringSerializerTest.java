@@ -15,11 +15,12 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.niolex.network.packet;
+package org.apache.niolex.network.serialize;
 
 import static org.junit.Assert.assertEquals;
 
 import org.apache.niolex.network.PacketData;
+import org.apache.niolex.network.serialize.StringSerializer;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -42,7 +43,7 @@ public class StringSerializerTest {
 	}
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.packet.StringSerializer#getCode()}.
+	 * Test method for {@link org.apache.niolex.network.serialize.StringSerializer#getCode()}.
 	 */
 	@Test
 	public void testGetCode() {
@@ -52,7 +53,7 @@ public class StringSerializerTest {
 	}
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.packet.StringSerializer#serObj(java.lang.String)}.
+	 * Test method for {@link org.apache.niolex.network.serialize.StringSerializer#serObj(java.lang.String)}.
 	 */
 	@Test
 	public void testSerObjString() {
