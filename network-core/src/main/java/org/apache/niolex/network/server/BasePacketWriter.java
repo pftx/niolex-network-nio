@@ -66,7 +66,7 @@ public abstract class BasePacketWriter implements IPacketWriter {
 
 	/**
 	 * We put the packet into the internal queue.
-	 * When channel is closed, we forbid user from send data
+	 * When channel is closed, we forbid user from send data.
 	 *
 	 * @throws IllegalStateException When This Channel is Closed.
 	 * @see org.apache.niolex.network.IPacketWriter#handleWrite(org.apache.niolex.network.PacketData)

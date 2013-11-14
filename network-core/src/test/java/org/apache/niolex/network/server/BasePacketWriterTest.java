@@ -17,17 +17,14 @@
  */
 package org.apache.niolex.network.server;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.apache.niolex.network.PacketData;
 import org.apache.niolex.network.TBasePacketWriter;
-import org.apache.niolex.network.server.BasePacketWriter;
+import org.apache.niolex.network.adapter.HeartBeatAdapter;
+import org.apache.niolex.network.event.WriteEventListener;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -41,25 +38,7 @@ public class BasePacketWriterTest {
 
 	@Before
 	public void setup() {
-		bpw = new TBasePacketWriter ();
-	}
-
-	@Test
-	public void testCloseAndChannelClose() {
-		BasePacketWriter tmp = new TBasePacketWriter();
-		tmp.handleWrite(PacketData.getHeartBeatPacket());
-		tmp.attachData("a", tmp);
-		assertNotNull(tmp.getAttached("a"));
-		tmp.channelClosed();
-		boolean g = false;
-		try {
-			tmp.handleWrite(PacketData.getHeartBeatPacket());
-		} catch (IllegalStateException e) {
-			g = true;
-		}
-		assertTrue(g);
-		assertNull(tmp.getAttached("a"));
-		tmp.channelClosed();
+		bpw = new TBasePacketWriter();
 	}
 
 	/**
@@ -67,16 +46,58 @@ public class BasePacketWriterTest {
 	 */
 	@Test
 	public void testHandleWrite() {
-		PacketData sc = new PacketData();
-        sc.setCode((short)4);
-        sc.setVersion((byte)1);
-        sc.setLength(0);
-        sc.setData(new byte[0]);
-		bpw.handleWrite(sc);
-		assertFalse(bpw.isEmpty());
-		assertEquals(sc, bpw.handleNext());
-		assertTrue(bpw.isEmpty());
+	    PacketData sc = new PacketData();
+	    sc.setCode((short)4);
+	    sc.setVersion((byte)1);
+	    sc.setLength(0);
+	    sc.setData(new byte[0]);
+	    bpw.handleWrite(sc);
+	    assertFalse(bpw.isEmpty());
+	    assertEquals(sc, bpw.handleNext());
+	    assertTrue(bpw.isEmpty());
 	}
+
+	/**
+     * Test method for {@link org.apache.niolex.network.server.BasePacketWriter#handleWrite(org.apache.niolex.network.PacketData)}.
+     */
+    @Test(expected=IllegalStateException.class)
+    public void testHandleWriteWhenClosed() {
+        bpw.channelClosed();
+        bpw.handleWrite(PacketData.getHeartBeatPacket());
+    }
+
+	@Test
+	public void testChannelClosed() {
+	    bpw.handleWrite(PacketData.getHeartBeatPacket());
+	    bpw.attachData("a", "b");
+		assertEquals("b", bpw.getAttached("a"));
+		bpw.channelClosed();
+		boolean g = false;
+		try {
+		    bpw.handleWrite(PacketData.getHeartBeatPacket());
+		} catch (IllegalStateException e) {
+			g = true;
+		}
+		assertTrue(g);
+		assertNull(bpw.getAttached("a"));
+		// close again.
+		bpw.channelClosed();
+	}
+
+    @Test
+    public void testAddEventListener() throws Exception {
+        WriteEventListener listener = new HeartBeatAdapter(null);
+        bpw.addEventListener(listener);
+        bpw.fireSendEvent(PacketData.getHeartBeatPacket());
+    }
+
+    @Test(expected=NullPointerException.class)
+    public void testAddEventListenerAfterClosed() throws Exception {
+        WriteEventListener listener = new HeartBeatAdapter(null);
+        bpw.addEventListener(listener);
+        bpw.channelClosed();
+        bpw.addEventListener(listener);
+    }
 
 	/**
 	 * Test method for {@link org.apache.niolex.network.server.BasePacketWriter#attachData(java.lang.String, java.lang.Object)}.
@@ -91,7 +112,7 @@ public class BasePacketWriterTest {
 	}
 
 	@Test
-	public void testQueue() throws InterruptedException {
+	public void testGetRemainQueue() throws InterruptedException {
 		PacketData sc = new PacketData();
         sc.setCode((short)4);
         sc.setVersion((byte)1);
@@ -118,4 +139,5 @@ public class BasePacketWriterTest {
 		assertEquals(sc, queue.poll());
 		assertEquals(10, queue.size());
 	}
+
 }

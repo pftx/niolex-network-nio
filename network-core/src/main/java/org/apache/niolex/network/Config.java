@@ -35,6 +35,7 @@ public interface Config extends Const {
 	 * Server internal configuration, do not change them if you don't
 	 * understand the meaning.
 	 */
+    // --------------------------------------------------------------
 
 	/**
 	 * The NIO Byte buffer size for server socket.
@@ -58,7 +59,6 @@ public interface Config extends Const {
 	 */
 	int SERVER_CACHE_TOLERATE_PACKETS_SIZE = 5;
 
-
 	/**
 	 * Server socket accept timeout, set it too large will cause server no responding to stop command.
 	 */
@@ -74,6 +74,12 @@ public interface Config extends Const {
 	 * The default server listen port.
 	 */
 	int SERVER_DEFAULT_PORT = 8808;
+
+	/**
+	 * The max queue size of the {@link org.apache.niolex.network.client.PacketClient}, we set it
+	 * to 10000 for default.
+	 */
+	int CLIENT_MAX_QUEUE_SIZE = 10000;
 
 	/**
 	 * The Rpc packet handler internal thread pool size.
@@ -123,6 +129,7 @@ public interface Config extends Const {
 	 * Handler attachment key, all system key will start with SYS_
 	 * Please keep away from them.
 	 */
+	// --------------------------------------------------------------
 
 	/**
 	 * Attach session handler to the packet writer with this key.

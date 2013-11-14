@@ -26,7 +26,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.niolex.commons.concurrent.ThreadUtil;
@@ -45,11 +45,12 @@ import org.slf4j.LoggerFactory;
  */
 public class PacketClient extends BaseClient {
 	private static final Logger LOG = LoggerFactory.getLogger(PacketClient.class);
+	private static final int MAX_QUEUE_SIZE = Config.CLIENT_MAX_QUEUE_SIZE;
 
 	/**
 	 * The queue to store all the out sending packets.
 	 */
-	private final LinkedBlockingDeque<PacketData> sendPacketList = new LinkedBlockingDeque<PacketData>();
+	private final LinkedBlockingQueue<PacketData> sendPacketList = new LinkedBlockingQueue<PacketData>(MAX_QUEUE_SIZE);
 
 	/**
 	 * The internal write thread.
@@ -113,9 +114,19 @@ public class PacketClient extends BaseClient {
         }
     }
 
+    /**
+     * We put the packet into the internal queue.
+     *
+     * @throws IllegalStateException when the queue is full and the thread is interrupted
+     * @see org.apache.niolex.network.IPacketWriter#handleWrite(org.apache.niolex.network.PacketData)
+     */
     @Override
     public void handleWrite(PacketData sc) {
-    	sendPacketList.add(sc);
+    	try {
+            sendPacketList.put(sc);
+        } catch (InterruptedException e) {
+            throw new IllegalStateException("Send List is Full, And thread is Interrupted when wait.", e);
+        }
     }
 
 	/**
@@ -210,7 +221,7 @@ public class PacketClient extends BaseClient {
                     	/**
                     	 * The write thread wait on this queue till there is data.
                     	 */
-                    	PacketData sendPacket = sendPacketList.pollFirst(connectTimeout / 2, TimeUnit.MILLISECONDS);
+                    	PacketData sendPacket = sendPacketList.poll(connectTimeout / 2, TimeUnit.MILLISECONDS);
                     	if (sendPacket != null) {
                     		sendNewPacket(sendPacket);
                     	} else {

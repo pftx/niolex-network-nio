@@ -29,6 +29,8 @@ import java.io.OutputStream;
 import java.util.concurrent.CountDownLatch;
 
 import org.apache.niolex.commons.bean.One;
+import org.apache.niolex.commons.util.Runner;
+import org.apache.niolex.network.Config;
 import org.apache.niolex.network.CoreRunner;
 import org.apache.niolex.network.IPacketHandler;
 import org.apache.niolex.network.IPacketWriter;
@@ -173,5 +175,23 @@ public class PacketClientTest {
 	    pc.isWorking = true;
 	    wl.run();
 	}
+
+	/**
+     * Test method for
+     * {@link org.apache.niolex.network.client.PacketClient#handleWrite(PacketData)}
+     * .
+     */
+    @Test
+    public void testHandleWriteListFull() throws Exception {
+        final PacketClient pc = new PacketClient(CoreRunner.SERVER_ADDR);
+        for (int i = 0; i < Config.CLIENT_MAX_QUEUE_SIZE; ++i) {
+            pc.handleWrite(PacketData.getHeartBeatPacket());
+        }
+        Thread t = Runner.run(pc, "handleWrite", PacketData.getHeartBeatPacket());
+        Thread.sleep(CoreRunner.CO_SLEEP);
+        assertTrue(t.isAlive());
+        t.interrupt();
+        t.join();
+    }
 
 }
