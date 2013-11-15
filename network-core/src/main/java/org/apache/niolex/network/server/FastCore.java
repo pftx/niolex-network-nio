@@ -21,8 +21,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.niolex.network.Config;
 import org.apache.niolex.network.IPacketHandler;
@@ -32,7 +31,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * This is the fast core of server side packet processing component.
- * This is definitely the core of the whole network server.
+ * This is definitely the core of the whole network server.<br>
+ * For any reader want to understand this framework, read this class carefully.
  * We handle read, write, network error etc all here.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
@@ -88,19 +88,19 @@ public class FastCore extends BasePacketWriter {
     private final ByteBuffer recvHeadBuffer = ByteBuffer.allocate(8);
 
     /**
-     * The name of the client side of this socket.
+     * The direct small buffer, for faster send speed.
      */
-    private String remoteName;
+    private final ByteBuffer smallBuffer = ByteBuffer.allocateDirect(MAX_BUFFER_SIZE);
 
     /**
      * Current socket write status. attached to the selector or not.
      */
-    private boolean writeAttached = false;
+    private final AtomicBoolean writeAttached = new AtomicBoolean(false);
 
     /**
-     * The lock to control socket write attach & detach.
+     * The the client side name of this socket.
      */
-    private Lock writeLock = new ReentrantLock();
+    private String remoteName;
 
 
     /* 发送数据缓冲区*/
@@ -132,7 +132,7 @@ public class FastCore extends BasePacketWriter {
 		// Initialize local variables.
         sendStatus = Status.NONE;
         receiveStatus = Status.HEADER;
-        receiveBuffer = getHeadBuffer(false);
+        receiveBuffer = getReceiveBuffer();
         remoteName = client.socket().getRemoteSocketAddress().toString();
         StringBuilder sb = new StringBuilder();
         sb.append("Remote Client [").append(remoteName);
@@ -142,18 +142,23 @@ public class FastCore extends BasePacketWriter {
     }
 
     /**
-     * Clean the head buffer and return it.
+     * Clean the send head buffer and return it for use.
      *
      * @return the head buffer
      */
-    private ByteBuffer getHeadBuffer(boolean isSend) {
-        if (isSend) {
-            sendHeadBuffer.clear();
-            return sendHeadBuffer;
-        } else {
-            recvHeadBuffer.clear();
-            return recvHeadBuffer;
-        }
+    private ByteBuffer getSendBuffer() {
+        sendHeadBuffer.clear();
+        return sendHeadBuffer;
+    }
+
+    /**
+     * Clean the receive head buffer and return it for use.
+     *
+     * @return the head buffer
+     */
+    private ByteBuffer getReceiveBuffer() {
+        recvHeadBuffer.clear();
+        return recvHeadBuffer;
     }
 
     /**
@@ -178,27 +183,20 @@ public class FastCore extends BasePacketWriter {
 	public void handleWrite(PacketData sc) {
 		super.handleWrite(sc);
 		// Signal the selector there is data to write.
-		if (!writeAttached) {
-			writeLock.lock();
-			try {
-				if (!writeAttached) {
-					writeAttached = true;
-					selector.changeInterestOps(selectionKey);
-				}
-			} finally {
-				writeLock.unlock();
-			}
+		if (writeAttached.compareAndSet(false, true)) {
+			selector.changeInterestOps(selectionKey);
 		}
 	}
 
     /**
-     * handle read request. called by NIO selector.
-     * This method will read packet over and over again. Never stop.
-     *
+     * Handle read request. called by NIO selector.
+     * If this method returns true, selector need to call this method again.
+     * <pre>
      * Read status change summary:
      * HEADER -> Need read header, means nothing is read by now
      * BODY -> Header is read, need to read body now
-     *
+     * </pre>
+     * @return true if there are some more data needs read.
      */
     public boolean handleRead() {
         try {
@@ -217,12 +215,12 @@ public class FastCore extends BasePacketWriter {
                 	receiveStatus = Status.BODY;
                 	socketChannel.read(receiveBuffer);
                 	if (!receiveBuffer.hasRemaining()) {
-                		readFinished();
+                		packetFinished();
                     	return true;
                 	}
                 	return false;
                 } else {
-                	readFinished();
+                	packetFinished();
                 	return true;
                 }
             }
@@ -237,7 +235,7 @@ public class FastCore extends BasePacketWriter {
      * Read packet finished, we need to invoke packet handler, and
      * init another read cycle.
      */
-    public void readFinished() {
+    public void packetFinished() {
     	LOG.debug("Packet received. desc {}, size {}.", receivePacket.descriptor(), receivePacket.getLength());
     	// We send heart beat back directly, without notifying the packet handler.
     	if (receivePacket.getCode() == Config.CODE_HEART_BEAT) {
@@ -246,18 +244,19 @@ public class FastCore extends BasePacketWriter {
     		packetHandler.handlePacket(receivePacket, this);
     	}
     	receiveStatus = Status.HEADER;
-    	receiveBuffer = getHeadBuffer(false);
+    	receiveBuffer = getReceiveBuffer();
     }
 
     /**
      * Handle write request. called by NIO selector.
-     * Send packets to client when there is any.
-     *
+     * Send packets to client when network is free.
+     * <pre>
      * Status change summary:
      * NONE -> Nothing is sending now
      * HEADER -> Sending a packet, header now
      * BODY -> Sending a packet body
-     *
+     * </pre>
+     * @return true if there are some more free space to write to.
      */
     public boolean handleWrite() {
         try {
@@ -294,27 +293,21 @@ public class FastCore extends BasePacketWriter {
      * Start to send a new packet.
      * If there is nothing to send, we will detach the write operation from selection key.
      *
+     * @return true if there are some more free space to write to.
      * @throws IOException
      */
     private boolean sendNewPacket() throws IOException {
     	sendPacket = super.handleNext();
-
+    	// If there is no packet in the queue, we try to reset attach flag.
         if (sendPacket == null) {
-        	writeLock.lock();
-			try {
-				// We will redo the packet handle here.
-				if (super.isEmpty()) {
-					// Nothing to send, remove the OP_WRITE from selector.
-					writeAttached = false;
-					selectionKey.interestOps(SelectionKey.OP_READ);
-				} else {
-					return true;
-				}
-			} catch (Exception e) {
-				LOG.warn("Failed to detach write from selector, client will stop. ", e.toString());
-				handleClose();
-			} finally {
-				writeLock.unlock();
+            writeAttached.set(false);
+            // After we set the flag, we check the queue again.
+            if (super.isEmpty()) {
+                // Nothing to send, remove the OP_WRITE from selector.
+                selectionKey.interestOps(SelectionKey.OP_READ);
+            } else {
+                // Queue is not empty, we return true, system will redo the packet handle.
+                return true;
             }
             return false;
         } else {
@@ -325,20 +318,21 @@ public class FastCore extends BasePacketWriter {
     /**
      * Do really send the packet.
      *
-     * @return
+     * @return true if there are some more free space to write to.
      * @throws IOException
      */
     private boolean doSendNewPacket() throws IOException {
-    	if (sendPacket.getLength() + 8 < MAX_BUFFER_SIZE) {
+    	if (sendPacket.getLength() + 8 <= MAX_BUFFER_SIZE) {
     		// We send small packets in just one buffer.
     		sendStatus = Status.BODY;
-    		sendBuffer = ByteBuffer.allocate(sendPacket.getLength() + 8);
+    		sendBuffer = smallBuffer;
+    		sendBuffer.clear();
     		sendPacket.putHeader(sendBuffer);
     		sendBuffer.put(sendPacket.getData());
     	} else {
     		// Packet too large, we will send it multiple times.
     		sendStatus = Status.HEADER;
-    		sendBuffer = getHeadBuffer(true);
+    		sendBuffer = getSendBuffer();
     		sendPacket.putHeader(sendBuffer);
     	}
     	sendBuffer.flip();
@@ -349,26 +343,29 @@ public class FastCore extends BasePacketWriter {
     /**
      * Error occurred when read or write.
      * Anyway, socket is closed.
-     *
-     * Need to close socket and clean Map.
-     *
-     * Call IPacketHandler.handleClose internally.
+     * Need to close socket and invoke {@link #channelClosed()} clean Map.
+     * <br>
+     * We will call {@link IPacketHandler#handleClose(org.apache.niolex.network.IPacketWriter)} internally.
      */
     private void handleClose() {
     	try {
+    	    // Super method, clean internal data structures.
+    	    channelClosed();
+    	    // Close socket and streams.
             socketChannel.close();
             StringBuilder sb = new StringBuilder();
             sb.append("Remote Client [").append(remoteName);
             sb.append("] disconnected.");
             LOG.info(sb.toString());
-        } catch (IOException e) {
+        } catch (Exception e) {
             LOG.info("Failed to close client socket: {}", e.getMessage());
-        } finally {
-        	try {
-        		packetHandler.handleClose(this);
-        	} finally {
-        		super.channelClosed();
-        	}
+        }
+    	// Call this at last.
+    	try {
+            packetHandler.handleClose(this);
+        } catch (Exception e) {
+            // Catch this method for safety.
+            LOG.info("Error occurred when invoke {}.handleClose(..)", packetHandler.getClass().getName(), e);
         }
     }
 
