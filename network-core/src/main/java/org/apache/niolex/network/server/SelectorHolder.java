@@ -26,12 +26,20 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * This class hold the selector and selector thread.
  * It will decide how to attach write operation to selector.
+ * <br>
+ * As the JDK indicates, it's only safe to change the interest operations
+ * in the selectors thread. That's why we need this class.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
  * @since 2012-8-17
  */
 public class SelectorHolder {
+
+    /**
+     * The interest operations.
+     */
+    private static final int INTEREST_OPS = SelectionKey.OP_READ | SelectionKey.OP_WRITE;
 
 	/**
 	 * This set store all the interested selection Keys.
@@ -67,30 +75,37 @@ public class SelectorHolder {
 	}
 
 	/**
-	 * #FastCore use this method to register the wish to change interest operations.
-	 * We will only change interest operations into both read and write.
+	 * {@link FastCore} use this method to register the wish of changing interest operations.
+	 * We will change the interest operations into both read and write.
 	 *
-	 * If the change is in the same thread as the selector is, we change directly.
-	 * Otherwise, we save it into set and wakeup the selector to register the change.
+	 * If the change is in the selector thread, we change it directly.
+	 * Otherwise, we save it into the set and wakeup the selector to register the change.
 	 *
 	 * @param selectionKey
 	 */
 	public void changeInterestOps(SelectionKey selectionKey) {
 		if (selectorThread == Thread.currentThread()) {
-			selectionKey.interestOps(SelectionKey.OP_READ | SelectionKey.OP_WRITE);
+			selectionKey.interestOps(INTEREST_OPS);
 		} else {
-			synchronized (selectionKeySet) {
-				selectionKeySet.add(selectionKey);
-			}
+		    addSelectionKey(selectionKey);
 			wakeup();
 		}
+	}
+
+	/**
+	 * Add the selection key into the key set in a synchronized method.
+	 *
+	 * @param selectionKey
+	 */
+	private synchronized void addSelectionKey(SelectionKey selectionKey) {
+	    selectionKeySet.add(selectionKey);
 	}
 
 	/**
 	 * Use this method to wake up the selector managed by this holder.
 	 * Holder will eliminate unnecessary multiple wakeups.
 	 */
-	public void wakeup() {
+	protected void wakeup() {
 		if (isAwake.compareAndSet(false, true)) {
 			selector.wakeup();
 		}
@@ -98,18 +113,18 @@ public class SelectorHolder {
 
 	/**
 	 * Server use this method to change all the interest operations on hold.
+	 * <br><b>
+	 * This method can only be invoked in the selector's thread.</b>
 	 */
-	public void changeAllInterestOps() {
+	protected synchronized void changeAllInterestOps() {
 		isAwake.set(false);
 		if (selectionKeySet.isEmpty()) {
 			return;
 		}
-		synchronized (selectionKeySet) {
-			for (SelectionKey selectionKey : selectionKeySet) {
-				selectionKey.interestOps(SelectionKey.OP_READ | SelectionKey.OP_WRITE);
-			}
-			selectionKeySet.clear();
+		for (SelectionKey selectionKey : selectionKeySet) {
+			selectionKey.interestOps(INTEREST_OPS);
 		}
+		selectionKeySet.clear();
 	}
 
 

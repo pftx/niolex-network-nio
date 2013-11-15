@@ -18,7 +18,6 @@
 package org.apache.niolex.network.server;
 
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.*;
 
 import java.nio.channels.SelectionKey;
@@ -30,12 +29,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-@RunWith(MockitoJUnitRunner.class)
 /**
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
  * @since 2012-11-7
  */
+@RunWith(MockitoJUnitRunner.class)
 public class SelectorHolderTest {
 
 	@Mock
@@ -55,11 +54,23 @@ public class SelectorHolderTest {
 		SelectionKey selectionKey = mock(SelectionKey.class);
 		assertNotEquals(selectorThread, Thread.currentThread());
 		selectorHolder.changeInterestOps(selectionKey);
-		verify(selectionKey, never()).interestOps(anyInt());
+		verify(selectionKey, never()).interestOps(SelectionKey.OP_READ | SelectionKey.OP_WRITE);
 		verify(selector).wakeup();
 		selectorHolder.changeAllInterestOps();
-		verify(selectionKey).interestOps(anyInt());
+		verify(selectionKey).interestOps(SelectionKey.OP_READ | SelectionKey.OP_WRITE);
 	}
+
+	/**
+     * Test method for {@link org.apache.niolex.network.server.SelectorHolder#changeInterestOps(java.nio.channels.SelectionKey)}.
+     */
+    @Test
+    public void testChangeInterestOpsCurrentThread() {
+        SelectorHolder sel = new SelectorHolder(Thread.currentThread(), selector);
+        SelectionKey selectionKey = mock(SelectionKey.class);
+        sel.changeInterestOps(selectionKey);
+        verify(selectionKey).interestOps(SelectionKey.OP_READ | SelectionKey.OP_WRITE);
+        verify(selector, never()).wakeup();
+    }
 
 	/**
 	 * Test method for {@link org.apache.niolex.network.server.SelectorHolder#wakeup()}.
@@ -76,7 +87,7 @@ public class SelectorHolderTest {
 	 * Test method for {@link org.apache.niolex.network.server.SelectorHolder#changeAllInterestOps()}.
 	 */
 	@Test
-	public void testChangeAllInterestOps() {
+	public void testChangeAllInterestOpsEmpty() {
 		selectorHolder.changeAllInterestOps();
 	}
 
