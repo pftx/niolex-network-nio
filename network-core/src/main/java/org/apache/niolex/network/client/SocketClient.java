@@ -79,8 +79,8 @@ public class SocketClient extends BaseClient {
 	public void connect() throws IOException {
 	    prepareSocket();
         this.isWorking = true;
-        inS = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
-        outS = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
+        inS = new DataInputStream(new BufferedInputStream(socket.getInputStream(), socketBufferSize));
+        outS = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream(), socketBufferSize));
         LOG.info("Socket client connected to address: {}", serverAddress);
 	}
 

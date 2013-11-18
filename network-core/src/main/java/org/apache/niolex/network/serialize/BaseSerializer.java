@@ -21,7 +21,7 @@ import org.apache.niolex.network.PacketData;
 
 /**
  * The base class of ISerializer, deal with {@link PacketData} and dirty object cast.
- * User can extend this class to implement their own serializer.
+ * User can extend this class to implement their own serializer for convenience.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
@@ -29,18 +29,15 @@ import org.apache.niolex.network.PacketData;
  */
 public abstract class BaseSerializer<T> implements ISerializer {
 
-    private final Class<T> clazz;
     private short code;
 
     /**
      * The Constructor.
      *
-     * @param clazz the class this Serializer is handling
      * @param code the packet code this Serializer is handling
      */
-    public BaseSerializer(Class<T> clazz, short code) {
+    public BaseSerializer(short code) {
         super();
-        this.clazz = clazz;
         this.code = code;
     }
 
@@ -49,8 +46,18 @@ public abstract class BaseSerializer<T> implements ISerializer {
      * @see org.apache.niolex.network.serialize.ISerializer#obj2Bytes(java.lang.Object)
      */
     @Override
+    @SuppressWarnings("unchecked")
     public byte[] obj2Bytes(Object o) {
-        return serialize(clazz.cast(o));
+        return toBytes((T) o);
+    }
+
+    /**
+     * This is the override of super method.
+     * @see org.apache.niolex.network.serialize.ISerializer#bytes2Obj(byte[])
+     */
+    @Override
+    public Object bytes2Obj(byte[] array) {
+        return toObj(array);
     }
 
     /**
@@ -59,7 +66,15 @@ public abstract class BaseSerializer<T> implements ISerializer {
 	 * @param t the object
 	 * @return the result
 	 */
-	public abstract byte[] serialize(T t);
+	public abstract byte[] toBytes(T t);
+
+	/**
+	 * deserialize byte array to object.
+	 *
+	 * @param arr the byte array
+	 * @return the object
+	 */
+	public abstract T toObj(byte[] arr);
 
     /**
      * This is the override of super method.
@@ -71,7 +86,7 @@ public abstract class BaseSerializer<T> implements ISerializer {
     }
 
     /**
-     * @param code the code to set
+     * @param code the packet code to set
      */
     public void setCode(short code) {
         this.code = code;

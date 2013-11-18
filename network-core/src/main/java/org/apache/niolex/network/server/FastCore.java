@@ -349,8 +349,6 @@ public class FastCore extends BasePacketWriter {
      */
     private void handleClose() {
     	try {
-    	    // Super method, clean internal data structures.
-    	    channelClosed();
     	    // Close socket and streams.
             socketChannel.close();
             StringBuilder sb = new StringBuilder();
@@ -367,6 +365,8 @@ public class FastCore extends BasePacketWriter {
             // Catch this method for safety.
             LOG.info("Error occurred when invoke {}.handleClose(..)", packetHandler.getClass().getName(), e);
         }
+    	// Super method, clean internal data structures.
+    	channelClosed();
     }
 
 }

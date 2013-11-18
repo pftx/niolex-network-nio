@@ -36,24 +36,24 @@ public class StringSerializer extends BaseSerializer<String> {
 	 * @param code
 	 */
 	public StringSerializer(short code) {
-		super(String.class, code);
+		super(code);
 	}
 
     /**
      * This is the override of super method.
-     * @see org.apache.niolex.network.serialize.ISerializer#bytes2Obj(byte[])
+     * @see org.apache.niolex.network.serialize.BaseSerializer#toObj(byte[])
      */
     @Override
-    public String bytes2Obj(byte[] array) {
+    public String toObj(byte[] array) {
         return StringUtil.utf8ByteToStr(array);
     }
 
     /**
      * This is the override of super method.
-     * @see org.apache.niolex.network.serialize.BaseSerializer#serialize(Object)
+     * @see org.apache.niolex.network.serialize.BaseSerializer#toBytes(Object)
      */
     @Override
-    public byte[] serialize(String t) {
+    public byte[] toBytes(String t) {
         return StringUtil.strToUtf8Byte(t);
     }
 

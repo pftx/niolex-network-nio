@@ -147,7 +147,7 @@ public class PacketClient extends BaseClient {
          */
         public ReadLoop(InputStream in) {
             super();
-            this.in = new DataInputStream(new BufferedInputStream(in));
+            this.in = new DataInputStream(new BufferedInputStream(in, socketBufferSize));
         }
 
         /**
@@ -200,7 +200,7 @@ public class PacketClient extends BaseClient {
          */
         public WriteLoop(OutputStream out) {
             super();
-            this.out = new DataOutputStream(new BufferedOutputStream(out));
+            this.out = new DataOutputStream(new BufferedOutputStream(out, socketBufferSize));
         }
 
         /**

@@ -63,7 +63,7 @@ public class PacketTransformerTest {
 
 	@Test
 	public void testGetDataObject() {
-		PacketData sc = new PacketData(5, "mer#getP#价格没有数字".getBytes());
+		PacketData sc = new PacketData(5, "mer#getP#价格没有数字".getBytes(StringUtil.UTF_8));
 		String c = pt.getDataObject(sc);
 		assertEquals("mer#getP#价格没有数字", c);
 	}

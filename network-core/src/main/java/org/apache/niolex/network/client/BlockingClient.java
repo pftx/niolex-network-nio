@@ -77,7 +77,7 @@ public class BlockingClient extends BaseClient {
 	public void connect() throws IOException {
         prepareSocket();
         this.isWorking = true;
-        out = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
+        out = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream(), socketBufferSize));
         Thread tr = new Thread(new ReadLoop(socket.getInputStream()), "BlockingClient");
         tr.start();
         LOG.info("Blocking client connected to address: {}", serverAddress);
@@ -121,7 +121,7 @@ public class BlockingClient extends BaseClient {
          */
         public ReadLoop(InputStream in) {
             super();
-            this.in = new DataInputStream(new BufferedInputStream(in));
+            this.in = new DataInputStream(new BufferedInputStream(in, socketBufferSize));
         }
 
         /**
