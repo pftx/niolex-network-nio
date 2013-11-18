@@ -17,15 +17,16 @@
  */
 package org.apache.niolex.network.server;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 import java.net.InetSocketAddress;
+import java.util.LinkedList;
 
+import org.apache.niolex.commons.concurrent.ThreadUtil;
+import org.apache.niolex.commons.test.MockUtil;
+import org.apache.niolex.commons.util.Const;
 import org.apache.niolex.network.CoreRunner;
 import org.apache.niolex.network.IPacketHandler;
 import org.apache.niolex.network.IPacketWriter;
@@ -33,6 +34,7 @@ import org.apache.niolex.network.PacketData;
 import org.apache.niolex.network.client.PacketClient;
 import org.apache.niolex.network.demo.PrintPacketHandler;
 import org.apache.niolex.network.example.EchoPacketHandler;
+import org.apache.niolex.network.example.SavePacketHandler;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -57,7 +59,7 @@ public class MultiNioServerTest {
 		nioServer = new MultiNioServer();
 		nioServer.setThreadsNumber(3);
 		nioServer.setPort(port);
-		nioServer.setAcceptTimeOut(10);
+		nioServer.setAcceptTimeOut(100);
 		nioServer.start();
 	}
 
@@ -208,4 +210,46 @@ public class MultiNioServerTest {
         assertEquals(3, nioServer.getThreadsNumber());
         nioServer.setThreadsNumber(3);
     }
+
+    @Test
+    public void testMultiNioServerInt() throws Exception {
+        MultiNioServer nms = new MultiNioServer(100);
+        assertEquals(100, nms.getThreadsNumber());
+    }
+
+    @Test
+    public void testComposite() throws Exception {
+        LinkedList<PacketData> svr = new LinkedList<PacketData>();
+        IPacketHandler serverH = new EchoPacketHandler();
+        LinkedList<PacketData> cli = new LinkedList<PacketData>();
+        IPacketHandler clientH = new SavePacketHandler(cli);
+
+        nioServer.setPacketHandler(serverH);
+        PacketClient c = new PacketClient(new InetSocketAddress("localhost", port));
+        c.setPacketHandler(clientH);
+        c.connect();
+
+        for (int i = 10; i < Const.M; i *= MockUtil.randInt(1, 10)) {
+            PacketData sc = new PacketData(MockUtil.randInt(1, 500), MockUtil.randByteArray(i));
+            c.handleWrite(sc);
+            svr.add(sc);
+        }
+
+        int i = 100, s = svr.size();
+        while (i-- > 0 && s != cli.size()) ThreadUtil.sleep(CoreRunner.CO_SLEEP);
+
+        assertEquals(s, cli.size());
+        c.stop();
+
+        for (i = 0; i < s; ++i) {
+            checkEq(svr.poll(), cli.poll());
+        }
+    }
+
+    private void checkEq(PacketData a, PacketData b) {
+        assertEquals(a.getCode(), b.getCode());
+        assertEquals(a.getLength(), b.getLength());
+        assertArrayEquals(a.getData(), b.getData());
+    }
+
 }

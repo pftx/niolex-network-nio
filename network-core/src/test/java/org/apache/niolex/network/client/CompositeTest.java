@@ -22,6 +22,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
@@ -122,7 +123,7 @@ public class CompositeTest {
         final PacketData sc5 = new PacketData();
 
         final IPacketHandler packetHandler = mock(IPacketHandler.class);
-        final Set<String> received = new HashSet<String>();
+        final Set<String> received = Collections.synchronizedSet(new HashSet<String>());
 
         doAnswer(new Answer<String>() {
             public String answer(InvocationOnMock invocation) {
