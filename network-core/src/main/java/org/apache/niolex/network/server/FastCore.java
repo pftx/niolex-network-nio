@@ -120,21 +120,21 @@ public class FastCore extends BasePacketWriter {
      *
      * @param packetHandler
      * @param selector
-     * @param client
+     * @param channel
      */
     public FastCore(IPacketHandler packetHandler, SelectorHolder selector,
-    		SocketChannel client) throws IOException {
+    		SocketChannel channel) throws IOException {
 		super();
 		this.packetHandler = packetHandler;
 		this.selector = selector;
-		this.socketChannel = client;
-		this.selectionKey = client.register(selector.getSelector(), SelectionKey.OP_READ, this);
+		this.socketChannel = channel;
+		this.selectionKey = channel.register(selector.getSelector(), SelectionKey.OP_READ, this);
 
 		// Initialize local variables.
         sendStatus = Status.NONE;
         receiveStatus = Status.HEADER;
         receiveBuffer = getReceiveBuffer();
-        Socket so = client.socket();
+        Socket so = channel.socket();
         // Initialize socket buffer.
         so.setTcpNoDelay(true);
         so.setSoLinger(false, 0);

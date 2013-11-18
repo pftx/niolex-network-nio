@@ -25,8 +25,6 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
-import java.net.Socket;
-import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
@@ -131,24 +129,110 @@ public class FastCoreTest {
 		verify(packetHandler, times(2)).handleClose(fastCore);
 	}
 
-	/**
-	 * Test method for {@link org.apache.niolex.network.server.FastCore#handleWrite()}.
-	 * @throws IOException
-	 */
-	@Test
-	public void testHandleWrite() throws IOException {
-		client.close();
-		fastCore.handleWrite();
-		verify(packetHandler, times(1)).handleClose(fastCore);
-	}
-
     @Test
     public void testPacketFinished() throws Exception {
+        Field f = FieldUtil.getField(FastCore.class, "receivePacket");
+        FieldUtil.setFieldValue(f, fastCore, new PacketData(7, new byte[65]));
+        fastCore.packetFinished();
+        verify(packetHandler, times(1)).handlePacket(any(PacketData.class), any(IPacketWriter.class));
+    }
+
+    @Test
+    public void testPacketFinishedOther() throws Exception {
         Field f = FieldUtil.getField(FastCore.class, "receivePacket");
         FieldUtil.setFieldValue(f, fastCore, PacketData.getHeartBeatPacket());
         fastCore.packetFinished();
         verify(packetHandler, times(0)).handlePacket(any(PacketData.class), any(IPacketWriter.class));
-        System.out.println("not yet implemented");
+    }
+
+    /**
+     * Test method for {@link org.apache.niolex.network.server.FastCore#handleWrite()}.
+     * @throws IOException
+     */
+    @Test
+    public void testHandleWriteEx() throws IOException {
+        client.close();
+        fastCore.handleWrite();
+        verify(packetHandler, times(1)).handleClose(fastCore);
+    }
+
+    /**
+     * Test method for {@link org.apache.niolex.network.server.FastCore#handleWrite()}.
+     * @throws IOException
+     */
+    @Test
+    public void testHandleWrite() throws IOException {
+        IPacketHandler hl = mock(IPacketHandler.class);
+        FastCore fc = createFastCore(hl);
+        FieldUtil.setValue(fc, "sendStatus", Status.BODY);
+        ByteBuffer bb = ByteBuffer.allocate(8);
+        bb.limit(8);
+        FieldUtil.setValue(fc, "sendBuffer", bb);
+        assertFalse(fc.handleWrite());
+        assertTrue(fc.handleWrite());
+    }
+
+    /**
+     * Test method for {@link org.apache.niolex.network.server.FastCore#handleWrite()}.
+     * @throws IOException
+     */
+    @Test
+    public void testHandleWriteHeader() throws IOException {
+        IPacketHandler hl = mock(IPacketHandler.class);
+        FastCore fc = createFastCore(hl);
+        ByteBuffer bb = ByteBuffer.allocate(8);
+        bb.limit(0);
+        FieldUtil.setValue(fc, "sendBuffer", bb);
+        FieldUtil.setValue(fc, "selectionKey", mock(SelectionKey.class));
+        FieldUtil.setValue(fc, "sendPacket", new PacketData(6, new byte[8]));
+        FieldUtil.setValue(fc, "sendStatus", Status.HEADER);
+
+        assertFalse(fc.handleWrite());
+        assertTrue(fc.handleWrite());
+    }
+
+    /**
+     * Test method for {@link org.apache.niolex.network.server.FastCore#handleWrite()}.
+     * @throws IOException
+     */
+    @Test
+    public void testHandleWriteHeaderCase2() throws IOException {
+        IPacketHandler hl = mock(IPacketHandler.class);
+        FastCore fc = createFastCore(hl);
+        ByteBuffer bb = ByteBuffer.allocate(8);
+        bb.limit(0);
+        FieldUtil.setValue(fc, "sendBuffer", bb);
+        FieldUtil.setValue(fc, "selectionKey", mock(SelectionKey.class));
+        FieldUtil.setValue(fc, "sendPacket", new PacketData(6, new byte[6]));
+        FieldUtil.setValue(fc, "sendStatus", Status.HEADER);
+
+        assertTrue(fc.handleWrite());
+    }
+
+    /**
+     * Test method for {@link org.apache.niolex.network.server.FastCore#doSendNewPacket()}.
+     * @throws Exception
+     */
+    @Test
+    public void testDoSendNewPacket() throws Exception {
+        IPacketHandler hl = mock(IPacketHandler.class);
+        FastCore fc = createFastCore(hl);
+        ByteBuffer bb = ByteBuffer.allocate(8);
+        bb.limit(0);
+        FieldUtil.setValue(fc, "sendBuffer", bb);
+        FieldUtil.setValue(fc, "selectionKey", mock(SelectionKey.class));
+        FieldUtil.setValue(fc, "sendPacket", new PacketData(6, new byte[6]));
+
+        Method m = MethodUtil.getMethod(FastCore.class, "doSendNewPacket");
+        Boolean b = (Boolean) MethodUtil.invokeMethod(m, fc);
+        assertFalse(b);
+    }
+
+    private FastCore createFastCore(IPacketHandler hl) throws IOException {
+        SocketChannel ch = new TSocketChannel();
+        ch.configureBlocking(false);
+        SelectorHolder sh = new SelectorHolder(Thread.currentThread(), mock(AbstractSelector.class));
+        return new FastCore(hl, sh, ch);
     }
 
     /**
@@ -188,68 +272,10 @@ public class FastCoreTest {
     @Test
     public void testHandleClose() throws Exception {
         doThrow(new IllegalArgumentException("Test")).when(packetHandler).handleClose(any(IPacketWriter.class));
-        SocketChannel client = spy(new SocketChannel(null) {
-
-            @Override
-            public Socket socket() {
-                return FastCoreTest.this.client.socket();
-            }
-
-            @Override
-            public boolean isConnected() {
-                return false;
-            }
-
-            @Override
-            public boolean isConnectionPending() {
-                return false;
-            }
-
-            @Override
-            public boolean connect(SocketAddress remote) throws IOException {
-                return false;
-            }
-
-            @Override
-            public boolean finishConnect() throws IOException {
-                return false;
-            }
-
-            @Override
-            public int read(ByteBuffer dst) throws IOException {
-                return 0;
-            }
-
-            @Override
-            public long read(ByteBuffer[] dsts, int offset, int length) throws IOException {
-                return 0;
-            }
-
-            @Override
-            public int write(ByteBuffer src) throws IOException {
-                return 0;
-            }
-
-            @Override
-            public long write(ByteBuffer[] srcs, int offset, int length) throws IOException {
-                return 0;
-            }
-
-            @Override
-            protected void implCloseSelectableChannel() throws IOException {
-                throw new IOException("Test");
-            }
-
-            @Override
-            protected void implConfigureBlocking(boolean block) throws IOException {
-            }});
-        client.configureBlocking(false);
-        selector = mock(AbstractSelector.class);
-        when(selectorH.getSelector()).thenReturn(selector);
-        fastCore = new FastCore(packetHandler, selectorH, client);
+        FastCore fc = createFastCore(packetHandler);
         Method m = MethodUtil.getMethod(FastCore.class, "handleClose");
-        MethodUtil.invokeMethod(m, fastCore);
-        verify(packetHandler, times(1)).handleClose(fastCore);
+        MethodUtil.invokeMethod(m, fc);
+        verify(packetHandler, times(1)).handleClose(fc);
     }
 
 }
