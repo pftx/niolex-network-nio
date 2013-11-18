@@ -302,7 +302,7 @@ public class FastCore extends BasePacketWriter {
         if (sendPacket == null) {
             writeAttached.set(false);
             // After we set the flag, we check the queue again.
-            if (super.isEmpty()) {
+            if (isEmpty()) {
                 // Nothing to send, remove the OP_WRITE from selector.
                 selectionKey.interestOps(SelectionKey.OP_READ);
             } else {

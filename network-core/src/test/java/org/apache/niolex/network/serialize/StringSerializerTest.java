@@ -51,7 +51,7 @@ public class StringSerializerTest {
 	}
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.serialize.StringSerializer#serObj(java.lang.String)}.
+	 * Test method for {@link org.apache.niolex.network.serialize.StringSerializer#toBytes(String)}.
 	 */
 	@Test
 	public void testSerObjString() {

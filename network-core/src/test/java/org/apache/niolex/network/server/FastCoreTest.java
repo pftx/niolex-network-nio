@@ -17,21 +17,30 @@
  */
 package org.apache.niolex.network.server;
 
+import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.net.SocketAddress;
+import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
+import java.nio.channels.spi.AbstractSelector;
 
+import org.apache.niolex.commons.reflect.FieldUtil;
+import org.apache.niolex.commons.reflect.MethodUtil;
+import org.apache.niolex.commons.util.Const;
 import org.apache.niolex.network.CoreRunner;
 import org.apache.niolex.network.IPacketHandler;
+import org.apache.niolex.network.IPacketWriter;
 import org.apache.niolex.network.PacketData;
+import org.apache.niolex.network.server.FastCore.Status;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -41,12 +50,12 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-@RunWith(MockitoJUnitRunner.class)
 /**
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
  * @since 2012-11-7
  */
+@RunWith(MockitoJUnitRunner.class)
 public class FastCoreTest {
 
 	private SocketChannel client;
@@ -86,13 +95,9 @@ public class FastCoreTest {
 	}
 
 	@Test
-	public void testCannotStart() {
-		MultiNioServer nioServer  = new MultiNioServer(3);
-		nioServer.setPort(-1);
-		nioServer.setAcceptTimeOut(10);
-		nioServer.start();
-		nioServer.stop();
-		nioServer.stop();
+    public void testStatus() {
+	    assertEquals("HEADER", Status.HEADER.toString());
+	    assertEquals(Status.BODY, Status.valueOf("BODY"));
 	}
 
 	/**
@@ -136,5 +141,115 @@ public class FastCoreTest {
 		fastCore.handleWrite();
 		verify(packetHandler, times(1)).handleClose(fastCore);
 	}
+
+    @Test
+    public void testPacketFinished() throws Exception {
+        Field f = FieldUtil.getField(FastCore.class, "receivePacket");
+        FieldUtil.setFieldValue(f, fastCore, PacketData.getHeartBeatPacket());
+        fastCore.packetFinished();
+        verify(packetHandler, times(0)).handlePacket(any(PacketData.class), any(IPacketWriter.class));
+        System.out.println("not yet implemented");
+    }
+
+    /**
+     * Test method for {@link org.apache.niolex.network.server.FastCore#handleWrite()}.
+     * @throws IOException
+     */
+    @Test
+    public void testHandleWriteLargeBuffer() throws IOException {
+        PacketData pk = new PacketData(0, new byte[65 * Const.K]);
+        fastCore.handleWrite(PacketData.getHeartBeatPacket());
+        fastCore.handleWrite(pk);
+        while(fastCore.handleWrite());
+        while(fastCore.handleWrite());
+        while(fastCore.handleWrite());
+    }
+
+    @Test
+    public void testSendNewPacket() throws Exception {
+        fastCore = new FastCore(packetHandler, selectorH, client){
+
+            /**
+             * This is the override of super method.
+             * @see org.apache.niolex.network.server.BasePacketWriter#isEmpty()
+             */
+            @Override
+            public boolean isEmpty() {
+                return false;
+            }};
+        assertTrue(fastCore.handleWrite());
+        assertTrue(fastCore.handleWrite());
+        assertTrue(fastCore.handleWrite());
+        assertTrue(fastCore.handleWrite());
+        assertTrue(fastCore.handleWrite());
+        assertTrue(fastCore.handleWrite());
+    }
+
+    @Test
+    public void testHandleClose() throws Exception {
+        doThrow(new IllegalArgumentException("Test")).when(packetHandler).handleClose(any(IPacketWriter.class));
+        SocketChannel client = spy(new SocketChannel(null) {
+
+            @Override
+            public Socket socket() {
+                return FastCoreTest.this.client.socket();
+            }
+
+            @Override
+            public boolean isConnected() {
+                return false;
+            }
+
+            @Override
+            public boolean isConnectionPending() {
+                return false;
+            }
+
+            @Override
+            public boolean connect(SocketAddress remote) throws IOException {
+                return false;
+            }
+
+            @Override
+            public boolean finishConnect() throws IOException {
+                return false;
+            }
+
+            @Override
+            public int read(ByteBuffer dst) throws IOException {
+                return 0;
+            }
+
+            @Override
+            public long read(ByteBuffer[] dsts, int offset, int length) throws IOException {
+                return 0;
+            }
+
+            @Override
+            public int write(ByteBuffer src) throws IOException {
+                return 0;
+            }
+
+            @Override
+            public long write(ByteBuffer[] srcs, int offset, int length) throws IOException {
+                return 0;
+            }
+
+            @Override
+            protected void implCloseSelectableChannel() throws IOException {
+                throw new IOException("Test");
+            }
+
+            @Override
+            protected void implConfigureBlocking(boolean block) throws IOException {
+            }});
+        client.configureBlocking(false);
+        selector = mock(AbstractSelector.class);
+        when(selectorH.getSelector()).thenReturn(selector);
+        fastCore = new FastCore(packetHandler, selectorH, client);
+        Method m = MethodUtil.getMethod(FastCore.class, "handleClose");
+        MethodUtil.invokeMethod(m, fastCore);
+        verify(packetHandler, times(1)).handleClose(fastCore);
+    }
 
 }

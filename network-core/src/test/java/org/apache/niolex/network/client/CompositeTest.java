@@ -197,7 +197,7 @@ public class CompositeTest {
             packetClient3.handleWrite(sc);
             packetClient4.handleWrite(sc);
         }
-        int i = 300;
+        int i = 100;
         while (i-- > 0) {
             if (received.size() == 24)
                 break;

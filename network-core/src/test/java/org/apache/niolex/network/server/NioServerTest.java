@@ -74,6 +74,16 @@ public class NioServerTest {
 		nioServer.setPacketHandler(packetHandler);
 	}
 
+    @Test
+    public void testCannotStart() {
+        MultiNioServer nioServer  = new MultiNioServer(3);
+        nioServer.setPort(-1);
+        nioServer.setAcceptTimeOut(10);
+        nioServer.start();
+        nioServer.stop();
+        nioServer.stop();
+    }
+
 	@Test
 	public void testSetter() throws Exception {
 		nioServer.setAcceptTimeOut(6233);
