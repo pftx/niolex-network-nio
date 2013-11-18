@@ -46,7 +46,7 @@ public class HeartBeatAdapterTest {
      */
     @BeforeClass
     public static void setup() {
-        ha.setHeartBeatInterval(20);
+        ha.setHeartBeatInterval(24);
         ha.start();
     }
 
@@ -145,53 +145,53 @@ public class HeartBeatAdapterTest {
 		reset(other);
 
 		// started now.
-		IPacketWriter wt = spy(new TBasePacketWriter());
-		PacketData sc = new PacketData(Config.CODE_REGR_HBEAT, new byte[0]);
+		IPacketWriter wt_hb = spy(new TBasePacketWriter());
+		PacketData regi_hb = new PacketData(Config.CODE_REGR_HBEAT, new byte[0]);
 
 		// Regi heart beat.
-		ha.handlePacket(sc, wt);
+		ha.handlePacket(regi_hb, wt_hb);
 
 		// Send data.
-		PacketData sc2 = new PacketData(3, "This is hearrr".getBytes());
-		ha.handlePacket(sc2, wt);
+		PacketData data = new PacketData(3, "This is hearrr".getBytes());
+		ha.handlePacket(data, wt_hb);
 
 		// verify
-		verify(other, times(0)).handlePacket(sc, wt);
-		verify(other).handlePacket(sc2, wt);
+		verify(other, times(0)).handlePacket(regi_hb, wt_hb);
+		verify(other).handlePacket(data, wt_hb);
 
 		// Create another
-		IPacketWriter wt2 = spy(new TBasePacketWriter());
+		IPacketWriter wt_no = spy(new TBasePacketWriter());
 
 		// Regi heart beat.
-		ha.handlePacket(sc2, wt2);
+		ha.handlePacket(data, wt_no);
 
 		Thread.sleep(100);
 
-		ha.handlePacket(sc, wt2);
+		ha.handlePacket(regi_hb, wt_no);
 
 		// wt2 has to send a packet.
 		WriteEvent wEvent = new WriteEvent();
-		wEvent.setPacketData(sc2);
-		wEvent.setPacketWriter(wt2);
+		wEvent.setPacketData(data);
+		wEvent.setPacketWriter(wt_no);
 		ha.afterSend(wEvent);
 
-		wt2.attachData(Config.ATTACH_KEY_HEART_BEAT, null);
+		wt_no.attachData(Config.ATTACH_KEY_HEART_BEAT, null);
 
 		Thread.sleep(150);
 
 		// After then, heart beat should be ready now.
-		verify(wt, atLeast(1)).handleWrite(PacketData.getHeartBeatPacket());
-		verify(wt2, never()).handleWrite(PacketData.getHeartBeatPacket());
+		verify(wt_hb, atLeast(1)).handleWrite(PacketData.getHeartBeatPacket());
+		verify(wt_no, never()).handleWrite(PacketData.getHeartBeatPacket());
 
 		// Close wt2
-		ha.handleClose(wt2);
+		ha.handleClose(wt_no);
 
 		// Sleep more than heart beat.
-		Thread.sleep(220);
+		Thread.sleep(150);
 
 		// After then, heart beat should be ready now.
-		verify(wt, atLeast(2)).handleWrite(PacketData.getHeartBeatPacket());
-		verify(wt2, never()).handleWrite(PacketData.getHeartBeatPacket());
+		verify(wt_hb, atLeast(2)).handleWrite(PacketData.getHeartBeatPacket());
+		verify(wt_no, never()).handleWrite(PacketData.getHeartBeatPacket());
 	}
 
 	/**

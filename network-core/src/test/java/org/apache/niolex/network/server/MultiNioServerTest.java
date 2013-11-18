@@ -54,7 +54,8 @@ public class MultiNioServerTest {
 
 	@BeforeClass
 	public static void createNioServer() throws Exception {
-		nioServer = new MultiNioServer(3);
+		nioServer = new MultiNioServer();
+		nioServer.setThreadsNumber(3);
 		nioServer.setPort(port);
 		nioServer.setAcceptTimeOut(10);
 		nioServer.start();
@@ -73,8 +74,6 @@ public class MultiNioServerTest {
 	@Test
 	public void testStart() throws Exception {
 		assertEquals(port, nioServer.getPort());
-		nioServer.setThreadsNumber(3);
-		assertEquals(3, nioServer.getThreadsNumber());
 		assertEquals(packetHandler, nioServer.getPacketHandler());
 		PacketClient c = new PacketClient(new InetSocketAddress("localhost", port));
         c.setPacketHandler(new PrintPacketHandler());
@@ -203,4 +202,10 @@ public class MultiNioServerTest {
 		verify(h, times(2)).handlePacket(any(PacketData.class), any(IPacketWriter.class));
 		verify(packetHandler, times(2)).handlePacket(any(PacketData.class), any(IPacketWriter.class));
 	}
+
+    @Test(expected=IllegalStateException.class)
+    public void testSetThreadsNumber() throws Exception {
+        assertEquals(3, nioServer.getThreadsNumber());
+        nioServer.setThreadsNumber(3);
+    }
 }

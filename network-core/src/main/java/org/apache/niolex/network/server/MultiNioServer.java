@@ -24,6 +24,7 @@ import java.nio.channels.SocketChannel;
 import java.util.LinkedList;
 import java.util.Set;
 
+import org.apache.niolex.commons.util.SystemUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,21 +52,21 @@ public class MultiNioServer extends NioServer {
      * User can change the threads number by setter.
      */
     public MultiNioServer() {
-		super();
-		this.threadsNumber = Runtime.getRuntime().availableProcessors();
-		if (threadsNumber < 8) {
-			// Default to 8, which is the majority CPU number on servers.
-			// Setting too many selectors is not good.
-			threadsNumber = 8;
-		}
+		this(Runtime.getRuntime().availableProcessors());
 	}
 
     /**
      * Create a MultiNioServer with your specified threads number.
-     * @param threadsNumber
+     *
+     * @param threadsNumber the threads number
      */
 	public MultiNioServer(int threadsNumber) {
 		super();
+		if (threadsNumber < 8) {
+		    // Default to 8, which is the majority CPU number on servers.
+		    // Setting too many selectors is not good.
+		    threadsNumber = 8;
+		}
 		this.threadsNumber = threadsNumber;
 	}
 
@@ -81,8 +82,8 @@ public class MultiNioServer extends NioServer {
 		tPool = new ThreadGroup("Selectors");
 		selectors = new RunnableSelector[threadsNumber];
 		try {
-			for (int i = 0; i < selectors.length; ++i) {
-				selectors[i] = new RunnableSelector(tPool);
+			for (int i = 0; i < threadsNumber; ++i) {
+				selectors[i] = new RunnableSelector(tPool, "selector-" + threadInitNumber++);
 			}
 		} catch (IOException e) {
             LOG.error("Failed to start MultiNioServer.", e);
@@ -136,11 +137,13 @@ public class MultiNioServer extends NioServer {
 	/**
 	 * Set the internal work pool threads number.
 	 * You need to set this before call the start method,
-	 * or it will be useless.
+	 * or it will throw an exception.
 	 *
-	 * @param threadsNumber
+	 * @param threadsNumber the new threads number
 	 */
 	public void setThreadsNumber(int threadsNumber) {
+	    if (isListening)
+	        throw new IllegalStateException("threadsNumber can not be changed if server is running.");
 		this.threadsNumber = threadsNumber;
 	}
 
@@ -157,10 +160,10 @@ public class MultiNioServer extends NioServer {
 		private final Selector selector;
 		private final Thread thread;
 
-		public RunnableSelector(ThreadGroup tPool) throws IOException {
+		public RunnableSelector(ThreadGroup tPool, String name) throws IOException {
 			super();
 			this.selector = Selector.open();
-			this.thread = new Thread(tPool, this, "selector-" + threadInitNumber++);
+			this.thread = new Thread(tPool, this, name);
 			this.selectorHolder = new SelectorHolder(thread, selector);
 			thread.start();
 		}
@@ -170,23 +173,20 @@ public class MultiNioServer extends NioServer {
 		 *
 		 * @param client
 		 */
-		public void registerClient(SocketChannel client) {
-			synchronized (clientQueue) {
-				clientQueue.add(client);
-			}
+		public synchronized void registerClient(SocketChannel client) {
+			clientQueue.add(client);
 			selectorHolder.wakeup();
 		}
 
 		/**
 		 * Close the internal selector and wait for the thread to shutdown.
+		 *
 		 * @throws IOException
 		 * @throws InterruptedException
 		 */
 		public void close() throws IOException, InterruptedException {
 			for (SelectionKey skey : selector.keys()) {
-            	try {
-            		skey.channel().close();
-            	} catch (Exception e) {}
+			    SystemUtil.close(skey.channel());
             }
 			selector.wakeup();
 			thread.join();
@@ -219,19 +219,16 @@ public class MultiNioServer extends NioServer {
 
 		/**
 		 * Add all the clients into this selector now.
+		 *
 		 * @throws IOException
 		 */
-		public void addClients() throws IOException {
+		public synchronized void addClients() throws IOException {
 			// Check the status, if there is any clients need to attach.
-			if (!clientQueue.isEmpty()) {
-				synchronized (clientQueue) {
-					SocketChannel client = null;
-					while ((client = clientQueue.poll()) != null) {
-						new FastCore(packetHandler, selectorHolder, client);
-					}
-				}
-			}
-
+		    SocketChannel client = null;
+		    while ((client = clientQueue.poll()) != null) {
+		        new FastCore(packetHandler, selectorHolder, client);
+		    }
 		}
+
 	}
 }

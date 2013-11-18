@@ -18,6 +18,7 @@
 package org.apache.niolex.network.server;
 
 import java.io.IOException;
+import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
@@ -98,7 +99,7 @@ public class FastCore extends BasePacketWriter {
     private final AtomicBoolean writeAttached = new AtomicBoolean(false);
 
     /**
-     * The the client side name of this socket.
+     * The client side name of this socket.
      */
     private String remoteName;
 
@@ -133,10 +134,16 @@ public class FastCore extends BasePacketWriter {
         sendStatus = Status.NONE;
         receiveStatus = Status.HEADER;
         receiveBuffer = getReceiveBuffer();
-        remoteName = client.socket().getRemoteSocketAddress().toString();
+        Socket so = client.socket();
+        // Initialize socket buffer.
+        so.setTcpNoDelay(true);
+        so.setSoLinger(false, 0);
+        so.setSendBufferSize(Config.SO_BUFFER_SIZE);
+        so.setReceiveBufferSize(Config.SO_BUFFER_SIZE);
+        remoteName = so.getRemoteSocketAddress().toString();
         StringBuilder sb = new StringBuilder();
         sb.append("Remote Client [").append(remoteName);
-        sb.append("] connected to local Port [").append(client.socket().getLocalPort());
+        sb.append("] connected to local Port [").append(so.getLocalPort());
         sb.append("].");
         LOG.info(sb.toString());
     }

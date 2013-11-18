@@ -28,6 +28,7 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.Set;
 
+import org.apache.niolex.commons.util.SystemUtil;
 import org.apache.niolex.network.Config;
 import org.apache.niolex.network.IPacketHandler;
 import org.apache.niolex.network.IServer;
@@ -42,7 +43,7 @@ import org.slf4j.LoggerFactory;
  * @version 1.0.0
  * @since 2012-6-11
  */
-public class NioServer implements IServer {
+public class NioServer implements IServer, Runnable {
     private static final Logger LOG = LoggerFactory.getLogger(NioServer.class);
 
     /**
@@ -102,8 +103,8 @@ public class NioServer implements IServer {
             so.bind(new InetSocketAddress(this.getPort()));
             mainSelector = Selector.open();
             ss.register(mainSelector, SelectionKey.OP_ACCEPT);
-            isListening = true;
-            run();
+
+            startLoop();
             LOG.info("Server started at {}", this.getPort());
             return true;
         } catch (Exception e) {
@@ -116,21 +117,34 @@ public class NioServer implements IServer {
      * This method will start a new thread.
      * Run selector internally.
      */
-    private void run() {
+    private void startLoop() {
+        isListening = true;
+        selectorHolder = new SelectorHolder(mainThread, mainSelector);
+        mainThread = new Thread(this, "NioServer");
+        mainThread.start();
+    }
+
+    /**
+     * This method will never return until this server was stopped or any Exception occurred.
+     *
+     * This is the override of super method.
+     * @see java.lang.Runnable#run()
+     */
+    @Override
+    public void run() {
         try {
-        	mainThread = new Thread(new Runnable() {
-        		public void run() {
-                    // Listen the main loop.
-        			try {
-						listenMain();
-					} catch (Exception e) {
-			            LOG.error("Error occured while server is listening. The server will now shutdown.", e);
-			            stop();
-					}
+            // Listen the main loop.
+            while (isListening) {
+                // Setting the timeout for accept method. Avoid that this server can not be shut
+                // down when this thread is waiting to accept.
+                mainSelector.select(acceptTimeOut);
+                selectorHolder.changeAllInterestOps();
+                Set<SelectionKey> selectedKeys = mainSelector.selectedKeys();
+                for (SelectionKey selectionKey : selectedKeys) {
+                    handleKey(selectionKey);
                 }
-        	}, "NioServer");
-        	selectorHolder = new SelectorHolder(mainThread, mainSelector);
-        	mainThread.start();
+                selectedKeys.clear();
+            }
         } catch (Exception e) {
             LOG.error("Error occured while server is listening. The server will now shutdown.", e);
             stop();
@@ -138,42 +152,10 @@ public class NioServer implements IServer {
     }
 
     /**
-     * This method will never return after this server stop or IOException.
-     * Call stop() to shutdown this server.
-     * @throws IOException
-     */
-    private void listenMain() throws IOException {
-        while (isListening) {
-            // Setting the timeout for accept method. Avoid that this server can not be shut
-            // down when this thread is waiting to accept.
-            mainSelector.select(acceptTimeOut);
-            selectorHolder.changeAllInterestOps();
-            Set<SelectionKey> selectedKeys = mainSelector.selectedKeys();
-            for (SelectionKey selectionKey : selectedKeys) {
-                handleKey(selectionKey);
-            }
-            selectedKeys.clear();
-        }
-    }
-
-    /**
-     * #handleKey(SelectionKey) use This method to register the newly created SocketChannel to a worker selector.
-     * This method will use the main selector to register READ operation.
-     *
-     * Any Sub class can override this method to change the default behavior.
-     * Sub class can override this method to use there own selector.
-     * The default client handler will just process in the main thread.
-     * @param client
-     */
-    protected void registerClient(SocketChannel client) throws IOException {
-    	new FastCore(packetHandler, selectorHolder, client);
-    }
-
-    /**
      * Process all the IO requests.
      * Handle accept, read, write. Please do not override this method.
      */
-    protected void handleKey(SelectionKey selectionKey) throws IOException {
+    protected final void handleKey(SelectionKey selectionKey) {
         SocketChannel client = null;
         try {
             if (selectionKey.isAcceptable()) {
@@ -183,8 +165,6 @@ public class NioServer implements IServer {
                 	return;
                 }
                 client.configureBlocking(false);
-                client.socket().setTcpNoDelay(true);
-                client.socket().setSoLinger(false, 0);
                 // Register this client to a selector.
                 registerClient(client);
                 return;
@@ -198,6 +178,7 @@ public class NioServer implements IServer {
             }
         } catch (Exception e) {
         	if (e instanceof CancelledKeyException || e instanceof ClosedChannelException) {
+        	    // Ignore these two exceptions.
         		return;
         	}
             LOG.info("Failed to handle socket: {}", e.toString());
@@ -205,29 +186,38 @@ public class NioServer implements IServer {
     }
 
     /**
-     * Any Sub class can override this method to change the behavior of ClientHandler.
-     * The default client handler will just process in the selector thread.
-     * @param clientHandler
+     * {@link #handleKey(SelectionKey)} use This method to register the newly created
+     * SocketChannel to a worker selector.<br>
+     * This method will use the main selector to register network operations, and the
+     * fast core will just run in the main thread.
+     * <br>
+     * Any Sub class can override this method to change the default behavior and use
+     * there own selector.
+     *
+     * @param client the client socket channel
      */
-    protected void handleRead(FastCore clientHandler) {
-    	// Call clientHandler.handleRead one time will just generate one Packet.
-    	// If there are more Packet, we need to call it multiple times.
-    	while (clientHandler.handleRead()) {
-    		continue;
-    	}
+    protected void registerClient(SocketChannel client) throws IOException {
+        new FastCore(packetHandler, selectorHolder, client);
     }
 
     /**
-     * Any Sub class can override this method to change the behavior of ClientHandler.
-     * The default client handler will just process in the selector thread.
-     * @param clientHandler
+     * Read packets from the socket channel.
+     *
+     * @param core
      */
-    protected void handleWrite(FastCore clientHandler) {
-    	// Call clientHandler.handleWrite will just send one buffer.
-    	// If that buffer is sent immediately, we need to call it again to send more data.
-    	while (clientHandler.handleWrite()) {
-    		continue;
-    	}
+    protected final void handleRead(FastCore core) {
+    	// Call this method repeatedly to empty the input channel.
+    	while (core.handleRead());
+    }
+
+    /**
+     * Write packets into the socket channel.
+     *
+     * @param core
+     */
+    protected final void handleWrite(FastCore core) {
+    	// Call this method repeatedly to fulfill the write buffer.
+    	while (core.handleWrite());
     }
 
 	/**
@@ -245,9 +235,7 @@ public class NioServer implements IServer {
             ss.socket().close();
             ss.close();
             for (SelectionKey skey : mainSelector.keys()) {
-            	try {
-            		skey.channel().close();
-            	} catch (Exception e) {}
+                SystemUtil.close(skey.channel());
             }
             mainSelector.wakeup();
             mainThread.join();

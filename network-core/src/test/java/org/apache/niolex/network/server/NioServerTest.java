@@ -19,13 +19,16 @@ package org.apache.niolex.network.server;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
+import java.lang.reflect.Field;
 import java.net.InetSocketAddress;
+import java.nio.channels.CancelledKeyException;
+import java.nio.channels.ClosedChannelException;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.ServerSocketChannel;
 
+import org.apache.niolex.commons.reflect.FieldUtil;
 import org.apache.niolex.network.CoreRunner;
 import org.apache.niolex.network.IPacketHandler;
 import org.apache.niolex.network.IPacketWriter;
@@ -33,7 +36,6 @@ import org.apache.niolex.network.PacketData;
 import org.apache.niolex.network.client.PacketClient;
 import org.apache.niolex.network.demo.PrintPacketHandler;
 import org.apache.niolex.network.example.EchoPacketHandler;
-import org.apache.niolex.network.server.NioServer;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -54,7 +56,7 @@ public class NioServerTest {
 	@Mock
 	private IPacketHandler packetHandler;
 
-	private static int port = 8808;
+	private static int port = 9806;
 	private static NioServer nioServer;
 
 	@BeforeClass
@@ -88,13 +90,13 @@ public class NioServerTest {
 	public void testSetter() throws Exception {
 		nioServer.setAcceptTimeOut(6233);
 		assertEquals(6233, nioServer.getAcceptTimeOut());
-		assertEquals(8808, nioServer.getPort());
+		assertEquals(port, nioServer.getPort());
+		assertEquals(packetHandler, nioServer.getPacketHandler());
 	}
 
 	@Test
 	public void testStart() throws Exception {
-		assertEquals(packetHandler, nioServer.getPacketHandler());
-		PacketClient c = new PacketClient(new InetSocketAddress("localhost", 8808));
+		PacketClient c = new PacketClient(new InetSocketAddress("localhost", port));
         c.setPacketHandler(new PrintPacketHandler());
         c.connect();
         PacketData sc = new PacketData();
@@ -115,7 +117,7 @@ public class NioServerTest {
 
 	@Test
 	public void testStop() throws Exception {
-		PacketClient c = new PacketClient(new InetSocketAddress("localhost", 8808));
+		PacketClient c = new PacketClient(new InetSocketAddress("localhost", port));
 		c.setPacketHandler(new PrintPacketHandler());
 		c.connect();
 		PacketData sc = new PacketData();
@@ -143,7 +145,7 @@ public class NioServerTest {
 		packetHandler = spy(new EchoPacketHandler());
 		nioServer.setPacketHandler(packetHandler);
 
-		PacketClient c = new PacketClient(new InetSocketAddress("localhost", 8808));
+		PacketClient c = new PacketClient(new InetSocketAddress("localhost", port));
 		IPacketHandler h = spy(new PrintPacketHandler());
 		c.setPacketHandler(h);
 		c.connect();
@@ -179,7 +181,7 @@ public class NioServerTest {
 	public void testListen() throws Exception {
 		packetHandler = spy(new EchoPacketHandler());
 		nioServer.setPacketHandler(packetHandler);
-		PacketClient c = new PacketClient(new InetSocketAddress("localhost", 8808));
+		PacketClient c = new PacketClient(new InetSocketAddress("localhost", port));
 		IPacketHandler h = spy(new PrintPacketHandler());
 		c.setPacketHandler(h);
 		c.connect();
@@ -202,7 +204,7 @@ public class NioServerTest {
 	public void testHugeData() throws Exception {
 		packetHandler = spy(new EchoPacketHandler());
 		nioServer.setPacketHandler(packetHandler);
-		PacketClient c = new PacketClient(new InetSocketAddress("localhost", 8808));
+		PacketClient c = new PacketClient(new InetSocketAddress("localhost", port));
 		IPacketHandler h = mock(IPacketHandler.class);
 		c.setPacketHandler(h);
 		c.connect();
@@ -221,5 +223,71 @@ public class NioServerTest {
 		verify(h, times(2)).handlePacket(any(PacketData.class), any(IPacketWriter.class));
 		verify(packetHandler, times(2)).handlePacket(any(PacketData.class), any(IPacketWriter.class));
 	}
+
+    @Test
+    public void testRun() throws Exception {
+        NioServer ns = new NioServer();
+        ns.isListening = true;
+        ns.run();
+    }
+
+    @Test
+    public void testStopNA() throws Exception {
+        NioServer ns = new NioServer();
+        ns.stop();
+    }
+
+    @Test
+    public void testStopEx() throws Exception {
+        NioServer ns = new NioServer();
+        ns.isListening = true;
+        ns.stop();
+    }
+
+    @Test
+    public void testHandleKey() throws Exception {
+        SelectionKey selectionKey = mock(SelectionKey.class);
+        when(selectionKey.readyOps()).thenReturn(SelectionKey.OP_ACCEPT | SelectionKey.OP_READ);
+        nioServer.handleKey(selectionKey);
+    }
+
+    @Test
+    public void testHandleKeyInvalidRead() throws Exception {
+        SelectionKey selectionKey = mock(SelectionKey.class);
+        when(selectionKey.readyOps()).thenReturn(SelectionKey.OP_READ);
+        when(selectionKey.isValid()).thenReturn(false);
+        nioServer.handleKey(selectionKey);
+    }
+
+    @Test
+    public void testHandleKeyCancelled() throws Exception {
+        SelectionKey selectionKey = mock(SelectionKey.class);
+        when(selectionKey.readyOps()).thenThrow(new CancelledKeyException());
+        when(selectionKey.isValid()).thenReturn(false);
+        nioServer.handleKey(selectionKey);
+    }
+
+    @Test
+    public void testHandleKeyClosed() throws Exception {
+        NioServer ns = new NioServer();
+        Field f = FieldUtil.getField(NioServer.class, "ss");
+        ServerSocketChannel ss = mock(ServerSocketChannel.class);
+        FieldUtil.setFieldValue(f, ns, ss);
+        when(ss.accept()).thenThrow(new ClosedChannelException());
+
+        SelectionKey selectionKey = mock(SelectionKey.class);
+        when(selectionKey.readyOps()).thenReturn(SelectionKey.OP_ACCEPT);
+        when(selectionKey.isValid()).thenReturn(false);
+
+        nioServer.handleKey(selectionKey);
+    }
+
+    @Test
+    public void testHandleKeyOther() throws Exception {
+        SelectionKey selectionKey = mock(SelectionKey.class);
+        when(selectionKey.readyOps()).thenThrow(new IllegalArgumentException("test"));
+        when(selectionKey.isValid()).thenReturn(false);
+        nioServer.handleKey(selectionKey);
+    }
 
 }
