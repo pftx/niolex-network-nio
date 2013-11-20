@@ -38,6 +38,11 @@ public interface Config extends Const {
     // --------------------------------------------------------------
 
     /**
+     * The packet header size.
+     */
+    int PACKET_HEADER_SIZE = 8;
+
+    /**
      * The low level socket buffer size.
      */
     int SO_BUFFER_SIZE = 64 * K;

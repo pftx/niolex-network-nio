@@ -17,19 +17,12 @@
  */
 package org.apache.niolex.network.client;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.niolex.commons.concurrent.ThreadUtil;
-import org.apache.niolex.commons.stream.StreamUtil;
 import org.apache.niolex.network.Config;
 import org.apache.niolex.network.PacketData;
 import org.slf4j.Logger;
@@ -86,9 +79,9 @@ public class PacketClient extends BaseClient {
 	public void connect() throws IOException {
         prepareSocket();
         this.isWorking = true;
-        writeThread = new Thread(new WriteLoop(socket.getOutputStream()), "PacketClientW");
+        writeThread = new Thread(new WriteLoop(), "PacketClientW");
         writeThread.start();
-        Thread tr = new Thread(new ReadLoop(socket.getInputStream()), "PacketClientR");
+        Thread tr = new Thread(new ReadLoop(), "PacketClientR");
         tr.start();
         LOG.info("Packet client connected to address: {}", serverAddress);
     }
@@ -139,15 +132,12 @@ public class PacketClient extends BaseClient {
      *
      */
     public class ReadLoop implements Runnable {
-        private final DataInputStream in;
 
         /**
-         * Create read loop by InputStream
-         * @param in
+         * Create read loop.
          */
-        public ReadLoop(InputStream in) {
+        public ReadLoop() {
             super();
-            this.in = new DataInputStream(new BufferedInputStream(in, socketBufferSize));
         }
 
         /**
@@ -156,8 +146,7 @@ public class PacketClient extends BaseClient {
         public void run() {
             try {
                 while (isWorking) {
-                    PacketData readPacket = new PacketData();
-                    readPacket.parsePacket(in);
+                    PacketData readPacket = readPacket();
                     LOG.debug("Packet received. desc {}, size {}.", readPacket.descriptor(), readPacket.getLength());
                     if (readPacket.getCode() == Config.CODE_HEART_BEAT) {
                     	// Let's ignore the heart beat packet here.
@@ -180,8 +169,6 @@ public class PacketClient extends BaseClient {
                     LOG.info("Read loop stoped.");
                 }
             }
-            // finally, we close the input stream.
-            StreamUtil.closeStream(in);
         }
     }
 
@@ -192,15 +179,12 @@ public class PacketClient extends BaseClient {
      *
      */
     public class WriteLoop implements Runnable {
-    	private final DataOutputStream out;
 
         /**
-         * Create a WriteLoop by OutputStream
-         * @param out
+         * Create a WriteLoop.
          */
-        public WriteLoop(OutputStream out) {
+        public WriteLoop() {
             super();
-            this.out = new DataOutputStream(new BufferedOutputStream(out, socketBufferSize));
         }
 
         /**
@@ -229,8 +213,7 @@ public class PacketClient extends BaseClient {
             } catch(Exception e) {
                 LOG.error("Error occured in write loop.", e);
             }
-            // finally, we close the output stream.
-            StreamUtil.closeStream(out);
+            // finally, we close the socket.
             safeClose();
         }
 
@@ -239,7 +222,7 @@ public class PacketClient extends BaseClient {
          * @throws IOException
          */
         public void sendNewPacket(PacketData sendPacket) throws IOException {
-            sendPacket.generateData(out);
+            writePacket(sendPacket);
             LOG.debug("Packet sent. desc {}, queue size {}.", sendPacket.descriptor(), PacketClient.this.size());
         }
     }

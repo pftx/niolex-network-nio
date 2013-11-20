@@ -21,6 +21,7 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -84,7 +85,9 @@ public class SocketClientTest {
 		assertEquals(list.size(), 1);
 		sc.setAutoRead(false);
 		sc.handleWrite(new PacketData(2, "Hellow, world.".getBytes()));
+		OutputStream out = sc.out;
 		sc.stop();
+		sc.out = out;
 		assertEquals(list.size(), 1);
 		boolean flag = false;
 		try {
@@ -104,7 +107,9 @@ public class SocketClientTest {
 	    IPacketHandler hand = mock(IPacketHandler.class);
 	    sc.setPacketHandler(hand);
 	    sc.connect();
+	    OutputStream out = sc.out;
 	    sc.stop();
+	    sc.out = out;
 	    sc.isWorking = true;
 	    boolean flag = false;
 	    try {

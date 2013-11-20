@@ -17,16 +17,10 @@
  */
 package org.apache.niolex.network.client;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.net.SocketTimeoutException;
 
-import org.apache.niolex.commons.stream.StreamUtil;
 import org.apache.niolex.network.Config;
 import org.apache.niolex.network.PacketData;
 import org.slf4j.Logger;
@@ -44,9 +38,9 @@ public class BlockingClient extends BaseClient {
 	private static final Logger LOG = LoggerFactory.getLogger(BlockingClient.class);
 
 	/**
-	 * The output stream to send all the packets.
+	 * The read loop instance.
 	 */
-	protected DataOutputStream out;
+	protected ReadLoop rLoop = new ReadLoop();
 
     /**
      * Create a BlockingClient without any Server Address.<br>
@@ -77,8 +71,7 @@ public class BlockingClient extends BaseClient {
 	public void connect() throws IOException {
         prepareSocket();
         this.isWorking = true;
-        out = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream(), socketBufferSize));
-        Thread tr = new Thread(new ReadLoop(socket.getInputStream()), "BlockingClient");
+        Thread tr = new Thread(rLoop, "BlockingClient");
         tr.start();
         LOG.info("Blocking client connected to address: {}", serverAddress);
     }
@@ -90,14 +83,13 @@ public class BlockingClient extends BaseClient {
     @Override
 	public void stop() {
         this.isWorking = false;
-        StreamUtil.closeStream(out);
         safeClose();
     }
 
     @Override
     public synchronized void handleWrite(PacketData sc) {
         try {
-            sc.generateData(out);
+            writePacket(sc);
             LOG.debug("Packet sent. desc {}.", sc.descriptor());
         } catch (IOException e) {
             // Throw an exception to the invoker.
@@ -113,15 +105,12 @@ public class BlockingClient extends BaseClient {
      *
      */
     public class ReadLoop implements Runnable {
-        private final DataInputStream in;
 
         /**
-         * Create read loop by InputStream
-         * @param in
+         * Create read loop.
          */
-        public ReadLoop(InputStream in) {
+        public ReadLoop() {
             super();
-            this.in = new DataInputStream(new BufferedInputStream(in, socketBufferSize));
         }
 
         /**
@@ -131,8 +120,7 @@ public class BlockingClient extends BaseClient {
             try {
                 while (isWorking) {
                     try {
-                        PacketData readPacket = new PacketData();
-                        readPacket.parsePacket(in);
+                        PacketData readPacket = readPacket();
                         LOG.debug("Packet received. desc {}, size {}.", readPacket.descriptor(), readPacket.getLength());
                         if (readPacket.getCode() == Config.CODE_HEART_BEAT) {
                             // Let's ignore the heart beat packet here.

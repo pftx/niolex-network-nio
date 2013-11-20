@@ -18,12 +18,18 @@
 package org.apache.niolex.network.client;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.nio.ByteBuffer;
 
+import org.apache.niolex.commons.stream.StreamUtil;
+import org.apache.niolex.commons.util.SystemUtil;
 import org.apache.niolex.network.Config;
 import org.apache.niolex.network.IClient;
 import org.apache.niolex.network.IPacketHandler;
+import org.apache.niolex.network.PacketData;
 import org.apache.niolex.network.event.WriteEventListener;
 
 /**
@@ -33,6 +39,16 @@ import org.apache.niolex.network.event.WriteEventListener;
  * @version 1.0.0, Date: 2012-6-14
  */
 public abstract class BaseClient implements IClient {
+
+    /**
+     * The byte array used to read packet header.
+     */
+    private final byte[] readHeader = new byte[Config.PACKET_HEADER_SIZE];
+
+    /**
+     * The byte buffer used to write packet header.
+     */
+    private final ByteBuffer writeHeader = ByteBuffer.allocate(Config.PACKET_HEADER_SIZE);
 
 	/**
 	 * The socket address this client it going to connect.
@@ -48,6 +64,16 @@ public abstract class BaseClient implements IClient {
      * The client socket under control.
      */
     protected Socket socket;
+
+    /**
+     * The socket input stream.
+     */
+    protected InputStream in;
+
+    /**
+     * The socket output stream.
+     */
+    protected OutputStream out;
 
     /**
      * The status of this client.
@@ -68,7 +94,7 @@ public abstract class BaseClient implements IClient {
      * Prepare socket and connect to the server address.
      *
      * @return the prepared socket
-     * @throws IOException
+     * @throws IOException if any I/O error occurs
      */
     protected Socket prepareSocket() throws IOException {
         // First, we must ensure the old socket is closed, or there will be resource leak.
@@ -81,7 +107,46 @@ public abstract class BaseClient implements IClient {
         socket.setSoTimeout(connectTimeout);
         socket.setTcpNoDelay(true);
         socket.connect(serverAddress);
+        in = socket.getInputStream();
+        out = socket.getOutputStream();
         return socket;
+    }
+
+    /**
+     * Parse Packet from the input stream. We will throw IOException if end of stream reached
+     * before we finish one packet.
+     *
+     * @throws IOException if any I/O error occurs
+     * @throws IllegalStateException If packet is too large
+     */
+    protected PacketData readPacket() throws IOException {
+        // Read header.
+        int size = StreamUtil.readData(in, readHeader);
+        if (size != 8) {
+            throw new IOException("End of stream found, but packet was not finished.");
+        }
+        PacketData readPacket = new PacketData();
+        readPacket.parseHeader(ByteBuffer.wrap(readHeader));
+        // Read body.
+        size = StreamUtil.readData(in, readPacket.getData());
+        if (size != readPacket.getLength()) {
+            throw new IOException("End of stream found, but packet was not finished.");
+        }
+        return readPacket;
+    }
+
+    /**
+     * Write the packet into the output stream and flush the stream.
+     *
+     * @param pd the packet to be written
+     * @throws IOException if any I/O error occurs
+     */
+    protected void writePacket(PacketData pd) throws IOException {
+        writeHeader.clear();
+        pd.putHeader(writeHeader);
+        out.write(writeHeader.array());
+        out.write(pd.getData());
+        out.flush();
     }
 
 	/**
@@ -105,12 +170,16 @@ public abstract class BaseClient implements IClient {
      * @return null if success, exception if error occurred.
      */
     protected Exception safeClose() {
-        try {
-            if (socket != null) socket.close();
-            return null;
-        } catch (Exception e) {
+        if (socket != null) {
+            StreamUtil.closeStream(in);
+            in = null;
+            StreamUtil.closeStream(out);
+            out = null;
+            Exception e = SystemUtil.close(socket);
+            socket = null;
             return e;
         }
+        return null;
     }
 
 	/**

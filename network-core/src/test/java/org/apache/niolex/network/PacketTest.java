@@ -31,7 +31,7 @@ public class PacketTest {
 	@Test
 	public void testDescriptor() {
 		PacketData p = PacketData.getHeartBeatPacket();
-		PacketData o = p.makeCopy();
+		PacketData o = p.clone();
 		assertEquals(0, o.getCode());
 		assertEquals("00000100", p.descriptor());
 	}

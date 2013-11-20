@@ -17,9 +17,6 @@
  */
 package org.apache.niolex.network;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
 import java.nio.ByteBuffer;
 
 import org.apache.niolex.commons.codec.StringUtil;
@@ -30,10 +27,10 @@ import org.apache.niolex.commons.codec.StringUtil;
  *
  * @author Xie, Jiyun
  */
-public class PacketData extends Packet {
-    private static final byte[] STUB = new byte[0];
+public class PacketData extends Packet implements Cloneable {
+    private static final byte[] Z_LEN_STUB = new byte[0];
     // The HEART_BEAT Packet is for test the connectivity between server and client
-    private static final PacketData HEART_BEAT = new PacketData((short)0, STUB);
+    private static final PacketData HEART_BEAT = new PacketData(Config.CODE_HEART_BEAT, Z_LEN_STUB);
     private static final int MAX_SIZE = Config.SERVER_MAX_PACKET_SIZE;
 
     /**
@@ -62,7 +59,7 @@ public class PacketData extends Packet {
      * @param code the packet code
      */
     public PacketData(int code) {
-    	this(code, STUB);
+    	this(code, Z_LEN_STUB);
     }
 
     /**
@@ -87,7 +84,7 @@ public class PacketData extends Packet {
     }
 
     /**
-     * Create packet by code and data
+     * Create packet by code and data.
      *
      * @param code the packet code
      * @param data the packet data in byte array
@@ -105,13 +102,13 @@ public class PacketData extends Packet {
      *
      * @return the copy.
      */
-    public PacketData makeCopy() {
+    @Override
+    public PacketData clone() {
     	PacketData other = new PacketData(this.code, this.data);
     	other.reserved = this.reserved;
     	other.version = this.version;
     	return other;
     }
-
 
     /**
      * Generate Data from this Packet into the ByteBuffer.
@@ -127,28 +124,12 @@ public class PacketData extends Packet {
     }
 
     /**
-     * Write this Packet into the DataOutputStream.
-     * Only return when finished write or IOException
-     *
-     * @param out the data output stream
-     * @throws IOException For any I/O error occurs.
-     */
-    public void generateData(DataOutputStream out) throws IOException {
-        out.writeByte(version);
-        out.writeByte(reserved);
-        out.writeShort(code);
-        out.writeInt(length);
-        out.write(data);
-        out.flush();
-    }
-
-    /**
      * Parse Packet header from the ByteBuffer.
      * We will create the data array for you to put in the packet content, but
      * user need to put data into the body themselves.
      *
      * @param bb the header byte buffer
-     * @throws IllegalStateException if the packet is larger than 10MB
+     * @throws IllegalStateException if the packet is larger than {@value #MAX_SIZE}
      */
     public void parseHeader(ByteBuffer bb) {
         version = bb.get();
@@ -159,41 +140,7 @@ public class PacketData extends Packet {
         if (length > MAX_SIZE) {
         	throw new IllegalStateException("The packet length is larger than the max size: " + length);
         }
-
         data = new byte[length];
-    }
-
-    /**
-     * Parse Packet from this DataInputStream.
-     * Only return when finish parse or IOException
-     *
-     * @param in the data input stream
-     * @throws IOException For any I/O error occurs.
-     * @throws IOException If packet is too large
-     */
-    public void parsePacket(DataInputStream in) throws IOException {
-        version = in.readByte();
-        reserved = in.readByte();
-        code = in.readShort();
-        length = in.readInt();
-
-        if (length > MAX_SIZE) {
-        	throw new IOException("The packet length is larger than the max size: " + length);
-        }
-
-        data = new byte[length];
-
-        int dataPos = 0;
-        int count = 0;
-        while ((count = in.read(data, dataPos, length - dataPos)) >= 0) {
-        	dataPos += count;
-            if (dataPos == length) {
-                break;
-            }
-        }
-        if (dataPos != length) {
-            throw new IOException("End of stream found, but packet was not finished.");
-        }
     }
 
 }

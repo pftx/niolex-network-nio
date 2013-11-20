@@ -118,7 +118,8 @@ public class PacketClientTest {
     public void testReadLoopFalse() throws IOException {
 	    final PacketClient pc = new PacketClient();
         InputStream in = mock(InputStream.class);
-        ReadLoop r = pc.new ReadLoop(in);
+        pc.in = in;
+        ReadLoop r = pc.new ReadLoop();
         r.run();
 	}
 
@@ -127,7 +128,8 @@ public class PacketClientTest {
         final PacketClient pc = new PacketClient();
         byte[] abc = new byte[10];
         InputStream in = new ByteArrayInputStream(abc);
-        ReadLoop r = pc.new ReadLoop(in);
+        pc.in = in;
+        ReadLoop r = pc.new ReadLoop();
         pc.isWorking = true;
 
         IPacketHandler h = mock(IPacketHandler.class);
@@ -170,7 +172,8 @@ public class PacketClientTest {
                     throw new NullPointerException("Fun.Run");
             }
 	    };
-	    WriteLoop wl = pc.new WriteLoop(out);
+	    pc.out = out;
+	    WriteLoop wl = pc.new WriteLoop();
 	    pc.setConnectTimeout(2);
 	    pc.isWorking = true;
 	    wl.run();

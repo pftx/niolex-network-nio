@@ -64,8 +64,8 @@ public class BlockingClientTest extends BlockingClient {
     public void testBlockingClient() throws IOException {
         BlockingClient pc = new BlockingClient();
         OutputStream o = mock(OutputStream.class);
-        doThrow(new IOException("Abc")).when(o).write(anyInt());
-        pc.out = new DataOutputStream(o);
+        doThrow(new IOException("Abc")).when(o).write(any(byte[].class));
+        pc.out = o;
         pc.handleWrite(PacketData.getHeartBeatPacket());
     }
 
@@ -76,8 +76,8 @@ public class BlockingClientTest extends BlockingClient {
     public void testBlockingClientInetSocketAddress() {
         BlockingClient pc = new BlockingClient(CoreRunner.SERVER_ADDR);
         byte[] abc = new byte[10];
-        InputStream in = new ByteArrayInputStream(abc);
-        ReadLoop r = pc.new ReadLoop(in);
+        pc.in = new ByteArrayInputStream(abc);
+        ReadLoop r = pc.rLoop;
         pc.isWorking = true;
         IPacketHandler h = mock(IPacketHandler.class);
         pc.setPacketHandler(h);
@@ -120,7 +120,8 @@ public class BlockingClientTest extends BlockingClient {
         InputStream in = mock(InputStream.class);
         doThrow(new SocketTimeoutException("Abc")).when(in).read();
         doThrow(new SocketTimeoutException("Abc")).when(in).read(any(byte[].class), anyInt(), anyInt());
-        ReadLoop r = pc.new ReadLoop(in);
+        pc.in = in;
+        ReadLoop r = pc.rLoop;
         pc.isWorking = true;
 
         OutputStream o = new ByteArrayOutputStream() {
@@ -153,8 +154,8 @@ public class BlockingClientTest extends BlockingClient {
 
     @Test(expected=NullPointerException.class)
     public void testHandleWrite() throws Exception {
-        InputStream in = mock(InputStream.class);
-        ReadLoop r = new ReadLoop(in);
+        in = mock(InputStream.class);
+        ReadLoop r = rLoop;
         r.run();
         handleWrite(PacketData.getHeartBeatPacket());
     }

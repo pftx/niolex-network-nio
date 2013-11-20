@@ -20,9 +20,12 @@ package org.apache.niolex.network.client;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.nio.ByteBuffer;
 
 import org.apache.niolex.network.IPacketHandler;
 import org.apache.niolex.network.PacketData;
@@ -77,6 +80,68 @@ public class BaseClientTest extends BaseClient {
         connect();
         assertEquals("localhost/127.0.0.1:8823-3527", getRemoteName());
         stop();
+    }
+
+    @Test
+    public void testReadPacket() throws Exception {
+        byte[] arr = "lex implemented read me out.".getBytes();
+        PacketData pc = new PacketData(47, arr);
+        ByteArrayOutputStream bout = new ByteArrayOutputStream();
+        out = bout;
+        writePacket(pc);
+        in = new ByteArrayInputStream(bout.toByteArray());
+        PacketData qc = readPacket();
+        assertArrayEquals(qc.getData(), pc.getData());
+        assertEquals(qc.getCode(), pc.getCode());
+        assertEquals(qc.getReserved(), pc.getReserved());
+        assertEquals(qc.getVersion(), pc.getVersion());
+    }
+
+    @Test
+    public void testWritePacket() throws Exception {
+        byte[] arr = "lex implemented first run.".getBytes();
+        PacketData pc = new PacketData(47, arr);
+        ByteArrayOutputStream bout = new ByteArrayOutputStream();
+        out = bout;
+        writePacket(pc);
+        ByteBuffer ba = ByteBuffer.wrap(bout.toByteArray());
+        assertEquals(1, ba.get());
+        assertEquals(0, ba.get());
+        assertEquals(47, ba.getShort());
+        assertEquals(26, ba.getInt());
+    }
+
+    @Test(expected=IOException.class)
+    public void testReadPacketEOH() throws IOException {
+        byte[] b = new byte[7];
+        for (int i = 0; i < 7; ++i) {
+            b[i] = 0;
+        }
+        in = new ByteArrayInputStream(b);
+        readPacket();
+    }
+
+    @Test(expected=IOException.class)
+    public void testReadPacketEOF() throws IOException {
+        byte[] b = new byte[9];
+        for (int i = 0; i < 7; ++i) {
+            b[i] = 0;
+        }
+        b[7] = b[8] = 10;
+        in = new ByteArrayInputStream(b);
+        readPacket();
+    }
+
+    @Test(expected=IllegalStateException.class)
+    public void testReadPacketTooLarge() throws IOException {
+        ByteBuffer ba = ByteBuffer.allocate(20);
+        ba.putInt(12345);
+        ba.putInt(10485761);
+        ba.putInt(10485761);
+        ba.putInt(10485761);
+        ba.putInt(10485761);
+        in = new ByteArrayInputStream(ba.array());
+        readPacket();
     }
 
     /**

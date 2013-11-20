@@ -17,10 +17,6 @@
  */
 package org.apache.niolex.network.client;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 
@@ -45,9 +41,6 @@ import org.slf4j.LoggerFactory;
  */
 public class SocketClient extends BaseClient {
 	private static final Logger LOG = LoggerFactory.getLogger(SocketClient.class);
-
-    private DataInputStream inS;
-    private DataOutputStream outS;
 
     /**
      * Automatically read data from remote server.
@@ -79,8 +72,6 @@ public class SocketClient extends BaseClient {
 	public void connect() throws IOException {
 	    prepareSocket();
         this.isWorking = true;
-        inS = new DataInputStream(new BufferedInputStream(socket.getInputStream(), socketBufferSize));
-        outS = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream(), socketBufferSize));
         LOG.info("Socket client connected to address: {}", serverAddress);
 	}
 
@@ -96,7 +87,6 @@ public class SocketClient extends BaseClient {
         if (e != null) {
             LOG.error("Error occured when stop the socket client.", e);
         }
-        socket = null;
         LOG.info("Socket client stoped.");
     }
 
@@ -107,7 +97,7 @@ public class SocketClient extends BaseClient {
 	@Override
 	public synchronized void handleWrite(PacketData sc) {
         try {
-			sc.generateData(outS);
+			writePacket(sc);
 			LOG.debug("Packet sent. desc {}, length {}.", sc.descriptor(), sc.getLength());
 			if (autoRead) {
 			    handleRead();
@@ -132,9 +122,8 @@ public class SocketClient extends BaseClient {
 	 * @throws IOException if network problem
 	 */
 	public void handleRead() throws IOException {
-		PacketData readPacket = new PacketData();
 		while (true) {
-			readPacket.parsePacket(inS);
+		    PacketData readPacket = readPacket();
 			LOG.debug("Packet received. desc {}, size {}.", readPacket.descriptor(), readPacket.getLength());
 			if (readPacket.getCode() == Config.CODE_HEART_BEAT) {
             	// Let's ignore the heart beat packet here.
