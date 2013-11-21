@@ -83,7 +83,7 @@ public class PacketClient extends BaseClient {
         writeThread.start();
         Thread tr = new Thread(new ReadLoop(), "PacketClientR");
         tr.start();
-        LOG.info("Packet client connected to address: {}", serverAddress);
+        LOG.info("Packet client connected to address: {}.", serverAddress);
     }
 
     /**

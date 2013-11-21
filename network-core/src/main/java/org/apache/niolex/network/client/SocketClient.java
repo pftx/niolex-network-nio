@@ -72,7 +72,7 @@ public class SocketClient extends BaseClient {
 	public void connect() throws IOException {
 	    prepareSocket();
         this.isWorking = true;
-        LOG.info("Socket client connected to address: {}", serverAddress);
+        LOG.info("Socket client connected to address: {}.", serverAddress);
 	}
 
     /**

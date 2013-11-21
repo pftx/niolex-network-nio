@@ -51,7 +51,7 @@ import org.slf4j.LoggerFactory;
  */
 @RunWith(MockitoJUnitRunner.class)
 public class CompositeTest {
-    private static final Logger LOG = LoggerFactory.getLogger(BaseClientTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(CompositeTest.class);
 
     @BeforeClass
     public static void start() throws Exception {

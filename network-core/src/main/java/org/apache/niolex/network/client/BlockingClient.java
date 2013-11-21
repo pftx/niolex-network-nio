@@ -73,7 +73,7 @@ public class BlockingClient extends BaseClient {
         this.isWorking = true;
         Thread tr = new Thread(rLoop, "BlockingClient");
         tr.start();
-        LOG.info("Blocking client connected to address: {}", serverAddress);
+        LOG.info("Blocking client connected to address: {}.", serverAddress);
     }
 
     /**

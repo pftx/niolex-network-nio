@@ -289,7 +289,7 @@ public class FastCore extends BasePacketWriter {
                 }
             }
         } catch (Exception e) {
-            LOG.info("Failed to send data to client socket: {}", e.getMessage());
+            LOG.info("Failed to send data to client socket: {}", e.toString());
             handleClose();
         }
         return false;
@@ -363,7 +363,7 @@ public class FastCore extends BasePacketWriter {
             sb.append("] disconnected.");
             LOG.info(sb.toString());
         } catch (Exception e) {
-            LOG.info("Failed to close client socket: {}", e.getMessage());
+            LOG.info("Failed to close client socket: {}", e.toString());
         }
     	// Call this at last.
     	try {
