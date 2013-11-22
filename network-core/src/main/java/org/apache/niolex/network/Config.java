@@ -43,6 +43,11 @@ public interface Config extends Const {
     int PACKET_HEADER_SIZE = 8;
 
     /**
+     * The max queue size of buffer manager, default to 2K.
+     */
+    int BUFFER_MGR_MAX_QUEUE_SIZE = 2048;
+
+    /**
      * The low level socket buffer size.
      */
     int SO_BUFFER_SIZE = 64 * K;
@@ -55,9 +60,9 @@ public interface Config extends Const {
     int SO_CONNECT_TIMEOUT = 20000;
 
 	/**
-	 * The NIO Byte buffer size for server socket.
+	 * The NIO Direct Byte buffer size for server socket.
 	 */
-	int SERVER_NIO_BUFFER_SIZE = 8 * K;
+	int SERVER_DIRECT_BUFFER_SIZE = 8 * K;
 
 	/**
 	 * The max packet size for this server. Default to 10MB

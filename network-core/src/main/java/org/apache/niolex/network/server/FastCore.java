@@ -44,9 +44,14 @@ public class FastCore extends BasePacketWriter {
 	private static final Logger LOG = LoggerFactory.getLogger(FastCore.class);
 
 	/**
-	 * The max send buffer size.
+	 * The direct send buffer size.
 	 */
-	private static final int MAX_BUFFER_SIZE = Config.SERVER_NIO_BUFFER_SIZE;
+	private static final int DIRECT_BUFFER_SIZE = Config.SERVER_DIRECT_BUFFER_SIZE;
+
+	/**
+	 * The buffer manager used to manage direct buffers.
+	 */
+	private static final BufferManager BUFFER_MANAGER = new BufferManager();
 
     /**
      * Internal used in FastCore. Please ignore.
@@ -91,7 +96,7 @@ public class FastCore extends BasePacketWriter {
     /**
      * The direct small buffer, for faster send speed.
      */
-    private final ByteBuffer smallBuffer = ByteBuffer.allocateDirect(MAX_BUFFER_SIZE);
+    private final ByteBuffer directBuffer = BUFFER_MANAGER.getBuffer();
 
     /**
      * Current socket write status. attached to the selector or not.
@@ -329,10 +334,10 @@ public class FastCore extends BasePacketWriter {
      * @throws IOException
      */
     private boolean doSendNewPacket() throws IOException {
-    	if (sendPacket.getLength() + 8 <= MAX_BUFFER_SIZE) {
+    	if (sendPacket.getLength() + 8 <= DIRECT_BUFFER_SIZE) {
     		// We send small packets in just one buffer.
     		sendStatus = Status.BODY;
-    		sendBuffer = smallBuffer;
+    		sendBuffer = directBuffer;
     		sendBuffer.clear();
     		sendPacket.putHeader(sendBuffer);
     		sendBuffer.put(sendPacket.getData());
@@ -358,6 +363,7 @@ public class FastCore extends BasePacketWriter {
     	try {
     	    // Close socket and streams.
             socketChannel.close();
+            BUFFER_MANAGER.giveBack(directBuffer);
             StringBuilder sb = new StringBuilder();
             sb.append("Remote Client [").append(remoteName);
             sb.append("] disconnected.");
