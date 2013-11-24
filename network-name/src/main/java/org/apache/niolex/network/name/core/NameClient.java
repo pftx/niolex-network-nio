@@ -31,8 +31,8 @@ import org.apache.niolex.network.name.bean.AddressListSerializer;
 import org.apache.niolex.network.name.bean.AddressRecord;
 import org.apache.niolex.network.name.bean.AddressRecordSerializer;
 import org.apache.niolex.network.name.bean.AddressRegiSerializer;
-import org.apache.niolex.network.packet.PacketTransformer;
-import org.apache.niolex.network.packet.StringSerializer;
+import org.apache.niolex.network.serialize.PacketTransformer;
+import org.apache.niolex.network.serialize.StringSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -91,10 +91,10 @@ public class NameClient implements IPacketHandler {
 
 	/**
 	 * Override super method
-	 * @see org.apache.niolex.network.IPacketHandler#handleRead(org.apache.niolex.network.PacketData, org.apache.niolex.network.IPacketWriter)
+	 * @see org.apache.niolex.network.IPacketHandler#handlePacket(org.apache.niolex.network.PacketData, org.apache.niolex.network.IPacketWriter)
 	 */
 	@Override
-	public void handleRead(PacketData sc, IPacketWriter wt) {
+	public void handlePacket(PacketData sc, IPacketWriter wt) {
 		// Dispatch package
 		switch(sc.getCode()) {
 			// 发布服务地址信息全量

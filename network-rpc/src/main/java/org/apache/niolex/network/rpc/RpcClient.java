@@ -255,11 +255,11 @@ public class RpcClient implements PoolableInvocationHandler, IPacketHandler {
 	 * We delegate all read packets to invoker.
 	 *
 	 * Override super method
-	 * @see org.apache.niolex.network.IPacketHandler#handleRead(org.apache.niolex.network.PacketData, org.apache.niolex.network.IPacketWriter)
+	 * @see org.apache.niolex.network.IPacketHandler#handlePacket(org.apache.niolex.network.PacketData, org.apache.niolex.network.IPacketWriter)
 	 */
 	@Override
-	public void handleRead(PacketData sc, IPacketWriter wt) {
-		this.invoker.handleRead(sc, wt);
+	public void handlePacket(PacketData sc, IPacketWriter wt) {
+		this.invoker.handlePacket(sc, wt);
 	}
 
 	/**

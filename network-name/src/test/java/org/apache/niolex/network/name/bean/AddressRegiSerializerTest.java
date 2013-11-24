@@ -30,28 +30,28 @@ import org.junit.Test;
 public class AddressRegiSerializerTest {
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.name.bean.AddressRegiBean#serObj(org.apache.niolex.network.name.bean.AddressRegiBean)}.
+	 * Test method for {@link org.apache.niolex.network.name.bean.AddressRegiBean#serialize(org.apache.niolex.network.name.bean.AddressRegiBean)}.
 	 */
 	@Test
 	public void testSerObjAddressRegiBean() {
 		AddressRegiSerializer r = new AddressRegiSerializer(Config.CODE_NAME_PUBLISH);
 		assertEquals(Config.CODE_NAME_PUBLISH, r.getCode());
 		AddressRegiBean q = new AddressRegiBean("network/name", "local/8004");
-		byte[] t = r.serObj(q);
-		AddressRegiBean s = r.deserObj(t);
+		byte[] t = r.toBytes(q);
+		AddressRegiBean s = r.toObj(t);
 		assertEquals("network/name", s.getAddressKey());
 		assertEquals("local/8004", s.getAddressValue());
 	}
 
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.name.bean.AddressRegiBean#serObj(org.apache.niolex.network.name.bean.AddressRegiBean)}.
+	 * Test method for {@link org.apache.niolex.network.name.bean.AddressRegiBean#serialize(org.apache.niolex.network.name.bean.AddressRegiBean)}.
 	 */
 	@Test(expected=IllegalArgumentException.class)
 	public void testSerObjAddress() {
 		AddressRegiSerializer r = new AddressRegiSerializer(Config.CODE_NAME_PUBLISH);
 		assertEquals(Config.CODE_NAME_PUBLISH, r.getCode());
-		AddressRegiBean s = r.deserObj("This is bad".getBytes());
+		AddressRegiBean s = r.toObj("This is bad".getBytes());
 		assertEquals("network/name", s.getAddressKey());
 	}
 	/**

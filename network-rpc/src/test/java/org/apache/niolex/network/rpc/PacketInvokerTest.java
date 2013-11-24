@@ -38,9 +38,9 @@ public class PacketInvokerTest {
 	 * Test method for {@link org.apache.niolex.network.rpc.PacketInvoker#handleClose(org.apache.niolex.network.IPacketWriter)}.
 	 */
 	@Test
-	public void testHandleRead() {
+	public void testHandlePacket() {
 		PacketInvoker in = new PacketInvoker();
-		in.handleRead(PacketData.getHeartBeatPacket(), null);
+		in.handlePacket(PacketData.getHeartBeatPacket(), null);
 	}
 
 	@Test
@@ -52,7 +52,7 @@ public class PacketInvokerTest {
 		final IClient client = mock(IClient.class);
 		final CountDownLatch latch = new CountDownLatch(1);
 		final CountDownLatch latch2 = new CountDownLatch(1);
-		final PacketData qq = rc.makeCopy();
+		final PacketData qq = rc.clone();
 		rc.setReserved((byte)-128);
 		Thread r = new Thread() {
 			public void run() {
@@ -65,7 +65,7 @@ public class PacketInvokerTest {
 		r.start();
 		latch2.await();
 		Thread.sleep(50);
-		in.handleRead(qq, client);
+		in.handlePacket(qq, client);
 		latch.await();
 	}
 

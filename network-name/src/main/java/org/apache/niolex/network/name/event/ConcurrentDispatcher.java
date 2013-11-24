@@ -24,7 +24,7 @@ import org.apache.niolex.network.Config;
 import org.apache.niolex.network.IPacketWriter;
 import org.apache.niolex.network.PacketData;
 import org.apache.niolex.network.name.bean.AddressRecord;
-import org.apache.niolex.network.packet.PacketTransformer;
+import org.apache.niolex.network.serialize.PacketTransformer;
 
 /**
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
@@ -56,7 +56,7 @@ public class ConcurrentDispatcher implements IDispatcher {
 		Hashtable<IPacketWriter, String> queue = map.get(rec.getAddressKey());
 		if (queue != null) {
 			for (IPacketWriter wt : queue.keySet()) {
-				wt.handleWrite(rc.makeCopy());
+				wt.handleWrite(rc);
 			}
 		}
 	}

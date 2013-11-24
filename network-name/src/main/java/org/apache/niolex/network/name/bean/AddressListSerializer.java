@@ -22,7 +22,7 @@ import java.util.List;
 
 import org.apache.niolex.commons.codec.StringUtil;
 import org.apache.niolex.network.Config;
-import org.apache.niolex.network.packet.BaseSerializer;
+import org.apache.niolex.network.serialize.BaseSerializer;
 
 /**
  * The class to serialize address list.
@@ -34,44 +34,29 @@ import org.apache.niolex.network.packet.BaseSerializer;
 public class AddressListSerializer extends BaseSerializer<List<String>> {
 
 	/**
-	 * The packet code.
-	 */
-	private short code;
-
-	/**
 	 * Create this AddressListSerializer with the given code.
 	 * @param code
 	 */
 	public AddressListSerializer(short code) {
-		super();
-		this.code = code;
+		super(code);
 	}
 
 	/**
 	 * Override super method
-	 * @see org.apache.niolex.network.packet.ISerializer#getCode()
+	 * @see org.apache.niolex.network.serialize.BaseSerializer#toBytes(Object)
 	 */
 	@Override
-	public short getCode() {
-		return code;
-	}
-
-	/**
-	 * Override super method
-	 * @see org.apache.niolex.network.packet.BaseSerializer#serObj(java.lang.Object)
-	 */
-	@Override
-	public byte[] serObj(List<String> t) {
+	public byte[] toBytes(List<String> t) {
 		String s = StringUtil.join(t, Config.NAME_FIELD_SEP);
 		return StringUtil.strToUtf8Byte(s);
 	}
 
 	/**
 	 * Override super method
-	 * @see org.apache.niolex.network.packet.BaseSerializer#deserObj(byte[])
+	 * @see org.apache.niolex.network.serialize.BaseSerializer#toObj(byte[])
 	 */
 	@Override
-	public List<String> deserObj(byte[] arr) {
+	public List<String> toObj(byte[] arr) {
 		if (arr.length == 0) {
 			return Arrays.asList();
 		}

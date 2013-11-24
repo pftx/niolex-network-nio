@@ -65,10 +65,10 @@ public class AuthSubscribeHandler implements IPacketHandler {
 
 	/**
 	 * Override super method
-	 * @see org.apache.niolex.network.IPacketHandler#handleRead(org.apache.niolex.network.PacketData, org.apache.niolex.network.IPacketWriter)
+	 * @see org.apache.niolex.network.IPacketHandler#handlePacket(org.apache.niolex.network.PacketData, org.apache.niolex.network.IPacketWriter)
 	 */
 	@Override
-	public void handleRead(PacketData sc, IPacketWriter wt) {
+	public void handlePacket(PacketData sc, IPacketWriter wt) {
 		// Parse bean from packet data.
 		SubscribeBean bean = PacketTranslater.toSubscribeBean(sc);
 		// Step 1. Deal with auth info.

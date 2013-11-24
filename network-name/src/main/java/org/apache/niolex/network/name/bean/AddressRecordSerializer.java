@@ -20,7 +20,7 @@ package org.apache.niolex.network.name.bean;
 import org.apache.niolex.commons.codec.StringUtil;
 import org.apache.niolex.network.Config;
 import org.apache.niolex.network.name.bean.AddressRecord.Status;
-import org.apache.niolex.network.packet.BaseSerializer;
+import org.apache.niolex.network.serialize.BaseSerializer;
 
 /**
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
@@ -30,44 +30,29 @@ import org.apache.niolex.network.packet.BaseSerializer;
 public class AddressRecordSerializer extends BaseSerializer<AddressRecord> {
 
 	/**
-	 * The packet code.
-	 */
-	private short code;
-
-	/**
 	 * Create this AddressListSerializer with the given code.
 	 * @param code
 	 */
 	public AddressRecordSerializer(short code) {
-		super();
-		this.code = code;
+		super(code);
 	}
 
 	/**
 	 * Override super method
-	 * @see org.apache.niolex.network.packet.ISerializer#getCode()
+	 * @see org.apache.niolex.network.serialize.BaseSerializer#toBytes(Object)
 	 */
 	@Override
-	public short getCode() {
-		return code;
-	}
-
-	/**
-	 * Override super method
-	 * @see org.apache.niolex.network.packet.BaseSerializer#serObj(java.lang.Object)
-	 */
-	@Override
-	public byte[] serObj(AddressRecord t) {
+	public byte[] toBytes(AddressRecord t) {
 		String[] arr = new String[] {t.getStatus().name(), t.getAddressKey(), t.getAddressValue()};
 		return StringUtil.strToUtf8Byte(StringUtil.join(arr , Config.NAME_FIELD_SEP));
 	}
 
 	/**
 	 * Override super method
-	 * @see org.apache.niolex.network.packet.BaseSerializer#deserObj(byte[])
+	 * @see org.apache.niolex.network.serialize.BaseSerializer#toObj(byte[])
 	 */
 	@Override
-	public AddressRecord deserObj(byte[] arr) {
+	public AddressRecord toObj(byte[] arr) {
 		String[] arr2 = StringUtil.utf8ByteToStr(arr).split(Config.NAME_FIELD_SEP_REGEX, 4);
 		if (arr2.length != 3) {
 			throw new IllegalArgumentException("Data is invalid.");

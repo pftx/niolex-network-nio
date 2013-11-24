@@ -44,10 +44,10 @@ public class AddAuthHandler implements IPacketHandler {
 
 	/**
 	 * Override super method
-	 * @see org.apache.niolex.network.IPacketHandler#handleRead(org.apache.niolex.network.PacketData, org.apache.niolex.network.IPacketWriter)
+	 * @see org.apache.niolex.network.IPacketHandler#handlePacket(org.apache.niolex.network.PacketData, org.apache.niolex.network.IPacketWriter)
 	 */
 	@Override
-	public void handleRead(PacketData sc, IPacketWriter wt) {
+	public void handlePacket(PacketData sc, IPacketWriter wt) {
 		String[] args = StringUtil.utf8ByteToStr(sc.getData()).split(",");
 		String s = service.addReadAuth(args[0], args[1], wt);
 		wt.handleWrite(new PacketData(CodeMap.RES_ADD_AUTH, s));

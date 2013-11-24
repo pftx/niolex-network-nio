@@ -35,8 +35,8 @@ import org.apache.niolex.network.name.bean.AddressRegiBean;
 import org.apache.niolex.network.name.bean.AddressRegiSerializer;
 import org.apache.niolex.network.name.bean.RecordStorage;
 import org.apache.niolex.network.name.event.IDispatcher;
-import org.apache.niolex.network.packet.PacketTransformer;
-import org.apache.niolex.network.packet.StringSerializer;
+import org.apache.niolex.network.serialize.PacketTransformer;
+import org.apache.niolex.network.serialize.StringSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -110,11 +110,11 @@ public class NameServer implements IPacketHandler {
 	/**
 	 * Override super method
 	 *
-	 * @see org.apache.niolex.network.IPacketHandler#handleRead(org.apache.niolex.network.PacketData,
+	 * @see org.apache.niolex.network.IPacketHandler#handlePacket(org.apache.niolex.network.PacketData,
 	 *      org.apache.niolex.network.IPacketWriter)
 	 */
 	@Override
-	public void handleRead(PacketData sc, IPacketWriter wt) {
+	public void handlePacket(PacketData sc, IPacketWriter wt) {
 		switch (sc.getCode()) {
 			// 获取服务地址信息
 			case Config.CODE_NAME_OBTAIN:

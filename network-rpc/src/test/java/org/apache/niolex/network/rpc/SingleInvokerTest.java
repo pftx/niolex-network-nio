@@ -32,12 +32,12 @@ import org.junit.Test;
 public class SingleInvokerTest {
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.rpc.SingleInvoker#handleRead(org.apache.niolex.network.PacketData, org.apache.niolex.network.IPacketWriter)}.
+	 * Test method for {@link org.apache.niolex.network.rpc.SingleInvoker#handlePacket(org.apache.niolex.network.PacketData, org.apache.niolex.network.IPacketWriter)}.
 	 */
 	@Test
-	public void testHandleRead() {
+	public void testHandlePacket() {
 		SingleInvoker ss = new SingleInvoker();
-		ss.handleRead(null, null);
+		ss.handlePacket(null, null);
 	}
 
 	/**

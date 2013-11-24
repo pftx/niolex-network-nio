@@ -82,11 +82,11 @@ public class PacketInvoker implements RemoteInvoker {
 	 * If there is no thread waiting for this packet, we do a Warn log.
 	 *
 	 * Override super method
-	 * @see org.apache.niolex.network.IPacketHandler#handleRead(org.apache.niolex.network.PacketData,
+	 * @see org.apache.niolex.network.IPacketHandler#handlePacket(org.apache.niolex.network.PacketData,
 	 *  org.apache.niolex.network.IPacketWriter)
 	 */
 	@Override
-	public void handleRead(PacketData sc, IPacketWriter wt) {
+	public void handlePacket(PacketData sc, IPacketWriter wt) {
 		Integer key = RpcUtil.generateKey(sc);
 		boolean isOk = blocker.release(key, sc);
 		if (!isOk) {

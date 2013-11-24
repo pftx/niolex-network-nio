@@ -38,14 +38,14 @@ public class AddressRecordSerializerTest {
 	}
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.name.bean.AddressRecordSerializer#serObj(org.apache.niolex.network.name.bean.AddressRecord)}.
+	 * Test method for {@link org.apache.niolex.network.name.bean.AddressRecordSerializer#serialize(org.apache.niolex.network.name.bean.AddressRecord)}.
 	 */
 	@Test
 	public void testSerObjAddressRecord() {
 		AddressRecordSerializer rec = new AddressRecordSerializer((short) 41);
 		AddressRecord ad = new AddressRecord("network/name", "local/8004");
-		byte[] dd = rec.serObj(ad);
-		AddressRecord af = rec.deserObj(dd);
+		byte[] dd = rec.toBytes(ad);
+		AddressRecord af = rec.toObj(dd);
 		assertEquals(ad, af);
 		assertEquals("network/name", af.getAddressKey());
 		assertEquals("local/8004", af.getAddressValue());
@@ -58,7 +58,7 @@ public class AddressRecordSerializerTest {
 	public void testDeserObjByteArray() {
 		AddressRecordSerializer rec = new AddressRecordSerializer((short) 41);
 		byte[] dd = "This is bug/*/very bad.".getBytes();
-		AddressRecord af = rec.deserObj(dd);
+		AddressRecord af = rec.toObj(dd);
 		assertEquals("network/name", af.getAddressKey());
 		assertEquals("local/8004", af.getAddressValue());
 	}

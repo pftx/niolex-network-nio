@@ -38,15 +38,15 @@ public class RpcPacketHandlerTest {
 
 	/**
 	 * Test method for
-	 * {@link org.apache.niolex.network.rpc.RpcPacketHandler#handleRead(org.apache.niolex.network.PacketData, org.apache.niolex.network.IPacketWriter)}
+	 * {@link org.apache.niolex.network.rpc.RpcPacketHandler#handlePacket(org.apache.niolex.network.PacketData, org.apache.niolex.network.IPacketWriter)}
 	 * .
 	 */
 	@Test
-	public void testHandleRead() {
+	public void testHandlePacket() {
 		RpcPacketHandler rr = new RpcPacketHandler(3);
 		rr.setConverter(new JsonConverter());
 		IPacketWriter tt = mock(IPacketWriter.class);
-		rr.handleRead(new PacketData(5, new byte[5]), tt);
+		rr.handlePacket(new PacketData(5, new byte[5]), tt);
 		verify(tt).handleWrite(any(PacketData.class));
 	}
 
@@ -54,7 +54,7 @@ public class RpcPacketHandlerTest {
 	public void testHandleHB() {
 		RpcPacketHandler rr = new RpcPacketHandler();
 		IPacketWriter tt = mock(IPacketWriter.class);
-		rr.handleRead(PacketData.getHeartBeatPacket(), tt);
+		rr.handlePacket(PacketData.getHeartBeatPacket(), tt);
 		verify(tt, never()).handleWrite(any(PacketData.class));
 	}
 
@@ -90,7 +90,7 @@ public class RpcPacketHandlerTest {
 		rr.setConverter(new JsonConverter());
 		IPacketWriter wt = mock(IPacketWriter.class);
 		PacketData p = new PacketData(9, new byte[9]);
-		rr.handleRead(p, wt);
+		rr.handlePacket(p, wt);
 		assertEquals(0, rr.getQueueSize());
 	}
 
@@ -108,7 +108,7 @@ public class RpcPacketHandlerTest {
 		p.setVersion((byte) 79);
 		p.setReserved((byte) 99);
 		IPacketWriter wt = mock(IPacketWriter.class);
-		rr.handleRead(p, wt);
+		rr.handlePacket(p, wt);
 		Thread.sleep(3 * CoreRunner.CO_SLEEP);
 		ArgumentCaptor<PacketData> au = ArgumentCaptor.forClass(PacketData.class);
 		verify(wt).handleWrite(au.capture());

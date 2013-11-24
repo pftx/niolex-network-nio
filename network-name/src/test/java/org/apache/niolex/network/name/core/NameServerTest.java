@@ -17,9 +17,7 @@
  */
 package org.apache.niolex.network.name.core;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
@@ -32,7 +30,7 @@ import org.apache.niolex.network.name.bean.AddressRegiBean;
 import org.apache.niolex.network.name.bean.RecordStorage;
 import org.apache.niolex.network.name.event.ConcurrentDispatcher;
 import org.apache.niolex.network.name.event.IDispatcher;
-import org.apache.niolex.network.packet.PacketTransformer;
+import org.apache.niolex.network.serialize.PacketTransformer;
 import org.apache.niolex.network.server.BasePacketWriter;
 import org.apache.niolex.network.server.NioServer;
 import org.junit.AfterClass;
@@ -79,11 +77,11 @@ public class NameServerTest {
 		// Step 1 publish.
 		AddressRegiBean regi = new AddressRegiBean("network.name.core.NameServer", "localhost:8181");
 		PacketData pb = transformer.getPacketData(Config.CODE_NAME_PUBLISH, regi);
-		name.handleRead(pb, wt);
+		name.handlePacket(pb, wt);
 
 		// Step 2 subscribe.
 		PacketData pd = transformer.getPacketData(Config.CODE_NAME_OBTAIN, "network.name.core.NameServer");
-		name.handleRead(pd, wt);
+		name.handlePacket(pd, wt);
 		ArgumentCaptor<PacketData> cap = ArgumentCaptor.forClass(PacketData.class);
 		verify(wt).handleWrite(cap.capture());
 		List<String> list = transformer.getDataObject(cap.getValue());
@@ -100,7 +98,7 @@ public class NameServerTest {
 		IPacketWriter wt = mock(IPacketWriter.class);
 		// Step 1 publish.
 		PacketData pb = new PacketData(56);
-		name.handleRead(pb, wt);
+		name.handlePacket(pb, wt);
 		ArgumentCaptor<PacketData> cap = ArgumentCaptor.forClass(PacketData.class);
 		verify(wt).handleWrite(cap.capture());
 		assertEquals(Config.CODE_NOT_RECOGNIZED, cap.getValue().getCode());
@@ -130,14 +128,14 @@ public class NameServerTest {
 		// Step 1 publish.
 		AddressRegiBean regi = new AddressRegiBean("network.name.core.NameServer", "localhost:8181");
 		PacketData pb = transformer.getPacketData(Config.CODE_NAME_PUBLISH, regi);
-		name.handleRead(pb, wt);
+		name.handlePacket(pb, wt);
 		regi = new AddressRegiBean("network.name.core.NameServer", "localhost:8182");
 		pb = transformer.getPacketData(Config.CODE_NAME_PUBLISH, regi);
-		name.handleRead(pb, wt);
+		name.handlePacket(pb, wt);
 
 		// Step 2 subscribe.
 		PacketData pd = transformer.getPacketData(Config.CODE_NAME_OBTAIN, "network.name.core.NameServer");
-		name.handleRead(pd, wt);
+		name.handlePacket(pd, wt);
 		assertFalse(wt.getAttached(Config.ATTACH_KEY_OBTAIN_ADDR) == null);
 		assertFalse(wt.getAttached(Config.ATTACH_KEY_REGIST_ADDR) == null);
 		name.handleClose(wt);

@@ -135,7 +135,7 @@ public class ReplicaServiceImpl implements ReplicaService {
 		 * Add this to listen server subscribe result.
 		 */
 		@Override
-	    public void handleRead(PacketData sc, IPacketWriter wt) {
+	    public void handlePacket(PacketData sc, IPacketWriter wt) {
 			if (sc.getCode() == CodeMap.RES_SERVER_SUBS) {
 				String result = StringUtil.utf8ByteToStr(sc.getData());
 				if (!result.equalsIgnoreCase("OK")) {
@@ -145,7 +145,7 @@ public class ReplicaServiceImpl implements ReplicaService {
 					((PacketClient) wt).stop();
 				}
 			} else {
-				super.handleRead(sc, wt);
+				super.handlePacket(sc, wt);
 			}
 		}
 

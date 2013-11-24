@@ -47,8 +47,8 @@ public class AddressListSerializerTest {
 	public void testSerObjListOfString() {
 		AddressListSerializer ser = new AddressListSerializer((short) 23);
 		List<String> ss = Arrays.asList("implemented", "yet", "Not");
-		byte[] bbt = ser.serObj(ss);
-		List<String> ls = ser.deserObj(bbt);
+		byte[] bbt = ser.toBytes(ss);
+		List<String> ls = ser.toObj(bbt);
 		System.out.println(ls);
 		assertEquals(ss, ls);
 	}
@@ -60,8 +60,8 @@ public class AddressListSerializerTest {
 	public void testDeserObjByteArray() {
 		AddressListSerializer ser = new AddressListSerializer((short) 23);
 		List<String> ss = Arrays.asList("implemented");
-		byte[] bbt = ser.serObj(ss);
-		List<String> ls = ser.deserObj(bbt);
+		byte[] bbt = ser.toBytes(ss);
+		List<String> ls = ser.toObj(bbt);
 		System.out.println(ls);
 		assertEquals(ss, ls);
 	}
@@ -73,8 +73,8 @@ public class AddressListSerializerTest {
 	public void testDeserObjByte() {
 		AddressListSerializer ser = new AddressListSerializer((short) 23);
 		List<String> ss = Arrays.asList();
-		byte[] bbt = ser.serObj(ss);
-		List<String> ls = ser.deserObj(bbt);
+		byte[] bbt = ser.toBytes(ss);
+		List<String> ls = ser.toObj(bbt);
 		System.out.println(ls);
 		assertEquals(ss.size(), ls.size());
 	}

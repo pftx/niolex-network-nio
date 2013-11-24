@@ -26,7 +26,7 @@ import org.apache.niolex.network.Config;
 import org.apache.niolex.network.IPacketWriter;
 import org.apache.niolex.network.PacketData;
 import org.apache.niolex.network.name.bean.AddressRecord;
-import org.apache.niolex.network.packet.PacketTransformer;
+import org.apache.niolex.network.serialize.PacketTransformer;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -70,25 +70,25 @@ public class NameClientTest {
 	}
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.name.core.NameClient#handleRead(org.apache.niolex.network.PacketData, org.apache.niolex.network.IPacketWriter)}.
+	 * Test method for {@link org.apache.niolex.network.name.core.NameClient#handlePacket(org.apache.niolex.network.PacketData, org.apache.niolex.network.IPacketWriter)}.
 	 */
 	@Test
-	public void testHandleRead() {
+	public void testHandlePacket() {
 		IPacketWriter wt = mock(IPacketWriter.class);
 		// Step 1 publish.
 		AddressRecord regi = new AddressRecord("network.name.core.NameServer", "localhost:8181");
 		PacketData pb = transformer.getPacketData(Config.CODE_NAME_DIFF, regi);
-		nameClient.handleRead(pb, wt);
+		nameClient.handlePacket(pb, wt);
 
 		// Step 2 subscribe.
 		List<String> list = new ArrayList<String>();
 		list.add("localhost:8181");
 		PacketData pd = transformer.getPacketData(Config.CODE_NAME_DATA, list);
-		nameClient.handleRead(pd, wt);
+		nameClient.handlePacket(pd, wt);
 
 		// Step 3 invalid.
 		pb = new PacketData(56);
-		nameClient.handleRead(pb, wt);
+		nameClient.handlePacket(pb, wt);
 	}
 
 

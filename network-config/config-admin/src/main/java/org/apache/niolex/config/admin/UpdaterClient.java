@@ -255,10 +255,10 @@ public class UpdaterClient implements Updater, IPacketHandler {
 
 	/**
 	 * Override super method
-	 * @see org.apache.niolex.network.IPacketHandler#handleRead(org.apache.niolex.network.PacketData, org.apache.niolex.network.IPacketWriter)
+	 * @see org.apache.niolex.network.IPacketHandler#handlePacket(org.apache.niolex.network.PacketData, org.apache.niolex.network.IPacketWriter)
 	 */
 	@Override
-	public void handleRead(PacketData sc, IPacketWriter wt) {
+	public void handlePacket(PacketData sc, IPacketWriter wt) {
 		switch(sc.getCode()) {
 		case CodeMap.RES_ADD_GROUP:
 			// Notify anyone waiting for this.
