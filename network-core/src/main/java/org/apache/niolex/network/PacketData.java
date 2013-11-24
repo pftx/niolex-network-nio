@@ -129,7 +129,8 @@ public class PacketData extends Packet implements Cloneable {
      * user need to put data into the body themselves.
      *
      * @param bb the header byte buffer
-     * @throws IllegalStateException if the packet is larger than {@value #MAX_SIZE}
+     * @throws IllegalStateException if the packet is larger than
+     * {@link Config#SERVER_MAX_PACKET_SIZE}
      */
     public void parseHeader(ByteBuffer bb) {
         version = bb.get();
