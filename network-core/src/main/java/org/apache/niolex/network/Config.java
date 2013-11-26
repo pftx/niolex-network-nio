@@ -50,7 +50,7 @@ public interface Config extends Const {
     /**
      * The low level socket buffer size.
      */
-    int SO_BUFFER_SIZE = 64 * K;
+    int SO_BUFFER_SIZE = 16 * K;
 
     /**
      * Socket connect and read timeout. this is the low level timeout. Please do not configure
