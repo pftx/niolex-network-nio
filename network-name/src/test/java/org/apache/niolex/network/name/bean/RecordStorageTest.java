@@ -18,13 +18,14 @@
 package org.apache.niolex.network.name.bean;
 
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.*;
 
 import java.util.List;
 
+import org.apache.niolex.commons.event.Event;
+import org.apache.niolex.commons.event.IEventDispatcher;
 import org.apache.niolex.network.name.bean.AddressRecord.Status;
-import org.apache.niolex.network.name.event.IDispatcher;
 import org.junit.Test;
 
 /**
@@ -39,105 +40,140 @@ public class RecordStorageTest {
 	 */
 	@Test
 	public void testStore() {
-		RecordStorage rs = new RecordStorage();
+		RecordStorage rs = new RecordStorage(null, 0);
 		rs.setDeleteTime(1233);
+		assertEquals(1233, rs.getDeleteTime());
 		AddressRegiBean ben = new AddressRegiBean("network/name", "local/8004");
 		rs.store(ben);
-		assertEquals(1233, rs.getDeleteTime());
+
 		List<String> ls = rs.getAddress("network/name");
-		System.out.println(ls);
 		assertEquals(1, ls.size());
 		assertEquals("local/8004", ls.get(0));
+		// store another.
+		AddressRegiBean ban = new AddressRegiBean("network/name", "local/8006");
+		rs.store(ban);
+
+		ls = rs.getAddress("network/name");
+		System.out.println(ls);
+		assertEquals(2, ls.size());
+		assertEquals("[local/8006, local/8004]", ls.toString());
 	}
 
+    /**
+     * Test method for {@link org.apache.niolex.network.name.bean.RecordStorage#getAddress(java.lang.String)}.
+     */
+    @Test
+    public void testGetAddress() throws Throwable {
+        RecordStorage rs = new RecordStorage(null, 0);
+        rs.setDeleteTime(1);
+        AddressRegiBean ben = new AddressRegiBean("network/name", "local/8004");
+        AddressRecord rec = rs.store(ben);
+        assertEquals(1, rs.getDeleteTime());
+        rec.setStatus(Status.DEL);
+        Thread.sleep(10);
+        ben = new AddressRegiBean("network/name", "remote/8004");
+        rs.store(ben);
+        rs.store(ben);
+        List<String> ls = rs.getAddress("network/name");
+        System.out.println(ls);
+        assertEquals(1, ls.size());
+        rs.runMe();
+        ls = rs.getAddress("network/name");
+        System.out.println(ls);
+        assertEquals(1, ls.size());
+        assertEquals("remote/8004", ls.get(0));
+    }
+
 	/**
-	 * Test method for {@link org.apache.niolex.network.name.bean.RecordStorage#deleteGarbage()}.
+	 * Test method for {@link org.apache.niolex.network.name.bean.RecordStorage#runMe()}.
 	 * @throws Throwable
 	 */
 	@Test
 	public void testDeleteGarbage() throws Throwable {
-		RecordStorage rs = new RecordStorage();
-		IDispatcher dd = mock(IDispatcher.class);
-		rs.setDispatcher(dd);
-		rs.setDeleteTime(1);
+		IEventDispatcher dd = mock(IEventDispatcher.class);
+		RecordStorage rs = new RecordStorage(dd, 0);
+		rs.setDeleteTime(-1);
+		assertEquals(-1, rs.getDeleteTime());
 		AddressRegiBean ben = new AddressRegiBean("network/name", "local/8004");
 		AddressRecord rec = rs.store(ben);
-		assertEquals(1, rs.getDeleteTime());
 		rec.setStatus(Status.DISCONNECTED);
-		Thread.sleep(20);
+		ben = new AddressRegiBean("network/2", "local/8004");
+        rec = rs.store(ben);
+        rec.setStatus(Status.DEL);
 		ben = new AddressRegiBean("network/name", "remote/8004");
 		rs.store(ben);
+		// ----
 		List<String> ls = rs.getAddress("network/name");
 		System.out.println(ls);
 		assertEquals(2, ls.size());
-		rs.deleteGarbage();
+		verify(dd, never()).fireEvent(any(Event.class));
+		// ----
+		rs.runMe();
 		ls = rs.getAddress("network/name");
 		System.out.println(ls);
 		assertEquals(1, ls.size());
 		assertEquals("remote/8004", ls.get(0));
-		verify(dd).fireEvent(rec);
-		assertEquals(dd, rs.getDispatcher());
+		verify(dd).fireEvent(any(Event.class));
 	}
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.name.bean.RecordStorage#getAddress(java.lang.String)}.
-	 */
-	@Test
-	public void testGetAddress() throws Throwable {
-		RecordStorage rs = new RecordStorage();
-		rs.setDeleteTime(1);
-		AddressRegiBean ben = new AddressRegiBean("network/name", "local/8004");
-		AddressRecord rec = rs.store(ben);
-		assertEquals(1, rs.getDeleteTime());
-		rec.setStatus(Status.DEL);
-		Thread.sleep(10);
-		ben = new AddressRegiBean("network/name", "remote/8004");
-		rs.store(ben);
-		rs.store(ben);
-		List<String> ls = rs.getAddress("network/name");
-		System.out.println(ls);
-		assertEquals(1, ls.size());
-		rs.deleteGarbage();
-		ls = rs.getAddress("network/name");
-		System.out.println(ls);
-		assertEquals(1, ls.size());
-		assertEquals("remote/8004", ls.get(0));
-	}
+     * Test method for {@link org.apache.niolex.network.name.bean.RecordStorage#runMe()}.
+     * @throws Throwable
+     */
+    @Test
+    public void testDeleteGarbageNotNow() throws Throwable {
+        IEventDispatcher dd = mock(IEventDispatcher.class);
+        RecordStorage rs = new RecordStorage(dd, 0);
+        rs.setDeleteTime(500);
+        AddressRegiBean ben = new AddressRegiBean("network/name", "local/8004");
+        AddressRecord rec = rs.store(ben);
+        rec.setStatus(Status.DISCONNECTED);
+        ben = new AddressRegiBean("network/name", "local/8008");
+        rec = rs.store(ben);
+        rec.setStatus(Status.DEL);
+        ben = new AddressRegiBean("network/name", "remote/8004");
+        rs.store(ben);
+        // ----
+        List<String> ls = rs.getAddress("network/name");
+        assertEquals(2, ls.size());
+        verify(dd, never()).fireEvent(any(Event.class));
+        // ----
+        rs.runMe();
+        ls = rs.getAddress("network/name");
+        assertEquals(2, ls.size());
+        verify(dd, never()).fireEvent(any(Event.class));
+    }
 
 	/**
 	 * Test method for {@link org.apache.niolex.network.name.bean.RecordStorage#getDeleteTime()}.
 	 */
 	@Test
 	public void testGetDeleteTime() throws Throwable {
-		RecordStorage rs = new RecordStorage();
-		rs.setDeleteTime(1);
+		RecordStorage rs = new RecordStorage(null, 0);
+		rs.setDeleteTime(-2);
 		AddressRegiBean ben = new AddressRegiBean("network/name", "local/8004");
 		AddressRecord rec = rs.store(ben);
-		assertEquals(1, rs.getDeleteTime());
 		rec.setStatus(Status.DEL);
 		ben = new AddressRegiBean("network/name2", "remote/8004");
 		rs.store(ben);
 		rec = rs.store(ben);
 		rec.setStatus(Status.DEL);
 
-		Thread.sleep(20);
-
 		List<String> ls = rs.getAddress("network/name3");
-		System.out.println(ls);
+		assertNull(ls);
 
 		ls = rs.getAddress("network/name");
 		System.out.println(ls);
 		assertEquals(0, ls.size());
 
-		rs.deleteGarbage();
+		rs.runMe();
 
 		ls = rs.getAddress("network/name");
-		System.out.println(ls);
-		assertEquals(0, ls.size());
+		assertNull(ls);
 
-		rs.deleteGarbage();
+		rs.runMe();
 		ls = rs.getAddress("network/name");
-		System.out.println(ls);
+		assertNull(ls);
 	}
 
 }

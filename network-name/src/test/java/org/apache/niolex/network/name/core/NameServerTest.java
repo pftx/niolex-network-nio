@@ -18,8 +18,7 @@
 package org.apache.niolex.network.name.core;
 
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 import java.util.List;
 
@@ -27,9 +26,6 @@ import org.apache.niolex.network.Config;
 import org.apache.niolex.network.IPacketWriter;
 import org.apache.niolex.network.PacketData;
 import org.apache.niolex.network.name.bean.AddressRegiBean;
-import org.apache.niolex.network.name.bean.RecordStorage;
-import org.apache.niolex.network.name.event.ConcurrentDispatcher;
-import org.apache.niolex.network.name.event.IDispatcher;
 import org.apache.niolex.network.serialize.PacketTransformer;
 import org.apache.niolex.network.server.BasePacketWriter;
 import org.apache.niolex.network.server.NioServer;
@@ -43,7 +39,7 @@ import org.mockito.ArgumentCaptor;
  * @version 1.0.0
  * @since 2012-6-27
  */
-public class NameServerTest {
+public class NameServerTest extends Context {
 
 	private static NioServer s = new NioServer();
 	private static NameServer name;
@@ -53,12 +49,7 @@ public class NameServerTest {
 	public static void startServer() {
 		s.setPort(8181);
         name = new NameServer(s);
-        RecordStorage st = new RecordStorage();
-        name.setStorage(st);
-        IDispatcher dd = new ConcurrentDispatcher();
-        name.setDispatcher(dd);
-        st.setDispatcher(dd);
-        st.setDeleteTime(123);
+        name.setDeleteTime(123);
         name.start();
         transformer = PacketTransformer.getInstance();
 	}

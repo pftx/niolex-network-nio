@@ -18,6 +18,8 @@
 package org.apache.niolex.network.name.client;
 
 /**
+ * The name service exception.
+ *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
  * @since 2012-6-27

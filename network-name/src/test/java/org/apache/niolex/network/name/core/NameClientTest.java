@@ -35,12 +35,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 
-@RunWith(MockitoJUnitRunner.class)
 /**
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
  * @since 2012-6-29
  */
+@RunWith(MockitoJUnitRunner.class)
 public class NameClientTest {
 
 	private NameClient nameClient;

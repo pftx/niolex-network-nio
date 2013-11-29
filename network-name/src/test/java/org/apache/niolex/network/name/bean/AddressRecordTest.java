@@ -84,7 +84,8 @@ public class AddressRecordTest {
 		assertEquals("network/name", ad.getAddressKey());
 		assertEquals("local/8004", ad.getAddressValue());
 		ad.setStatus(Status.DISCONNECTED);
-		assertEquals(Status.DISCONNECTED, ad.getStatus());
+		assertEquals(Status.DISCONNECTED.toString(), ad.getStatus().toString());
+		assertEquals(Status.OK, Status.valueOf("OK"));
 		assertTrue(System.currentTimeMillis() - ad.getLastTime() < 100);
 	}
 

@@ -18,7 +18,6 @@
 package org.apache.niolex.network.name.core;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.util.List;
 
 import org.apache.niolex.network.Config;
@@ -26,17 +25,16 @@ import org.apache.niolex.network.IClient;
 import org.apache.niolex.network.IPacketHandler;
 import org.apache.niolex.network.IPacketWriter;
 import org.apache.niolex.network.PacketData;
+import org.apache.niolex.network.client.ClientManager;
 import org.apache.niolex.network.client.PacketClient;
-import org.apache.niolex.network.name.bean.AddressListSerializer;
 import org.apache.niolex.network.name.bean.AddressRecord;
-import org.apache.niolex.network.name.bean.AddressRecordSerializer;
-import org.apache.niolex.network.name.bean.AddressRegiSerializer;
 import org.apache.niolex.network.serialize.PacketTransformer;
-import org.apache.niolex.network.serialize.StringSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * The name client wrap a real client and handle packets inside.
+ *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
  * @since 2012-6-20
@@ -45,53 +43,43 @@ public class NameClient implements IPacketHandler {
 	private static final Logger LOG = LoggerFactory.getLogger(NameClient.class);
 
 	/**
-	 * The real client implementation.
+	 * Manage the client retry and fail over.
 	 */
-	protected final IClient client;
-
-	/**
-	 * The time to sleep between retry.
-	 */
-	private int sleepBetweenRetryTime = Config.SERVER_HEARTBEAT_INTERVAL;
-
-	/**
-	 * Times to retry get connected.
-	 */
-	private int connectRetryTimes = Integer.MAX_VALUE;
+	private final ClientManager clientManager = new ClientManager(new PacketClient());
 
 	/**
 	 * Transform packets.
 	 */
-	protected final PacketTransformer transformer;
+	protected final PacketTransformer transformer = Context.getTransformer();
 
 
 	/**
-	 * Constructor.
+	 * Create a new name client.
 	 *
-	 * @param serverAddress
+	 * @param serverAddress the server address
 	 * @throws IOException
 	 */
 	public NameClient(String serverAddress) throws IOException {
 		super();
-		String[] addrs = serverAddress.split(":");
-		client = new PacketClient(new InetSocketAddress(addrs[0], Integer.parseInt(addrs[1])));
-		client.setPacketHandler(this);
-		client.connect();
-		client.handleWrite(new PacketData(Config.CODE_REGR_HBEAT));
-		transformer = PacketTransformer.getInstance();
-		// 获取地址信息只传一个字符串，表达服务的key
-		transformer.addSerializer(new StringSerializer(Config.CODE_NAME_OBTAIN));
-		// 反向传输整个地址列表，表达地址
-		transformer.addSerializer(new AddressListSerializer(Config.CODE_NAME_DATA));
-		// 传输增量
-		transformer.addSerializer(new AddressRecordSerializer(Config.CODE_NAME_DIFF));
-		// 注册服务
-		transformer.addSerializer(new AddressRegiSerializer(Config.CODE_NAME_PUBLISH));
+		clientManager.setAddressList(serverAddress);
+		clientManager.setPacketHandler(this);
+		clientManager.setConnectRetryTimes(Integer.MAX_VALUE);
+		clientManager.connect();
+		boolean flag = true;
+		try {
+		    flag = clientManager.waitForConnected();
+        } catch (Exception e) {
+            flag = false;
+        }
+		if (!flag) {
+		    throw new IllegalStateException("Failed to connect to server.");
+		}
+		clientManager.handleWrite(new PacketData(Config.CODE_REGR_HBEAT));
 	}
 
 	/**
 	 * Override super method
-	 * @see org.apache.niolex.network.IPacketHandler#handlePacket(org.apache.niolex.network.PacketData, org.apache.niolex.network.IPacketWriter)
+	 * @see org.apache.niolex.network.IPacketHandler#handlePacket(PacketData, IPacketWriter)
 	 */
 	@Override
 	public void handlePacket(PacketData sc, IPacketWriter wt) {
@@ -115,6 +103,13 @@ public class NameClient implements IPacketHandler {
 	}
 
 	/**
+	 * @return the internal client
+	 */
+	protected IClient client() {
+	    return clientManager.client();
+	}
+
+	/**
 	 * 由子类去处理增量，这里什么都不做
 	 * @param bean
 	 */
@@ -128,17 +123,16 @@ public class NameClient implements IPacketHandler {
 
 	/**
 	 * Override super method
-	 * @see org.apache.niolex.network.IPacketHandler#handleClose(org.apache.niolex.network.IPacketWriter)
+	 * @see org.apache.niolex.network.IPacketHandler#handleClose(IPacketWriter)
 	 */
 	@Override
 	public void handleClose(IPacketWriter wt) {
 		// We will retry to connect in this method.
-		client.stop();
-		if (!retryConnect()) {
+		if (!clientManager.retryConnect()) {
 			LOG.error("Exception occured when try to re-connect to server.");
 			// Try to shutdown this Client, inform all the threads.
 		} else {
-			client.handleWrite(new PacketData(Config.CODE_REGR_HBEAT));
+			clientManager.handleWrite(new PacketData(Config.CODE_REGR_HBEAT));
 			reconnected();
 		}
 	}
@@ -147,7 +141,7 @@ public class NameClient implements IPacketHandler {
 	 * Stop this client.
 	 */
 	public void stop() {
-		client.stop();
+	    clientManager.close();
 	}
 
 	/**
@@ -155,31 +149,12 @@ public class NameClient implements IPacketHandler {
 	 */
 	protected void reconnected() {}
 
-	private boolean retryConnect() {
-		for (int i = 0; i < connectRetryTimes; ++i) {
-			try {
-				Thread.sleep(sleepBetweenRetryTime);
-			} catch (InterruptedException e1) {
-				// It's OK.
-			}
-			LOG.info("RPC Client try to reconnect to server round {} ...", i);
-			try {
-				client.connect();
-				return true;
-			} catch (IOException e) {
-				// Not connected.
-				LOG.info("Try to re-connect to server failed. {}", e.toString());
-			}
-		}
-		return false;
-	}
-
 	public void setSleepBetweenRetryTime(int sleepBetweenRetryTime) {
-		this.sleepBetweenRetryTime = sleepBetweenRetryTime;
+	    clientManager.setSleepBetweenRetryTime(sleepBetweenRetryTime);
 	}
 
 	public void setConnectRetryTimes(int connectRetryTimes) {
-		this.connectRetryTimes = connectRetryTimes;
+	    clientManager.setConnectRetryTimes(connectRetryTimes);
 	}
 
 }

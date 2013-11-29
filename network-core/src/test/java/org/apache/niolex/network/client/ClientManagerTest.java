@@ -18,6 +18,7 @@
 package org.apache.niolex.network.client;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
 
 import java.net.InetSocketAddress;
 import java.util.Arrays;
@@ -25,6 +26,11 @@ import java.util.Collections;
 import java.util.List;
 
 import org.apache.niolex.network.ConnStatus;
+import org.apache.niolex.network.CoreRunner;
+import org.apache.niolex.network.IPacketHandler;
+import org.apache.niolex.network.PacketData;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
@@ -35,6 +41,16 @@ import org.junit.Test;
  */
 public class ClientManagerTest {
 
+    @BeforeClass
+    public static void setup() throws Exception {
+        CoreRunner.createServer();
+    }
+
+    @AfterClass
+    public static void stop2() throws Exception {
+        CoreRunner.shutdown();
+    }
+
     /**
      * Test method for {@link org.apache.niolex.network.client.ClientManager#ClientManager(org.apache.niolex.network.IClient)}.
      * @throws InterruptedException
@@ -42,8 +58,12 @@ public class ClientManagerTest {
     @Test
     public void testClientManager() throws InterruptedException {
         SocketClient sc = new SocketClient();
-        ClientManager<SocketClient> cm = new ClientManager<SocketClient>(sc);
-        cm.setAddressList(Arrays.asList(new InetSocketAddress("www.baidu.com", 80)));
+        IPacketHandler han = mock(IPacketHandler.class);
+        ClientManager cm = new ClientManager(sc);
+        cm.setPacketHandler(han);
+        assertEquals(han, sc.packetHandler);
+        assertEquals(sc, cm.client());
+        cm.setAddressList("localhost:8809");
         boolean b = cm.connect();
         assertTrue(b);
         assertEquals(cm.getConnStatus(), ConnStatus.CONNECTED);
@@ -65,8 +85,9 @@ public class ClientManagerTest {
      */
     @Test(expected=IllegalArgumentException.class)
     public void testConnectNoAddress() {
-        SocketClient sc = new SocketClient();
-        ClientManager<SocketClient> cm = new ClientManager<SocketClient>(sc);
+        PacketClient sc = new PacketClient();
+        ClientManager cm = new ClientManager(sc);
+        cm.handleWrite(new PacketData(5));
         assertTrue(cm.connect());
     }
 
@@ -77,8 +98,8 @@ public class ClientManagerTest {
     public void testConnectIsWorking() {
         SocketClient sc = new SocketClient();
         sc.isWorking = true;
-        ClientManager<SocketClient> cm = new ClientManager<SocketClient>(sc);
-        cm.setAddressList(Arrays.asList(new InetSocketAddress("www.baidu.com", 80)));
+        ClientManager cm = new ClientManager(sc);
+        cm.setAddressList(Arrays.asList(new InetSocketAddress("localhost", 8809)));
         assertTrue(cm.connect());
     }
 
@@ -89,7 +110,7 @@ public class ClientManagerTest {
     public void testConnectNoServer() {
         SocketClient sc = new SocketClient();
         sc.setConnectTimeout(500);
-        ClientManager<SocketClient> cm = new ClientManager<SocketClient>(sc);
+        ClientManager cm = new ClientManager(sc);
         cm.setAddressList(Arrays.asList(new InetSocketAddress("127.0.0.1", 8090)));
         boolean b = cm.connect();
         assertFalse(b);
@@ -103,7 +124,7 @@ public class ClientManagerTest {
     @Test(expected=IllegalArgumentException.class)
     public void testRetryConnectNoAddress() {
         SocketClient sc = new SocketClient();
-        ClientManager<SocketClient> cm = new ClientManager<SocketClient>(sc);
+        ClientManager cm = new ClientManager(sc);
         assertTrue(cm.retryConnect());
     }
 
@@ -114,7 +135,7 @@ public class ClientManagerTest {
     public void testRetryConnect() {
         SocketClient sc = new SocketClient();
         sc.connectTimeout = 500;
-        ClientManager<SocketClient> cm = new ClientManager<SocketClient>(sc);
+        ClientManager cm = new ClientManager(sc);
         cm.setConnectRetryTimes(1);
         cm.setSleepBetweenRetryTime(1);
         cm.setAddressList(Arrays.asList(new InetSocketAddress("127.0.0.1", 8090)));
@@ -128,7 +149,7 @@ public class ClientManagerTest {
     @Test(expected=IllegalArgumentException.class)
     public void testGetConnStatus() {
         SocketClient sc = new SocketClient();
-        ClientManager<SocketClient> cm = new ClientManager<SocketClient>(sc);
+        ClientManager cm = new ClientManager(sc);
         List<InetSocketAddress> addressList = Collections.emptyList();
         cm.setAddressList(addressList);
         boolean b = cm.connect();
@@ -142,7 +163,7 @@ public class ClientManagerTest {
     @Test(expected=IllegalArgumentException.class)
     public void testSetSleepBetweenRetryTime() {
         SocketClient sc = new SocketClient();
-        ClientManager<SocketClient> cm = new ClientManager<SocketClient>(sc);
+        ClientManager cm = new ClientManager(sc);
         boolean b = cm.retryConnect();
         assertTrue(b);
         fail("Not yet implemented");
@@ -154,7 +175,7 @@ public class ClientManagerTest {
     @Test(expected=IllegalArgumentException.class)
     public void testWaitForConnected() {
         SocketClient sc = new SocketClient();
-        ClientManager<SocketClient> cm = new ClientManager<SocketClient>(sc);
+        ClientManager cm = new ClientManager(sc);
         List<InetSocketAddress> addressList = Collections.emptyList();
         cm.setAddressList(addressList);
         boolean b = cm.retryConnect();
@@ -169,7 +190,7 @@ public class ClientManagerTest {
     public void testClose() {
         SocketClient sc = new SocketClient();
         sc.setConnectTimeout(1000);
-        ClientManager<SocketClient> cm = new ClientManager<SocketClient>(sc);
+        ClientManager cm = new ClientManager(sc);
         cm.setAddressList(Arrays.asList(new InetSocketAddress("10.1.2.3", 8090)));
         cm.setConnectRetryTimes(0);
         cm.setSleepBetweenRetryTime(1);
@@ -186,9 +207,9 @@ public class ClientManagerTest {
     public void testGetSleepBetweenRetryTime() throws InterruptedException {
         SocketClient sc = new SocketClient();
         sc.setConnectTimeout(500);
-        ClientManager<SocketClient> cm = new ClientManager<SocketClient>(sc);
-        cm.setAddressList(Arrays.asList(new InetSocketAddress("www.baidu.com", 80),
-                new InetSocketAddress("127.0.0.1", 80)));
+        ClientManager cm = new ClientManager(sc);
+        cm.setAddressList(Arrays.asList(new InetSocketAddress("localhost", 8809),
+                new InetSocketAddress("127.0.0.1", 8100)));
         boolean b = cm.connect();
         if (b) {
             cm.close();
@@ -208,9 +229,9 @@ public class ClientManagerTest {
     public void testSetConnectRetryTimes() {
         SocketClient sc = new SocketClient();
         sc.setConnectTimeout(500);
-        ClientManager<SocketClient> cm = new ClientManager<SocketClient>(sc);
-        cm.setAddressList(Arrays.asList(new InetSocketAddress("www.baidu.com", 80),
-                new InetSocketAddress("localhost", 80), new InetSocketAddress("localhost", 90)));
+        ClientManager cm = new ClientManager(sc);
+        cm.setAddressList(Arrays.asList(new InetSocketAddress("localhost", 8809),
+                new InetSocketAddress("localhost", 8100), new InetSocketAddress("localhost", 90)));
         boolean b = cm.retryConnect();
         assertTrue(b);
         cm.close();
@@ -222,7 +243,7 @@ public class ClientManagerTest {
     @Test
     public void testGetConnectRetryTimes() {
         SocketClient sc = new SocketClient();
-        ClientManager<SocketClient> cm = new ClientManager<SocketClient>(sc);
+        ClientManager cm = new ClientManager(sc);
         cm.setConnectRetryTimes(100);
         assertEquals(100, cm.getConnectRetryTimes());
     }
@@ -233,9 +254,20 @@ public class ClientManagerTest {
     @Test
     public void testSetAddressList() {
         SocketClient sc = new SocketClient();
-        ClientManager<SocketClient> cm = new ClientManager<SocketClient>(sc);
+        ClientManager cm = new ClientManager(sc);
         cm.setSleepBetweenRetryTime(1234);
         assertEquals(1234, cm.getSleepBetweenRetryTime());
+    }
+
+    /**
+     * Test method for {@link org.apache.niolex.network.client.ClientManager#setAddressList(String)}.
+     */
+    @Test
+    public void testSetAddressListStr() {
+        SocketClient sc = new SocketClient();
+        ClientManager cm = new ClientManager(sc);
+        cm.setAddressList("localhost:8809, localhost:8080 localhost:9009");
+        System.out.println(cm.getAddressList());
     }
 
     /**
@@ -244,9 +276,9 @@ public class ClientManagerTest {
     @Test
     public void testGetAddressList() {
         SocketClient sc = new SocketClient();
-        ClientManager<SocketClient> cm = new ClientManager<SocketClient>(sc);
-        cm.setAddressList(Arrays.asList(new InetSocketAddress("www.baidu.com", 80),
-                new InetSocketAddress("www.niolex.net", 80), new InetSocketAddress("www.niolex.org", 80)));
+        ClientManager cm = new ClientManager(sc);
+        cm.setAddressList(Arrays.asList(new InetSocketAddress("localhost", 8809),
+                new InetSocketAddress("localhost", 1810), new InetSocketAddress("localhost", 2820)));
         System.out.println(cm.getAddressList());
     }
 
@@ -256,7 +288,7 @@ public class ClientManagerTest {
     @Test
     public void testSetConnectTimeout() {
         SocketClient sc = new SocketClient();
-        ClientManager<SocketClient> cm = new ClientManager<SocketClient>(sc);
+        ClientManager cm = new ClientManager(sc);
         cm.setConnectTimeout(3100);
         assertEquals(3100, sc.getConnectTimeout());
     }

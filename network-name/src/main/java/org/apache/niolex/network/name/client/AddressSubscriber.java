@@ -19,7 +19,6 @@ package org.apache.niolex.network.name.client;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -42,7 +41,7 @@ public class AddressSubscriber extends NameClient {
 	/**
 	 * Store all the requests, retry them after reconnection.
 	 */
-	private final List<PacketData> list = Collections.synchronizedList(new ArrayList<PacketData>());
+	private final List<PacketData> list = new ArrayList<PacketData>();
 
 	/**
 	 * The service address dispatcher proxy.
@@ -118,9 +117,9 @@ public class AddressSubscriber extends NameClient {
 	 * Override super method
 	 * @see org.apache.niolex.network.name.core.NameClient#reconnected()
 	 */
-	protected void reconnected() {
+	protected synchronized void reconnected() {
 		for (PacketData data : list) {
-			client.handleWrite(data);
+			client().handleWrite(data);
 		}
 	}
 
@@ -132,14 +131,14 @@ public class AddressSubscriber extends NameClient {
 	 * @return The current addresses list
 	 * @throws NameServiceException if any exception occurred.
 	 */
-	public List<String> getServiceAddrList(String serviceKey, AddressEventListener listener) {
+	public synchronized List<String> getServiceAddrList(String serviceKey, AddressEventListener listener) {
 		// We can listen changes from now on.
 		map.put(serviceKey, listener);
 		// Register this subscriber.
 		PacketData listnName = transformer.getPacketData(Config.CODE_NAME_OBTAIN, serviceKey);
 		list.add(listnName);
 		WaitOn<List<String>> on = waiter.initWait(serviceKey);
-		client.handleWrite(listnName);
+		client().handleWrite(listnName);
 		try {
 			List<String> list = on.waitForResult(rpcHandleTimeout);
 			return list;

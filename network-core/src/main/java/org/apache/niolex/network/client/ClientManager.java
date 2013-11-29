@@ -19,6 +19,7 @@ package org.apache.niolex.network.client;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -28,6 +29,8 @@ import org.apache.niolex.commons.util.SystemUtil;
 import org.apache.niolex.network.Config;
 import org.apache.niolex.network.ConnStatus;
 import org.apache.niolex.network.IClient;
+import org.apache.niolex.network.IPacketHandler;
+import org.apache.niolex.network.PacketData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,14 +45,14 @@ import org.slf4j.LoggerFactory;
  * to connect to others in the background.
  * <p>
  * If user want to make sure finally connect to one server, please
- * call {@link #retryConnect()}. See to document of that method for
+ * call {@link #waitForConnected()}. See to document of that method for
  * details.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.5
  * @since 2013-1-11
  */
-public class ClientManager<T extends IClient> {
+public class ClientManager {
     private static final Logger LOG = LoggerFactory.getLogger(ClientManager.class);
 
     /**
@@ -175,7 +178,7 @@ public class ClientManager<T extends IClient> {
      * Wait for we finally get a connection or been interrupted.
      * <p>
      * Notion! Please call {@link #connect()} or
-     * {@link #retryConnect()} first! We will not start a tread
+     * {@link #retryConnect()} first! We will not start a thread
      * to try to connect to server in this method.
      *
      * @return true if connected, false if failed to connect to any server and we already
@@ -199,6 +202,13 @@ public class ClientManager<T extends IClient> {
         this.connectRetryTimes = 0;
         this.client.stop();
         this.connStatus = ConnStatus.CLOSED;
+    }
+
+    /**
+     * @return  the internal client
+     */
+    public IClient client() {
+        return client;
     }
 
     /**
@@ -255,6 +265,23 @@ public class ClientManager<T extends IClient> {
     }
 
     /**
+     * Set the server address list.
+     * We will shuffle it here in order to make it act more randomly.
+     *
+     * @param addressStr
+     */
+    public void setAddressList(String addressStr) {
+        String[] addrArr = addressStr.split("[,; ]+");
+        List<InetSocketAddress> list = new ArrayList<InetSocketAddress>();
+        for (String addr : addrArr) {
+            String[] aa = addr.split(":");
+            list.add(new InetSocketAddress(aa[0], Integer.parseInt(aa[1])));
+        }
+        Collections.shuffle(list);
+        this.addressList = list;
+    }
+
+    /**
      * @return the current addressList
      */
     public List<InetSocketAddress> getAddressList() {
@@ -265,11 +292,30 @@ public class ClientManager<T extends IClient> {
      * Set the socket connect timeout.
      *
      * @param timeout the new connect timeout
-     *
      * @see org.apache.niolex.network.IClient#setConnectTimeout(int)
      */
     public void setConnectTimeout(int timeout) {
         this.client.setConnectTimeout(timeout);
+    }
+
+    /**
+     * Write packet to server.
+     *
+     * @param sc the packet
+     * @see org.apache.niolex.network.IPacketWriter#handleWrite(PacketData)
+     */
+    public void handleWrite(PacketData sc) {
+        client.handleWrite(sc);
+    }
+
+    /**
+     * Set packet handler.
+     *
+     * @param packetHandler the packet handler
+     * @see org.apache.niolex.network.IClient#setPacketHandler(IPacketHandler)
+     */
+    public void setPacketHandler(IPacketHandler packetHandler) {
+        client.setPacketHandler(packetHandler);
     }
 
 }

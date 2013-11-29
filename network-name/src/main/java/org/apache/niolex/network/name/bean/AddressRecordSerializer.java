@@ -30,7 +30,7 @@ import org.apache.niolex.network.serialize.BaseSerializer;
 public class AddressRecordSerializer extends BaseSerializer<AddressRecord> {
 
 	/**
-	 * Create this AddressListSerializer with the given code.
+	 * Create this AddressRecordSerializer with the given code.
 	 * @param code
 	 */
 	public AddressRecordSerializer(short code) {

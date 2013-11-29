@@ -52,7 +52,6 @@ public class AddressSubscriberTest {
 		NameServerTest.stopServer();
 	}
 
-
 	/**
 	 * Test method for {@link org.apache.niolex.network.name.client.AddressSubscriber#handleDiff(org.apache.niolex.network.name.bean.AddressRecord)}.
 	 * @throws IOException

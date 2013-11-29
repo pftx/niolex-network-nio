@@ -20,27 +20,27 @@ package org.apache.niolex.network.name.core;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.niolex.commons.util.Runme;
+import org.apache.niolex.commons.event.ConcurrentEventDispatcher;
+import org.apache.niolex.commons.event.Event;
+import org.apache.niolex.commons.event.IEventDispatcher;
 import org.apache.niolex.network.Config;
 import org.apache.niolex.network.IPacketHandler;
 import org.apache.niolex.network.IPacketWriter;
 import org.apache.niolex.network.IServer;
 import org.apache.niolex.network.PacketData;
 import org.apache.niolex.network.adapter.HeartBeatAdapter;
-import org.apache.niolex.network.name.bean.AddressListSerializer;
 import org.apache.niolex.network.name.bean.AddressRecord;
 import org.apache.niolex.network.name.bean.AddressRecord.Status;
-import org.apache.niolex.network.name.bean.AddressRecordSerializer;
 import org.apache.niolex.network.name.bean.AddressRegiBean;
-import org.apache.niolex.network.name.bean.AddressRegiSerializer;
 import org.apache.niolex.network.name.bean.RecordStorage;
-import org.apache.niolex.network.name.event.IDispatcher;
+import org.apache.niolex.network.name.event.WriteEventListener;
 import org.apache.niolex.network.serialize.PacketTransformer;
-import org.apache.niolex.network.serialize.StringSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * The name server wrap a network server and provide name service.
+ *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
  * @since 2012-6-21
@@ -48,6 +48,22 @@ import org.slf4j.LoggerFactory;
 public class NameServer implements IPacketHandler {
 
 	private static final Logger LOG = LoggerFactory.getLogger(NameServer.class);
+
+	/**
+	 * Used to manage all the events.
+	 */
+	private final IEventDispatcher dispatcher = new ConcurrentEventDispatcher();
+
+	/**
+	 * Used to transform packets from and to java beans.
+	 */
+	private final PacketTransformer transformer = Context.getTransformer();
+
+	/**
+	 * Store all the address records.
+	 */
+	private final RecordStorage storage = new RecordStorage(dispatcher, 2 * Config.RPC_HANDLE_TIMEOUT);
+
 	/**
 	 * The real server implementation.
 	 */
@@ -55,45 +71,27 @@ public class NameServer implements IPacketHandler {
 
 	private final HeartBeatAdapter ada;
 
-	private final PacketTransformer transformer;
 
-	private RecordStorage storage;
-
-	private IDispatcher dispatcher;
-
-	private Runme gcThread;
-
+	/**
+	 * Create a name server. Initialize transformer here.
+	 *
+	 * @param server the network server
+	 */
 	public NameServer(IServer server) {
 		super();
 		this.server = server;
 		ada = new HeartBeatAdapter(this);
 		this.server.setPacketHandler(ada);
-		transformer = PacketTransformer.getInstance();
-		// 获取地址信息只传一个字符串，表达服务的key
-		transformer.addSerializer(new StringSerializer(Config.CODE_NAME_OBTAIN));
-		// 反向传输整个地址列表，表达地址
-		transformer.addSerializer(new AddressListSerializer(Config.CODE_NAME_DATA));
-		// 传输增量
-		transformer.addSerializer(new AddressRecordSerializer(Config.CODE_NAME_DIFF));
-		// 注册服务
-		transformer.addSerializer(new AddressRegiSerializer(Config.CODE_NAME_PUBLISH));
 	}
 
 	/**
-	 * Start the Server, bind to the Port. Server need to start threads internally to run. This method need to return
-	 * after this server is started.
+	 * Start the Server, bind to the Port. Server need to start threads internally to run.
+	 * This method need to return after this server is started.
 	 */
 	public boolean start() {
 		if (server.start()) {
 			ada.start();
-			gcThread = new Runme() {
-				@Override
-				public void runMe() {
-					storage.deleteGarbage();
-				}
-			};
-			gcThread.setSleepInterval(5000);
-			gcThread.start();
+			storage.start();
 		}
 		return false;
 	}
@@ -104,14 +102,12 @@ public class NameServer implements IPacketHandler {
 	public void stop() {
 		server.stop();
 		ada.stop();
-		gcThread.stopMe();
+		storage.stopMe();
 	}
 
 	/**
 	 * Override super method
-	 *
-	 * @see org.apache.niolex.network.IPacketHandler#handlePacket(org.apache.niolex.network.PacketData,
-	 *      org.apache.niolex.network.IPacketWriter)
+	 * @see org.apache.niolex.network.IPacketHandler#handlePacket(PacketData, IPacketWriter)
 	 */
 	@Override
 	public void handlePacket(PacketData sc, IPacketWriter wt) {
@@ -120,7 +116,7 @@ public class NameServer implements IPacketHandler {
 			case Config.CODE_NAME_OBTAIN:
 				String addressKey = transformer.getDataObject(sc);
 				// 监听后续地址的变化
-				dispatcher.register(addressKey, wt);
+				dispatcher.addListener(addressKey, WriteEventListener.obtain(wt));
 				// 将AddressKey附加到IPacketWriter里面，供后续使用
 				attachData(wt, addressKey);
 				// Return list
@@ -137,7 +133,8 @@ public class NameServer implements IPacketHandler {
 				// 将AddressRecord附加到IPacketWriter里面，供后续使用
 				attachData(wt, rec);
 				//Fire event
-				dispatcher.fireEvent(rec);
+				PacketData sent = transformer.getPacketData(Config.CODE_NAME_DIFF, rec);
+				dispatcher.fireEvent(new Event<PacketData>(rec.getAddressKey(), sent));
 				LOG.info("Client {} try to publish address {}.", wt.getRemoteName(), rec.toString());
 				break;
 			default:
@@ -181,20 +178,21 @@ public class NameServer implements IPacketHandler {
 		}
 		List<String> addrList = wt.getAttached(Config.ATTACH_KEY_OBTAIN_ADDR);
 		if (addrList != null) {
+		    WriteEventListener tmp = WriteEventListener.obtain(wt);
 			// 将监听器移除掉
 			for (String addressKey : addrList) {
-				dispatcher.handleClose(addressKey, wt);
+				dispatcher.removeListener(addressKey, tmp);
 			}
 			wt.attachData(Config.ATTACH_KEY_OBTAIN_ADDR, null);
 		}
 	}
 
-	public void setStorage(RecordStorage storage) {
-		this.storage = storage;
-	}
-
-	public void setDispatcher(IDispatcher dispatcher) {
-		this.dispatcher = dispatcher;
-	}
+    /**
+     * @param deleteTime the time to wait after server disconnected
+     * @see org.apache.niolex.network.name.bean.RecordStorage#setDeleteTime(int)
+     */
+    public void setDeleteTime(int deleteTime) {
+        storage.setDeleteTime(deleteTime);
+    }
 
 }

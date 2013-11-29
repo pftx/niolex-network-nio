@@ -17,10 +17,7 @@
  */
 package org.apache.niolex.network.name.server;
 
-import org.apache.niolex.network.name.bean.RecordStorage;
 import org.apache.niolex.network.name.core.NameServer;
-import org.apache.niolex.network.name.event.ConcurrentDispatcher;
-import org.apache.niolex.network.name.event.IDispatcher;
 import org.apache.niolex.network.server.MultiNioServer;
 
 /**
@@ -34,17 +31,11 @@ public class MasterNameServer {
 
 	private final NameServer nameServer;
 	private final MultiNioServer iServer;
-	private final RecordStorage storage;
 
 	public MasterNameServer() {
 		super();
 		iServer = new MultiNioServer();
 		nameServer = new NameServer(iServer);
-		storage = new RecordStorage();
-		nameServer.setStorage(storage);
-		IDispatcher dispatcher = new ConcurrentDispatcher();
-		nameServer.setDispatcher(dispatcher);
-		storage.setDispatcher(dispatcher);
 	}
 
 	public boolean start() {
@@ -60,7 +51,7 @@ public class MasterNameServer {
 	}
 
 	public void setDeleteTime(int deleteTime) {
-		storage.setDeleteTime(deleteTime);
+	    nameServer.setDeleteTime(deleteTime);
 	}
 
 }

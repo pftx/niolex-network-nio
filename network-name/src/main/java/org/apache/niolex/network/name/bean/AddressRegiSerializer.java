@@ -29,7 +29,7 @@ import org.apache.niolex.network.serialize.BaseSerializer;
 public class AddressRegiSerializer extends BaseSerializer<AddressRegiBean> {
 
 	/**
-	 * Create this AddressListSerializer with the given code.
+	 * Create this AddressRegiSerializer with the given code.
 	 * @param code
 	 */
 	public AddressRegiSerializer(short code) {
