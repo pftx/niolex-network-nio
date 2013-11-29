@@ -54,7 +54,7 @@ public class NameClient implements IPacketHandler {
 
 
 	/**
-	 * Create a new name client.
+	 * Create a new name client and connect it to the server address.
 	 *
 	 * @param serverAddress the server address
 	 * @throws IOException
@@ -64,18 +64,23 @@ public class NameClient implements IPacketHandler {
 		clientManager.setAddressList(serverAddress);
 		clientManager.setPacketHandler(this);
 		clientManager.setConnectRetryTimes(Integer.MAX_VALUE);
-		clientManager.connect();
-		boolean flag = true;
-		try {
-		    flag = clientManager.waitForConnected();
-        } catch (Exception e) {
-            flag = false;
-        }
-		if (!flag) {
-		    throw new IllegalStateException("Failed to connect to server.");
-		}
+		connect();
 		clientManager.handleWrite(new PacketData(Config.CODE_REGR_HBEAT));
 	}
+
+	/**
+     * Try to connect to one server.
+     *
+     * @return true if connected, false otherwise.
+     */
+    public boolean connect() {
+        clientManager.connect();
+        try {
+            return clientManager.waitForConnected();
+        } catch (Exception e) {
+            return false;
+        }
+    }
 
 	/**
 	 * Override super method

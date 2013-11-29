@@ -24,6 +24,7 @@ import java.util.List;
 
 import org.apache.niolex.network.Config;
 import org.apache.niolex.network.IPacketWriter;
+import org.apache.niolex.network.IServer;
 import org.apache.niolex.network.PacketData;
 import org.apache.niolex.network.name.bean.AddressRegiBean;
 import org.apache.niolex.network.serialize.PacketTransformer;
@@ -41,17 +42,16 @@ import org.mockito.ArgumentCaptor;
  */
 public class NameServerTest extends Context {
 
+    private static PacketTransformer transformer = getTransformer();
 	private static NioServer s = new NioServer();
 	private static NameServer name;
-	private static PacketTransformer transformer;
 
 	@BeforeClass
 	public static void startServer() {
 		s.setPort(8181);
         name = new NameServer(s);
         name.setDeleteTime(123);
-        name.start();
-        transformer = PacketTransformer.getInstance();
+        assertTrue(name.start());
 	}
 
 	@AfterClass
@@ -65,12 +65,12 @@ public class NameServerTest extends Context {
 	@Test
 	public void testNameServer() {
 		IPacketWriter wt = mock(IPacketWriter.class);
-		// Step 1 publish.
+		// Step 1. publish.
 		AddressRegiBean regi = new AddressRegiBean("network.name.core.NameServer", "localhost:8181");
 		PacketData pb = transformer.getPacketData(Config.CODE_NAME_PUBLISH, regi);
 		name.handlePacket(pb, wt);
 
-		// Step 2 subscribe.
+		// Step 2. subscribe.
 		PacketData pd = transformer.getPacketData(Config.CODE_NAME_OBTAIN, "network.name.core.NameServer");
 		name.handlePacket(pd, wt);
 		ArgumentCaptor<PacketData> cap = ArgumentCaptor.forClass(PacketData.class);
@@ -79,15 +79,37 @@ public class NameServerTest extends Context {
 		assertEquals(Config.CODE_NAME_DATA, cap.getValue().getCode());
 		assertEquals(2, list.size());
 		assertEquals("localhost:8181", list.get(0));
+		assertEquals("network.name.core.NameServer", list.get(1));
+		reset(wt);
+
+		// Step 3. publish another.
+		regi = new AddressRegiBean("network.name.core.NameServer", "localhost:8182");
+        pb = transformer.getPacketData(Config.CODE_NAME_PUBLISH, regi);
+        name.handlePacket(pb, wt);
+        verify(wt).handleWrite(cap.capture());
+        assertEquals(Config.CODE_NAME_DIFF, cap.getValue().getCode());
+
+        // Step 4. invalid code.
+        name.handlePacket(new PacketData(68), wt);
 	}
+
+	/**
+     * Test method for {@link org.apache.niolex.network.name.core.NameServer#start()}.
+     */
+    @Test
+    public void testStartFail() {
+        IServer server = mock(IServer.class);
+        NameServer ns = new NameServer(server);
+        when(server.start()).thenReturn(false);
+        assertFalse(ns.start());
+    }
 
 	/**
 	 * Test method for {@link org.apache.niolex.network.name.core.NameServer#start()}.
 	 */
 	@Test
-	public void testStart() {
+	public void testNotRecognize() {
 		IPacketWriter wt = mock(IPacketWriter.class);
-		// Step 1 publish.
 		PacketData pb = new PacketData(56);
 		name.handlePacket(pb, wt);
 		ArgumentCaptor<PacketData> cap = ArgumentCaptor.forClass(PacketData.class);
@@ -102,6 +124,8 @@ public class NameServerTest extends Context {
 	public void testHandleClose() {
 		IPacketWriter wt = mock(IPacketWriter.class);
 		name.handleClose(wt);
+		verify(wt, times(2)).getAttached(anyString());
+		verify(wt, times(0)).attachData(anyString(), anyObject());
 	}
 
 	/**

@@ -17,14 +17,20 @@
  */
 package org.apache.niolex.network.name.core;
 
-import static org.mockito.Mockito.mock;
+import static org.junit.Assert.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.niolex.commons.concurrent.ThreadUtil;
+import org.apache.niolex.commons.reflect.FieldUtil;
+import org.apache.niolex.commons.util.Runner;
 import org.apache.niolex.network.Config;
 import org.apache.niolex.network.IPacketWriter;
 import org.apache.niolex.network.PacketData;
+import org.apache.niolex.network.client.ClientManager;
 import org.apache.niolex.network.name.bean.AddressRecord;
 import org.apache.niolex.network.serialize.PacketTransformer;
 import org.junit.After;
@@ -56,7 +62,6 @@ public class NameClientTest {
 		NameServerTest.stopServer();
 	}
 
-
 	@Before
 	public void createNameClient() throws Exception {
 		nameClient = new NameClient("localhost:8181");
@@ -69,22 +74,35 @@ public class NameClientTest {
 		nameClient.stop();
 	}
 
+    @Test
+    public void testNameClient() throws Exception {
+        nameClient.stop();
+        ClientManager clientManager = FieldUtil.getValue(nameClient, "clientManager");
+        clientManager.setAddressList("localhost:8180");
+        nameClient.setConnectRetryTimes(0);
+        assertFalse(nameClient.connect());
+    }
+
 	/**
-	 * Test method for {@link org.apache.niolex.network.name.core.NameClient#handlePacket(org.apache.niolex.network.PacketData, org.apache.niolex.network.IPacketWriter)}.
+	 * Test method for {@link org.apache.niolex.network.name.core.NameClient#handlePacket(PacketData, IPacketWriter)}.
 	 */
-	@Test
+	@SuppressWarnings("unchecked")
+    @Test
 	public void testHandlePacket() {
 		IPacketWriter wt = mock(IPacketWriter.class);
+		nameClient = spy(nameClient);
 		// Step 1 publish.
 		AddressRecord regi = new AddressRecord("network.name.core.NameServer", "localhost:8181");
 		PacketData pb = transformer.getPacketData(Config.CODE_NAME_DIFF, regi);
 		nameClient.handlePacket(pb, wt);
+		verify(nameClient).handleDiff(any(AddressRecord.class));
 
 		// Step 2 subscribe.
 		List<String> list = new ArrayList<String>();
 		list.add("localhost:8181");
 		PacketData pd = transformer.getPacketData(Config.CODE_NAME_DATA, list);
 		nameClient.handlePacket(pd, wt);
+		verify(nameClient).handleRefresh(any(List.class));
 
 		// Step 3 invalid.
 		pb = new PacketData(56);
@@ -93,21 +111,46 @@ public class NameClientTest {
 
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.name.core.NameClient#handleClose(org.apache.niolex.network.IPacketWriter)}.
+	 * Test method for {@link org.apache.niolex.network.name.core.NameClient#connect()}.
 	 */
 	@Test
-	public void testHandleClose() {
+	public void testConnect() {
+	    assertTrue(nameClient.client().isWorking());
 		nameClient.handleClose(null);
 	}
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.name.core.NameClient#handleClose(org.apache.niolex.network.IPacketWriter)}.
+	 * Test method for {@link org.apache.niolex.network.name.core.NameClient#handleClose(IPacketWriter)}.
 	 */
 	@Test
-	public void testHandleClose2() {
+	public void testHandleClose() {
 		nameClient.setConnectRetryTimes(0);
 		nameClient.handleClose(null);
 	}
 
+    @Test
+    public void testClient() throws Exception {
+        nameClient.setConnectRetryTimes(0);
+        nameClient.stop();
+        nameClient.handleClose(null);
+    }
+
+    public void gogo() {
+        assertFalse(nameClient.connect());
+    }
+
+    @Test
+    public void testStop() throws Exception {
+        nameClient.stop();
+        ClientManager clientManager = FieldUtil.getValue(nameClient, "clientManager");
+        clientManager.setAddressList("localhost:8180");
+        nameClient.setSleepBetweenRetryTime(100000);
+        nameClient.setConnectRetryTimes(3);
+        Thread t = Runner.run(this, "gogo");
+        ThreadUtil.sleep(100);
+        t.interrupt();
+        t.interrupt();
+        t.join();
+    }
 
 }

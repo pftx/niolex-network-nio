@@ -29,6 +29,8 @@ import org.apache.niolex.network.serialize.PacketTransformer;
 import org.apache.niolex.network.serialize.StringSerializer;
 
 /**
+ * Put common methods here.
+ *
  * @author <a href="mailto:xiejiyun@foxmail.com">Xie, Jiyun</a>
  * @version 1.0.0
  * @since 2013-11-29
@@ -37,6 +39,11 @@ public class Context {
 
     private static PacketTransformer transformer;
 
+    /**
+     * Initialize transformer here.
+     *
+     * @return the transformer
+     */
     public static synchronized final PacketTransformer getTransformer() {
         if (transformer == null) {
             transformer = PacketTransformer.getInstance();
@@ -52,7 +59,13 @@ public class Context {
         return transformer;
     }
 
-    public static synchronized final void fireEvent(IEventDispatcher dispatcher, AddressRecord rec) {
+    /**
+     * Fire event, send this record to dispatcher.
+     *
+     * @param dispatcher the dispatcher used to send events
+     * @param rec the record
+     */
+    public static final void fireEvent(IEventDispatcher dispatcher, AddressRecord rec) {
         PacketData sent = getTransformer().getPacketData(Config.CODE_NAME_DIFF, rec);
         dispatcher.fireEvent(new Event<PacketData>(rec.getAddressKey(), sent));
     }

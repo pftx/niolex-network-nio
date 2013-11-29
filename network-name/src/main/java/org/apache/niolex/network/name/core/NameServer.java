@@ -73,7 +73,7 @@ public class NameServer implements IPacketHandler {
 
 
 	/**
-	 * Create a name server. Initialize transformer here.
+	 * Create a name server.
 	 *
 	 * @param server the network server
 	 */
@@ -92,6 +92,7 @@ public class NameServer implements IPacketHandler {
 		if (server.start()) {
 			ada.start();
 			storage.start();
+			return true;
 		}
 		return false;
 	}
