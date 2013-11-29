@@ -18,6 +18,7 @@
 package org.apache.niolex.network.name.core;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.niolex.network.Config;
@@ -41,6 +42,11 @@ import org.slf4j.LoggerFactory;
  */
 public class NameClient implements IPacketHandler {
 	private static final Logger LOG = LoggerFactory.getLogger(NameClient.class);
+
+	/**
+     * Store all the requests, retry them after reconnection.
+     */
+    private final List<PacketData> internalPacketList = new ArrayList<PacketData>();
 
 	/**
 	 * Manage the client retry and fail over.
@@ -150,9 +156,22 @@ public class NameClient implements IPacketHandler {
 	}
 
 	/**
-	 * 由子类去处理重连之后的修复，这里什么都不做
+	 * Re-send all the packets to server after re-connected.
 	 */
-	protected void reconnected() {}
+	protected synchronized void reconnected() {
+	    for (PacketData data : internalPacketList) {
+            client().handleWrite(data);
+        }
+	}
+
+	/**
+     * Save the packet into internal list.
+     *
+     * @param sent the sent packet
+     */
+    protected synchronized void savePacket(PacketData sent) {
+        internalPacketList.add(sent);
+    }
 
 	public void setSleepBetweenRetryTime(int sleepBetweenRetryTime) {
 	    clientManager.setSleepBetweenRetryTime(sleepBetweenRetryTime);
@@ -161,5 +180,12 @@ public class NameClient implements IPacketHandler {
 	public void setConnectRetryTimes(int connectRetryTimes) {
 	    clientManager.setConnectRetryTimes(connectRetryTimes);
 	}
+
+	/**
+	 * @return the internal packet list size
+	 */
+    public int size() {
+        return internalPacketList.size();
+    }
 
 }

@@ -64,15 +64,21 @@ public class AddressSubscriberTest {
 		assertEquals(0, ls.size());
 		AddressRecord bean;
 
+		// add one
 		bean = new AddressRecord("network.name.core.NameServer", "localhost:8181");
 		sub.handleDiff(bean);
 		verify(listn).addressAdd("localhost:8181");
+
+		// delete one
 		bean.setStatus(Status.DEL);
 		sub.handleDiff(bean);
 		verify(listn).addressRemove("localhost:8181");
+
+		// nothing
 		bean.setStatus(Status.DISCONNECTED);
 		sub.handleDiff(bean);
 
+		// not the same key
 		bean.setAddressKey("gujiguji");
 		bean.setStatus(Status.DEL);
 		sub.handleDiff(bean);
@@ -93,16 +99,23 @@ public class AddressSubscriberTest {
 		assertEquals(0, ls.size());
 		List<String> list;
 
+		// refresh empty check if (last > -1)
 		list = new ArrayList<String>();
 		sub.handleRefresh(list);
+
+		// refresh one address
 		list.add("localhost:8456");
 		list.add("network.name.core.NameServer");
-
 		sub.handleRefresh(list);
 		ArgumentCaptor<List> cap = ArgumentCaptor.forClass(List.class);
 		verify(listn).addressRefresh(cap.capture());
 		assertEquals(1, cap.getValue().size());
 		assertEquals("localhost:8456", cap.getValue().get(0));
+
+		// refresh invalid key
+		list.add("jdielaidd");
+		sub.handleRefresh(list);
+		verify(listn).addressRefresh(cap.capture());
 	}
 
 	/**
@@ -118,6 +131,7 @@ public class AddressSubscriberTest {
 		System.out.println("Address list: " + ls);
 		sub.setSleepBetweenRetryTime(20);
 		stopServer();
+		Thread.sleep(50);
 		startServer();
 		Thread.sleep(500);
 		ArgumentCaptor<List> cap = ArgumentCaptor.forClass(List.class);
@@ -152,6 +166,7 @@ public class AddressSubscriberTest {
 		t.interrupt();
 		Thread.sleep(50);
 		assertTrue(bool.get());
+		startServer();
 	}
 
 }

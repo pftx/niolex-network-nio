@@ -18,8 +18,6 @@
 package org.apache.niolex.network.name.client;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.apache.niolex.network.Config;
 import org.apache.niolex.network.PacketData;
@@ -42,11 +40,6 @@ import org.apache.niolex.network.name.core.NameClient;
 public class AddressPublisher extends NameClient {
 
 	/**
-	 * Store all the requests, retry them after reconnection.
-	 */
-	private final List<PacketData> list = new ArrayList<PacketData>();
-
-	/**
 	 * The constructor.
 	 *
 	 * @param serverAddress
@@ -62,27 +55,11 @@ public class AddressPublisher extends NameClient {
 	 * @param addressKey
 	 * @param addressValue
 	 */
-	public synchronized void pushlishService(String addressKey, String addressValue) {
+	public void pushlishService(String addressKey, String addressValue) {
 		AddressRegiBean regi = new AddressRegiBean(addressKey, addressValue);
 		PacketData data = transformer.getPacketData(Config.CODE_NAME_PUBLISH, regi);
-		list.add(data);
+		savePacket(data);
 		client().handleWrite(data);
-	}
-
-	/**
-	 * Publish all the services.
-	 *
-	 * Override super method
-	 * @see org.apache.niolex.network.name.core.NameClient#reconnected()
-	 */
-	protected synchronized void reconnected() {
-		for (PacketData data : list) {
-			client().handleWrite(data);
-		}
-	}
-
-	public int size() {
-		return list.size();
 	}
 
 }

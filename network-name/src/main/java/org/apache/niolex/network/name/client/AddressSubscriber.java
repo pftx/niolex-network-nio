@@ -18,7 +18,6 @@
 package org.apache.niolex.network.name.client;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -37,11 +36,6 @@ import org.apache.niolex.network.name.core.NameClient;
  * @since 2012-6-20
  */
 public class AddressSubscriber extends NameClient {
-
-	/**
-	 * Store all the requests, retry them after reconnection.
-	 */
-	private final List<PacketData> list = new ArrayList<PacketData>();
 
 	/**
 	 * The service address dispatcher proxy.
@@ -69,7 +63,6 @@ public class AddressSubscriber extends NameClient {
 		super(serverAddress);
 	}
 
-
 	/**
 	 * It's fire event.
 	 * Override super method
@@ -89,7 +82,6 @@ public class AddressSubscriber extends NameClient {
 			}
 		}
 	}
-
 
 	/**
 	 * This is a direct answer of subscribe address.
@@ -111,35 +103,22 @@ public class AddressSubscriber extends NameClient {
 		}
 	}
 
-
-	/**
-	 * Subscribe all the serviceKeys.
-	 *
-	 * Override super method
-	 * @see org.apache.niolex.network.name.core.NameClient#reconnected()
-	 */
-	protected synchronized void reconnected() {
-		for (PacketData data : list) {
-			client().handleWrite(data);
-		}
-	}
-
 	/**
 	 * Get service addresses list, and add the listener to listen changes.
 	 *
-	 * @param serviceKey
-	 * @param listener
+	 * @param serviceKey the service key
+	 * @param listener the address event listener
 	 * @return The current addresses list
 	 * @throws NameServiceException if any exception occurred.
 	 */
-	public synchronized List<String> getServiceAddrList(String serviceKey, AddressEventListener listener) {
+	public List<String> getServiceAddrList(String serviceKey, AddressEventListener listener) {
 		// We can listen changes from now on.
 		map.put(serviceKey, listener);
 		// Register this subscriber.
-		PacketData listnName = transformer.getPacketData(Config.CODE_NAME_OBTAIN, serviceKey);
-		list.add(listnName);
+		PacketData obtain = transformer.getPacketData(Config.CODE_NAME_OBTAIN, serviceKey);
+		savePacket(obtain);
 		WaitOn<List<String>> on = waiter.initWait(serviceKey);
-		client().handleWrite(listnName);
+		client().handleWrite(obtain);
 		try {
 			List<String> list = on.waitForResult(rpcHandleTimeout);
 			return list;
