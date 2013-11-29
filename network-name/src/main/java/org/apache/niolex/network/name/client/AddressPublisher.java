@@ -30,8 +30,8 @@ import org.apache.niolex.network.name.core.NameClient;
  * Publish service address to name server.
  * This service will maintain connection to server with a long connection.
  * If this connection is broken, server will mark all the addresses published
- * from this service disconnected.
- *
+ * from this service as disconnected.
+ * <br>
  * After reconnected, we will try to republish all the addresses for you
  * automatically.
  *

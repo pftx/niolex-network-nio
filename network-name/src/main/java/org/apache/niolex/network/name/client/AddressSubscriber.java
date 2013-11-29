@@ -60,8 +60,9 @@ public class AddressSubscriber extends NameClient {
 
 
 	/**
-	 * Construct a subscriber by a client address.
-	 * @param serverAddress
+	 * Construct a subscriber by a server address.
+	 *
+	 * @param serverAddress the name server address
 	 * @throws IOException
 	 */
 	public AddressSubscriber(String serverAddress) throws IOException {

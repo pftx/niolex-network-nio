@@ -30,17 +30,14 @@ public class NameServerDemo {
 
 	private static MasterNameServer name;
 
-	static {
-        name = new MasterNameServer();
-        name.setPort(8181);
-        name.setDeleteTime(10000);
-	}
-
     /**
      * The Server Demo
      * @param args
      */
     public static void main(String[] args) throws IOException {
+        name = new MasterNameServer();
+        name.setPort(8181);
+        name.setDeleteTime(10000);
     	name.start();
     }
 

@@ -160,7 +160,7 @@ public class RecordStorageTest {
 		rec.setStatus(Status.DEL);
 
 		List<String> ls = rs.getAddress("network/name3");
-		assertNull(ls);
+		assertEquals(ls.size(), 0);
 
 		ls = rs.getAddress("network/name");
 		System.out.println(ls);
@@ -169,11 +169,11 @@ public class RecordStorageTest {
 		rs.runMe();
 
 		ls = rs.getAddress("network/name");
-		assertNull(ls);
+		assertEquals(ls.size(), 0);
 
 		rs.runMe();
 		ls = rs.getAddress("network/name");
-		assertNull(ls);
+		assertEquals(ls.size(), 0);
 	}
 
 }

@@ -172,14 +172,14 @@ public class RecordStorage extends Runme {
 	 * Get all the addresses by this address key.
 	 *
 	 * @param addressKey the address key
-	 * @return the address list, or null if key not found
+	 * @return the address list
 	 */
 	public List<String> getAddress(String addressKey) {
 	    RecordContainer container = mapStorage.get(addressKey);
         if (container != null) {
             return container.getAddress();
 		}
-		return null;
+		return new ArrayList<String>();
 	}
 
 	public int getDeleteTime() {

@@ -23,7 +23,7 @@ import java.io.IOException;
 import java.util.List;
 
 import org.apache.niolex.network.name.demo.DemoAddressEventListener;
-import org.apache.niolex.network.name.server.MasterNameServer;
+import org.apache.niolex.network.name.demo.NameServerDemo;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -34,19 +34,15 @@ import org.junit.Test;
  * @since 2012-6-27
  */
 public class AddressPublisherTest {
-	private static MasterNameServer server;
 
 	@BeforeClass
-	public static void startServer() {
-		server = new MasterNameServer();
-		server.setPort(8181);
-		server.setDeleteTime(1000);
-		server.start();
+	public static void startServer() throws Exception {
+	    NameServerDemo.main(null);
 	}
 
 	@AfterClass
 	public static void stopServer() {
-		server.stop();
+	    NameServerDemo.stop();
 	}
 
 	/**

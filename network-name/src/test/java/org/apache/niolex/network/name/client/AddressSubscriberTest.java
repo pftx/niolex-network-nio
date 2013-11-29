@@ -18,8 +18,7 @@
 package org.apache.niolex.network.name.client;
 
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -28,8 +27,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.niolex.network.name.bean.AddressRecord;
 import org.apache.niolex.network.name.bean.AddressRecord.Status;
-import org.apache.niolex.network.name.core.NameServerTest;
 import org.apache.niolex.network.name.demo.DemoAddressEventListener;
+import org.apache.niolex.network.name.demo.NameServerDemo;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -43,13 +42,13 @@ import org.mockito.ArgumentCaptor;
 public class AddressSubscriberTest {
 
 	@BeforeClass
-	public static void startServer() {
-		NameServerTest.startServer();
+	public static void startServer() throws IOException {
+	    NameServerDemo.main(null);
 	}
 
 	@AfterClass
 	public static void stopServer() {
-		NameServerTest.stopServer();
+	    NameServerDemo.stop();
 	}
 
 	/**
