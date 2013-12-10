@@ -24,10 +24,10 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.niolex.address.core.FindException;
 import org.apache.niolex.address.server.Producer;
 import org.apache.niolex.address.util.PathUtil;
 import org.apache.niolex.commons.codec.StringUtil;
+import org.apache.niolex.zookeeper.core.ZKException;
 import org.apache.niolex.zookeeper.core.ZKListener;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.data.Stat;
@@ -76,7 +76,7 @@ public class AdvancedProducer extends Producer {
      * @param service 服务的唯一名称，例如org.apache.niolex.address.Test
      * @param version 支持3种格式，参考[version的格式]章节
      * @return 当前的元数据；系统会监听该元数据的变化
-     * @throws FindException 当发生异常时
+     * @throws ZKException 当发生异常时
      */
     public ConcurrentHashMap<String, MetaData> getMetaData(String service, String version) {
         return getMetaData(service, this.getCurrentVersion(service, version));
@@ -89,7 +89,7 @@ public class AdvancedProducer extends Producer {
      * @param service 服务的唯一名称，例如org.apache.niolex.address.Test
      * @param version 服务的版本信息，例如100
      * @return 当前的元数据；系统会监听该元数据的变化
-     * @throws FindException 当发生异常时
+     * @throws ZKException 当发生异常时
      */
     public ConcurrentHashMap<String, MetaData> getMetaData(String service, int version) {
         if (this.root == null) {
@@ -115,7 +115,7 @@ public class AdvancedProducer extends Producer {
             if (e instanceof RuntimeException) {
                 throw (RuntimeException)e;
             }
-            throw FindException.makeInstance("Failed to get Meta Data.", e);
+            throw ZKException.makeInstance("Failed to get Meta Data.", e);
         }
     }
 

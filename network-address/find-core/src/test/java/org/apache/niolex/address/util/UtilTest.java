@@ -21,7 +21,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import org.apache.niolex.address.util.PathUtil.VersionRes;
 import org.junit.Test;
 
 
@@ -30,11 +29,10 @@ import org.junit.Test;
  * @version 1.0.0
  * @Date: 2012-6-25
  */
-public class UtilTest {
+public class UtilTest extends PathUtil {
 
     @Test
     public void nothing() {
-        new PathUtil() {};
     }
 
 	/**

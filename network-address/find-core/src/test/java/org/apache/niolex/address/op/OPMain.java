@@ -11,8 +11,6 @@ import org.apache.niolex.commons.codec.Base16Util;
 import org.apache.niolex.commons.codec.Base64Util;
 import org.apache.niolex.commons.codec.SHAUtil;
 import org.apache.zookeeper.CreateMode;
-import org.apache.zookeeper.WatchedEvent;
-import org.apache.zookeeper.Watcher;
 import org.apache.zookeeper.ZooDefs.Perms;
 import org.apache.zookeeper.ZooKeeper;
 import org.apache.zookeeper.data.ACL;
@@ -30,12 +28,35 @@ public class OPMain {
     public static String CLI_NAME = "find-cli";
     public static String CLI_PASSWORD = "mailto:xiejiyun";
 
+    public static String SVR_NAME = "find-svr";
+    public static String SVR_PASSWORD = "Niolex";
+
     public static List<ACL> getAll4Op() throws Exception {
         List<ACL> acls = new ArrayList<ACL>();
 
         String pwd = Base64Util.byteToBase64(Base16Util.base16toByte(SHAUtil.sha1(OP_NAME + ":" + OP_PASSWORD)));
         Id sid = new Id("digest", OP_NAME + ":" + pwd);
         ACL su = new ACL(Perms.ALL, sid);
+        acls.add(su);
+        return acls;
+    }
+
+    public static List<ACL> getCDR4Server() throws Exception {
+        List<ACL> acls = new ArrayList<ACL>();
+
+        String pwd = Base64Util.byteToBase64(Base16Util.base16toByte(SHAUtil.sha1(SVR_NAME + ":" + SVR_PASSWORD)));
+        Id sid = new Id("digest", SVR_NAME + ":" + pwd);
+        ACL su = new ACL(Perms.CREATE | Perms.DELETE | Perms.READ, sid);
+        acls.add(su);
+        return acls;
+    }
+
+    public static List<ACL> getRead4Server() throws Exception {
+        List<ACL> acls = new ArrayList<ACL>();
+
+        String pwd = Base64Util.byteToBase64(Base16Util.base16toByte(SHAUtil.sha1(SVR_NAME + ":" + SVR_PASSWORD)));
+        Id sid = new Id("digest", SVR_NAME + ":" + pwd);
+        ACL su = new ACL(Perms.READ, sid);
         acls.add(su);
         return acls;
     }
@@ -50,27 +71,21 @@ public class OPMain {
         return acls;
     }
 
+    public static ZooKeeper getZooKeeper() {
+        ZooKeeper zk = CoreTest.CON_SU.zooKeeper();
+        zk.addAuthInfo("digest", (OP_NAME + ":" + OP_PASSWORD).getBytes());
+        return zk;
+    }
+
     /**
+     * Init all the directories for test.
+     *
      * @param args
-     * @throws InterruptedException
+     * @throws Exception
      */
     public static void main(String[] args) throws Exception {
-        ZooKeeper zk = null;
-        try {
-            zk = new ZooKeeper(CoreTest.ZK_ADDR, 10000, new Watcher() {
-                @Override
-                public void process(WatchedEvent event) {
-                    System.out.println("ZK Status - " + event);
-
-                }
-            });
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        zk.addAuthInfo("digest", "operator:djidf3jdd23".getBytes());
-        String param = args[0];
-
+        String param = args == null ? "init" : args[0];
+        ZooKeeper zk = getZooKeeper();
         if (param != null && param.equals("init")) {
             zk.create("/find", null, getAll4Op(), CreateMode.PERSISTENT);
             zk.create("/find/services", null, getAll4Op(), CreateMode.PERSISTENT);
@@ -91,6 +106,7 @@ public class OPMain {
             zk.create("/find/services/" + param + "/versions/2", null, list, CreateMode.PERSISTENT);
             zk.create("/find/services/" + param + "/versions/3", null, list, CreateMode.PERSISTENT);
             zk.create("/find/services/" + param + "/versions/4", null, list, CreateMode.PERSISTENT);
+            zk.create("/find/services/" + param + "/versions/LEX", null, list, CreateMode.PERSISTENT);
 
             Stat stat = new Stat();
             list = zk.getACL("/find/services/" + param + "/versions/4", stat);

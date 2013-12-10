@@ -21,6 +21,7 @@ import java.io.IOException;
 
 import org.apache.niolex.address.client.Consumer;
 import org.apache.niolex.address.util.PathUtil;
+import org.apache.niolex.zookeeper.core.ZKException;
 
 
 /**
@@ -55,7 +56,7 @@ public class Producer extends Consumer {
      * @param stat 服务的状态信息，例如分区的服务则用这个表示不同的分区
      * @param address 服务的地址信息，这就是本机打算发布的信息
      * @param isTmp 是否临时节点。临时节点在服务器关闭后会自动从zookeeper集群删除，否则永久存在。
-     * @throws FindException假如发布失败
+     * @throws ZKException 假如发布失败
      */
     public void publishService(String service, int version, String stat, String address, boolean isTmp) {
         publishService(service, version, stat, address, null, isTmp, false);
@@ -71,7 +72,7 @@ public class Producer extends Consumer {
      * @param address 服务的地址信息，这就是本机打算发布的信息
      * @param config 服务的配置信息，例如一个key/value属性文件: disabled=true
      * @param isTmp 是否临时节点。临时节点在服务器关闭后会自动从zookeeper集群删除，否则永久存在。
-     * @throws FindException假如发布失败
+     * @throws ZKException 假如发布失败
      */
     public void publishService(String service, int version, String stat, String address, byte[] config, boolean isTmp) {
         publishService(service, version, stat, address, config, isTmp, false);
@@ -90,7 +91,7 @@ public class Producer extends Consumer {
      * @param isSequential 是否自增节点。自增节点zookeeper集群会在address后面追加一个10位的自增整数，
      *         zookeeper会保证该整数在同一个目录里面不会重复。可利用该整数进行节点的外部排序。
      * @return the actual path of the created ZK node
-     * @throws FindException假如发布失败
+     * @throws ZKException 假如发布失败
      */
     public String publishService(String service, int version, String stat, String address, byte[] config,
             boolean isTmp, boolean isSequential) {
@@ -117,7 +118,7 @@ public class Producer extends Consumer {
      * @param version 服务的版本信息，例如100
      * @param stat 服务的状态信息，例如分区的服务则用这个表示不同的分区
      * @param address 服务的地址信息，这就是本机打算撤销的地址
-     * @throws FindException假如撤销服务失败
+     * @throws ZKException 假如撤销服务失败
      */
     public void withdrawService(String service, int version, String stat, String address) {
         if (this.root == null) {
@@ -142,7 +143,7 @@ public class Producer extends Consumer {
      * 该方法用于撤销永久节点，临时节点zookeeper会自己管理。
      *
      * @param wholePath the actual path of the created ZK node
-     * @throws FindException假如撤销服务失败
+     * @throws ZKException 假如撤销服务失败
      */
     public void withdrawSequentialService(String wholePath) {
         LOG.info("Try to withdraw address: " + wholePath);

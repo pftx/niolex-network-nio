@@ -7,8 +7,6 @@ import java.util.List;
 
 import org.apache.niolex.address.core.CoreTest;
 import org.apache.zookeeper.CreateMode;
-import org.apache.zookeeper.WatchedEvent;
-import org.apache.zookeeper.Watcher;
 import org.apache.zookeeper.ZooDefs.Ids;
 import org.apache.zookeeper.ZooKeeper;
 import org.apache.zookeeper.data.ACL;
@@ -19,29 +17,17 @@ import org.apache.zookeeper.data.Stat;
  */
 public class ServerMain {
 
-    public static String SVR_NAME = "find-svr";
-    public static String SVR_PASSWORD = "Niolex";
-
     /**
+     * Init server service nodes.
+     *
      * @param args
      * @throws InterruptedException
      */
     public static void main(String[] args) throws Exception {
-        ZooKeeper zk = null;
-        try {
-            zk = new ZooKeeper(CoreTest.ZK_ADDR, 10000, new Watcher() {
-                @Override
-                public void process(WatchedEvent event) {
-                    System.out.println("ZK Status - " + event);
+        ZooKeeper zk = CoreTest.CON_SU.zooKeeper();
 
-                }
-            });
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        zk.addAuthInfo("digest", (SVR_NAME + ":" + SVR_PASSWORD).getBytes());
-        String param = "/find/services/org.apache.niolex.address.Test/versions/1/B";
+        zk.addAuthInfo("digest", (OPMain.SVR_NAME + ":" + OPMain.SVR_PASSWORD).getBytes());
+        String param = "/find/services/org.apache.niolex.address.Test/versions/3/C";
 
         zk.create(param + "/10.1.2.3:8808", null, Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
         zk.create(param + "/10.1.2.4:8808", null, Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);

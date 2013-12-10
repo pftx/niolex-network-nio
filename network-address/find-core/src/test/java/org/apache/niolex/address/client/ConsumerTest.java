@@ -22,7 +22,6 @@ import static org.junit.Assert.assertEquals;
 import java.util.List;
 
 import org.apache.niolex.address.core.CoreTest;
-import org.apache.niolex.address.op.OPMain;
 import org.apache.niolex.commons.bean.MutableOne;
 import org.junit.Test;
 
@@ -51,41 +50,29 @@ public class ConsumerTest {
     public void testGetCurrentVersionFixed() {
         int k = common.getCurrentVersion(CoreTest.TEST_SERVICE, "3");
         assertEquals(3, k);
+        assertEquals("/" + CoreTest.ZK_ROOT, common.getRoot());
     }
-
-	public Consumer createConsumer() throws Exception {
-	    Consumer consumer = new Consumer(CoreTest.ZK_ADDR, 5000);
-		consumer.addAuthInfo(OPMain.CLI_NAME, OPMain.CLI_PASSWORD);
-		return consumer;
-	}
 
 	@Test(expected=IllegalStateException.class)
     public void testRoot_Err_0() throws Exception {
-	    try {
-	        Consumer consumer = createConsumer();
-	        consumer.getAddressList(CoreTest.TEST_SERVICE, "1-5", "shard");
-	    } catch (Exception e) {throw e;}
+	    CoreTest.NO_ROOT.getAddressList(CoreTest.TEST_SERVICE, "1-5", "shard");
 	}
 
 	@Test(expected=IllegalArgumentException.class)
 	public void testVer_Err_0() throws Exception {
-	    try {
-	        common.getAddressList(CoreTest.TEST_SERVICE, "1-5+", "shard");
-    	} catch (Exception e) {throw e;}
+	    CoreTest.NO_ROOT.getAddressList(CoreTest.TEST_SERVICE, "1-5+", "shard");
 	}
 
 	@Test(expected=IllegalStateException.class)
 	public void testVer_Err_01() throws Exception {
-	    try {
-	        common.getAddressList(CoreTest.TEST_SERVICE, "5+", "shard");
-	    } catch (Exception e) {throw e;}
+	    common.getAddressList(CoreTest.TEST_SERVICE, "5+", "shard");
 	}
 
     @Test
     public void testGetAllStats() {
         MutableOne<List<String>> allStats = common.getAllStats(CoreTest.TEST_SERVICE, "1");
         System.out.println("[STATES] " + allStats.data());
-        assertEquals(4, allStats.data().size());
+        assertEquals(3, allStats.data().size());
     }
 
     @Test

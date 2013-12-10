@@ -22,7 +22,7 @@ import java.io.IOException;
 import org.apache.niolex.address.client.Consumer;
 import org.apache.niolex.address.ext.AdvancedProducer;
 import org.apache.niolex.address.op.OPMain;
-import org.apache.niolex.address.op.ServerMain;
+import org.apache.niolex.address.server.Producer;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,16 +41,20 @@ public class CoreTest {
     public static final String ZK_ROOT = "find";
     public static final String TEST_SERVICE = "org.apache.niolex.address.Test";
     public static AdvancedProducer PRO_DU;
+    public static Producer NO_ROOT;
     public static Consumer CON_SU;
 
     static {
         try {
             PRO_DU = new AdvancedProducer(ZK_ADDR, 5000);
             PRO_DU.setRoot(ZK_ROOT);
-            PRO_DU.addAuthInfo(ServerMain.SVR_NAME, ServerMain.SVR_PASSWORD);
+            PRO_DU.addAuthInfo(OPMain.SVR_NAME, OPMain.SVR_PASSWORD);
+            // --------------------
+            NO_ROOT = new Producer(ZK_ADDR, 5000);
+            NO_ROOT.addAuthInfo(OPMain.CLI_NAME, OPMain.CLI_PASSWORD);
             // --------------------
             CON_SU = new Consumer(ZK_ADDR, 5000);
-            CON_SU.setRoot(ZK_ROOT);
+            CON_SU.setRoot("/" + ZK_ROOT);
             CON_SU.addAuthInfo(OPMain.CLI_NAME, OPMain.CLI_PASSWORD);
         } catch (IOException e) {
             LOG.error("Error occured when create producer.", e);

@@ -20,10 +20,10 @@ package org.apache.niolex.address.client;
 import java.io.IOException;
 import java.util.List;
 
-import org.apache.niolex.address.core.FindException;
 import org.apache.niolex.address.util.PathUtil;
 import org.apache.niolex.commons.bean.MutableOne;
 import org.apache.niolex.zookeeper.core.ZKConnector;
+import org.apache.niolex.zookeeper.core.ZKException;
 import org.apache.niolex.zookeeper.core.ZKListener;
 
 
@@ -101,37 +101,30 @@ public class Consumer extends ZKConnector {
         if (this.root == null) {
             throw new IllegalStateException("Root not set.");
         }
-        try {
-            final int ver = res.getLow();
-            if (res.isRange()) {
-                String path = PathUtil.makeService2VersionPath(root, service);
-                // Get all children.
-                List<String> ls = this.zk.getChildren(path, false);
-                LOG.info("Current versions for [{}] is: {}", service, ls);
-                // The max version available.
-                int mver = -1;
-                // Parse all versions and get the maximum correct version.
-                for (String s : ls) {
-                    try {
-                        int cv = Integer.parseInt(s);
-                        if (cv > mver && cv < res.getHigh()) {
-                            mver = cv;
-                        }
-                    } catch (Exception e) {}
-                }
-                if (mver < ver) {
-                    throw new IllegalStateException("Version not matched: max available - {" + mver + "} range - " + version);
-                }
-                LOG.info("Picked version: {} for range {}.", mver, version);
-                return mver;
-            } else {
-                return ver;
+        final int ver = res.getLow();
+        if (res.isRange()) {
+            String path = PathUtil.makeService2VersionPath(root, service);
+            // Get all children.
+            List<String> ls = this.getChildren(path);
+            LOG.info("Current versions for [{}] is: {}", service, ls);
+            // The max version available.
+            int mver = -1;
+            // Parse all versions and get the maximum correct version.
+            for (String s : ls) {
+                try {
+                    int cv = Integer.parseInt(s);
+                    if (cv > mver && cv < res.getHigh()) {
+                        mver = cv;
+                    }
+                } catch (Exception e) {}
             }
-        } catch (Exception e) {
-            if (e instanceof RuntimeException) {
-                throw (RuntimeException)e;
+            if (mver < ver) {
+                throw new IllegalStateException("Version not matched: max available - {" + mver + "} range - " + version);
             }
-            throw FindException.makeInstance("Failed to get Current Version.", e);
+            LOG.info("Picked version: {} for range {}.", mver, version);
+            return mver;
+        } else {
+            return ver;
         }
     }
 
@@ -150,22 +143,14 @@ public class Consumer extends ZKConnector {
      * @param service 服务的唯一名称，例如org.apache.niolex.address.Test
      * @param version 支持3种格式，参考[version的格式]章节
      * @return 当前的服务的状态信息列表；系统会监听该列表的变化，将信息变化设置到返回的MutableOne里
-     * @throws FindException 当发生异常时
+     * @throws ZKException 当发生异常时
      */
     public MutableOne<List<String>> getAllStats(String service, String version) {
         String path = PathUtil.makeService2StatePath(root, service, this.getCurrentVersion(service, version));
-
-        try {
-            LOG.info("Watch states: [{}]", path);
-            MutableOne<List<String>> ret = new MutableOne<List<String>>();
-            ret.updateData(this.watchChildren(path, new NodeWatcher(ret)));
-            return ret;
-        } catch (Exception e) {
-            if (e instanceof RuntimeException) {
-                throw (RuntimeException)e;
-            }
-            throw FindException.makeInstance("Failed to get Stats List.", e);
-        }
+        LOG.info("Watch states: [{}]", path);
+        MutableOne<List<String>> ret = new MutableOne<List<String>>();
+        ret.updateData(this.watchChildren(path, new NodeWatcher(ret)));
+        return ret;
     }
 
     /**
@@ -179,21 +164,14 @@ public class Consumer extends ZKConnector {
      * @param version 支持3种格式，参考[version的格式]章节
      * @param stat 服务的状态信息，例如分区的服务则用这个表示不同的分区
      * @return 当前的服务地址信息列表；系统会监听该列表的变化，将信息变化设置到返回的MutableOne里
-     * @throws FindException 当发生异常时
+     * @throws ZKException 当发生异常时
      */
     public MutableOne<List<String>> getAddressList(String service, String version, String stat) {
         String path = PathUtil.makeService2NodePath(root, service, getCurrentVersion(service, version), stat);
-        try {
-            LOG.info("watch AddressList: " + path);
-            MutableOne<List<String>> ret = new MutableOne<List<String>>();
-            ret.updateData(this.watchChildren(path, new NodeWatcher(ret)));
-            return ret;
-        } catch (Exception e) {
-        	if (e instanceof RuntimeException) {
-        		throw (RuntimeException)e;
-        	}
-            throw FindException.makeInstance("Failed to get Address List.", e);
-        }
+        LOG.info("watch AddressList: " + path);
+        MutableOne<List<String>> ret = new MutableOne<List<String>>();
+        ret.updateData(this.watchChildren(path, new NodeWatcher(ret)));
+        return ret;
     }
 
     /**
@@ -207,21 +185,14 @@ public class Consumer extends ZKConnector {
      * @param version 当前的数字版本
      * @param stat 服务的状态信息，例如分区的服务则用这个表示不同的分区
      * @return 当前的服务地址信息列表；系统会监听该列表的变化，将信息变化设置到返回的MutableOne里
-     * @throws FindException 当发生异常时
+     * @throws ZKException 当发生异常时
      */
     public MutableOne<List<String>> getAddressList(String service, int version, String stat) {
         String path = PathUtil.makeService2NodePath(root, service, version, stat);
-        try {
-            LOG.info("watch AddressList: " + path);
-            MutableOne<List<String>> ret = new MutableOne<List<String>>();
-            ret.updateData(this.watchChildren(path, new NodeWatcher(ret)));
-            return ret;
-        } catch (Exception e) {
-            if (e instanceof RuntimeException) {
-                throw (RuntimeException)e;
-            }
-            throw FindException.makeInstance("Failed to get Address List.", e);
-        }
+        LOG.info("watch AddressList: " + path);
+        MutableOne<List<String>> ret = new MutableOne<List<String>>();
+        ret.updateData(this.watchChildren(path, new NodeWatcher(ret)));
+        return ret;
     }
 
     /**
