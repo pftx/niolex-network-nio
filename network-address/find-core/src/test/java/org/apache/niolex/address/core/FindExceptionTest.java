@@ -20,7 +20,6 @@ package org.apache.niolex.address.core;
 import static org.junit.Assert.*;
 
 import org.apache.niolex.address.core.FindException;
-import org.apache.niolex.address.core.ZKConnector;
 import org.apache.niolex.address.core.FindException.Code;
 import org.junit.Test;
 
@@ -40,7 +39,7 @@ public class FindExceptionTest {
 		FindException e = FindException.makeInstance("Not yet implemented", null);
 		System.out.println(e.toString());
 		assertEquals(e.getCode(), Code.OTHER);
-		ZKConnector.LOG.error("Error with two msg: {}, {}.", "this is good", "this is bad", e);
+		CoreTest.LOG.error("Error with two msg: {}, {}.", "this is good", "this is bad", e);
 	}
 
 	/**

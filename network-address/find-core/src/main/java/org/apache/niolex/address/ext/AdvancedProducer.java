@@ -25,18 +25,28 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.niolex.address.core.FindException;
-import org.apache.niolex.address.core.RecoverableWatcher;
 import org.apache.niolex.address.server.Producer;
 import org.apache.niolex.address.util.PathUtil;
 import org.apache.niolex.commons.codec.StringUtil;
+import org.apache.niolex.zookeeper.core.ZKListener;
 import org.apache.zookeeper.KeeperException;
-import org.apache.zookeeper.WatchedEvent;
-import org.apache.zookeeper.Watcher.Event.EventType;
 import org.apache.zookeeper.data.Stat;
 
 /**
  * The Advanced Producer is for access the meta data from ZK.
- * 元数据的路径：/<root>/services/<service>/clients/<version>/<client-name> ==> [meta-key]:[meta-value]
+ * <br>
+ * The Path of MetaData: "/&lt;root>/services/&lt;service&gt;/clients/&lt;version&gt;/&lt;client-name&gt; ==&gt; [meta-key]:[meta-value]"
+ * <br><pre>
+ * [How the MetaData stored]
+ * In order to reduce the total number of watchers, We set a signature at the node
+ * data of version node. So there will be only one data watcher watch the data of
+ * version node.
+ *
+ * If any one modified any meta data of any client under this version, he need to
+ * change the signature too. So we can find out which client is modified by decode
+ * the signature.
+ * </pre>
+ * 元数据的路径："/&lt;root>/services/&lt;service&gt;/clients/&lt;version&gt;/&lt;client-name&gt; ==&gt; [meta-key]:[meta-value]"
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.5
@@ -60,7 +70,7 @@ public class AdvancedProducer extends Producer {
      * Get the meta data under the version node and listen changes.
      * This is a wrap of method: {@link #getMetaData(String, int)}
      * 获取存储在version节点下的元数据并监听他的变化。
-     * <p>
+     * <br>
      * 本方法是对{@link #getMetaData(String, int)}方法的封装。
      *
      * @param service 服务的唯一名称，例如org.apache.niolex.address.Test
@@ -92,28 +102,28 @@ public class AdvancedProducer extends Producer {
         try {
             LOG.info("Try to get meta data from: {}", path);
             ConcurrentHashMap<String, MetaData> map = new ConcurrentHashMap<String, MetaData>();
-            DataWatcher wat = new DataWatcher(map);
-            byte[] b = (byte[]) this.submitWatcher(path, wat, false);
-            wat.setData(b);
+            DataWatcher wat = new DataWatcher(path, map);
+            byte[] before = this.watchData(path, wat);
+            wat.setData(before);
             // Merge all the meta data for the first time.
             List<String> clients = this.getChildren(path);
             for (String client : clients) {
-                wat.parseMetaData(path, client);
+                wat.parseMetaData(client);
             }
             return map;
         } catch (Exception e) {
             if (e instanceof RuntimeException) {
                 throw (RuntimeException)e;
             }
-            throw FindException.makeInstance("Failed to get meta data.", e);
+            throw FindException.makeInstance("Failed to get Meta Data.", e);
         }
     }
 
     /**
-     * Parse the meta signature.
+     * Parse the meta signature and store it in a hash map.
      *
-     * @param data
-     * @return the map
+     * @param data the meta signature
+     * @return the signature map
      */
     public HashMap<String, String> parseMap(byte[] data) {
         HashMap<String, String> map = new HashMap<String, String>();
@@ -133,17 +143,21 @@ public class AdvancedProducer extends Producer {
      *
      * @author Xie, Jiyun
      */
-    public class DataWatcher implements RecoverableWatcher {
-        private ConcurrentHashMap<String, MetaData> map;
+    public class DataWatcher implements ZKListener {
+        private final String path;
+        private final ConcurrentHashMap<String, MetaData> map;
         private byte[] before;
+        private HashMap<String, String> beforeMap;
 
         /**
          * Create a DataWatcher.
          *
-         * @param map
+         * @param path the current zookeeper path
+         * @param map the meta data map
          */
-        public DataWatcher(ConcurrentHashMap<String, MetaData> map) {
+        public DataWatcher(String path, ConcurrentHashMap<String, MetaData> map) {
             super();
+            this.path = path;
             this.map = map;
         }
 
@@ -154,82 +168,68 @@ public class AdvancedProducer extends Producer {
          */
         public void setData(byte[] b) {
             before = b;
+            // Data updated, Let's do this.
+            beforeMap = parseMap(before);
         }
 
         /**
-         * Parse the meta data of this client.
-         *
-         * @param path the path to meta data
-         * @param client the client to parse
-         * @throws InterruptedException
-         * @throws KeeperException
+         * This is the override of super method.
+         * @see org.apache.niolex.zookeeper.core.ZKListener#onDataChange(byte[])
          */
-        public void parseMetaData(String path, String client) throws KeeperException, InterruptedException {
-            Stat st = new Stat();
-            byte[] data = zk.getData(path + "/" + client, false, st);
-            MetaData m = MetaData.parse(data);
-            map.put(client, m);
+        @Override
+        public void onDataChange(byte[] data) {
+            try {
+                // Compare before with after.
+                compareAndUpdate(data);
+            } catch (Exception e) {
+                LOG.error("Failed to watch Data.", e);
+            }
+        }
+
+        /**
+         * This is the override of super method.
+         * @see org.apache.niolex.zookeeper.core.ZKListener#onChildrenChange(java.util.List)
+         */
+        @Override
+        public void onChildrenChange(List<String> list) {
+            // We don't care about this.
         }
 
         /**
          * Compare the meta signature and update if necessary.
          *
-         * @param path the path to meta data
          * @param after the after signature
          * @throws InterruptedException
          * @throws KeeperException
          */
-        private void compareAndUpdate(String path, byte[] after) throws KeeperException, InterruptedException {
+        private void compareAndUpdate(byte[] after) throws KeeperException, InterruptedException {
             if (Arrays.equals(before, after)) {
                 return;
             }
-            // Data updated, Let's do this.
-            HashMap<String, String> beforeMap = parseMap(before);
-            // Before is now update with after.
-            before = after;
             HashMap<String, String> afterMap = parseMap(after);
             for (Entry<String, String> entry : afterMap.entrySet()) {
                 String be = beforeMap.get(entry.getKey());
                 if (be == null || !be.equals(entry.getValue())) {
                     LOG.info("Meta data changed for: {}/{}", path, entry.getKey());
-                    parseMetaData(path, entry.getKey());
+                    parseMetaData(entry.getKey());
                 }
             }
+            // Before is now update with after.
+            before = after;
+            beforeMap = afterMap;
         }
 
         /**
-         * Override super method
-         * @see org.apache.zookeeper.Watcher#process(org.apache.zookeeper.WatchedEvent)
+         * Parse the meta data of this client.
+         *
+         * @param client the client to be parsed
+         * @throws InterruptedException
+         * @throws KeeperException
          */
-        @Override
-        public void process(WatchedEvent event) {
-            if (event.getType() != EventType.NodeDataChanged) {
-                return;
-            }
-            try {
-                Stat st = new Stat();
-                byte[] after = zk.getData(event.getPath(), this, st);
-                // Compare before with after.
-                compareAndUpdate(event.getPath(), after);
-            } catch (Exception e) {
-                LOG.error("Failed to watch Data.", e);
-            }
-        }
-
-        /**
-         * Override super method
-         * @see org.apache.niolex.address.core.RecoverableWatcher#reconnected(java.lang.String)
-         */
-        @Override
-        public void reconnected(String path) {
-            try {
-                Stat st = new Stat();
-                byte[] after = zk.getData(path, this, st);
-                // Compare before with after.
-                compareAndUpdate(path, after);
-            } catch (Exception e) {
-                LOG.error("Failed to watch Data.", e);
-            }
+        public void parseMetaData(String client) throws KeeperException, InterruptedException {
+            byte[] data = zk.getData(path + "/" + client, false, new Stat());
+            MetaData m = MetaData.parse(data);
+            map.put(client, m);
         }
 
     }

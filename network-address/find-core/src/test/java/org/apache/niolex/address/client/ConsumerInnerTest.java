@@ -7,14 +7,13 @@ package org.apache.niolex.address.client;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.niolex.address.client.Consumer.NodeWatcher;
 import org.apache.niolex.address.core.CoreTest;
 import org.apache.niolex.commons.bean.MutableOne;
-import org.apache.zookeeper.WatchedEvent;
-import org.apache.zookeeper.Watcher;
 import org.junit.Test;
 
 
@@ -40,11 +39,8 @@ public class ConsumerInnerTest {
             }
         });
         NodeWatcher a = consumer.new NodeWatcher(listener);
-        WatchedEvent ev = new WatchedEvent(Watcher.Event.EventType.NodeCreated, Watcher.Event.KeeperState.AuthFailed, null);
-        a.process(ev);
-        ev = new WatchedEvent(Watcher.Event.EventType.NodeChildrenChanged, Watcher.Event.KeeperState.AuthFailed,
-                "/find/services/org.apache.niolex.address.Test/versions/1/B");
-        a.process(ev);
+        a.onDataChange(null);
+        a.onChildrenChange(Collections.singletonList("Lex"));
         assertEquals(i.intValue(), 1);
     }
 }

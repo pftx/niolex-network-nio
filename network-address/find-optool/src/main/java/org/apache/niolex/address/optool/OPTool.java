@@ -41,16 +41,6 @@ public class OPTool extends AdvancedProducer {
     }
 
     /**
-     * Check if a full path exists.
-     *
-     * @param fullpath
-     * @return true if exists
-     */
-    public boolean exists(String fullpath) throws KeeperException, InterruptedException {
-        return zk.exists(fullpath, false) == null ? false : true;
-    }
-
-    /**
      * Create a new node.
      *
      * @param fullpath

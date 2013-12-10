@@ -24,6 +24,8 @@ import org.apache.niolex.address.ext.AdvancedProducer;
 import org.apache.niolex.address.op.OPMain;
 import org.apache.niolex.address.op.ServerMain;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -33,7 +35,9 @@ import org.junit.Test;
  */
 public class CoreTest {
 
-    public static final String ZK_ADDR = "10.22.241.233:8181";
+    protected static final Logger LOG = LoggerFactory.getLogger(CoreTest.class);
+
+    public static final String ZK_ADDR = "localhost:9181";
     public static final String ZK_ROOT = "find";
     public static final String TEST_SERVICE = "org.apache.niolex.address.Test";
     public static AdvancedProducer PRO_DU;
@@ -49,7 +53,7 @@ public class CoreTest {
             CON_SU.setRoot(ZK_ROOT);
             CON_SU.addAuthInfo(OPMain.CLI_NAME, OPMain.CLI_PASSWORD);
         } catch (IOException e) {
-            ZKConnector.LOG.error("Error occured when create producer.", e);
+            LOG.error("Error occured when create producer.", e);
         }
     }
 

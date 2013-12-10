@@ -26,8 +26,10 @@ import org.apache.niolex.address.util.PathUtil;
 /**
  * This is the main class server used to publish service and get IP addresses who
  * can use this service.
- *
- * 服务的路径：/<root>/services/<service>/versions/<version>/<state>/<node>
+ * <br>
+ * The Path of One Service: "/&lt;root&gt;/services/&lt;service&gt;/versions/&lt;version&gt;/&lt;state&gt;/&lt;node&gt;"
+ * <br>
+ * 服务的路径："/&lt;root&gt;/services/&lt;service&gt;/versions/&lt;version&gt;/&lt;state&gt;/&lt;node&gt;"
  *
  * @author Xie, Jiyun
  */

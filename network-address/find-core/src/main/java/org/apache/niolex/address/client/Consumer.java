@@ -21,39 +21,56 @@ import java.io.IOException;
 import java.util.List;
 
 import org.apache.niolex.address.core.FindException;
-import org.apache.niolex.address.core.RecoverableWatcher;
-import org.apache.niolex.address.core.ZKConnector;
 import org.apache.niolex.address.util.PathUtil;
 import org.apache.niolex.commons.bean.MutableOne;
-import org.apache.zookeeper.WatchedEvent;
-import org.apache.zookeeper.Watcher.Event.EventType;
+import org.apache.niolex.zookeeper.core.ZKConnector;
+import org.apache.niolex.zookeeper.core.ZKListener;
 
 
 /**
  * This is the main class clients used to get service address list.
  * Clients can also get all states and listen to states list changes.
+ * <br>
+ * The Path of One Service: "/&lt;root>/services/&lt;service&gt;/versions/&lt;version&gt;/&lt;state&gt;/&lt;node&gt;"
+ * <br><pre>
+ * [The style of Version]
+ * 1. Number
+ * The common version maybe with 3 or 4 digits separated by dot. i.e. "1.0.3.445", but we
+ * don't want to do this. Our version is just one 4-bytes-int. So in order to represent
+ * the common version, one may want to use this int like this:
+ *       XXYYZZFFF
+ *      2147483647(The Max Value)
+ * XX for major version, YY for minor version, ZZ for path version, FFF for anything else.
  *
- * 服务的路径：/<root>/services/<service>/versions/<version>/<state>/<node>
+ * 2. Number+
+ * i.e. 10003445+ means versions greater than "1.0.3.445"
  *
- * Version的格式
+ * 3. Number-Number
+ * i.e. 10003445-10005000 means versions greater than "1.0.3.445" but smaller than "1.0.5.000"
+ * Please note that the end version is not included.
+ *
+ *
+ * [Version的格式]
  * 1. 数字
- *
  * 例如5表示版本号5,100表示版本号100.
  *
  * 2. 数字+
- *
  * 例如100+，表示取服务器最新的版本号，如果版本号小于100则报错。
  *
  * 3. 数字-数字
- *
  * 例如100-300，表示取服务器版本号在[100, 300)区间的最大的version。
  * 数字是半开半闭区间，即100是可用的版本，300是不可以的版本。
- *
+ * &gt;/pre>
  *
  * @author Xie, Jiyun
  *
  */
 public class Consumer extends ZKConnector {
+
+    /**
+     * The current cluster root.
+     */
+    protected String root;
 
     /**
      * The only constructor extends super class.
@@ -141,9 +158,7 @@ public class Consumer extends ZKConnector {
         try {
             LOG.info("Watch states: [{}]", path);
             MutableOne<List<String>> ret = new MutableOne<List<String>>();
-            @SuppressWarnings("unchecked")
-            List<String> ls = (List<String>) this.submitWatcher(path, new NodeWatcher(ret), true);
-            ret.updateData(ls);
+            ret.updateData(this.watchChildren(path, new NodeWatcher(ret)));
             return ret;
         } catch (Exception e) {
             if (e instanceof RuntimeException) {
@@ -171,9 +186,7 @@ public class Consumer extends ZKConnector {
         try {
             LOG.info("watch AddressList: " + path);
             MutableOne<List<String>> ret = new MutableOne<List<String>>();
-            @SuppressWarnings("unchecked")
-			List<String> ls = (List<String>) this.submitWatcher(path.toString(), new NodeWatcher(ret), true);
-            ret.updateData(ls);
+            ret.updateData(this.watchChildren(path, new NodeWatcher(ret)));
             return ret;
         } catch (Exception e) {
         	if (e instanceof RuntimeException) {
@@ -201,9 +214,7 @@ public class Consumer extends ZKConnector {
         try {
             LOG.info("watch AddressList: " + path);
             MutableOne<List<String>> ret = new MutableOne<List<String>>();
-            @SuppressWarnings("unchecked")
-            List<String> ls = (List<String>) this.submitWatcher(path.toString(), new NodeWatcher(ret), true);
-            ret.updateData(ls);
+            ret.updateData(this.watchChildren(path, new NodeWatcher(ret)));
             return ret;
         } catch (Exception e) {
             if (e instanceof RuntimeException) {
@@ -219,7 +230,7 @@ public class Consumer extends ZKConnector {
      *
      * @author Xie, Jiyun
      */
-    public class NodeWatcher implements RecoverableWatcher {
+    public class NodeWatcher implements ZKListener {
         private MutableOne<List<String>> ret;
 
         /**
@@ -231,36 +242,44 @@ public class Consumer extends ZKConnector {
         }
 
         /**
-         * Override super method
-         * @see org.apache.zookeeper.Watcher#process(org.apache.zookeeper.WatchedEvent)
+         * This is the override of super method.
+         * @see org.apache.niolex.zookeeper.core.ZKListener#onDataChange(byte[])
          */
         @Override
-        public void process(WatchedEvent event) {
-            if (event.getType() != EventType.NodeChildrenChanged) {
-                return;
-            }
-            try {
-                List<String> ls = zk.getChildren(event.getPath(), this);
-                ret.updateData(ls);
-            } catch (Exception e) {
-                LOG.error("Failed to watch Children.", e);
-            }
+        public void onDataChange(byte[] data) {
+            // This method is not used.
         }
 
         /**
-         * Override super method
-         * @see org.apache.niolex.address.core.RecoverableWatcher#reconnected(java.lang.String)
+         * This is the override of super method.
+         * @see org.apache.niolex.zookeeper.core.ZKListener#onChildrenChange(java.util.List)
          */
         @Override
-        public void reconnected(String path) {
-            try {
-                List<String> ls = zk.getChildren(path, this);
-                ret.updateData(ls);
-            } catch (Exception e) {
-                LOG.error("Failed to watch Children.", e);
-            }
+        public void onChildrenChange(List<String> list) {
+            ret.updateData(list);
         }
 
+    }
+
+    /**
+     * @return the root
+     */
+    public String getRoot() {
+        return root;
+    }
+
+    /**
+     * 设置当前使用的root。
+     * root是用来区分不同地址状态的，例如online表示线上服务，test表示线下测试服务
+     * @param root
+     *            the root to set
+     */
+    public void setRoot(String root) {
+        if (root.charAt(0) != '/') {
+            this.root = '/' + root;
+        } else {
+            this.root = root;
+        }
     }
 
 }

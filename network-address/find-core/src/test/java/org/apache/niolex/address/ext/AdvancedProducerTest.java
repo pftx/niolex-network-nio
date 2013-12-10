@@ -20,17 +20,16 @@ package org.apache.niolex.address.ext;
 import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.niolex.address.core.CoreTest;
-import org.apache.niolex.address.core.ZKConnector;
 import org.apache.niolex.address.ext.AdvancedProducer.DataWatcher;
 import org.apache.niolex.address.op.OPMain;
 import org.apache.niolex.commons.util.DateTimeUtil;
+import org.apache.niolex.zookeeper.core.ZKConnector;
 import org.apache.zookeeper.KeeperException;
-import org.apache.zookeeper.WatchedEvent;
-import org.apache.zookeeper.Watcher;
 import org.junit.Test;
 
 /**
@@ -46,22 +45,20 @@ public class AdvancedProducerTest {
     @Test
     public void testDataWatcher() throws Exception {
         final AtomicInteger i = new AtomicInteger(0);
+        String path = "/find/services/org.apache.niolex.address.Test/clients/1";
         ConcurrentHashMap<String, MetaData> map = new ConcurrentHashMap<String, MetaData>();
-        DataWatcher a = produ.new DataWatcher(map) {
+        DataWatcher a = produ.new DataWatcher(path, map) {
 
             @Override
-            public void parseMetaData(String path, String client) throws KeeperException, InterruptedException {
+            public void parseMetaData(String client) throws KeeperException, InterruptedException {
                 i.incrementAndGet();
-                super.parseMetaData(path, client);
+                super.parseMetaData(client);
             }
 
         };
         a.setData(new byte[3]);
-        WatchedEvent ev = new WatchedEvent(Watcher.Event.EventType.NodeCreated, Watcher.Event.KeeperState.AuthFailed, null);
-        a.process(ev);
-        ev = new WatchedEvent(Watcher.Event.EventType.NodeDataChanged, Watcher.Event.KeeperState.AuthFailed,
-                "/find/services/org.apache.niolex.address.Test/clients/1");
-        a.process(ev);
+        a.onDataChange(produ.getData(path));
+        a.onChildrenChange(Collections.singletonList("Lex"));
         assertEquals(i.intValue(), 1);
         System.out.println(map);
     }
@@ -82,7 +79,7 @@ public class AdvancedProducerTest {
         zKConnector.addAuthInfo(OPMain.OP_NAME, OPMain.OP_PASSWORD);
         byte[] data = meta.toByteArray();
         meta.getPropMap().put("UTIME", "FAKE");
-        zKConnector.updateNode("/find/services/org.apache.niolex.address.Test/clients/1/find-cli", data);
+        zKConnector.updateNodeData("/find/services/org.apache.niolex.address.Test/clients/1/find-cli", data);
         byte[] k = zKConnector.getData("/find/services/org.apache.niolex.address.Test/clients/1");
         int e = k.length - 1;
         if (k[e] == '0') {
@@ -90,7 +87,7 @@ public class AdvancedProducerTest {
         } else {
             k[e] = '0';
         }
-        zKConnector.updateNode("/find/services/org.apache.niolex.address.Test/clients/1", k);
+        zKConnector.updateNodeData("/find/services/org.apache.niolex.address.Test/clients/1", k);
         zKConnector.close();
 
         Thread.sleep(100);
