@@ -28,11 +28,103 @@ package org.apache.niolex.address.util;
  * @since 2013-3-15
  */
 public abstract class PathUtil {
+    public static final String OP_ROOT = "operators";
+    public static final String SVR_ROOT = "servers";
+    public static final String CLI_ROOT = "clients";
     public static final String SERVICES = "services";
-    public static final String OPS = "operators";
-    public static final String CLIENTS = "clients";
-    public static final String SERVERS = "servers";
     public static final String VERSIONS = "versions";
+
+    /**
+     * Make the operator path.
+     *
+     * @param root
+     * @return the path
+     */
+    public static String makeOpPath(String root) {
+        return new StringBuilder().append(root).append("/").append(OP_ROOT).toString();
+    }
+
+    /**
+     * Make the server path.
+     *
+     * @param root
+     * @return the path
+     */
+    public static String makeServerPath(String root) {
+        return new StringBuilder().append(root).append("/").append(SVR_ROOT).toString();
+    }
+
+    /**
+     * Make the client path.
+     *
+     * @param root
+     * @return the path
+     */
+    public static String makeClientPath(String root) {
+        return new StringBuilder().append(root).append("/").append(CLI_ROOT).toString();
+    }
+
+    /**
+     * Make the service path.
+     *
+     * @param root
+     * @return the path
+     */
+    public static String makeServicePath(String root) {
+        return new StringBuilder().append(root).append("/").append(SERVICES).toString();
+    }
+
+    /**
+     * Make the operator path.
+     *
+     * @param root
+     * @param opName
+     * @return the path
+     */
+    public static String makeOpPath(String root, String opName) {
+        StringBuilder path = new StringBuilder();
+        path.append(root).append("/").append(OP_ROOT).append("/").append(opName);
+        return path.toString();
+    }
+
+    /**
+     * Make the server path.
+     *
+     * @param root
+     * @param svrName
+     * @return the path
+     */
+    public static String makeServerPath(String root, String svrName) {
+        StringBuilder path = new StringBuilder();
+        path.append(root).append("/").append(OP_ROOT).append("/").append(svrName);
+        return path.toString();
+    }
+
+    /**
+     * Make the client path.
+     *
+     * @param root
+     * @param cliName
+     * @return the path
+     */
+    public static String makeClientPath(String root, String cliName) {
+        StringBuilder path = new StringBuilder();
+        path.append(root).append("/").append(OP_ROOT).append("/").append(cliName);
+        return path.toString();
+    }
+
+    /**
+     * Make the service path.
+     *
+     * @param root
+     * @param service
+     * @return the path
+     */
+    public static String makeServicePath(String root, String service) {
+        StringBuilder path = new StringBuilder();
+        path.append(root).append("/").append(SERVICES).append("/").append(service);
+        return path.toString();
+    }
 
     /**
      * Make the service to version path.
@@ -87,7 +179,7 @@ public abstract class PathUtil {
      */
     public static String makeMeta2ClientPath(String root, String service) {
         StringBuilder path = new StringBuilder();
-        path.append(root).append("/").append(SERVICES).append("/").append(service).append("/").append(CLIENTS);
+        path.append(root).append("/").append(SERVICES).append("/").append(service).append("/").append(CLI_ROOT);
         return path.toString();
     }
 
@@ -102,7 +194,7 @@ public abstract class PathUtil {
      */
     public static String makeMeta2VersionPath(String root, String service, int version) {
         StringBuilder path = new StringBuilder();
-        path.append(root).append("/").append(SERVICES).append("/").append(service).append("/").append(CLIENTS);
+        path.append(root).append("/").append(SERVICES).append("/").append(service).append("/").append(CLI_ROOT);
         path.append("/").append(version);
         return path.toString();
     }
