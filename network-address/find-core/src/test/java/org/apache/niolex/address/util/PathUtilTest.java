@@ -19,6 +19,7 @@ package org.apache.niolex.address.util;
 
 import static org.junit.Assert.*;
 
+import org.apache.niolex.address.util.PathUtil.Result;
 import org.junit.Test;
 
 /**
@@ -59,14 +60,28 @@ public class PathUtilTest {
         assertEquals("/online/services/org.lex.Good/versions/5/default", s);
     }
 
+    @Test
+    public void testMakeMeta2ClientPath() throws Exception {
+        String s = PathUtil.makeMeta2ClientPath("/online", "org.lex.Good");
+        System.out.println(s);
+        assertEquals("/online/services/org.lex.Good/clients", s);
+    }
+
+    @Test
+    public void testMakeMeta2VersionPath() throws Exception {
+        String s = PathUtil.makeMeta2VersionPath("/online", "org.lex.Good", 3);
+        System.out.println(s);
+        assertEquals("/online/services/org.lex.Good/clients/3", s);
+    }
+
     /**
      * Test method for {@link org.apache.niolex.address.util.PathUtil#validateVersion(java.lang.String)}.
      */
     @Test
     public void testValidateVersion() {
-        String s = PathUtil.makeMetaPath("/online", "org.lex.Good", 4);
-        System.out.println(s);
-        assertEquals("/online/services/org.lex.Good/clients/4", s);
+        Result res = PathUtil.validateVersion("3-700");
+        System.out.println(res);
+        assertEquals("{V?true, R?true, [3, 700)}", res.toString());
     }
 
 }

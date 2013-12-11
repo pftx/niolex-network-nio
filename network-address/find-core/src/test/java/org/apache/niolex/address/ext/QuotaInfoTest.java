@@ -21,6 +21,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import org.junit.Before;
 import org.junit.Test;
 
 /**
@@ -30,44 +31,79 @@ import org.junit.Test;
  */
 public class QuotaInfoTest {
 
-	static QuotaInfo info = new QuotaInfo();
+	QuotaInfo info = new QuotaInfo();
+
+	@Before
+	public void setup() {
+	    info.setMinuteQuota(987423);
+	    info.setSecondQuota(542);
+	}
 
 	@Test
-	public void testEqu() {
+	public void testQuotaInfo() {
 	    QuotaInfo in2fo = new QuotaInfo();
-	    assertFalse(in2fo.equals("info"));
-	    assertTrue(in2fo.equals(info));
+	    assertEquals(0, in2fo.hashCode());
+	}
+
+	/**
+	 * Test method for {@link org.apache.niolex.address.ext.QuotaInfo#getMinuteQuota()}.
+	 */
+	@Test
+	public void testGetMinuteQuota() {
+	    assertEquals(987423, info.getMinuteQuota());
+	}
+
+	@Test
+	public void testSetMinuteQuota() throws Exception {
+	    assertFalse(info.equals(null));
+        assertFalse(info.equals("info"));
+        assertTrue(info.equals(info));
+	}
+
+	@Test
+    public void testGetSecondQuota() {
+	    assertEquals(542, info.getSecondQuota());
+	}
+
+    @Test
+    public void testSetSecondQuota() throws Exception {
+        QuotaInfo in2fo = QuotaInfo.parse("10,110");
+        QuotaInfo in3fo = QuotaInfo.parse("10,100");
+        assertFalse(in2fo.equals(in3fo));
+        assertFalse(in3fo.hashCode() == in2fo.hashCode());
+    }
+
+	/**
+	 * Test method for {@link org.apache.niolex.address.ext.QuotaInfo#parse(String)}.
+	 */
+	@Test
+	public void testParse() {
+	    QuotaInfo in2fo = QuotaInfo.parse("10,100");
+	    QuotaInfo in3fo = QuotaInfo.parse("10,100");
+	    assertTrue(in2fo.equals(in3fo));
+	    assertFalse(in3fo == in2fo);
+	}
+
+	@Test
+	public void testHashCode() throws Exception {
+	    assertEquals(1004225, info.hashCode());
+	}
+
+	@Test
+	public void testEquals() {
+	    QuotaInfo in2fo = QuotaInfo.parse("293212");
+	    assertFalse(in2fo.equals(info));
 	    QuotaInfo in3fo = new QuotaInfo();
 	    assertTrue(in2fo.equals(in3fo));
 	    assertEquals(in2fo.hashCode(), in3fo.hashCode());
 	}
 
 	/**
-	 * Test method for {@link org.apache.niolex.find.bean.QuotaInfo#getTotalQuota()}.
-	 */
-	@Test
-	public void testGetMinuteQuota() {
-		info.setMinuteQuota(987423);
-		assertEquals(info.getMinuteQuota(), 987423);
-	}
-
-	/**
-	 * Test method for {@link org.apache.niolex.find.bean.QuotaInfo#getSingleQuota()}.
-	 */
-	@Test
-	public void testGetSingleQuota() {
-		QuotaInfo in2fo = QuotaInfo.parse("10,100");
-        QuotaInfo in3fo = QuotaInfo.parse("10,100");
-        assertTrue(in2fo.equals(in3fo));
-	}
-
-	/**
-	 * Test method for {@link org.apache.niolex.find.bean.QuotaInfo#toString()}.
+	 * Test method for {@link org.apache.niolex.address.ext.QuotaInfo#toString()}.
 	 */
 	@Test
 	public void testToString() {
-		System.out.println(info);
-		assertTrue(info.equals(info));
+		assertEquals("{secQ=542, minQ=987423}", info.toString());
 	}
 
 }

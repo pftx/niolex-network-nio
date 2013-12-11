@@ -29,8 +29,6 @@ import org.apache.niolex.address.util.PathUtil;
 import org.apache.niolex.commons.codec.StringUtil;
 import org.apache.niolex.zookeeper.core.ZKException;
 import org.apache.niolex.zookeeper.core.ZKListener;
-import org.apache.zookeeper.KeeperException;
-import org.apache.zookeeper.data.Stat;
 
 /**
  * The Advanced Producer is for access the meta data from ZK.
@@ -69,8 +67,8 @@ public class AdvancedProducer extends Producer {
     /**
      * Get the meta data under the version node and listen changes.
      * This is a wrap of method: {@link #getMetaData(String, int)}
-     * 获取存储在version节点下的元数据并监听他的变化。
      * <br>
+     * 获取存储在version节点下的元数据并监听他的变化。
      * 本方法是对{@link #getMetaData(String, int)}方法的封装。
      *
      * @param service 服务的唯一名称，例如org.apache.niolex.address.Test
@@ -79,7 +77,7 @@ public class AdvancedProducer extends Producer {
      * @throws ZKException 当发生异常时
      */
     public ConcurrentHashMap<String, MetaData> getMetaData(String service, String version) {
-        return getMetaData(service, this.getCurrentVersion(service, version));
+        return getMetaData(service, this.getCurrentVersionInner(service, version, 1));
     }
 
     /**
@@ -98,25 +96,18 @@ public class AdvancedProducer extends Producer {
         if (version < 1) {
             throw new IllegalArgumentException("Version must greater than 0.");
         }
-        String path = PathUtil.makeMetaPath(root, service, version);
-        try {
-            LOG.info("Try to get meta data from: {}", path);
-            ConcurrentHashMap<String, MetaData> map = new ConcurrentHashMap<String, MetaData>();
-            DataWatcher wat = new DataWatcher(path, map);
-            byte[] before = this.watchData(path, wat);
-            wat.setData(before);
-            // Merge all the meta data for the first time.
-            List<String> clients = this.getChildren(path);
-            for (String client : clients) {
-                wat.parseMetaData(client);
-            }
-            return map;
-        } catch (Exception e) {
-            if (e instanceof RuntimeException) {
-                throw (RuntimeException)e;
-            }
-            throw ZKException.makeInstance("Failed to get Meta Data.", e);
+        String path = PathUtil.makeMeta2VersionPath(root, service, version);
+        LOG.info("Try to get meta data from: {}", path);
+        ConcurrentHashMap<String, MetaData> map = new ConcurrentHashMap<String, MetaData>();
+        DataWatcher wat = new DataWatcher(path, map);
+        byte[] before = this.watchData(path, wat);
+        wat.setData(before);
+        // Merge all the meta data for the first time.
+        List<String> clients = this.getChildren(path);
+        for (String client : clients) {
+            wat.parseMetaData(client);
         }
+        return map;
     }
 
     /**
@@ -173,36 +164,13 @@ public class AdvancedProducer extends Producer {
         }
 
         /**
-         * This is the override of super method.
+         * Compare the meta signature and update if necessary.
+         *
          * @see org.apache.niolex.zookeeper.core.ZKListener#onDataChange(byte[])
          */
         @Override
-        public void onDataChange(byte[] data) {
-            try {
-                // Compare before with after.
-                compareAndUpdate(data);
-            } catch (Exception e) {
-                LOG.error("Failed to watch Data.", e);
-            }
-        }
-
-        /**
-         * This is the override of super method.
-         * @see org.apache.niolex.zookeeper.core.ZKListener#onChildrenChange(java.util.List)
-         */
-        @Override
-        public void onChildrenChange(List<String> list) {
-            // We don't care about this.
-        }
-
-        /**
-         * Compare the meta signature and update if necessary.
-         *
-         * @param after the after signature
-         * @throws InterruptedException
-         * @throws KeeperException
-         */
-        private void compareAndUpdate(byte[] after) throws KeeperException, InterruptedException {
+        public void onDataChange(byte[] after) {
+            // Compare before with after.
             if (Arrays.equals(before, after)) {
                 return;
             }
@@ -220,14 +188,21 @@ public class AdvancedProducer extends Producer {
         }
 
         /**
+         * This is the override of super method.
+         * @see org.apache.niolex.zookeeper.core.ZKListener#onChildrenChange(java.util.List)
+         */
+        @Override
+        public void onChildrenChange(List<String> list) {
+            // We don't care about this.
+        }
+
+        /**
          * Parse the meta data of this client.
          *
          * @param client the client to be parsed
-         * @throws InterruptedException
-         * @throws KeeperException
          */
-        public void parseMetaData(String client) throws KeeperException, InterruptedException {
-            byte[] data = zk.getData(path + "/" + client, false, new Stat());
+        public void parseMetaData(String client) {
+            byte[] data = getData(path + "/" + client);
             MetaData m = MetaData.parse(data);
             map.put(client, m);
         }

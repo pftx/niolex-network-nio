@@ -29,10 +29,10 @@ public class QuotaInfo {
      * Parse the quota string into quota bean.
      *
      * @param quotaStr the quota string
-     * @return the quota map
+     * @return the quota info bean
      */
-    public static QuotaInfo parse(String quotaStr) {
-        String[] items = quotaStr.split(" *[,;:] *");
+    public static final QuotaInfo parse(String quotaStr) {
+        String[] items = quotaStr.split("\\s*[,;:]\\s*");
         QuotaInfo i = new QuotaInfo();
         if (items.length >= 2) {
             i.secondQuota = Integer.parseInt(items[0]);
@@ -102,11 +102,7 @@ public class QuotaInfo {
      */
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + secondQuota;
-        result = prime * result + minuteQuota;
-        return result;
+        return 31 * secondQuota + minuteQuota;
     }
 
     /**

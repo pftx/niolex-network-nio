@@ -93,39 +93,59 @@ public class Consumer extends ZKConnector {
      * @return 当前最高的可用版本号
      */
     public int getCurrentVersion(String service, String version) {
+        return getCurrentVersionInner(service, version, 0);
+    }
+
+    /**
+     * Get the int version according to the string version. We will find the greatest version for you.
+     * 根据输入的字符串version获取当前最高的可用版本号。
+     *
+     * @param service 服务的唯一名称，例如org.apache.niolex.address.Test
+     * @param version 支持3种格式，参考[version的格式]章节
+     * @param type 获取version的位置，0 service，1 client
+     * @return 当前最高的可用版本号
+     */
+    protected int getCurrentVersionInner(String service, String version, int type) {
         // We only support three kinds of version:
-        PathUtil.VersionRes res = PathUtil.validateVersion(version);
+        PathUtil.Result res = PathUtil.validateVersion(version);
         if (!res.isValid()) {
             throw new IllegalArgumentException("Version not recognised: " + version);
         }
         if (this.root == null) {
             throw new IllegalStateException("Root not set.");
         }
-        final int ver = res.getLow();
-        if (res.isRange()) {
-            String path = PathUtil.makeService2VersionPath(root, service);
-            // Get all children.
-            List<String> ls = this.getChildren(path);
-            LOG.info("Current versions for [{}] is: {}", service, ls);
-            // The max version available.
-            int mver = -1;
-            // Parse all versions and get the maximum correct version.
-            for (String s : ls) {
-                try {
-                    int cv = Integer.parseInt(s);
-                    if (cv > mver && cv < res.getHigh()) {
-                        mver = cv;
-                    }
-                } catch (Exception e) {}
-            }
-            if (mver < ver) {
-                throw new IllegalStateException("Version not matched: max available - {" + mver + "} range - " + version);
-            }
-            LOG.info("Picked version: {} for range {}.", mver, version);
-            return mver;
-        } else {
-            return ver;
+        if (!res.isRange()) {
+            return res.getLow();
         }
+        String path = null;
+        switch (type) {
+            case 1:
+                path = PathUtil.makeMeta2ClientPath(root, service);
+                break;
+            case 0:
+            default:
+                path = PathUtil.makeService2VersionPath(root, service);
+                break;
+        }
+        // Get all children.
+        List<String> ls = this.getChildren(path);
+        LOG.info("Current versions for [{}] is: {}", path, ls);
+        // The max version available.
+        int mver = -1;
+        // Parse all versions and get the maximum correct version.
+        for (String s : ls) {
+            try {
+                int cv = Integer.parseInt(s);
+                if (cv > mver && cv < res.getHigh()) {
+                    mver = cv;
+                }
+            } catch (Exception e) {}
+        }
+        if (mver < res.getLow()) {
+            throw new IllegalStateException("Version not matched: max available - {" + mver + "} range - " + version);
+        }
+        LOG.info("Picked version: {} for range {}.", mver, version);
+        return mver;
     }
 
     /**

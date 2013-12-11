@@ -19,6 +19,7 @@ package org.apache.niolex.address.ext;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.niolex.commons.codec.StringUtil;
@@ -41,14 +42,14 @@ public class MetaData {
      * @param data the byte array
      * @return the Java bean style meta data
      */
-    public static MetaData parse(byte[] data) {
+    public static final MetaData parse(byte[] data) {
         String s = StringUtil.utf8ByteToStr(data);
         String[] carr = s.split("\r*\n");
         final MetaData m = new MetaData();
         for (String item : carr) {
-            String[] c2 = item.split(" *= *", 2);
+            String[] c2 = item.split("=", 2);
             if (c2.length == 2) {
-                m.propMap.put(c2[0], c2[1]);
+                m.propMap.put(c2[0].trim(), c2[1].trim());
             }
         }
         m.constructBeans();
@@ -61,7 +62,8 @@ public class MetaData {
     private final Map<String, String> propMap = new HashMap<String, String>();
 
     /**
-     * This map is for store java bean, extra help.
+     * This map is for store java bean, for extra help. the {@link #propMap} will
+     * have all the data.
      */
     private final Map<String, Object> beanMap = new HashMap<String, Object>();
 
@@ -72,7 +74,7 @@ public class MetaData {
         beanMap.clear();
         String ips = propMap.get(KEY_IPS);
         if (ips != null) {
-            beanMap.put(KEY_IPS, Arrays.asList(ips.split(" *[,;:] *")));
+            beanMap.put(KEY_IPS, Arrays.asList(ips.split("[^\\w.-]+")));
         }
         String quota = propMap.get(KEY_QUOTA);
         if (quota != null) {
@@ -94,17 +96,32 @@ public class MetaData {
     }
 
     /**
-     * @return the propMap
+     * @return the properties map
      */
     public Map<String, String> getPropMap() {
         return propMap;
     }
 
     /**
-     * @return the beanMap
+     * @return the Java beans map
      */
     public Map<String, Object> getBeanMap() {
         return beanMap;
+    }
+
+    /**
+     * @return the IP list of this meta data
+     */
+    @SuppressWarnings("unchecked")
+    public List<String> getIPs() {
+        return (List<String>) beanMap.get(KEY_IPS);
+    }
+
+    /**
+     * @return the quota info of this meta data
+     */
+    public QuotaInfo getQuota() {
+        return (QuotaInfo) beanMap.get(KEY_QUOTA);
     }
 
     /**

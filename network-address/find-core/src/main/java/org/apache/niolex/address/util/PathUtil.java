@@ -20,6 +20,8 @@ package org.apache.niolex.address.util;
 /**
  * The whole path of service is:
  * /<root>/services/<service>/versions/<version>/<state>/<node>
+ * The whole path of meta data is:
+ * /<root>/services/<service>/clients/<version>/<client-name>
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.5
@@ -76,16 +78,29 @@ public abstract class PathUtil {
         return path.toString();
     }
 
+    /**
+     * Make the meta data to client path.
+     *
+     * @param root
+     * @param service
+     * @return the path
+     */
+    public static String makeMeta2ClientPath(String root, String service) {
+        StringBuilder path = new StringBuilder();
+        path.append(root).append("/").append(SERVICES).append("/").append(service).append("/").append(CLIENTS);
+        return path.toString();
+    }
+
 
     /**
-     * Make the meta data path.
+     * Make the meta data to version path.
      *
      * @param root
      * @param service
      * @param version
      * @return the path
      */
-    public static String makeMetaPath(String root, String service, int version) {
+    public static String makeMeta2VersionPath(String root, String service, int version) {
         StringBuilder path = new StringBuilder();
         path.append(root).append("/").append(SERVICES).append("/").append(service).append("/").append(CLIENTS);
         path.append("/").append(version);
@@ -100,11 +115,11 @@ public abstract class PathUtil {
      * 1+ use the current highest version greater than 1
      * 1-3 use the current highest version between 1 and 3
      *
-     * @param version
-     * @return validation result
+     * @param version the string format of version
+     * @return the validation result
      */
-    public static final VersionRes validateVersion(String version) {
-        VersionRes res = new VersionRes();
+    public static final Result validateVersion(String version) {
+        Result res = new Result();
         res.setValid(true);
         if (version.matches("\\d+")) {
             int ver = Integer.parseInt(version);
@@ -126,53 +141,68 @@ public abstract class PathUtil {
         return res;
     }
 
-    public static class VersionRes {
+    /**
+     * The version validation result.
+     *
+     * @author <a href="mailto:xiejiyun@foxmail.com">Xie, Jiyun</a>
+     * @version 1.0.0
+     * @since 2013-12-11
+     */
+    public static class Result {
         private boolean isValid;
         private boolean isRange;
         private int low;
         private int high;
+
         /**
          * @return the isValid
          */
         public boolean isValid() {
             return isValid;
         }
+
         /**
          * @param isValid the isValid to set
          */
         public void setValid(boolean isValid) {
             this.isValid = isValid;
         }
+
         /**
          * @return the isRange
          */
         public boolean isRange() {
             return isRange;
         }
+
         /**
          * @param isRange the isRange to set
          */
         public void setRange(boolean isRange) {
             this.isRange = isRange;
         }
+
         /**
          * @return the low
          */
         public int getLow() {
             return low;
         }
+
         /**
          * @param low the low to set
          */
         public void setLow(int low) {
             this.low = low;
         }
+
         /**
          * @return the high
          */
         public int getHigh() {
             return high;
         }
+
         /**
          * @param high the high to set
          */
@@ -182,7 +212,7 @@ public abstract class PathUtil {
 
         @Override
         public String toString() {
-            return "V[isValid=" + isValid + ", isRange=" + isRange + ", low=" + low + ", high=" + high + "]";
+            return "{V?" + isValid + ", R?" + isRange + ", [" + low + ", " + high + ")}";
         }
 
     }

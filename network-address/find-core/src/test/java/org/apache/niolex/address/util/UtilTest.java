@@ -40,7 +40,7 @@ public class UtilTest extends PathUtil {
 	 */
 	@Test
 	public void testValidateVersion_1() {
-		VersionRes r = PathUtil.validateVersion("@12");
+		Result r = PathUtil.validateVersion("@12");
 		System.out.println(r);
 		assertFalse(r.isValid());
 	}
@@ -50,7 +50,7 @@ public class UtilTest extends PathUtil {
 	 */
 	@Test
 	public void testValidateVersion0() {
-		VersionRes r = PathUtil.validateVersion("125+ad");
+		Result r = PathUtil.validateVersion("125+ad");
 		System.out.println(r);
 		assertFalse(r.isValid());
 	}
@@ -60,7 +60,7 @@ public class UtilTest extends PathUtil {
 	 */
 	@Test
 	public void testValidateVersion1() {
-		VersionRes r = PathUtil.validateVersion("125ad");
+		Result r = PathUtil.validateVersion("125ad");
 		System.out.println(r);
 		assertFalse(r.isValid());
 	}
@@ -70,7 +70,7 @@ public class UtilTest extends PathUtil {
 	 */
 	@Test
 	public void testValidateVersion11() {
-		VersionRes r = PathUtil.validateVersion("125+126");
+		Result r = PathUtil.validateVersion("125+126");
 		System.out.println(r);
 		assertFalse(r.isValid());
 	}
@@ -80,7 +80,7 @@ public class UtilTest extends PathUtil {
 	 */
 	@Test
 	public void testValidateVersion12() {
-		VersionRes r = PathUtil.validateVersion("125-");
+		Result r = PathUtil.validateVersion("125-");
 		System.out.println(r);
 		assertFalse(r.isValid());
 	}
@@ -90,7 +90,7 @@ public class UtilTest extends PathUtil {
 	 */
 	@Test
 	public void testValidateVersion2() {
-		VersionRes r = PathUtil.validateVersion("423");
+		Result r = PathUtil.validateVersion("423");
 		System.out.println(r);
 		assertTrue(r.isValid());
 		assertFalse(r.isRange());
@@ -101,7 +101,7 @@ public class UtilTest extends PathUtil {
 	 */
 	@Test
 	public void testValidateVersion3() {
-		VersionRes r = PathUtil.validateVersion("543+");
+		Result r = PathUtil.validateVersion("543+");
 		System.out.println(r);
 		assertTrue(r.isValid());
 		assertTrue(r.isRange());
@@ -114,7 +114,7 @@ public class UtilTest extends PathUtil {
 	 */
 	@Test
 	public void testValidateVersion4() {
-		VersionRes r = PathUtil.validateVersion("543-2343");
+		Result r = PathUtil.validateVersion("543-2343");
 		System.out.println(r);
 		assertTrue(r.isValid());
 		assertTrue(r.isRange());

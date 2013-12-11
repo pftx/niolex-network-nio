@@ -29,7 +29,6 @@ import org.apache.niolex.address.ext.AdvancedProducer.DataWatcher;
 import org.apache.niolex.address.op.OPMain;
 import org.apache.niolex.commons.util.DateTimeUtil;
 import org.apache.niolex.zookeeper.core.ZKConnector;
-import org.apache.zookeeper.KeeperException;
 import org.junit.Test;
 
 /**
@@ -48,19 +47,25 @@ public class AdvancedProducerTest {
         String path = "/find/services/org.apache.niolex.address.Test/clients/1";
         ConcurrentHashMap<String, MetaData> map = new ConcurrentHashMap<String, MetaData>();
         DataWatcher a = produ.new DataWatcher(path, map) {
-
             @Override
-            public void parseMetaData(String client) throws KeeperException, InterruptedException {
+            public void parseMetaData(String client) {
                 i.incrementAndGet();
-                super.parseMetaData(client);
             }
-
         };
-        a.setData(new byte[3]);
-        a.onDataChange(produ.getData(path));
         a.onChildrenChange(Collections.singletonList("Lex"));
+        // ---
+        byte[] before = "find-cli=009".getBytes();
+        byte[] data = produ.getData(path);
+        a.setData(before);
+        a.onDataChange(before);
+        assertEquals(i.intValue(), 0);
+        a.onDataChange(data);
         assertEquals(i.intValue(), 1);
-        System.out.println(map);
+        before = "lex-cli=009".getBytes();
+        a.setData(before);
+        a.onDataChange(data);
+
+        assertEquals(i.intValue(), 2);
     }
 
     /**
@@ -70,6 +75,17 @@ public class AdvancedProducerTest {
      */
     @Test
     public void testGetMetaDataStringString() throws IOException, InterruptedException {
+        ConcurrentHashMap<String, MetaData> map = produ.getMetaData(CoreTest.TEST_SERVICE, "1+");
+        System.out.println(map);
+        assertEquals(map.get("find-cli").getPropMap().size(), 2);
+    }
+
+    /**
+     * Test method for {@link org.apache.niolex.address.ext.AdvancedProducer#getMetaData(java.lang.String, int)}.
+     * @throws Exception
+     */
+    @Test
+    public void testGetMetaDataStringInt() throws Exception {
         ConcurrentHashMap<String, MetaData> map = produ.getMetaData(CoreTest.TEST_SERVICE, 1);
         MetaData meta = map.get("find-cli");
         String ts = DateTimeUtil.formatDate2DateTimeStr();
@@ -94,29 +110,15 @@ public class AdvancedProducerTest {
         assertEquals(ts, map.get("find-cli").getPropMap().get("UTIME"));
     }
 
-    /**
-     * Test method for {@link org.apache.niolex.address.ext.AdvancedProducer#getMetaData(java.lang.String, int)}.
-     * @throws IOException
-     */
-    @Test
-    public void testGetMetaDataStringInt() throws IOException {
-        AdvancedProducer pro = new AdvancedProducer(CoreTest.ZK_ADDR, 5000);
-        pro.addAuthInfo(OPMain.CLI_NAME, OPMain.CLI_PASSWORD);
-        pro.setRoot("find");
-        ConcurrentHashMap<String, MetaData> map = pro.getMetaData(CoreTest.TEST_SERVICE, "1+");
-        System.out.println(map);
-        assertEquals(map.get("find-cli").getPropMap().size(), 2);
-    }
-
     @Test(expected = IllegalStateException.class)
-    public void testGetMetaData1() throws Exception {
+    public void testGetMetaDataNoRoot() throws Exception {
         AdvancedProducer sub = new AdvancedProducer(CoreTest.ZK_ADDR, 5000);
         sub.addAuthInfo("redis", "mailto:xiejiyun");
         sub.getMetaData("org.apache.niolex.address.Test", 3);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testGetMetaData2() throws Exception {
+    public void testGetMetaDataInvalidVersion() throws Exception {
         AdvancedProducer sub = new AdvancedProducer(CoreTest.ZK_ADDR, 5000);
         sub.addAuthInfo("redis", "mailto:xiejiyun");
         sub.setRoot("dev");
