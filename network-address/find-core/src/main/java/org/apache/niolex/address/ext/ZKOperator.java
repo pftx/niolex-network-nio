@@ -111,6 +111,26 @@ public class ZKOperator extends AdvancedProducer {
         }
     }
 
+    /**
+     * Set the specified ACL list into the ZK path.
+     *
+     * @param path the node path
+     * @param acl the ACL list
+     */
+    public void setACL(String path, List<ACL> acl) {
+        try {
+            zk.setACL(path, acl, -1);
+        } catch (Exception e) {
+            throw ZKException.makeInstance("Failed to set ACL.", e);
+        }
+    }
+
+    /**
+     * Add the specified ACL list into the ZK path.
+     *
+     * @param path the node path
+     * @param acl the ACL list
+     */
     public void addACL(String path, List<ACL> acl) {
         try {
             // Add ACL in a while loop to ensure current add will end with
@@ -159,6 +179,13 @@ public class ZKOperator extends AdvancedProducer {
         return true;
     }
 
+    /**
+     * Add a new operator into find service.
+     *
+     * @param opName the operator name
+     * @param opPasswd the operator password
+     * @return true if success, false if this operator already exists
+     */
     public boolean addOperator(String opName, String opPasswd) {
         if (this.root == null) {
             throw new IllegalStateException("Root not set.");
@@ -172,13 +199,21 @@ public class ZKOperator extends AdvancedProducer {
         createNode(path, acl);
         // 2. Add ACL to all services
         addACLTree(makeServicePath(root), acl);
-        // 3. Add ACL to server and client root. We don't give the ADMIN right.
+        // 3. Add ACL to server and client root. We don't give the ADMIN right,
+        // It's reserved for root.
         acl = getCRDRights(opName, opPasswd);
         addACL(makeServerPath(root), acl);
         addACL(makeClientPath(root), acl);
         return true;
     }
 
+    /**
+     * Add a new server account into find service.
+     *
+     * @param serverName the server account name
+     * @param serverPasswd the server account password
+     * @return true if success, false if this server account already exists
+     */
     public boolean addServer(String serverName, String serverPasswd) {
         if (this.root == null) {
             throw new IllegalStateException("Root not set.");
