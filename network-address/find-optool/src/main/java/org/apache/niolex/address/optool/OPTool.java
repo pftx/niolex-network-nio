@@ -11,7 +11,6 @@ import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.data.ACL;
 import org.apache.zookeeper.data.Stat;
 
-
 /**
  * The core optool, encapsulate ZK operation.
  *
@@ -20,7 +19,7 @@ import org.apache.zookeeper.data.Stat;
 public class OPTool extends AdvancedProducer {
 
     /**
-     * Override super method.
+     * Invoke super Constructor.
      *
      * @param clusterAddress
      * @param sessionTimeout
@@ -28,16 +27,6 @@ public class OPTool extends AdvancedProducer {
      */
     public OPTool(String clusterAddress, int sessionTimeout) throws IOException {
         super(clusterAddress, sessionTimeout);
-        this.zk = super.zk;
-    }
-
-    /**
-     * Add authenticate info for this client.
-     *
-     * @param userPwd
-     */
-    public void addAuthInfo(String userPwd) {
-        this.zk.addAuthInfo("digest", StringUtil.strToUtf8Byte(userPwd));
     }
 
     /**

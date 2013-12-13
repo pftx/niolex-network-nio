@@ -15,9 +15,9 @@ import java.util.Set;
 
 import jline.console.ConsoleReader;
 
-import org.apache.niolex.address.core.FindException;
 import org.apache.niolex.address.optool.OPTool.SVSM;
 import org.apache.niolex.address.util.PathUtil;
+import org.apache.niolex.zookeeper.core.ZKException;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.ZooDefs.Perms;
 import org.apache.zookeeper.data.ACL;
@@ -286,7 +286,7 @@ public class ShellMain {
 
     protected void initOPTool() throws Exception {
         optool = new OPToolService(cl.host, cl.timeout);
-        optool.addAuthInfo(cl.auth);
+        optool.addAuthInfo(cl.auth, cl.auth);
         if (cl.root != null)
             optool.setRoot(cl.root);
         String userName = cl.auth.substring(0, cl.auth.indexOf(":") + 1);
@@ -326,7 +326,7 @@ public class ShellMain {
                 cl.parseCommand(line);
                 processCmd(cl);
             }
-        } catch (FindException e) {
+        } catch (ZKException e) {
             if (e.getCause() instanceof KeeperException.NoNodeException) {
                 System.err.println("NO NODE: " + ((KeeperException)e.getCause()).getPath());
             } else if (e.getCause() instanceof KeeperException.NoAuthException) {
@@ -722,7 +722,7 @@ public class ShellMain {
         String[] curl = path.split("/");
         StringBuilder ret = new StringBuilder();
         ret.append(optool.getRoot()).append("/").append(PathUtil.SERVICES).append("/");
-        ret.append(curl[3]).append("/").append(PathUtil.CLIENTS).append("/");
+        ret.append(curl[3]).append("/").append(PathUtil.CLI_ROOT).append("/");
         ret.append(curl[5]);
         return ret.toString();
     }

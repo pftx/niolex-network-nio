@@ -96,7 +96,7 @@ public abstract class PathUtil {
      */
     public static String makeServerPath(String root, String svrName) {
         StringBuilder path = new StringBuilder();
-        path.append(root).append("/").append(OP_ROOT).append("/").append(svrName);
+        path.append(root).append("/").append(SVR_ROOT).append("/").append(svrName);
         return path.toString();
     }
 
@@ -109,7 +109,7 @@ public abstract class PathUtil {
      */
     public static String makeClientPath(String root, String cliName) {
         StringBuilder path = new StringBuilder();
-        path.append(root).append("/").append(OP_ROOT).append("/").append(cliName);
+        path.append(root).append("/").append(CLI_ROOT).append("/").append(cliName);
         return path.toString();
     }
 

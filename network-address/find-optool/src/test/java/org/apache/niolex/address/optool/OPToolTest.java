@@ -43,7 +43,7 @@ public class OPToolTest {
     static {
         try {
             optool = new OPTool("10.22.241.233:8181", 5000);
-            optool.addAuthInfo("operator:djidf3jdd23");
+            optool.addAuthInfo("operator", "djidf3jdd23");
         } catch (IOException e) {
             LOG.error("Error occured when init optool.", e);
         }

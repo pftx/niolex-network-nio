@@ -19,7 +19,6 @@ package org.apache.niolex.address.util;
 
 import static org.junit.Assert.*;
 
-import org.apache.niolex.address.util.PathUtil.Result;
 import org.junit.Test;
 
 /**
@@ -28,7 +27,7 @@ import org.junit.Test;
  * @version 1.0.5
  * @since 2013-3-15
  */
-public class PathUtilTest {
+public class PathUtilTest extends PathUtil {
 
     /**
      * Test method for {@link org.apache.niolex.address.util.PathUtil#makeService2VersionPath(java.lang.String, java.lang.String)}.
@@ -82,6 +81,46 @@ public class PathUtilTest {
         Result res = PathUtil.validateVersion("3-700");
         System.out.println(res);
         assertEquals("{V?true, R?true, [3, 700)}", res.toString());
+    }
+
+    @Test
+    public void testMakeOpPathString() throws Exception {
+        assertEquals("/find/operators", makeOpPath("/find"));
+    }
+
+    @Test
+    public void testMakeServerPathString() throws Exception {
+        assertEquals("/find/servers", makeServerPath("/find"));
+    }
+
+    @Test
+    public void testMakeClientPathString() throws Exception {
+        assertEquals("/find/clients", makeClientPath("/find"));
+    }
+
+    @Test
+    public void testMakeServicePathString() throws Exception {
+        assertEquals("/find/services", makeServicePath("/find"));
+    }
+
+    @Test
+    public void testMakeOpPathStringString() throws Exception {
+        assertEquals("/find/operators/lex", makeOpPath("/find", "lex"));
+    }
+
+    @Test
+    public void testMakeServerPathStringString() throws Exception {
+        assertEquals("/find/servers/lex", makeServerPath("/find", "lex"));
+    }
+
+    @Test
+    public void testMakeClientPathStringString() throws Exception {
+        assertEquals("/find/clients/lex", makeClientPath("/find", "lex"));
+    }
+
+    @Test
+    public void testMakeServicePathStringString() throws Exception {
+        assertEquals("/find/services/lex", makeServicePath("/find", "lex"));
     }
 
 }

@@ -232,7 +232,7 @@ public class OPToolService extends OPTool {
      */
     public boolean copyClientsVersion(String servicePath, String fromVersion, String toVersion)
             throws KeeperException, InterruptedException {
-        servicePath += "/" + PathUtil.CLIENTS;
+        servicePath += "/" + PathUtil.CLI_ROOT;
         if (exists(servicePath + "/" + toVersion)) {
             return false;
         }
@@ -256,7 +256,7 @@ public class OPToolService extends OPTool {
      * @throws Exception
      */
     public List<ACL> getAllPerm4Op() throws Exception {
-        List<ACL> list = this.getACLs(root + "/" + PathUtil.OPS);
+        List<ACL> list = this.getACLs(root + "/" + PathUtil.OP_ROOT);
         for (ACL a : list) {
             a.setPerms(Perms.ALL);
         }
@@ -270,7 +270,7 @@ public class OPToolService extends OPTool {
      * @throws Exception
      */
     public List<ACL> getAllPerm4Super() throws Exception {
-        List<ACL> list = this.getACLs(root + "/" + PathUtil.OPS);
+        List<ACL> list = this.getACLs(root + "/" + PathUtil.OP_ROOT);
         List<ACL> list2 = new ArrayList<ACL>();
         for (ACL a : list) {
             if (a.getPerms() == Perms.ALL) {
@@ -316,21 +316,21 @@ public class OPToolService extends OPTool {
      * @return /root/operators
      */
     public String getOpPath() {
-        return root + "/" + PathUtil.OPS;
+        return root + "/" + PathUtil.OP_ROOT;
     }
 
     /**
      * @return /root/clients
      */
     public String getClientsPath() {
-        return root + "/" + PathUtil.CLIENTS;
+        return root + "/" + PathUtil.CLI_ROOT;
     }
 
     /**
      * @return /root/servers
      */
     public String getServersPath() {
-        return root + "/" + PathUtil.SERVERS;
+        return root + "/" + PathUtil.SVR_ROOT;
     }
 
     /**

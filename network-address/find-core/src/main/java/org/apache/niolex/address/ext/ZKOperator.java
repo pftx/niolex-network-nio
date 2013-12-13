@@ -140,6 +140,7 @@ public class ZKOperator extends AdvancedProducer {
                 List<ACL> old = zk.getACL(path, stat);
                 try {
                     zk.setACL(path, mergeACL(old, acl), stat.getAversion());
+                    break;
                 } catch (KeeperException e) {
                     if (e.code() != KeeperException.Code.BADVERSION) {
                         throw e;
@@ -228,6 +229,13 @@ public class ZKOperator extends AdvancedProducer {
         return true;
     }
 
+    /**
+     * Add a new client account into find service.
+     *
+     * @param clientName the client account name
+     * @param clientPasswd the client account password
+     * @return true if success, false if this client account already exists
+     */
     public boolean addClient(String clientName, String clientPasswd) {
         if (this.root == null) {
             throw new IllegalStateException("Root not set.");
@@ -242,6 +250,12 @@ public class ZKOperator extends AdvancedProducer {
         return true;
     }
 
+    /**
+     * Add a new service into find service storage.
+     *
+     * @param service the new service name
+     * @return true if success, false if this service already exists
+     */
     public boolean addService(String service) {
         if (this.root == null) {
             throw new IllegalStateException("Root not set.");
@@ -254,6 +268,34 @@ public class ZKOperator extends AdvancedProducer {
         createNode(path, acl);
         createNode(makeService2VersionPath(root, service), acl);
         createNode(makeMeta2ClientPath(path, service), acl);
+        return true;
+    }
+
+    public boolean initServiceTree(String service, int version, String[] stats) {
+        return true;
+    }
+
+    public boolean copyVersion(String service, int fromVersion, int toVersion) {
+        return false;
+    }
+
+    public boolean addStat(String service, int version, String stat) {
+        return true;
+    }
+
+    public boolean addServerAuth(String service, int version, String stat) {
+        return true;
+    }
+
+    public boolean addClientAuth(String service, int version) {
+        return true;
+    }
+
+    public boolean removeServerAuth(String service, int version, String stat) {
+        return true;
+    }
+
+    public boolean removeClientAuth(String service, int version) {
         return true;
     }
 
