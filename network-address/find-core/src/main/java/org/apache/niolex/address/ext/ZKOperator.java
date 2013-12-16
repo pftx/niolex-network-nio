@@ -25,8 +25,9 @@ import java.util.List;
 
 import org.apache.niolex.zookeeper.core.ZKException;
 import org.apache.zookeeper.CreateMode;
-import org.apache.zookeeper.KeeperException;
+import org.apache.zookeeper.KeeperException.BadVersionException;
 import org.apache.zookeeper.data.ACL;
+import org.apache.zookeeper.data.Id;
 import org.apache.zookeeper.data.Stat;
 
 /**
@@ -145,11 +146,7 @@ public class ZKOperator extends AdvancedProducer {
                 try {
                     zk.setACL(path, mergeACL(old, acl), stat.getAversion());
                     break;
-                } catch (KeeperException e) {
-                    if (e.code() != KeeperException.Code.BADVERSION) {
-                        throw e;
-                    }
-                }
+                } catch (BadVersionException e) {}
             }
         } catch (Exception e) {
             throw ZKException.makeInstance("Failed to add ACL.", e);
@@ -166,6 +163,29 @@ public class ZKOperator extends AdvancedProducer {
         addACL(path, acl);
         for (String end : getChildren(path)) {
             addACLTree(path + "/" + end, acl);
+        }
+    }
+
+    /**
+     * Remove all the ACLs of this specified Id from this path.
+     *
+     * @param path the node path
+     * @param id the id to be removed
+     */
+    public void removeACL(String path, Id id) {
+        try {
+            // Remove ACL in a while loop to ensure current remove will end with
+            // expected result.
+            while (true) {
+                Stat stat = new Stat();
+                List<ACL> old = zk.getACL(path, stat);
+                try {
+                    zk.setACL(path, removeId(old, id), stat.getAversion());
+                    break;
+                } catch (BadVersionException e) {}
+            }
+        } catch (Exception e) {
+            throw ZKException.makeInstance("Failed to remove ACL.", e);
         }
     }
 

@@ -10,6 +10,7 @@ import jline.console.completer.Completer;
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  */
 class OPToolCompletor implements Completer {
+
     // The internal core shell main.
     private ShellMain main;
 
@@ -31,7 +32,7 @@ class OPToolCompletor implements Completer {
         // Guarantee that the final token is the one we're expanding
         buffer = buffer.substring(0, cursor);
         String token = "";
-        String[] tokens = buffer.split(" ");
+        String[] tokens = buffer.split("\\s+");
         if (tokens.length > 1) {
             token = tokens[tokens.length - 1];
         } else {
@@ -51,11 +52,7 @@ class OPToolCompletor implements Completer {
         String prefix = path.substring(idx);
         // Only the root path can end in a /, so strip it off every other prefix
         String dir = idx == 1 ? "/" : path.substring(0, idx - 1);
-        try {
-            if (!main.optool.exists(dir)) {
-                return buffer.length();
-            }
-        } catch (Exception e) {
+        if (!main.optool.exists(dir)) {
             return buffer.length();
         }
         List<String> children = main.optool.getChildren(dir);

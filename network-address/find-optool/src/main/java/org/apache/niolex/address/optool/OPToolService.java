@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.niolex.address.ext.ZKOperator;
 import org.apache.niolex.address.util.PathUtil;
 import org.apache.niolex.commons.codec.Base16Util;
 import org.apache.niolex.commons.codec.Base64Util;
@@ -44,10 +45,10 @@ import org.apache.zookeeper.data.Stat;
  * @version 1.0.5
  * @since 2013-3-18
  */
-public class OPToolService extends OPTool {
+public class OPToolService extends ZKOperator {
 
     /**
-     * Invoker super constructor.
+     * Invoke super constructor.
      *
      * @param clusterAddress
      * @param sessionTimeout
@@ -55,97 +56,6 @@ public class OPToolService extends OPTool {
      */
     public OPToolService(String clusterAddress, int sessionTimeout) throws IOException {
         super(clusterAddress, sessionTimeout);
-    }
-
-    /**
-     * Generate the digest for authentication.
-     *
-     * @param userName
-     * @param passwd
-     * @return the generated digest
-     * @throws NoSuchAlgorithmException
-     */
-    public Id generateDigest(String userName, String passwd) throws NoSuchAlgorithmException {
-        String pwd = Base64Util.byteToBase64(Base16Util.base16toByte(SHAUtil.sha1(userName + ":" + passwd)));
-        return new Id("digest", userName + ":" + pwd);
-    }
-
-    /**
-     * Add ACLs to a node
-     *
-     * @param fullpath
-     * @param ACLs
-     * @throws KeeperException
-     * @throws InterruptedException
-     */
-    public void addACLs(String fullpath, List<ACL> ACLs) throws KeeperException, InterruptedException {
-        while (true) {
-            try {
-                Stat st = new Stat();
-                List<ACL> acls = zk.getACL(fullpath, st);
-                acls.addAll(ACLs);
-                zk.setACL(fullpath, acls, st.getAversion());
-                return;
-            } catch (BadVersionException e){} catch (NoNodeException e){return;}
-        }
-    }
-
-    /**
-     * Add the new ACLs for this service and it's descendants.
-     *
-     * @param service
-     * @param ACLs
-     * @throws KeeperException
-     * @throws InterruptedException
-     */
-    public void addACLs4Service(String service, List<ACL> ACLs) throws KeeperException, InterruptedException {
-        String servicePath = getServicePath() + "/" + service;
-        List<String> superVers = zk.getChildren(servicePath, false);
-        for (String sp : superVers) {
-            List<String> vers = zk.getChildren(servicePath + "/" + sp, false);
-            for (String v : vers) {
-                List<String> stats = zk.getChildren(servicePath + "/" + sp + "/" + v, false);
-                for (String s : stats) {
-                    addACLs(servicePath + "/" + sp + "/" + v + "/" + s, ACLs);
-                }
-                addACLs(servicePath + "/" + sp + "/" + v, ACLs);
-            }
-            addACLs(servicePath + "/" + sp, ACLs);
-        }
-        addACLs(servicePath, ACLs);
-    }
-
-    /**
-     * Remove some ACLs from a node
-     *
-     * @param fullpath
-     * @param ACLs
-     * @throws KeeperException
-     * @throws InterruptedException
-     */
-    public void removeACLs(String fullpath, List<ACL> ACLs) throws KeeperException, InterruptedException {
-        while (true) {
-            try {
-                Stat st = new Stat();
-                List<ACL> acls = zk.getACL(fullpath, st);
-                acls.removeAll(ACLs);
-                zk.setACL(fullpath, acls, st.getAversion());
-                return;
-            } catch (BadVersionException e){} catch (NoNodeException e){return;}
-        }
-    }
-
-    /**
-     * Serialize this meta data into byte array.
-     *
-     * @return the byte array
-     */
-    public byte[] toByteArray(HashMap<String, String> map) {
-        StringBuilder sb = new StringBuilder();
-        for (Map.Entry<String,String> en : map.entrySet()) {
-            sb.append(en.getKey()).append("=").append(en.getValue()).append("\n");
-        }
-        return StringUtil.strToUtf8Byte(sb.toString());
     }
 
     /**

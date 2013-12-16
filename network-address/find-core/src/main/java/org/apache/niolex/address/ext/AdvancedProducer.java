@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -126,6 +127,20 @@ public class AdvancedProducer extends Producer {
             }
         }
         return map;
+    }
+
+    /**
+     * Serialize this meta data into byte array.
+     *
+     * @param map the signature map
+     * @return the byte array
+     */
+    public byte[] toByteArray(Map<String, String> map) {
+        StringBuilder sb = new StringBuilder();
+        for (Map.Entry<String,String> en : map.entrySet()) {
+            sb.append(en.getKey()).append("=").append(en.getValue()).append("\n");
+        }
+        return StringUtil.strToUtf8Byte(sb.toString());
     }
 
     /**

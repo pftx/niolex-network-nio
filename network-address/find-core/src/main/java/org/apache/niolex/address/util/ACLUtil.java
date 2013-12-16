@@ -150,14 +150,31 @@ public class ACLUtil {
      */
     public static List<ACL> mergeACL(List<ACL> old, List<ACL> add) {
         List<ACL> tmp = new ArrayList<ACL>();
-        Set<String> nameSet = Sets.newHashSet();
+        Set<Id> nameSet = Sets.newHashSet();
         for (ACL a : add) {
-            if (nameSet.add(a.getId().toString())) {
+            if (nameSet.add(a.getId())) {
                 tmp.add(a);
             }
         }
         for (ACL a : old) {
-            if (nameSet.add(a.getId().toString())) {
+            if (nameSet.add(a.getId())) {
+                tmp.add(a);
+            }
+        }
+        return tmp;
+    }
+
+    /**
+     * Remove all the ACLs belongs to the specified Id.
+     *
+     * @param old the old ACL list
+     * @param id the Id to be removed
+     * @return the result
+     */
+    public static List<ACL> removeId(List<ACL> old, Id id) {
+        List<ACL> tmp = new ArrayList<ACL>();
+        for (ACL a : old) {
+            if (!id.equals(a.getId())) {
                 tmp.add(a);
             }
         }

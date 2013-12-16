@@ -4,17 +4,15 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Set;
 
 import jline.console.ConsoleReader;
 
+import org.apache.niolex.address.cmd.CommandOptions;
 import org.apache.niolex.address.optool.OPTool.SVSM;
 import org.apache.niolex.address.util.PathUtil;
 import org.apache.niolex.zookeeper.core.ZKException;
@@ -25,7 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The shell Main class.
+ * The shell Main class. OP Tool starts here.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  */
@@ -37,7 +35,7 @@ public class ShellMain {
      */
     protected static final Set<String> commandSet = new HashSet<String>();
 
-    protected MyCommandOptions cl = new MyCommandOptions();
+    protected CommandOptions cl = new CommandOptions();
 
     protected OPToolService optool;
 
@@ -141,108 +139,6 @@ public class ShellMain {
         System.out.println(USAGE);
     }
 
-    /**
-     * A storage class for both command line options and shell commands.
-     *
-     */
-    static protected class MyCommandOptions {
-
-        // ====================================
-        // Command Line Options
-        // ====================================
-        protected String host = "127.0.0.1:2181";
-
-        protected int timeout = 30000;
-
-        protected String auth = null;
-
-        protected String root = null;
-
-        private List<String> cmdArgs = null;
-
-        private String command = null;
-
-        private String curpath = "/";
-
-        private boolean isSuper = false;
-
-        private boolean isInit = false;
-
-        public String getCommand() {
-            return command;
-        }
-
-        public String[] getArgArray() {
-            return cmdArgs.toArray(new String[0]);
-        }
-
-        /**
-         * Parses a command line that may contain one or more flags before an optional command string
-         *
-         * @param args
-         *            command line arguments
-         * @return true if parsing succeeded, false otherwise.
-         */
-        public boolean parseOptions(String[] args) {
-            List<String> argList = Arrays.asList(args);
-            Iterator<String> it = argList.iterator();
-
-            while (it.hasNext()) {
-                String opt = it.next();
-                try {
-                    if (opt.equals("-server")) {
-                        this.host = it.next();
-                    } else if (opt.equals("-timeout")) {
-                        timeout = Integer.parseInt(it.next());
-                    } else if (opt.equals("-auth")) {
-                        auth = it.next();
-                    } else if (opt.equals("-root")) {
-                        root = it.next();
-                        curpath = "/" + root;
-                    } else if (opt.equals("--init")) {
-                        isInit = true;
-                    }
-                } catch (NoSuchElementException e) {
-                    System.err.println("Error: no argument found for option " + opt);
-                    return false;
-                }
-
-                if (!opt.startsWith("-")) {
-                    command = opt;
-                    cmdArgs = new ArrayList<String>();
-                    cmdArgs.add(command);
-                    while (it.hasNext()) {
-                        cmdArgs.add(it.next());
-                    }
-                    return true;
-                }
-            }
-            return true;
-        }
-
-        /**
-         * Breaks a string into command + arguments.
-         *
-         * @param cmdstring
-         *            string of form "cmd arg1 arg2..etc"
-         * @return true if parsing succeeded.
-         */
-        public boolean parseCommand(String cmdstring) {
-            String[] args = cmdstring.split(" ");
-            if (args.length == 0) {
-                return false;
-            }
-            command = args[0];
-            cmdArgs = Arrays.asList(args);
-            return true;
-        }
-
-        public String getCurpath() {
-            return this.curpath;
-        }
-
-    }
-
     protected String getPrompt() {
         if (cl.isSuper)
             return "[ZK:" + cl.curpath + "]#";
@@ -343,7 +239,7 @@ public class ShellMain {
         }
     }
 
-    protected void processCmd(MyCommandOptions co) throws Exception {
+    protected void processCmd(CommandOptions co) throws Exception {
         String[] args = co.getArgArray();
         String cmd = co.getCommand();
         if (args.length < 1 || !commandSet.contains(cmd)) {
@@ -352,9 +248,7 @@ public class ShellMain {
         }
         String returnStr = null;
         if (cmd.equals("quit") || cmd.equals("exit")) {
-            System.out.println("Goodbye...");
-            optool.close();
-            System.exit(0);
+            //ggg
         } else if (cmd.equals("cd") && args.length == 2) {
             String absPath = genAbstractPath(args[1]);
             if (optool.exists(absPath)) {

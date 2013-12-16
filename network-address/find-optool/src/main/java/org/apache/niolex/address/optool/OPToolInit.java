@@ -6,7 +6,7 @@ package org.apache.niolex.address.optool;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.niolex.address.optool.ShellMain.MyCommandOptions;
+import org.apache.niolex.address.cmd.CommandOptions;
 import org.apache.niolex.commons.codec.Base16Util;
 import org.apache.niolex.commons.codec.Base64Util;
 import org.apache.niolex.commons.codec.SHAUtil;
@@ -23,7 +23,7 @@ import org.apache.zookeeper.data.Id;
  */
 public class OPToolInit {
 
-    public static MyCommandOptions CL;
+    public static CommandOptions CL;
 
     public static List<ACL> getAll4Super() throws Exception {
         List<ACL> acls = new ArrayList<ACL>();
@@ -42,7 +42,7 @@ public class OPToolInit {
      * @param cl
      * @throws Exception
      */
-    public static void initRoot(MyCommandOptions cl) throws Exception {
+    public static void initRoot(CommandOptions cl) throws Exception {
         CL = cl;
         ZooKeeper zk = new ZooKeeper(cl.host, cl.timeout, new Watcher() {
             @Override

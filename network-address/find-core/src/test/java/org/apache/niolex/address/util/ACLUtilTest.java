@@ -186,4 +186,29 @@ public class ACLUtilTest extends ACLUtil {
         assertEquals(r, merged.get(0).getId().toString());
     }
 
+    @Test
+    public void testRemoveId() throws Exception {
+        Id root = getId("qq", "root");
+        Id lex = getId("qq", "lex");
+        Id nio = getId("nio", "lex");
+        List<ACL> old = Lists.newArrayList();
+        old.add(new ACL(Perms.DELETE, root));
+        old.add(new ACL(Perms.DELETE | Perms.READ, lex));
+        old.add(new ACL(Perms.ALL, nio));
+        old.add(new ACL(Perms.DELETE, root));
+        old.add(new ACL(Perms.CREATE | Perms.READ, lex));
+        old.add(new ACL(Perms.ALL, nio));
+        old.add(new ACL(Perms.READ, root));
+        old.add(new ACL(Perms.ADMIN, lex));
+        old.add(new ACL(Perms.DELETE, nio));
+        List<ACL> acl = removeId(old, root);
+        assertEquals(6, acl.size());
+        acl = removeId(acl, lex);
+        assertEquals(3, acl.size());
+        acl = removeId(acl, getId("qq:", "lex"));
+        assertEquals(3, acl.size());
+        acl = removeId(acl, nio);
+        assertEquals(0, acl.size());
+    }
+
 }

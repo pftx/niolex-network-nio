@@ -17,7 +17,7 @@
  */
 package org.apache.niolex.address.ext;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -123,6 +123,14 @@ public class AdvancedProducerTest {
         sub.addAuthInfo("redis", "mailto:xiejiyun");
         sub.setRoot("dev");
         sub.getMetaData("org.apache.niolex.address.Test", 0);
+    }
+
+    @Test
+    public void testToByteArray() throws Exception {
+        byte[] origin = "IPS=10.1.2.3,10.1.2.4\nQUOTA=100,6000\nUTIME=2013-03-18 16:06:37\n".getBytes();
+        MetaData kd = MetaData.parse(origin);
+        byte[] after = produ.toByteArray(kd.getPropMap());
+        assertArrayEquals(origin, after);
     }
 
 }

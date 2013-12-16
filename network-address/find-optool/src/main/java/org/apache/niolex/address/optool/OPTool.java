@@ -4,19 +4,16 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.niolex.address.ext.AdvancedProducer;
+import org.apache.niolex.address.ext.ZKOperator;
 import org.apache.niolex.commons.codec.StringUtil;
-import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException;
-import org.apache.zookeeper.data.ACL;
-import org.apache.zookeeper.data.Stat;
 
 /**
  * The core optool, encapsulate ZK operation.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  */
-public class OPTool extends AdvancedProducer {
+public class OPTool extends ZKOperator {
 
     /**
      * Invoke super Constructor.
@@ -29,50 +26,6 @@ public class OPTool extends AdvancedProducer {
         super(clusterAddress, sessionTimeout);
     }
 
-    /**
-     * Create a new node.
-     *
-     * @param fullpath
-     * @param data
-     * @param acl
-     * @return the actual path of the created node
-     * @throws KeeperException
-     * @throws InterruptedException
-     */
-    public String create(String fullpath, String data, List<ACL> acl) throws KeeperException, InterruptedException {
-        // Case 1. an existing full path
-        if (exists(fullpath)) {
-            setACLs(fullpath, acl);
-            return fullpath;
-        }
-        // Case 2. an non-existing full path
-        return zk.create(fullpath, str2byte(data), acl, CreateMode.PERSISTENT);
-    }
-
-    /**
-     * Delete node.
-     *
-     * @param fullpath
-     * @param recursive
-     */
-    public void delete(String fullpath, boolean recursive) throws InterruptedException, KeeperException {
-        if (!recursive) {
-            zk.delete(fullpath, -1);
-            return;
-        }
-        // recursive delete
-        try {
-            List<String> childrens = zk.getChildren(fullpath, false);
-            if (!childrens.isEmpty()) {
-                for (String c : childrens) {
-                    delete(fullpath + "/" + c, true);
-                }
-            }
-            zk.delete(fullpath, -1);
-        } catch (KeeperException.NoNodeException e) {
-            return;
-        }
-    }
 
     /**
      * Set data to a node.
@@ -102,27 +55,6 @@ public class OPTool extends AdvancedProducer {
      */
     public String getDataStr(String fullpath) throws KeeperException, InterruptedException {
         return byte2str(zk.getData(fullpath, null, null));
-    }
-
-    /**
-     * Get all ACLs
-     *
-     * @param fullpath
-     * @return all ACLs
-     */
-    public List<ACL> getACLs(String fullpath) throws KeeperException, InterruptedException {
-        Stat stat = new Stat();
-        return zk.getACL(fullpath, stat);
-    }
-
-    /**
-     * Set ACLs to a node
-     *
-     * @param fullpath
-     * @param ACLs
-     */
-    public void setACLs(String fullpath, List<ACL> ACLs) throws KeeperException, InterruptedException {
-        zk.setACL(fullpath, ACLs, -1);
     }
 
     /**
