@@ -8,6 +8,7 @@ import java.util.*;
 import jline.console.ConsoleReader;
 
 import org.apache.niolex.address.cmd.ICommand;
+import org.apache.niolex.address.cmd.impl.CDCommand;
 import org.apache.niolex.address.cmd.impl.ExitCommand;
 import org.apache.niolex.address.util.PathUtil;
 import org.apache.niolex.commons.codec.StringUtil;
@@ -112,7 +113,7 @@ public class ShellMain {
         // -- Common
         COMMAND_MAP.put("quit", new ExitCommand());
         COMMAND_MAP.put("exit", new ExitCommand());
-        COMMAND_MAP.put("cd", new ExitCommand());
+        COMMAND_MAP.put("cd", new CDCommand());
         COMMAND_MAP.put("ls", new ExitCommand());
         // -- Node
         COMMAND_MAP.put("create", new ExitCommand());
@@ -281,13 +282,6 @@ public class ShellMain {
         String returnStr = null;
         if (cmd.equals("quit") || cmd.equals("exit")) {
             //ggg
-        } else if (cmd.equals("cd") && args.length == 2) {
-            String absPath = genAbstractPath(args[1]);
-            if (optool.exists(absPath)) {
-                EVN.curpath = absPath;
-            } else {
-                System.out.println("NO NODE: " + absPath);
-            }
         } else if (cmd.equals("ls")) {
             if (args.length == 1)
                 System.out.println(optool.getChildren(EVN.curpath));
@@ -597,46 +591,7 @@ public class ShellMain {
         }
     }
 
-    /**
-     * Format the relative path into abstract path.
-     *
-     * @param appendix
-     * @return the abstract path
-     */
-    protected String genAbstractPath(String appendix) {
-        if (appendix.charAt(0) == '/') {
-            return appendix;
-        } else if (appendix.charAt(0) != '.') {
-            return EVN.curpath + "/" + appendix;
-        } else if (appendix.startsWith("./")) {
-            return EVN.curpath + appendix.substring(1);
-        } else if (appendix.equals(".")) {
-            return EVN.curpath;
-        }
-        // OK, then there must be some ../...
-        String[] breads = appendix.split("/");
-        int i = 0, j = 0;
-        for (; i < breads.length; ++i) {
-            if (breads[i].equals("..")) {
-                ++j;
-            } else {
-                break;
-            }
-        }
-        StringBuilder ret = new StringBuilder();
-        String[] curl = EVN.curpath.split("/");
-        if (curl.length > j) {
-            j = curl.length - j;
-            // The first item in curl is empty.
-            for (int k = 1; k < j; ++k) {
-                ret.append('/').append(curl[k]);
-            }
-        }
-        for (; i < breads.length; i++) {
-            ret.append('/').append(breads[i]);
-        }
-        return ret.length() == 0 ? "/" : ret.toString();
-    }
+
 
     /**
      * Make the version path to a new version path walk through the clients.

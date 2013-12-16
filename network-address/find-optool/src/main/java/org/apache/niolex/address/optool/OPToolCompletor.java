@@ -41,7 +41,7 @@ class OPToolCompletor implements Completer {
         if (token.startsWith("/")) {
             return completeZNode(buffer, token, candidates);
         } else if (token.startsWith("./") || token.startsWith("../")) {
-            return completeZNode(buffer, main.genAbstractPath(token), candidates);
+            return completeZNode(buffer, ShellMain.EVN.getAbsolutePath(token), candidates);
         }
         return cursor;
     }

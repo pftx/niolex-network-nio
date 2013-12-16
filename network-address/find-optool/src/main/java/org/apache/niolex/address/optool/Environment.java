@@ -23,6 +23,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+import org.apache.niolex.commons.codec.StringUtil;
+
 /**
  * Store all the environments here.
  *
@@ -174,6 +176,55 @@ public final class Environment {
         command = args[0];
         cmdArgs = Arrays.asList(args);
         return true;
+    }
+
+    /**
+     * Translate the relative path into absolute path.
+     *
+     * @param relativePath the relative path
+     * @return the absolute path
+     */
+    public String getAbsolutePath(String relativePath) {
+        if (relativePath.startsWith("./")) {
+            relativePath = relativePath.substring(2);
+        }
+        if (StringUtil.isBlank(relativePath)) {
+            relativePath = ".";
+        }
+        if (".".equals(relativePath)) {
+            return curpath;
+        }
+        switch (relativePath.charAt(0)) {
+            case '/':
+                return relativePath;
+            case '.':
+                break;
+            default:
+                return curpath + "/" + relativePath;
+        }
+        // OK, then there must be some ../..
+        String[] breads = relativePath.split("/");
+        int i = 0, j = 0;
+        for (; i < breads.length; ++i) {
+            if (breads[i].equals("..")) {
+                ++j;
+            } else {
+                break;
+            }
+        }
+        StringBuilder ret = new StringBuilder();
+        String[] items = curpath.split("/");
+        if (items.length > j) {
+            j = items.length - j;
+            // The first item in items is empty.
+            for (int k = 1; k < j; ++k) {
+                ret.append('/').append(items[k]);
+            }
+        }
+        for (; i < breads.length; i++) {
+            ret.append('/').append(breads[i]);
+        }
+        return ret.length() == 0 ? "/" : ret.toString();
     }
 
 }
