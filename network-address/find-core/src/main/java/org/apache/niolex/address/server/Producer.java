@@ -53,13 +53,13 @@ public class Producer extends Consumer {
      *
      * @param service 服务的唯一名称，例如org.apache.niolex.address.Test
      * @param version 服务的版本信息，例如100
-     * @param stat 服务的状态信息，例如分区的服务则用这个表示不同的分区
+     * @param state 服务的状态信息，例如分区的服务则用这个表示不同的分区
      * @param address 服务的地址信息，这就是本机打算发布的信息
      * @param isTmp 是否临时节点。临时节点在服务器关闭后会自动从zookeeper集群删除，否则永久存在。
      * @throws ZKException 假如发布失败
      */
-    public void publishService(String service, int version, String stat, String address, boolean isTmp) {
-        publishService(service, version, stat, address, null, isTmp, false);
+    public void publishService(String service, int version, String state, String address, boolean isTmp) {
+        publishService(service, version, state, address, null, isTmp, false);
     }
 
     /**
@@ -68,14 +68,14 @@ public class Producer extends Consumer {
      *
      * @param service 服务的唯一名称，例如org.apache.niolex.address.Test
      * @param version 服务的版本信息，例如100
-     * @param stat 服务的状态信息，例如分区的服务则用这个表示不同的分区
+     * @param state 服务的状态信息，例如分区的服务则用这个表示不同的分区
      * @param address 服务的地址信息，这就是本机打算发布的信息
      * @param config 服务的配置信息，例如一个key/value属性文件: disabled=true
      * @param isTmp 是否临时节点。临时节点在服务器关闭后会自动从zookeeper集群删除，否则永久存在。
      * @throws ZKException 假如发布失败
      */
-    public void publishService(String service, int version, String stat, String address, byte[] config, boolean isTmp) {
-        publishService(service, version, stat, address, config, isTmp, false);
+    public void publishService(String service, int version, String state, String address, byte[] config, boolean isTmp) {
+        publishService(service, version, state, address, config, isTmp, false);
     }
 
     /**
@@ -84,7 +84,7 @@ public class Producer extends Consumer {
      *
      * @param service 服务的唯一名称，例如org.apache.niolex.address.Test
      * @param version 服务的版本信息，例如100
-     * @param stat 服务的状态信息，例如分区的服务则用这个表示不同的分区
+     * @param state 服务的状态信息，例如分区的服务则用这个表示不同的分区
      * @param address 服务的地址信息，这就是本机打算发布的信息
      * @param config 服务的配置信息，例如一个key/value属性文件: disabled=true
      * @param isTmp 是否临时节点。临时节点在服务器关闭后会自动从zookeeper集群删除，否则永久存在。
@@ -93,7 +93,7 @@ public class Producer extends Consumer {
      * @return the actual path of the created ZK node
      * @throws ZKException 假如发布失败
      */
-    public String publishService(String service, int version, String stat, String address, byte[] config,
+    public String publishService(String service, int version, String state, String address, byte[] config,
             boolean isTmp, boolean isSequential) {
         if (this.root == null) {
             throw new IllegalStateException("Root not set.");
@@ -102,7 +102,7 @@ public class Producer extends Consumer {
             throw new IllegalArgumentException("Version must greater than 0.");
         }
         StringBuilder path = new StringBuilder();
-        path.append(PathUtil.makeService2NodePath(root, service, version, stat));
+        path.append(PathUtil.makeService2NodePath(root, service, version, state));
         path.append("/").append(address);
         LOG.info("Try to publish address: " + path);
 
@@ -116,11 +116,11 @@ public class Producer extends Consumer {
      *
      * @param service 服务的唯一名称，例如org.apache.niolex.address.Test
      * @param version 服务的版本信息，例如100
-     * @param stat 服务的状态信息，例如分区的服务则用这个表示不同的分区
+     * @param state 服务的状态信息，例如分区的服务则用这个表示不同的分区
      * @param address 服务的地址信息，这就是本机打算撤销的地址
      * @throws ZKException 假如撤销服务失败
      */
-    public void withdrawService(String service, int version, String stat, String address) {
+    public void withdrawService(String service, int version, String state, String address) {
         if (this.root == null) {
             throw new IllegalStateException("Root not set.");
         }
@@ -128,7 +128,7 @@ public class Producer extends Consumer {
             throw new IllegalArgumentException("Version must greater than 0.");
         }
         StringBuilder path = new StringBuilder();
-        path.append(PathUtil.makeService2NodePath(root, service, version, stat));
+        path.append(PathUtil.makeService2NodePath(root, service, version, state));
         path.append("/").append(address);
         LOG.info("Try to withdraw address: " + path);
         this.deleteNode(path.toString());

@@ -70,6 +70,10 @@ public class ZKOperator extends AdvancedProducer {
         super(clusterAddress, sessionTimeout);
     }
 
+    /////////////////////////////////////////////////////////////////////////////
+    // BASIC OPERATIONS
+    /////////////////////////////////////////////////////////////////////////////
+
     /**
      * Create node with the specified ACL.
      *
@@ -152,9 +156,22 @@ public class ZKOperator extends AdvancedProducer {
         }
     }
 
+    /**
+     * Add the specified ACL list to the subtree of the specified path.
+     *
+     * @param path the root of subtree
+     * @param acl the ACL list
+     */
     public void addACLTree(String path, List<ACL> acl) {
-        ;
+        addACL(path, acl);
+        for (String end : getChildren(path)) {
+            addACLTree(path + "/" + end, acl);
+        }
     }
+
+    /////////////////////////////////////////////////////////////////////////////
+    // COMPOSITE OPERATIONS
+    /////////////////////////////////////////////////////////////////////////////
 
     /**
      * Init a new tree to store all the data of find service.
@@ -271,31 +288,192 @@ public class ZKOperator extends AdvancedProducer {
         return true;
     }
 
-    public boolean initServiceTree(String service, int version, String[] stats) {
+    /**
+     * Initialize the service tree with the specified version and states.
+     *
+     * @param service the service name
+     * @param version the version number
+     * @param states the states list
+     * @return true if success, false if this service not found
+     */
+    public boolean initServiceTree(String service, int version, String[] states) {
+        if (this.root == null) {
+            throw new IllegalStateException("Root not set.");
+        }
+        String path = makeServicePath(root, service);
+        if (!exists(path)) {
+            return false;
+        }
+        List<ACL> acl = getACL(path);
+        createNode(makeService2StatePath(root, service, version), acl);
+        for (String state : states) {
+            createNode(makeService2NodePath(root, service, version, state), acl);
+        }
         return true;
     }
 
+    /**
+     * Copy all the states and related ACL from one version to another version.
+     *
+     * @param service the service name
+     * @param fromVersion the from version number
+     * @param toVersion the to version number
+     * @return true if success, false if this service or version not found
+     */
     public boolean copyVersion(String service, int fromVersion, int toVersion) {
-        return false;
-    }
-
-    public boolean addStat(String service, int version, String stat) {
+        if (this.root == null) {
+            throw new IllegalStateException("Root not set.");
+        }
+        String path = makeService2StatePath(root, service, fromVersion);
+        if (!exists(path)) {
+            return false;
+        }
+        createNode(makeService2StatePath(root, service, toVersion), getACL(path));
+        for (String state : getChildren(path)) {
+            createNode(makeService2NodePath(root, service, toVersion, state),
+                    getACL(makeService2NodePath(root, service, fromVersion, state)));
+        }
         return true;
     }
 
-    public boolean addServerAuth(String service, int version, String stat) {
+    /**
+     * Add a new state to the specified service and version.
+     *
+     * @param service the service name
+     * @param version the version number
+     * @param state the new state label
+     * @return true if success, false if already exists
+     */
+    public boolean addState(String service, int version, String state) {
+        if (this.root == null) {
+            throw new IllegalStateException("Root not set.");
+        }
+        String path = makeService2NodePath(root, service, version, state);
+        if (exists(path)) {
+            return false;
+        }
+        createNode(path, getACL(makeService2StatePath(root, service, version)));
         return true;
     }
 
-    public boolean addClientAuth(String service, int version) {
+    /**
+     * Add server create read delete rights to all the states nodes of this version.
+     *
+     * @param serverName the server account name
+     * @param service the service name
+     * @param version the version number
+     * @return true if success, false otherwise
+     * @throws IllegalArgumentException if server account not found
+     */
+    public boolean addServerAuth(String serverName, String service, int version) {
+        if (this.root == null) {
+            throw new IllegalStateException("Root not set.");
+        }
+        String path = makeService2StatePath(root, service, version);
+        if (!exists(path)) {
+            return false;
+        }
+        List<String> list = getChildren(path);
+        for (String state : list) {
+            addServerAuth(serverName, service, version, state);
+        }
         return true;
     }
 
-    public boolean removeServerAuth(String service, int version, String stat) {
+    /**
+     * Add server create read delete rights to the specified state.
+     *
+     * @param serverName the server account name
+     * @param service the service name
+     * @param version the version number
+     * @param state the state label
+     * @return true if success, false otherwise
+     * @throws IllegalArgumentException if server account not found
+     */
+    public boolean addServerAuth(String serverName, String service, int version, String state) {
+        if (this.root == null) {
+            throw new IllegalStateException("Root not set.");
+        }
+        String path = makeService2NodePath(root, service, version, state);
+        if (!exists(path)) {
+            return false;
+        }
+        String serverPath = makeServerPath(root, serverName);
+        if (!exists(serverPath)) {
+            throw new IllegalArgumentException("server account not found.");
+        }
+        List<ACL> acl = getACL(serverPath);
+        acl = getCRDRights(serverName, acl);
+        addACL(path, acl);
         return true;
     }
 
-    public boolean removeClientAuth(String service, int version) {
+    /**
+     * Add client read rights to all the versions of the specified service.
+     *
+     * @param clientName the client account name
+     * @param service the service name
+     * @return true if success, false otherwise
+     * @throws IllegalArgumentException if client account not found
+     */
+    public boolean addClientAuth(String clientName, String service) {
+        if (this.root == null) {
+            throw new IllegalStateException("Root not set.");
+        }
+        String path = makeService2VersionPath(root, service);
+        if (!exists(path)) {
+            return false;
+        }
+        String clientPath = makeServerPath(root, clientName);
+        if (!exists(clientPath)) {
+            throw new IllegalArgumentException("client account not found.");
+        }
+        List<ACL> acl = getACL(clientPath);
+        acl = getReadRight(clientName, acl);
+        addACLTree(path, acl);
+        return true;
+    }
+
+    /**
+     * Add client read rights to the specified version.
+     *
+     * @param clientName the client account name
+     * @param service the service name
+     * @param version the version number
+     * @return true if success, false otherwise
+     * @throws IllegalArgumentException if client account not found
+     */
+    public boolean addClientAuth(String clientName, String service, int version) {
+        if (this.root == null) {
+            throw new IllegalStateException("Root not set.");
+        }
+        String path = makeService2StatePath(root, service, version);
+        if (!exists(path)) {
+            return false;
+        }
+        String clientPath = makeServerPath(root, clientName);
+        if (!exists(clientPath)) {
+            throw new IllegalArgumentException("client account not found.");
+        }
+        List<ACL> acl = getACL(clientPath);
+        acl = getReadRight(clientName, acl);
+        addACLTree(path, acl);
+        return true;
+    }
+
+    public boolean removeServerAuth(String serverName, String service, int version) {
+        return true;
+    }
+
+    public boolean removeServerAuth(String serverName, String service, int version, String state) {
+        return true;
+    }
+
+    public boolean removeClientAuth(String clientName, String service) {
+        return true;
+    }
+
+    public boolean removeClientAuth(String clientName, String service, int version) {
         return true;
     }
 

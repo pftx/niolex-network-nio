@@ -182,16 +182,12 @@ public class Consumer extends ZKConnector {
      *
      * @param service 服务的唯一名称，例如org.apache.niolex.address.Test
      * @param version 支持3种格式，参考[version的格式]章节
-     * @param stat 服务的状态信息，例如分区的服务则用这个表示不同的分区
+     * @param state 服务的状态信息，例如分区的服务则用这个表示不同的分区
      * @return 当前的服务地址信息列表；系统会监听该列表的变化，将信息变化设置到返回的MutableOne里
      * @throws ZKException 当发生异常时
      */
-    public MutableOne<List<String>> getAddressList(String service, String version, String stat) {
-        String path = PathUtil.makeService2NodePath(root, service, getCurrentVersion(service, version), stat);
-        LOG.info("watch AddressList: " + path);
-        MutableOne<List<String>> ret = new MutableOne<List<String>>();
-        ret.updateData(this.watchChildren(path, new NodeWatcher(ret)));
-        return ret;
+    public MutableOne<List<String>> getAddressList(String service, String version, String state) {
+        return getAddressList(service, getCurrentVersion(service, version), state);
     }
 
     /**
@@ -203,12 +199,12 @@ public class Consumer extends ZKConnector {
      *
      * @param service 服务的唯一名称，例如org.apache.niolex.address.Test
      * @param version 当前的数字版本
-     * @param stat 服务的状态信息，例如分区的服务则用这个表示不同的分区
+     * @param state 服务的状态信息，例如分区的服务则用这个表示不同的分区
      * @return 当前的服务地址信息列表；系统会监听该列表的变化，将信息变化设置到返回的MutableOne里
      * @throws ZKException 当发生异常时
      */
-    public MutableOne<List<String>> getAddressList(String service, int version, String stat) {
-        String path = PathUtil.makeService2NodePath(root, service, version, stat);
+    public MutableOne<List<String>> getAddressList(String service, int version, String state) {
+        String path = PathUtil.makeService2NodePath(root, service, version, state);
         LOG.info("watch AddressList: " + path);
         MutableOne<List<String>> ret = new MutableOne<List<String>>();
         ret.updateData(this.watchChildren(path, new NodeWatcher(ret)));

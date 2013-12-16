@@ -90,6 +90,57 @@ public class ACLUtil {
     }
 
     /**
+     * Get the create read delete rights of this user.
+     *
+     * @param name
+     * @param list
+     * @return the ACL list
+     */
+    public static List<ACL> getCRDRights(String name, List<ACL> list) {
+        List<ACL> acls = new ArrayList<ACL>();
+        for (ACL acl : list) {
+            Id id = acl.getId();
+            if (belongsTo(id, name)) {
+                ACL su = new ACL(Perms.CREATE | Perms.READ | Perms.DELETE, id);
+                acls.add(su);
+                break;
+            }
+        }
+        return acls;
+    }
+
+    /**
+     * Get the read right of this user.
+     *
+     * @param name
+     * @param list
+     * @return the ACL list
+     */
+    public static List<ACL> getReadRight(String name, List<ACL> list) {
+        List<ACL> acls = new ArrayList<ACL>();
+        for (ACL acl : list) {
+            Id id = acl.getId();
+            if (belongsTo(id, name)) {
+                ACL su = new ACL(Perms.READ, id);
+                acls.add(su);
+                break;
+            }
+        }
+        return acls;
+    }
+
+    /**
+     * Test whether this ID belongs to the specified user.
+     *
+     * @param id
+     * @param name
+     * @return true if belongs to, false otherwise
+     */
+    public static boolean belongsTo(Id id, String name) {
+        return "digest".equals(id.getScheme()) && id.getId().startsWith(name + ":");
+    }
+
+    /**
      * Add the new ACL into the old list. If there is any duplicated IDs,
      * use the new one to replace the old one.
      *
