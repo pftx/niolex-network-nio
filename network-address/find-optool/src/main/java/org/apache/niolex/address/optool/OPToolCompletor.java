@@ -65,7 +65,7 @@ class OPToolCompletor implements Completer {
     }
 
     private int completeCommand(String buffer, String token, List<CharSequence> candidates) {
-        for (String cmd : ShellMain.commandSet) {
+        for (String cmd : ShellMain.COMMAND_MAP.keySet()) {
             if (cmd.startsWith(token)) {
                 candidates.add(cmd);
             }

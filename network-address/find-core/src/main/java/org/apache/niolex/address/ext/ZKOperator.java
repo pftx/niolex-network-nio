@@ -190,6 +190,74 @@ public class ZKOperator extends AdvancedProducer {
     }
 
     /////////////////////////////////////////////////////////////////////////////
+    // LOGIN OPERATIONS
+    /////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Login as an operator.
+     *
+     * @param username the user name
+     * @param password the password
+     * @return true if success, false otherwise
+     */
+    public boolean loginOp(String username, String password) {
+        String path = makeOpPath(root, username);
+        addAuthInfo(username, password);
+        try {
+            getData(path);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /**
+     * Login as a server.
+     *
+     * @param username the user name
+     * @param password the password
+     * @return true if success, false otherwise
+     */
+    public boolean loginServer(String username, String password) {
+        String path = makeServerPath(root, username);
+        addAuthInfo(username, password);
+        try {
+            getData(path);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /**
+     * Login as a client.
+     *
+     * @param username the user name
+     * @param password the password
+     * @return true if success, false otherwise
+     */
+    public boolean loginClient(String username, String password) {
+        String path = makeClientPath(root, username);
+        addAuthInfo(username, password);
+        try {
+            getData(path);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /**
+     * Get the super user's name.
+     *
+     * @return the super user name
+     */
+    public String getSuperUser() {
+        List<ACL> acl = getACL(root);
+        return getUserName(acl.get(0).getId());
+    }
+
+    /////////////////////////////////////////////////////////////////////////////
     // COMPOSITE OPERATIONS
     /////////////////////////////////////////////////////////////////////////////
 
@@ -375,6 +443,10 @@ public class ZKOperator extends AdvancedProducer {
         createNode(path, getACL(makeService2StatePath(root, service, version)));
         return true;
     }
+
+    /////////////////////////////////////////////////////////////////////////////
+    // AUTHORIZATION OPERATIONS
+    /////////////////////////////////////////////////////////////////////////////
 
     /**
      * Add server create read delete rights to all the states nodes of this version.

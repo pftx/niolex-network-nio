@@ -3,18 +3,14 @@ package org.apache.niolex.address.optool;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import jline.console.ConsoleReader;
 
-import org.apache.niolex.address.cmd.CommandOptions;
-import org.apache.niolex.address.optool.OPTool.SVSM;
+import org.apache.niolex.address.cmd.ICommand;
+import org.apache.niolex.address.cmd.impl.ExitCommand;
 import org.apache.niolex.address.util.PathUtil;
+import org.apache.niolex.commons.codec.StringUtil;
 import org.apache.niolex.zookeeper.core.ZKException;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.ZooDefs.Perms;
@@ -28,19 +24,24 @@ import org.slf4j.LoggerFactory;
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  */
 public class ShellMain {
+
     protected static final Logger LOG = LoggerFactory.getLogger(ShellMain.class);
+
+    /**
+     * Store all the environments.
+     */
+    protected static final Environment EVN = Environment.getInstance();
 
     /**
      * Store all the commands.
      */
-    protected static final Set<String> commandSet = new HashSet<String>();
+    protected static final Map<String, ICommand> COMMAND_MAP = new HashMap<String, ICommand>();
 
-    protected CommandOptions cl = new CommandOptions();
-
-    protected OPToolService optool;
-
+    /**
+     * The usage description.
+     */
     private static final String USAGE =
-            " OPTool -server host:port -timeout <timeout> -auth username:password -root <root>\n\n"
+            " OPTool -server host:port -timeout <timeout> -auth username:password -login <login type> -root <root>\n\n"
                     +
                     " Node Path Structure is\n" +
                     " \t/<root>/services/<service>/versions/<version>/<stats>/<node>\n" +
@@ -109,41 +110,34 @@ public class ShellMain {
 
     static {
         // -- Common
-        commandSet.add("quit");
-        commandSet.add("exit");
-        commandSet.add("cd");
-        commandSet.add("ls");
+        COMMAND_MAP.put("quit", new ExitCommand());
+        COMMAND_MAP.put("exit", new ExitCommand());
+        COMMAND_MAP.put("cd", new ExitCommand());
+        COMMAND_MAP.put("ls", new ExitCommand());
         // -- Node
-        commandSet.add("create");
-        commandSet.add("delete");
-        commandSet.add("copyVersion");
-        commandSet.add("set");
-        commandSet.add("get");
+        COMMAND_MAP.put("create", new ExitCommand());
+        COMMAND_MAP.put("delete", new ExitCommand());
+        COMMAND_MAP.put("copyVersion", new ExitCommand());
+        COMMAND_MAP.put("set", new ExitCommand());
+        COMMAND_MAP.put("get", new ExitCommand());
         // -- Permission
-        commandSet.add("addOp");
-        commandSet.add("deleteOp");
-        commandSet.add("listOp");
-        commandSet.add("addClient");
-        commandSet.add("addServer");
-        commandSet.add("addAuth");
-        commandSet.add("deleteAuth");
-        commandSet.add("listAuth");
+        COMMAND_MAP.put("addOp", new ExitCommand());
+        COMMAND_MAP.put("deleteOp", new ExitCommand());
+        COMMAND_MAP.put("listOp", new ExitCommand());
+        COMMAND_MAP.put("addClient", new ExitCommand());
+        COMMAND_MAP.put("addServer", new ExitCommand());
+        COMMAND_MAP.put("addAuth", new ExitCommand());
+        COMMAND_MAP.put("deleteAuth", new ExitCommand());
+        COMMAND_MAP.put("listAuth", new ExitCommand());
         // -- Meta
-        commandSet.add("getMeta");
-        commandSet.add("setMeta");
+        COMMAND_MAP.put("getMeta", new ExitCommand());
+        COMMAND_MAP.put("setMeta", new ExitCommand());
         // -- List
-        commandSet.add("listService");
+        COMMAND_MAP.put("listService", new ExitCommand());
     }
 
     static protected void usage() {
         System.out.println(USAGE);
-    }
-
-    protected String getPrompt() {
-        if (cl.isSuper)
-            return "[ZK:" + cl.curpath + "]#";
-        else
-            return "[ZK:" + cl.curpath + "]$";
     }
 
     /**
@@ -159,42 +153,70 @@ public class ShellMain {
         main.mainLoop();
     }
 
-    public ShellMain(String args[]) throws Exception {
-        cl.parseOptions(args);
-        if (cl.isInit) {
+    //////////////////////////////////////////////////////////////////////////////////////////////
+    // END OF STATIC FIELDS AND METHODS
+    //////////////////////////////////////////////////////////////////////////////////////////////
+
+
+    protected OPToolService optool;
+
+    protected ShellMain(String args[]) throws Exception {
+        EVN.parseOptions(args);
+        if (!EVN.validate()) {
+            System.exit(0);
+        }
+        initOPToolService();
+    }
+
+    protected void initOPToolService() throws Exception {
+        System.out.println("Connecting to " + EVN.host);
+        optool = new OPToolService(EVN.host, EVN.timeout);
+        optool.setRoot(EVN.root);
+        // Check init tree.
+        if (EVN.isInit) {
             System.out.println("                              Attention!!!");
-            System.out.println("  System will now try to init a new root [" + cl.root +"]. [" + cl.auth + "] will be the");
+            System.out.println("  System will now try to init a new root [" + EVN.root +"]. [" + EVN.userName + "] will be the");
             System.out.println("super user. Once proceed, this process can not be undone.");
             System.out.println("Are you sure to continue?(y/n):");
             int input = System.in.read();
             if (input == 'y') {
                 System.out.println("\nSystem is initializing the root ...");
-                OPToolInit.initRoot(cl);
+                optool.initTree(EVN.userName, EVN.password);
                 System.out.println("Init done.");
             } else {
                 System.out.println("Init abouted.");
-                System.exit(0);
             }
         }
-        System.out.println("Connecting to " + cl.host);
-        initOPTool();
-    }
+        // Try login.
+        login();
 
-    protected void initOPTool() throws Exception {
-        optool = new OPToolService(cl.host, cl.timeout);
-        optool.addAuthInfo(cl.auth, cl.auth);
-        if (cl.root != null)
-            optool.setRoot(cl.root);
-        String userName = cl.auth.substring(0, cl.auth.indexOf(":") + 1);
-        List<ACL> list = optool.getAllPerm4Super();
-        for (ACL a : list) {
-            if (a.getId().getId().startsWith(userName)) {
-                cl.isSuper = true;
-            }
+        if (EVN.userName.equals(optool.getSuperUser())) {
+            EVN.isSuper = true;
         }
     }
 
-    protected void mainLoop() throws IOException, KeeperException, InterruptedException {
+    protected void login() throws Exception {
+        boolean isLogin = false;
+        switch (EVN.loginType) {
+            case OP:
+                isLogin = optool.loginOp(EVN.userName, EVN.password);
+                break;
+            case SVR:
+                isLogin = optool.loginServer(EVN.userName, EVN.password);
+                break;
+            default:
+                isLogin = optool.loginClient(EVN.userName, EVN.password);
+                break;
+        }
+        if (isLogin) {
+            System.out.println("Welcome ~ " + EVN.userName + "!");
+        } else {
+            System.out.println("Login failed, please check your username or password.");
+            System.exit(0);
+        }
+    }
+
+    protected void mainLoop() throws Exception {
         System.out.println("Welcome to \"FIND\" Console!");
 
         final ConsoleReader reader = new ConsoleReader();
@@ -216,49 +238,59 @@ public class ShellMain {
         }
     }
 
+    protected String getPrompt() {
+        if (EVN.isSuper)
+            return "[ZK:" + EVN.curpath + "]#";
+        else
+            return "[ZK:" + EVN.curpath + "]$";
+    }
+
     public void executeLine(String line) {
         try {
-            if (!line.isEmpty()) {
-                cl.parseCommand(line);
-                processCmd(cl);
+            if (!StringUtil.isBlank(line)) {
+                EVN.parseCommand(line);
+                processCmd();
             }
         } catch (ZKException e) {
-            if (e.getCause() instanceof KeeperException.NoNodeException) {
-                System.err.println("NO NODE: " + ((KeeperException)e.getCause()).getPath());
-            } else if (e.getCause() instanceof KeeperException.NoAuthException) {
-                System.err.println("NO AUTH!");
-            } else {
-                e.printStackTrace();
+            switch (e.getCode()) {
+                case NO_NODE:
+                    System.err.println("NO NODE: " + ((KeeperException)e.getCause()).getPath());
+                    break;
+                case NO_AUTH:
+                    System.err.println("NO AUTH!");
+                    break;
+                default:
+                    System.err.println("Ex: " + e.toString());
+                    break;
             }
-        } catch (KeeperException.NoAuthException e) {
-            System.err.println("NO AUTH!");
-        } catch (KeeperException.NoNodeException e) {
-            System.err.println("NO NODE: " + e.getPath());
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("Ex: " + e.toString());
         }
     }
 
-    protected void processCmd(CommandOptions co) throws Exception {
-        String[] args = co.getArgArray();
-        String cmd = co.getCommand();
-        if (args.length < 1 || !commandSet.contains(cmd)) {
+    protected void processCmd() throws Exception {
+        ICommand command = COMMAND_MAP.get(EVN.command);
+        if (command == null) {
             usage();
-            return;
+        } else {
+            command.processCmd(optool, EVN.cmdArgs);
         }
+    }
+
+    /*
         String returnStr = null;
         if (cmd.equals("quit") || cmd.equals("exit")) {
             //ggg
         } else if (cmd.equals("cd") && args.length == 2) {
             String absPath = genAbstractPath(args[1]);
             if (optool.exists(absPath)) {
-                cl.curpath = absPath;
+                EVN.curpath = absPath;
             } else {
                 System.out.println("NO NODE: " + absPath);
             }
         } else if (cmd.equals("ls")) {
             if (args.length == 1)
-                System.out.println(optool.getChildren(cl.curpath));
+                System.out.println(optool.getChildren(EVN.curpath));
             else if (args.length == 2)
                 System.out.println(optool.getChildren(genAbstractPath(args[1])));
             else
@@ -308,15 +340,15 @@ public class ShellMain {
             if (args.length == 4) {
                 copyClients = Boolean.parseBoolean(args[3]);
             }
-            if (!optool.isAtServicePath(cl.curpath)) {
+            if (!optool.isAtServicePath(EVN.curpath)) {
                 System.err.println("copyVersion Only work at a Service node!");
                 return;
             }
             // 1. copy version node.
-            if (optool.copyServiceVersion(cl.curpath, args[1], args[2])) {
+            if (optool.copyServiceVersion(EVN.curpath, args[1], args[2])) {
                 if (copyClients) {
                     // 2. copy clients node.
-                    if (optool.copyClientsVersion(cl.curpath, args[1], args[2])) {
+                    if (optool.copyClientsVersion(EVN.curpath, args[1], args[2])) {
                         System.out.println("Copy ServiceVersion & ClientsVersion OK");
                     } else {
                         System.out.println("WRONG: New Client Version Already Exists!");
@@ -336,7 +368,7 @@ public class ShellMain {
             // From now permissions.
             // -----------------------------------------------------
         } else if (cmd.equals("addOp") && args.length == 3) {
-            if (cl.isSuper) {
+            if (EVN.isSuper) {
                 optool.create(optool.getOpPath() + "/" + args[1], null, optool.getAllPerm4Super());
                 ACL newOp = new ACL(Perms.READ, optool.generateDigest(args[1], args[2]));
                 List<ACL> rlist = Collections.singletonList(newOp);
@@ -363,13 +395,13 @@ public class ShellMain {
                 System.err.println("Only Super Can Execute this Command!");
             }
         } else if (cmd.equals("deleteOp") && args.length == 2) {
-            if (cl.isSuper) {
+            if (EVN.isSuper) {
                 System.out.println("deleteOp Will be supported latter....");
             } else {
                 System.err.println("Only Super Can Execute this Command!");
             }
         } else if (cmd.equals("listOp") && args.length == 1) {
-            if (cl.isSuper) {
+            if (EVN.isSuper) {
                 System.out.println(optool.getChildren(optool.getOpPath()));
             } else {
                 System.err.println("Only Super Can Execute this Command!");
@@ -507,7 +539,7 @@ public class ShellMain {
                 System.err.println("This Path does not exist!");
             }
         }else if (cmd.equals("getMeta") && (args.length == 2 || args.length == 3)) {
-            String path = this.genAbstractPath(cl.curpath);
+            String path = this.genAbstractPath(EVN.curpath);
             if (!optool.isInsideVersionPath(path)) {
                 System.err.println("getMeta only Work inside a Version Node.");
                 return;
@@ -526,7 +558,7 @@ public class ShellMain {
                 }
             }
         }else if (cmd.equals("setMeta") && args.length == 4) {
-            String path = this.genAbstractPath(cl.curpath);
+            String path = this.genAbstractPath(EVN.curpath);
             if (!optool.isInsideVersionPath(path)) {
                 System.err.println("setMeta only Work inside a Version Node.");
                 return;
@@ -575,11 +607,11 @@ public class ShellMain {
         if (appendix.charAt(0) == '/') {
             return appendix;
         } else if (appendix.charAt(0) != '.') {
-            return cl.curpath + "/" + appendix;
+            return EVN.curpath + "/" + appendix;
         } else if (appendix.startsWith("./")) {
-            return cl.curpath + appendix.substring(1);
+            return EVN.curpath + appendix.substring(1);
         } else if (appendix.equals(".")) {
-            return cl.curpath;
+            return EVN.curpath;
         }
         // OK, then there must be some ../...
         String[] breads = appendix.split("/");
@@ -592,7 +624,7 @@ public class ShellMain {
             }
         }
         StringBuilder ret = new StringBuilder();
-        String[] curl = cl.curpath.split("/");
+        String[] curl = EVN.curpath.split("/");
         if (curl.length > j) {
             j = curl.length - j;
             // The first item in curl is empty.

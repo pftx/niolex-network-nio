@@ -62,6 +62,20 @@ public class ACLUtil {
     }
 
     /**
+     * Get the user's name from this Id.
+     *
+     * @param id the zookeeper id
+     * @return the user's name, or null if not found
+     */
+    public static String getUserName(Id id) {
+        if ("digest".equals(id.getScheme())) {
+            String sig = id.getId();
+            return sig.substring(0, sig.indexOf(':'));
+        }
+        return null;
+    }
+
+    /**
      * Get the full rights of this user.
      *
      * @param name

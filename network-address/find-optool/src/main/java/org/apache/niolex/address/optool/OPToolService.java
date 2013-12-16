@@ -17,6 +17,9 @@
  */
 package org.apache.niolex.address.optool;
 
+import static org.apache.niolex.address.util.ACLUtil.*;
+import static org.apache.niolex.address.util.PathUtil.*;
+
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;

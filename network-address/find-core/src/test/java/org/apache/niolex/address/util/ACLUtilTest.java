@@ -211,4 +211,12 @@ public class ACLUtilTest extends ACLUtil {
         assertEquals(0, acl.size());
     }
 
+    @Test
+    public void testGetUserName() throws Exception {
+        Id id = new Id("ip", NetUtil.getLocalIP());
+        assertNull(getUserName(id));
+        Id root = getId("qq", "root");
+        assertEquals("qq", getUserName(root));
+    }
+
 }
