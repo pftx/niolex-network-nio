@@ -20,6 +20,7 @@ package org.apache.niolex.address.cmd.impl;
 import java.util.List;
 
 import org.apache.niolex.address.optool.OPToolService;
+import org.apache.niolex.address.util.PathUtil;
 
 /**
  * Copy one version into another version.
@@ -36,8 +37,18 @@ public class CopyVersionCommand extends BaseCommand {
      */
     @Override
     public void processCmd(OPToolService optool, List<String> cmdOps) throws Exception {
-        // TODO Auto-generated method stub
-
+        if (cmdOps.size() != 3) {
+            error("Usage: copyVersion <fromVersionNum> <toVersionNum>");
+            return;
+        }
+        PathUtil.Path p = PathUtil.decodePath(optool.getRoot(), EVN.curpath);
+        if (p.getService() == null) {
+            error("copyVersion can only work inside a service path.");
+            return;
+        }
+        int fromVersion = Integer.parseInt(cmdOps.get(1));
+        int toVersion = Integer.parseInt(cmdOps.get(2));
+        optool.copyVersion(p.getService(), fromVersion, toVersion);
     }
 
 }

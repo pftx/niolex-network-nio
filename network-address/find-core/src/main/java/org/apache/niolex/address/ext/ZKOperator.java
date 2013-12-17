@@ -416,10 +416,23 @@ public class ZKOperator extends AdvancedProducer {
         if (!exists(path)) {
             return false;
         }
+        // Make service version tree.
         createNode(makeService2StatePath(root, service, toVersion), getACL(path));
         for (String state : getChildren(path)) {
             createNode(makeService2NodePath(root, service, toVersion, state),
                     getACL(makeService2NodePath(root, service, fromVersion, state)));
+        }
+        path = makeMeta2VersionPath(root, service, fromVersion);
+        if (!exists(path)) {
+            return true;
+        }
+        // Make client version tree.
+        createNode(makeMeta2VersionPath(root, service, toVersion),
+                getData(path), getACL(path));
+        for (String client : getChildren(path)) {
+            String fromPath = makeMeta2NodePath(root, service, fromVersion, client);
+            createNode(makeMeta2NodePath(root, service, toVersion, client),
+                    getData(fromPath), getACL(fromPath));
         }
         return true;
     }

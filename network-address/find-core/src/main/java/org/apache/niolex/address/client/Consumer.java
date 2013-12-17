@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.util.List;
 
 import org.apache.niolex.address.util.PathUtil;
+import org.apache.niolex.address.util.VersionUtil;
 import org.apache.niolex.commons.bean.MutableOne;
 import org.apache.niolex.zookeeper.core.ZKConnector;
 import org.apache.niolex.zookeeper.core.ZKException;
@@ -107,7 +108,7 @@ public class Consumer extends ZKConnector {
      */
     protected int getCurrentVersionInner(String service, String version, int type) {
         // We only support three kinds of version:
-        PathUtil.Result res = PathUtil.validateVersion(version);
+        VersionUtil.Result res = VersionUtil.validateVersion(version);
         if (!res.isValid()) {
             throw new IllegalArgumentException("Version not recognised: " + version);
         }

@@ -65,11 +65,11 @@ public final class Environment {
 
     String password = null;
 
-    String root = null;
+    public String root = null;
 
     public String curpath = "/";
 
-    boolean isSuper = false;
+    public boolean isSuper = false;
 
     boolean isInit = false;
 
@@ -226,6 +226,13 @@ public final class Environment {
             ret.append('/').append(breads[i]);
         }
         return ret.length() == 0 ? "/" : ret.toString();
+    }
+
+    /**
+     * Change the current path to the parent directory.
+     */
+    public void cdUp() {
+        curpath = curpath.substring(0, curpath.lastIndexOf("/"));
     }
 
 }

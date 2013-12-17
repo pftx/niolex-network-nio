@@ -29,8 +29,8 @@ Usage: optool -server host:port -timeout <timeout> -auth username:password -logi
 
  TREE OPERATIONS
 
-	 copyVersion <fromVersionNum> <toVersionNum> <copyClients>
-		--true for copy clients, false or empty for not copy.
+	 copyVersion <fromVersionNum> <toVersionNum>
+		--Only Work Inside a Service Path
 
  PERMISSION OPERATIONS
 

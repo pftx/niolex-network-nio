@@ -105,64 +105,6 @@ public class OPToolService extends ZKOperator {
     }
 
     /**
-     * Copy an existing version and its recursive nodes to the a new version.
-     *
-     * @param servicePath
-     * @param fromVersion
-     * @param toVersion
-     * @return true if success, false otherwise
-     * @throws KeeperException
-     * @throws InterruptedException
-     */
-    public boolean copyServiceVersion(String servicePath, String fromVersion, String toVersion)
-            throws KeeperException, InterruptedException {
-        servicePath += "/" + PathUtil.VERSIONS;
-        if (exists(servicePath + "/" + toVersion)) {
-            return false;
-        }
-        // 1. create the new version node.
-        this.copyNode(servicePath + "/" + fromVersion, servicePath + "/" + toVersion);
-        List<String> statsNodes = zk.getChildren(servicePath + "/" + fromVersion, false);
-        if (statsNodes.isEmpty())
-            return true;
-        // 2. create all states node.
-        for (String statsNode : statsNodes) {
-            this.copyNode(servicePath + "/" + fromVersion + "/" + statsNode, servicePath + "/" + toVersion + "/"
-                    + statsNode);
-        }
-        return true;
-    }
-
-    /**
-     * Copy an existing version and its recursive nodes to the a new version.
-     *
-     * @param servicePath
-     * @param fromVersion
-     * @param toVersion
-     * @return true if success, false otherwise
-     * @throws KeeperException
-     * @throws InterruptedException
-     */
-    public boolean copyClientsVersion(String servicePath, String fromVersion, String toVersion)
-            throws KeeperException, InterruptedException {
-        servicePath += "/" + PathUtil.CLI_ROOT;
-        if (exists(servicePath + "/" + toVersion)) {
-            return false;
-        }
-        // 1. create the new version node.
-        this.copyNode(servicePath + "/" + fromVersion, servicePath + "/" + toVersion);
-        List<String> clientsNodes = zk.getChildren(servicePath + "/" + fromVersion, false);
-        if (clientsNodes.isEmpty())
-            return true;
-        // 2. create all states node.
-        for (String clientNode : clientsNodes) {
-            this.copyNode(servicePath + "/" + fromVersion + "/" + clientNode, servicePath + "/" + toVersion + "/"
-                    + clientNode);
-        }
-        return true;
-    }
-
-    /**
      * Get all the permissions for all the operators.
      *
      * @return the permission list

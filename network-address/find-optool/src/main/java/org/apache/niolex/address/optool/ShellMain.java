@@ -8,15 +8,7 @@ import java.util.Map;
 import jline.console.ConsoleReader;
 
 import org.apache.niolex.address.cmd.ICommand;
-import org.apache.niolex.address.cmd.impl.CDCommand;
-import org.apache.niolex.address.cmd.impl.CopyVersionCommand;
-import org.apache.niolex.address.cmd.impl.ExitCommand;
-import org.apache.niolex.address.cmd.impl.GetCommand;
-import org.apache.niolex.address.cmd.impl.LSCommand;
-import org.apache.niolex.address.cmd.impl.ListAuthCommand;
-import org.apache.niolex.address.cmd.impl.PWDCommand;
-import org.apache.niolex.address.cmd.impl.SetCommand;
-import org.apache.niolex.address.cmd.impl.UsageCommand;
+import org.apache.niolex.address.cmd.impl.*;
 import org.apache.niolex.commons.codec.StringUtil;
 import org.apache.niolex.commons.util.SystemUtil;
 import org.apache.niolex.zookeeper.core.ZKException;
@@ -58,8 +50,8 @@ public class ShellMain {
         COMMAND_MAP.put("set", new SetCommand());
         COMMAND_MAP.put("acl", new ListAuthCommand());
         COMMAND_MAP.put("create", new ExitCommand());
-        COMMAND_MAP.put("delete", new ExitCommand());
-        COMMAND_MAP.put("deleteTree", new ExitCommand());
+        COMMAND_MAP.put("delete", new DeleteCommand());
+        COMMAND_MAP.put("deleteTree", new DeleteTreeCommand());
         // -- Tree
         COMMAND_MAP.put("initService", new CopyVersionCommand());
         COMMAND_MAP.put("addService", new CopyVersionCommand());

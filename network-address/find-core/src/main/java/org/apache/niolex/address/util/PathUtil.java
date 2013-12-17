@@ -17,6 +17,9 @@
  */
 package org.apache.niolex.address.util;
 
+import org.apache.niolex.address.util.PathUtil.Path.Level;
+
+
 /**
  * The whole path of service is:
  * /<root>/services/<service>/versions/<version>/<state>/<node>
@@ -199,113 +202,167 @@ public abstract class PathUtil {
         return path.toString();
     }
 
-
     /**
-     * We only support three kinds of version:
+     * Make the meta data to client node path.
      *
-     * 1 the fixed format.
-     * 1+ use the current highest version greater than 1
-     * 1-3 use the current highest version between 1 and 3
-     *
-     * @param version the string format of version
-     * @return the validation result
+     * @param root
+     * @param service
+     * @param version
+     * @param clientName
+     * @return the path
      */
-    public static final Result validateVersion(String version) {
-        Result res = new Result();
-        res.setValid(true);
-        if (version.matches("\\d+")) {
-            int ver = Integer.parseInt(version);
-            res.setRange(false);
-            res.setLow(ver);
-        } else if (version.matches("\\d+\\+")) {
-            int ver = Integer.parseInt(version.substring(0, version.length() - 1));
-            res.setRange(true);
-            res.setLow(ver);
-            res.setHigh(Integer.MAX_VALUE);
-        } else if (version.matches("\\d+\\-\\d+")) {
-            res.setRange(true);
-            String[] lh = version.split("-");
-            res.setLow(Integer.parseInt(lh[0]));
-            res.setHigh(Integer.parseInt(lh[1]));
-        } else {
-            res.setValid(false);
-        }
-        return res;
+    public static String makeMeta2NodePath(String root, String service, int version, String clientName) {
+        StringBuilder path = new StringBuilder();
+        path.append(root).append("/").append(SERVICES).append("/").append(service).append("/").append(CLI_ROOT);
+        path.append("/").append(version).append("/").append(clientName);
+        return path.toString();
     }
 
     /**
-     * The version validation result.
+     * Decode the current path.
+     *
+     * @param root the root of find storage
+     * @param currentPath the current path
+     * @return the decoded path bean
+     */
+    public static Path decodePath(String root, String currentPath) {
+        if (root.startsWith("/")) {
+            root = root.substring(1);
+        }
+        Path p = new Path();
+        String[] items = currentPath.split("/");
+        if (items.length < 2 || !root.equals(items[1])) {
+            p.level = Level.OTHER;
+            return p;
+        }
+        p.root = items[1];
+        if (items.length == 2) {
+            p.level = Level.ROOT;
+            return p;
+        }
+        if (!SERVICES.equals(items[2])) {
+            p.level = Level.RO_OTHER;
+            return p;
+        }
+        if (items.length == 3) {
+            p.level = Level.RO_SER;
+            return p;
+        }
+        p.service = items[3];
+        if (items.length == 4) {
+            p.level = Level.SERVICE;
+            return p;
+        }
+        if (VERSIONS.equals(items[4])) {
+            if (items.length == 5) {
+                p.level = Level.SER_VER;
+                return p;
+            }
+            p.version = Integer.parseInt(items[5]);
+            if (items.length == 6) {
+                p.level = Level.SVERSION;
+                return p;
+            }
+            p.state = items[6];
+            if (items.length == 7) {
+                p.level = Level.STATE;
+                return p;
+            }
+            p.node = items[7];
+            p.level = Level.NODE;
+            return p;
+        } else if (CLI_ROOT.equals(items[4])) {
+            if (items.length == 5) {
+                p.level = Level.SER_CLI;
+                return p;
+            }
+            p.version = Integer.parseInt(items[5]);
+            if (items.length == 6) {
+                p.level = Level.CVERSION;
+                return p;
+            }
+            p.client = items[6];
+            p.level = Level.CLIENT;
+            return p;
+        } else {
+            p.level = Level.SER_OTHER;
+            return p;
+        }
+    }
+
+    /**
+     * The decoded path.
      *
      * @author <a href="mailto:xiejiyun@foxmail.com">Xie, Jiyun</a>
      * @version 1.0.0
-     * @since 2013-12-11
+     * @since 2013-12-17
      */
-    public static class Result {
-        private boolean isValid;
-        private boolean isRange;
-        private int low;
-        private int high;
+    public static class Path {
 
         /**
-         * @return the isValid
+         * The path level.
+         *
+         * @author <a href="mailto:xiejiyun@foxmail.com">Xie, Jiyun</a>
+         * @version 1.0.0
+         * @since 2013-12-17
          */
-        public boolean isValid() {
-            return isValid;
+        public static enum Level {
+            OTHER, ROOT, RO_SER, RO_OTHER, SERVICE,
+            SER_VER, SER_CLI, SER_OTHER,
+            SVERSION, CVERSION, CLIENT, STATE, NODE;
         }
+
+        private Level level;
+        private String root;
+        private String service;
+        private int version;
+        private String state;
+        private String node;
+        private String client;
 
         /**
-         * @param isValid the isValid to set
+         * @return the level
          */
-        public void setValid(boolean isValid) {
-            this.isValid = isValid;
+        public Level getLevel() {
+            return level;
         }
-
         /**
-         * @return the isRange
+         * @return the root
          */
-        public boolean isRange() {
-            return isRange;
+        public String getRoot() {
+            return root;
         }
-
         /**
-         * @param isRange the isRange to set
+         * @return the service
          */
-        public void setRange(boolean isRange) {
-            this.isRange = isRange;
+        public String getService() {
+            return service;
         }
-
         /**
-         * @return the low
+         * @return the version
          */
-        public int getLow() {
-            return low;
+        public int getVersion() {
+            return version;
         }
-
         /**
-         * @param low the low to set
+         * @return the state
          */
-        public void setLow(int low) {
-            this.low = low;
+        public String getState() {
+            return state;
         }
-
         /**
-         * @return the high
+         * @return the node
          */
-        public int getHigh() {
-            return high;
+        public String getNode() {
+            return node;
         }
-
         /**
-         * @param high the high to set
+         * @return the client
          */
-        public void setHigh(int high) {
-            this.high = high;
-        }
-
-        @Override
-        public String toString() {
-            return "{V?" + isValid + ", R?" + isRange + ", [" + low + ", " + high + ")}";
+        public String getClient() {
+            return client;
         }
 
     }
+
 }

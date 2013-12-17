@@ -22,6 +22,8 @@ import java.util.List;
 import org.apache.niolex.address.optool.OPToolService;
 
 /**
+ * Set node data.
+ *
  * @author <a href="mailto:xiejiyun@foxmail.com">Xie, Jiyun</a>
  * @version 1.0.0
  * @since 2013-12-17

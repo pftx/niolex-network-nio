@@ -50,4 +50,11 @@ public abstract class BaseCommand implements ICommand {
             return null;
     }
 
+    protected String getPrintPath(List<String> cmdOps) {
+        if (cmdOps.size() <= 1)
+            return ".";
+        else
+            return cmdOps.get(1);
+    }
+
 }
