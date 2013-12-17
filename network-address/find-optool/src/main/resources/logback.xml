@@ -15,7 +15,7 @@
 
     <property name="log_pattern" value="%date{&quot;yyyy-MM-dd HH:mm:ss,SSS&quot;}%6p [%F:%L] - %m%n" />
 
-    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+    <appender name="INTERNAL" class="ch.qos.logback.core.ConsoleAppender">
         <Target>System.out</Target>
         <encoder>
             <pattern>${log_pattern}</pattern>
@@ -26,7 +26,22 @@
         </filter>
     </appender>
 
-    <root level="INFO">
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <Target>System.out</Target>
+        <encoder>
+            <pattern>${log_pattern}</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>WARN</level>
+        </filter>
+    </appender>
+
+    <logger name="org.apache.niolex.address" level="DEBUG">
+		<appender-ref ref="INTERNAL" />
+	</logger>
+
+    <root level="WARN">
         <appender-ref ref="CONSOLE" />
     </root>
 </configuration>

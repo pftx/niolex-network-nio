@@ -57,7 +57,7 @@ public final class Environment {
 
     LoginType loginType = LoginType.OP;
 
-    String host = "127.0.0.1:2181";
+    String host = "127.0.0.1:9181";
 
     int timeout = 30000;
 
@@ -188,11 +188,12 @@ public final class Environment {
         if (relativePath.startsWith("./")) {
             relativePath = relativePath.substring(2);
         }
-        if (StringUtil.isBlank(relativePath)) {
-            relativePath = ".";
-        }
-        if (".".equals(relativePath)) {
+        if (StringUtil.isBlank(relativePath) || ".".equals(relativePath)) {
             return curpath;
+        }
+        String curpath = this.curpath;
+        if ("/".equals(curpath)) {
+            curpath = "";
         }
         switch (relativePath.charAt(0)) {
             case '/':

@@ -1,0 +1,61 @@
+Usage: optool -server host:port -timeout <timeout> -auth username:password -login <login type> -root <root>
+		  <login type>: op     - login as an operator [default option]
+		                client - login as client
+		                server - login as server
+
+ Node Path Structure is
+	 /<root>/services/<service>/versions/<version>/<states>/<node>
+	 ........................../clients /<version>/<clientName> ==> [data]
+	 ......./operators/<operator>
+	 ......./servers  /<server>
+	 ......./clients  /<client>
+
+ COMMON COMMANDS
+
+	 quit|exit
+	 pwd
+	 cd <fullpath|relativepath>
+	 ls <fullpath|relativepath|empty>
+
+ NODE OPERATIONS
+
+	 get <fullpath|relativepath>
+	 set <fullpath|relativepath> <data>
+	 acl <fullpath|relativepath>
+	 create <fullpath|relativepath> <data|empty for no data>
+	 delete <fullpath|relativepath>
+	 deleteTree <fullpath|relativepath>
+		--Only For Super User to Delete Version
+
+ TREE OPERATIONS
+
+	 copyVersion <fromVersionNum> <toVersionNum> <copyClients>
+		--true for copy clients, false or empty for not copy.
+
+ PERMISSION OPERATIONS
+
+	 addOp <userName> <password>
+		--Only For Super User
+	 deleteOp <userName>
+		--Only For Super User
+	 listOp
+		--Only For Super User
+	 addClient <userName> <password>
+	 addServer <userName> <password>
+	 addAuth <fullpath|relativepath> <userName>
+		--Only Work For Service Node
+	 deleteAuth <fullpath|relativepath> <userName>
+		--Only Work For Service Node
+	 listAuth <fullpath|relativepath>
+
+ META OPERATIONS
+
+	 getMeta <userName> <key|empty for get all metas>
+		--Must in a <version> directory
+	 setMeta <userName> <Key> <Value>
+		--Must in a <version> directory
+
+ LIST OPERATIONS
+
+	 listService byname <servicePrefixName>
+	 listService byip <machineIP>

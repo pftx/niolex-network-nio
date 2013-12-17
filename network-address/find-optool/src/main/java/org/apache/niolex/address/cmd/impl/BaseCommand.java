@@ -1,5 +1,5 @@
 /**
- * ICommand.java
+ * BaseCommand.java
  *
  * Copyright 2013 the original author or authors.
  *
@@ -15,31 +15,39 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.niolex.address.cmd;
+package org.apache.niolex.address.cmd.impl;
 
 import java.util.List;
 
-import org.apache.niolex.address.optool.Environment;
-import org.apache.niolex.address.optool.OPToolService;
-
+import org.apache.niolex.address.cmd.ICommand;
+import org.apache.niolex.commons.util.SystemUtil;
 
 /**
- * The command interface, all the commands need implement this.
+ * The base command, some common methods here.
  *
  * @author <a href="mailto:xiejiyun@foxmail.com">Xie, Jiyun</a>
  * @version 1.0.0
- * @since 2013-12-16
+ * @since 2013-12-17
  */
-public interface ICommand {
+public abstract class BaseCommand implements ICommand {
 
-    Environment EVN = Environment.getInstance();
+    protected void error(String str) {
+        System.err.println(str);
+        System.err.flush();
+        SystemUtil.sleep(5);
+    }
 
-    /**
-     * Process the command.
-     *
-     * @param cmdOps the command options
-     * @throws Exception
-     */
-    void processCmd(OPToolService optool, List<String> cmdOps) throws Exception;
+    protected void out(Object str) {
+        System.out.println(str);
+    }
+
+    protected String getPath(List<String> cmdOps) {
+        if (cmdOps.size() == 1)
+            return EVN.curpath;
+        else if (cmdOps.size() == 2)
+            return EVN.getAbsolutePath(cmdOps.get(1));
+        else
+            return null;
+    }
 
 }

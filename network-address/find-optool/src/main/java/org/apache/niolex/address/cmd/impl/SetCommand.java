@@ -1,5 +1,5 @@
 /**
- * ICommand.java
+ * SetCommand.java
  *
  * Copyright 2013 the original author or authors.
  *
@@ -15,31 +15,30 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.niolex.address.cmd;
+package org.apache.niolex.address.cmd.impl;
 
 import java.util.List;
 
-import org.apache.niolex.address.optool.Environment;
 import org.apache.niolex.address.optool.OPToolService;
 
-
 /**
- * The command interface, all the commands need implement this.
- *
  * @author <a href="mailto:xiejiyun@foxmail.com">Xie, Jiyun</a>
  * @version 1.0.0
- * @since 2013-12-16
+ * @since 2013-12-17
  */
-public interface ICommand {
-
-    Environment EVN = Environment.getInstance();
+public class SetCommand extends BaseCommand {
 
     /**
-     * Process the command.
-     *
-     * @param cmdOps the command options
-     * @throws Exception
+     * This is the override of super method.
+     * @see org.apache.niolex.address.cmd.ICommand#processCmd(org.apache.niolex.address.optool.OPToolService, java.util.List)
      */
-    void processCmd(OPToolService optool, List<String> cmdOps) throws Exception;
+    @Override
+    public void processCmd(OPToolService optool, List<String> cmdOps) throws Exception {
+        if (cmdOps.size() != 3) {
+            error("Usage: set <path> <data>");
+        }
+        optool.updateNodeData(EVN.getAbsolutePath(cmdOps.get(1)), cmdOps.get(2));
+        out("OK");
+    }
 
 }

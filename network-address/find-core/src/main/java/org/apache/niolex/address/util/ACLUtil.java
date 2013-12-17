@@ -195,4 +195,62 @@ public class ACLUtil {
         return tmp;
     }
 
+
+    /**
+     * Generate formatted string from the specified ACL list.
+     *
+     * @param list the ACL list
+     * @return the formatted string
+     */
+    public static String formatACL(List<ACL> list) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("total ").append(list.size()).append('\n');
+        for (ACL acl : list) {
+            formatACL(sb, acl);
+        }
+        return sb.toString();
+    }
+
+    /**
+     * Generate formatted string from the specified ACL, and append
+     * the output to the string builder.
+     *
+     * @param sb the string builder
+     * @param acl the ACL
+     */
+    public static void formatACL(StringBuilder sb, ACL acl) {
+        sb.append("\t");
+        int p = acl.getPerms();
+        if ((p & Perms.ADMIN) != 0) {
+            sb.append('A');
+        } else {
+            sb.append('-');
+        }
+        if ((p & Perms.CREATE) != 0) {
+            sb.append('C');
+        } else {
+            sb.append('-');
+        }
+        if ((p & Perms.DELETE) != 0) {
+            sb.append('D');
+        } else {
+            sb.append('-');
+        }
+        if ((p & Perms.READ) != 0) {
+            sb.append('R');
+        } else {
+            sb.append('-');
+        }
+        if ((p & Perms.WRITE) != 0) {
+            sb.append('W');
+        } else {
+            sb.append('-');
+        }
+        String name = acl.getId().getId();
+        int i = name.indexOf(':');
+        if (i != -1)
+            name = name.substring(0, i);
+        sb.append(' ').append(name).append('\n');
+    }
+
 }

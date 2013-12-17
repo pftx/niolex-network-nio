@@ -1,5 +1,5 @@
 /**
- * ICommand.java
+ * UsageCommand.java
  *
  * Copyright 2013 the original author or authors.
  *
@@ -15,31 +15,34 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.niolex.address.cmd;
+package org.apache.niolex.address.cmd.impl;
 
 import java.util.List;
 
-import org.apache.niolex.address.optool.Environment;
 import org.apache.niolex.address.optool.OPToolService;
-
+import org.apache.niolex.commons.codec.StringUtil;
+import org.apache.niolex.commons.file.FileUtil;
 
 /**
- * The command interface, all the commands need implement this.
- *
  * @author <a href="mailto:xiejiyun@foxmail.com">Xie, Jiyun</a>
  * @version 1.0.0
- * @since 2013-12-16
+ * @since 2013-12-17
  */
-public interface ICommand {
-
-    Environment EVN = Environment.getInstance();
+public class UsageCommand extends BaseCommand {
 
     /**
-     * Process the command.
-     *
-     * @param cmdOps the command options
-     * @throws Exception
+     * The usage description.
      */
-    void processCmd(OPToolService optool, List<String> cmdOps) throws Exception;
+    private static final String USAGE =
+            FileUtil.getCharacterFileContentFromClassPath("/usage.txt", UsageCommand.class, StringUtil.UTF_8);
+
+    /**
+     * This is the override of super method.
+     * @see org.apache.niolex.address.cmd.ICommand#processCmd(org.apache.niolex.address.optool.OPToolService, java.util.List)
+     */
+    @Override
+    public void processCmd(OPToolService optool, List<String> cmdOps) throws Exception {
+        out(USAGE);
+    }
 
 }

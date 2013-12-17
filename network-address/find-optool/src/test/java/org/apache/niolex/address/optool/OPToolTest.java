@@ -77,9 +77,9 @@ public class OPToolTest {
      */
     @Test
     public void testGetACLs() throws KeeperException, InterruptedException {
-        List<ACL> list = optool.getACLs("/find/services/org.apache.niolex.address.Test/versions");
+        List<ACL> list = optool.getACL("/find/services/org.apache.niolex.address.Test/versions");
         System.out.println(list);
-        list = optool.getACLs("/find/clients/find-cli");
+        list = optool.getACL("/find/clients/find-cli");
         System.out.println("/cli" + list);
     }
 
@@ -90,8 +90,8 @@ public class OPToolTest {
      */
     @Test
     public void testSetACLs() throws KeeperException, InterruptedException {
-        optool.setACLs("/tmp", Ids.CREATOR_ALL_ACL);
-        System.out.println("/tmp" + optool.getACLs("/tmp"));
+        optool.setACL("/tmp", Ids.CREATOR_ALL_ACL);
+        System.out.println("/tmp" + optool.getACL("/tmp"));
     }
 
 }

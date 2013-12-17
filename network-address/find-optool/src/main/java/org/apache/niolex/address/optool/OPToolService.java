@@ -99,9 +99,9 @@ public class OPToolService extends ZKOperator {
      * @throws InterruptedException
      */
     public void copyNode(String oldNode, String newNode) throws KeeperException, InterruptedException {
-        String data = this.getDataStr(oldNode);
-        List<ACL> acls = this.getACLs(oldNode);
-        this.create(newNode, data, acls);
+        byte[] data = this.getData(oldNode);
+        List<ACL> acls = this.getACL(oldNode);
+        this.createNode(newNode, data, acls);
     }
 
     /**
@@ -169,7 +169,7 @@ public class OPToolService extends ZKOperator {
      * @throws Exception
      */
     public List<ACL> getAllPerm4Op() throws Exception {
-        List<ACL> list = this.getACLs(root + "/" + PathUtil.OP_ROOT);
+        List<ACL> list = this.getACL(root + "/" + PathUtil.OP_ROOT);
         for (ACL a : list) {
             a.setPerms(Perms.ALL);
         }
@@ -183,7 +183,7 @@ public class OPToolService extends ZKOperator {
      * @throws Exception
      */
     public List<ACL> getAllPerm4Super() throws Exception {
-        List<ACL> list = this.getACLs(root + "/" + PathUtil.OP_ROOT);
+        List<ACL> list = this.getACL(root + "/" + PathUtil.OP_ROOT);
         List<ACL> list2 = new ArrayList<ACL>();
         for (ACL a : list) {
             if (a.getPerms() == Perms.ALL) {
@@ -265,6 +265,21 @@ public class OPToolService extends ZKOperator {
             if (path.charAt(i) == '/') ++j;
         }
         return j;
+    }
+
+    /**
+     * Make the version path to a new version path walk through the clients.
+     *
+     * @param path
+     * @return the path
+     */
+    protected String makeClientVersionPath(String path) {
+        String[] curl = path.split("/");
+        StringBuilder ret = new StringBuilder();
+        ret.append(getRoot()).append("/").append(PathUtil.SERVICES).append("/");
+        ret.append(curl[3]).append("/").append(PathUtil.CLI_ROOT).append("/");
+        ret.append(curl[5]);
+        return ret.toString();
     }
 
 }

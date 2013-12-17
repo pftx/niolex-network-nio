@@ -201,6 +201,18 @@ public class ACLUtilTest extends ACLUtil {
         old.add(new ACL(Perms.READ, root));
         old.add(new ACL(Perms.ADMIN, lex));
         old.add(new ACL(Perms.DELETE, nio));
+        String s = formatACL(old);
+        String e = "total 9\n" +
+                        "\t--D-- qq\n" +
+                        "\t--DR- qq\n" +
+                        "\tACDRW nio\n" +
+                        "\t--D-- qq\n" +
+                        "\t-C-R- qq\n" +
+                        "\tACDRW nio\n" +
+                        "\t---R- qq\n" +
+                        "\tA---- qq\n" +
+                        "\t--D-- nio\n";
+        assertEquals(e, s);
         List<ACL> acl = removeId(old, root);
         assertEquals(6, acl.size());
         acl = removeId(acl, lex);
@@ -217,6 +229,14 @@ public class ACLUtilTest extends ACLUtil {
         assertNull(getUserName(id));
         Id root = getId("qq", "root");
         assertEquals("qq", getUserName(root));
+    }
+
+    @Test
+    public void testFormatACL() throws Exception {
+        Id id = new Id("ip", NetUtil.getLocalIP());
+        List<ACL> old = Lists.newArrayList();
+        old.add(new ACL(Perms.WRITE, id));
+        System.out.print(formatACL(old));
     }
 
 }
