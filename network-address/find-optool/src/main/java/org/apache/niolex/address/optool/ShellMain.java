@@ -40,6 +40,7 @@ public class ShellMain {
         COMMAND_MAP.put("u", new UsageCommand());
         COMMAND_MAP.put("usage", new UsageCommand());
         // -- Common
+        COMMAND_MAP.put("q", new ExitCommand());
         COMMAND_MAP.put("quit", new ExitCommand());
         COMMAND_MAP.put("exit", new ExitCommand());
         COMMAND_MAP.put("pwd", new PWDCommand());
@@ -56,26 +57,29 @@ public class ShellMain {
         COMMAND_MAP.put("deleteTree", new DeleteTreeCommand());
         // -- Tree
         COMMAND_MAP.put("initService", new InitServiceCommand());
-        COMMAND_MAP.put("addService", new CopyVersionCommand());
-        COMMAND_MAP.put("addVersion", new CopyVersionCommand());
-        COMMAND_MAP.put("addState", new CopyVersionCommand());
+        COMMAND_MAP.put("addService", new FutureCommand());
+        COMMAND_MAP.put("addVersion", new FutureCommand());
+        COMMAND_MAP.put("addState", new FutureCommand());
         COMMAND_MAP.put("copyVersion", new CopyVersionCommand());
         // -- Permission
         COMMAND_MAP.put("addOp", new AddOpCommand());
-        COMMAND_MAP.put("deleteOp", new ExitCommand());
+        COMMAND_MAP.put("deleteOp", new FutureCommand());
         COMMAND_MAP.put("listOp", new ListOpCommand());
-        COMMAND_MAP.put("addClient", new ExitCommand());
-        COMMAND_MAP.put("addClientAuth", new ExitCommand());
-        COMMAND_MAP.put("deleteClientAuth", new ExitCommand());
+        COMMAND_MAP.put("addClient", new AddClientCommand());
+        COMMAND_MAP.put("deleteClient", new FutureCommand());
+        COMMAND_MAP.put("addClientAuth", new AddClientAuthCommand());
+        COMMAND_MAP.put("deleteClientAuth", new FutureCommand());
         COMMAND_MAP.put("addServer", new AddServerCommand());
+        COMMAND_MAP.put("deleteServer", new FutureCommand());
         COMMAND_MAP.put("addServerAuth", new AddServerAuthCommand());
-        COMMAND_MAP.put("deleteServerAuth", new ExitCommand());
+        COMMAND_MAP.put("deleteServerAuth", new FutureCommand());
         COMMAND_MAP.put("listAuth", new ListAuthCommand());
         // -- Meta
         COMMAND_MAP.put("getMeta", new GetMetaCommand());
         COMMAND_MAP.put("setMeta", new SetMetaCommand());
         // -- List
         COMMAND_MAP.put("listService", new ListServiceCommand());
+        COMMAND_MAP.put("listNode", new ListNodeCommand());
     }
 
     /**

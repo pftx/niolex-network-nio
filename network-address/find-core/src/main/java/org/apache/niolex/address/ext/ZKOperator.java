@@ -617,7 +617,7 @@ public class ZKOperator extends AdvancedProducer {
         if (!exists(path)) {
             return false;
         }
-        String clientPath = makeServerPath(root, clientName);
+        String clientPath = makeClientPath(root, clientName);
         if (!exists(clientPath)) {
             throw new IllegalArgumentException("client account not found.");
         }
@@ -644,7 +644,7 @@ public class ZKOperator extends AdvancedProducer {
         if (!exists(path)) {
             return false;
         }
-        String clientPath = makeServerPath(root, clientName);
+        String clientPath = makeClientPath(root, clientName);
         if (!exists(clientPath)) {
             throw new IllegalArgumentException("client account not found.");
         }

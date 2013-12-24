@@ -29,6 +29,7 @@ Usage: optool -server host:port -timeout <timeout> -auth username:password -logi
 		--Only For Super User to Delete Version
 
  TREE OPERATIONS
+
 	 initService <serviceName> <version> <state1> ... <stateN>
 	 copyVersion <fromVersionNum> <toVersionNum>
 		--Only Work Inside a Service Path
@@ -43,10 +44,14 @@ Usage: optool -server host:port -timeout <timeout> -auth username:password -logi
 		--Only For Super User
 	 addClient <userName> <password>
 	 addClientAuth <fullpath|relativepath> <userName>
+		--Only Work Inside a Service or Version Path
 	 deleteClientAuth <fullpath|relativepath> <userName>
+		--Only Work Inside a Service or Version Path
 	 addServer <userName> <password>
 	 addServerAuth <fullpath|relativepath> <userName>
+		--Only Work Inside a Version or State Path
 	 deleteServerAuth <fullpath|relativepath> <userName>
+		--Only Work Inside a Version or State Path
 	 listAuth <fullpath|relativepath>
 
  META OPERATIONS
@@ -60,3 +65,4 @@ Usage: optool -server host:port -timeout <timeout> -auth username:password -logi
 
 	 listService byname <servicePrefix>
 	 listService byip <machineIP>
+	 listNode <version>

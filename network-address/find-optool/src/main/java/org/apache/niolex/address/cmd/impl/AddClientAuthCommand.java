@@ -1,5 +1,5 @@
 /**
- * ListServiceCommand.java
+ * AddClientAuthCommand.java
  *
  * Copyright 2013 the original author or authors.
  *
@@ -20,15 +20,16 @@ package org.apache.niolex.address.cmd.impl;
 import java.util.List;
 
 import org.apache.niolex.address.optool.OPToolService;
+import org.apache.niolex.address.util.PathUtil;
 
 /**
- * List services for user.
+ * Add client authorization.
  *
  * @author <a href="mailto:xiejiyun@foxmail.com">Xie, Jiyun</a>
  * @version 1.0.0
  * @since 2013-12-24
  */
-public class ListServiceCommand extends BaseCommand {
+public class AddClientAuthCommand extends BaseCommand {
 
     /**
      * This is the override of super method.
@@ -36,28 +37,27 @@ public class ListServiceCommand extends BaseCommand {
      */
     @Override
     public void processCmd(OPToolService optool, List<String> cmdOps) throws Exception {
-        if (cmdOps.size() != 3) {
-            error("Usage: listService byname <servicePrefix> or listService byip <machineIP>");
-            return;
-        }
-
-        String by = cmdOps.get(1);
-        if ("byname".equalsIgnoreCase(by)) {
-            // By Name
-            List<String> list = optool.listServiceByPrefix(cmdOps.get(2));
-            out("total " + list.size());
-            for (String s : list) {
-                out("\t" + s);
+        if (cmdOps.size() == 3) {
+            String path = EVN.getAbsolutePath(cmdOps.get(1));
+            String clientName = cmdOps.get(2);
+            PathUtil.Path p = PathUtil.decodePath(optool.getRoot(), path);
+            switch (p.getLevel()) {
+                case SERVICE:
+                case SER_CLI:
+                case SER_VER:
+                    optool.addClientAuth(clientName, p.getService());
+                    break;
+                case CVERSION:
+                case SVERSION:
+                    optool.addClientAuth(clientName, p.getService(), p.getVersion());
+                    break;
+                default:
+                    error("addClientAuth can only work inside a version path.");
+                    return;
             }
-        } else if("byip".equalsIgnoreCase(by)) {
-            List<String> list = optool.listServiceByIP(cmdOps.get(2));
-            out("total " + list.size());
-            for (String s : list) {
-                out("\t" + s);
-            }
+            out("OK");
         } else {
-            error("Usage: listService byname <servicePrefix> or listService byip <machineIP>");
-            return;
+            error("Usage: addClientAuth <path> <userName>");
         }
     }
 

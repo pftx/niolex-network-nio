@@ -100,4 +100,25 @@ public class OPToolService extends ZKOperator {
         return retList;
     }
 
+    /**
+     * List all the nodes in the specified version.
+     *
+     * @param service the service name
+     * @param version the version number
+     * @return the nodes list
+     */
+    public List<String> listNodeByVersion(String service, int version) {
+        List<String> retList = new ArrayList<String>();
+        List<String> stats = getChildren(makeService2StatePath(root, service, version));
+        for (String state : stats) {
+            List<String> nodes = getChildren(makeService2NodePath(root, service, version, state));
+            for (String n : nodes) {
+                StringBuilder sb = new StringBuilder();
+                sb.append(state).append(' ').append(n);
+                retList.add(sb.toString());
+            }
+        }
+        return retList;
+    }
+
 }
