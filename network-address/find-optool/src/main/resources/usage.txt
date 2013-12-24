@@ -58,5 +58,5 @@ Usage: optool -server host:port -timeout <timeout> -auth username:password -logi
 
  LIST OPERATIONS
 
-	 listService byname <servicePrefixName>
+	 listService byname <servicePrefix>
 	 listService byip <machineIP>

@@ -75,7 +75,7 @@ public class ShellMain {
         COMMAND_MAP.put("getMeta", new GetMetaCommand());
         COMMAND_MAP.put("setMeta", new SetMetaCommand());
         // -- List
-        COMMAND_MAP.put("listService", new ExitCommand());
+        COMMAND_MAP.put("listService", new ListServiceCommand());
     }
 
     /**
