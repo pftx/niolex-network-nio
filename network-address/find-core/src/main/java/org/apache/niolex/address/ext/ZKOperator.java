@@ -347,6 +347,33 @@ public class ZKOperator extends AdvancedProducer {
         return true;
     }
 
+    /**
+     * Get server ACL list by server account name.
+     *
+     * @param serverName the server account name
+     * @return the server ACL list
+     */
+    public List<ACL> getServerACL(String serverName) {
+        String serverPath = makeServerPath(root, serverName);
+        if (!exists(serverPath)) {
+            throw new IllegalArgumentException("server account not found.");
+        }
+        return getACL(serverPath);
+    }
+
+    /**
+     * Get client ACL list by client account name.
+     *
+     * @param clientName the client account name
+     * @return the client ACL list
+     */
+    public List<ACL> getClientACL(String clientName) {
+        String clientPath = makeClientPath(root, clientName);
+        if (!exists(clientPath)) {
+            throw new IllegalArgumentException("client account not found.");
+        }
+        return getACL(clientPath);
+    }
 
     /////////////////////////////////////////////////////////////////////////////
     // COMPOSITE OPERATIONS
@@ -546,8 +573,9 @@ public class ZKOperator extends AdvancedProducer {
         return true;
     }
 
+
     /**
-     * Add server create read delete rights to all the states nodes of this version.
+     * Add server read right to all the meta data nodes of this version.
      *
      * @param serverName the server account name
      * @param service the service name
@@ -563,11 +591,7 @@ public class ZKOperator extends AdvancedProducer {
         if (!exists(path)) {
             return false;
         }
-        String serverPath = makeServerPath(root, serverName);
-        if (!exists(serverPath)) {
-            throw new IllegalArgumentException("server account not found.");
-        }
-        List<ACL> acl = getACL(serverPath);
+        List<ACL> acl = getServerACL(serverName);
         acl = getReadRight(serverName, acl);
         addACLTree(path, acl);
         return true;
@@ -591,11 +615,7 @@ public class ZKOperator extends AdvancedProducer {
         if (!exists(path)) {
             return false;
         }
-        String serverPath = makeServerPath(root, serverName);
-        if (!exists(serverPath)) {
-            throw new IllegalArgumentException("server account not found.");
-        }
-        List<ACL> acl = getACL(serverPath);
+        List<ACL> acl = getServerACL(serverName);
         acl = getCRDRights(serverName, acl);
         addACL(path, acl);
         return true;
@@ -617,11 +637,7 @@ public class ZKOperator extends AdvancedProducer {
         if (!exists(path)) {
             return false;
         }
-        String clientPath = makeClientPath(root, clientName);
-        if (!exists(clientPath)) {
-            throw new IllegalArgumentException("client account not found.");
-        }
-        List<ACL> acl = getACL(clientPath);
+        List<ACL> acl = getClientACL(clientName);
         acl = getReadRight(clientName, acl);
         addACLTree(path, acl);
         return true;
@@ -644,29 +660,116 @@ public class ZKOperator extends AdvancedProducer {
         if (!exists(path)) {
             return false;
         }
-        String clientPath = makeClientPath(root, clientName);
-        if (!exists(clientPath)) {
-            throw new IllegalArgumentException("client account not found.");
-        }
-        List<ACL> acl = getACL(clientPath);
+        List<ACL> acl = getClientACL(clientName);
         acl = getReadRight(clientName, acl);
         addACLTree(path, acl);
         return true;
     }
 
+    /**
+     * Remove server authorization from this version.
+     *
+     * @param serverName the server account name
+     * @param service the service name
+     * @param version the version number
+     * @return true if removed, false if version not found
+     */
     public boolean removeServerAuth(String serverName, String service, int version) {
+        if (this.root == null) {
+            throw new IllegalStateException("Root not set.");
+        }
+        String path = makeService2StatePath(root, service, version);
+        if (!exists(path)) {
+            return false;
+        }
+        List<String> list = getChildren(path);
+        for (String state : list) {
+            removeServerAuth(serverName, service, version, state);
+        }
         return true;
     }
 
+    /**
+     * Remove server authorization from the meta nodes of this version.
+     *
+     * @param serverName the server account name
+     * @param service the service name
+     * @param version the version number
+     * @return true if removed, false if version not found
+     */
+    public boolean removeServerMetaAuth(String serverName, String service, int version) {
+        if (this.root == null) {
+            throw new IllegalStateException("Root not set.");
+        }
+        String path = makeMeta2VersionPath(root, service, version);
+        if (!exists(path)) {
+            return false;
+        }
+        List<ACL> acl = getServerACL(serverName);
+        removeACLTree(path, acl.get(0).getId());
+        return true;
+    }
+
+    /**
+     * Remove server authorization from this state.
+     *
+     * @param serverName the server account name
+     * @param service the service name
+     * @param version the version number
+     * @param state the state
+     * @return true if removed, false if state not found
+     */
     public boolean removeServerAuth(String serverName, String service, int version, String state) {
+        if (this.root == null) {
+            throw new IllegalStateException("Root not set.");
+        }
+        String path = makeService2NodePath(root, service, version, state);
+        if (!exists(path)) {
+            return false;
+        }
+        List<ACL> acl = getServerACL(serverName);
+        removeACLTree(path, acl.get(0).getId());
         return true;
     }
 
+    /**
+     * Remove client authorization from this service.
+     *
+     * @param clientName the client name
+     * @param service the service name
+     * @return true if removed, false if service not found
+     */
     public boolean removeClientAuth(String clientName, String service) {
+        if (this.root == null) {
+            throw new IllegalStateException("Root not set.");
+        }
+        String path = makeService2VersionPath(root, service);
+        if (!exists(path)) {
+            return false;
+        }
+        List<ACL> acl = getClientACL(clientName);
+        removeACLTree(path, acl.get(0).getId());
         return true;
     }
 
+    /**
+     * Remove client authorization from the specified version of this service.
+     *
+     * @param clientName the client name
+     * @param service the service name
+     * @param version the version number
+     * @return true if removed, false if version not found
+     */
     public boolean removeClientAuth(String clientName, String service, int version) {
+        if (this.root == null) {
+            throw new IllegalStateException("Root not set.");
+        }
+        String path = makeService2StatePath(root, service, version);
+        if (!exists(path)) {
+            return false;
+        }
+        List<ACL> acl = getClientACL(clientName);
+        removeACLTree(path, acl.get(0).getId());
         return true;
     }
 

@@ -43,11 +43,13 @@ Usage: optool -server host:port -timeout <timeout> -auth username:password -logi
 	 listOp
 		--Only For Super User
 	 addClient <userName> <password>
+	 deleteClient <userName>
 	 addClientAuth <fullpath|relativepath> <userName>
 		--Only Work Inside a Service or Version Path
 	 deleteClientAuth <fullpath|relativepath> <userName>
 		--Only Work Inside a Service or Version Path
 	 addServer <userName> <password>
+	 deleteServer <userName>
 	 addServerAuth <fullpath|relativepath> <userName>
 		--Only Work Inside a Version or State Path
 	 deleteServerAuth <fullpath|relativepath> <userName>

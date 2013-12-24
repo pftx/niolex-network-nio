@@ -50,6 +50,7 @@ public class ShellMain {
         // -- Node
         COMMAND_MAP.put("get", new GetCommand());
         COMMAND_MAP.put("set", new SetCommand());
+        COMMAND_MAP.put("alc", new ListAuthCommand());
         COMMAND_MAP.put("acl", new ListAuthCommand());
         COMMAND_MAP.put("add", new CreateCommand());
         COMMAND_MAP.put("create", new CreateCommand());
@@ -68,11 +69,11 @@ public class ShellMain {
         COMMAND_MAP.put("addClient", new AddClientCommand());
         COMMAND_MAP.put("deleteClient", new FutureCommand());
         COMMAND_MAP.put("addClientAuth", new AddClientAuthCommand());
-        COMMAND_MAP.put("deleteClientAuth", new FutureCommand());
+        COMMAND_MAP.put("deleteClientAuth", new DeleteClientAuthCommand());
         COMMAND_MAP.put("addServer", new AddServerCommand());
         COMMAND_MAP.put("deleteServer", new FutureCommand());
         COMMAND_MAP.put("addServerAuth", new AddServerAuthCommand());
-        COMMAND_MAP.put("deleteServerAuth", new FutureCommand());
+        COMMAND_MAP.put("deleteServerAuth", new DeleteServerAuthCommand());
         COMMAND_MAP.put("listAuth", new ListAuthCommand());
         // -- Meta
         COMMAND_MAP.put("getMeta", new GetMetaCommand());

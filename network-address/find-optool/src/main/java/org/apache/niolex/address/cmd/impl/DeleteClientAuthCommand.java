@@ -1,5 +1,5 @@
 /**
- * AddClientAuthCommand.java
+ * DeleteClientAuthCommand.java
  *
  * Copyright 2013 the original author or authors.
  *
@@ -23,13 +23,13 @@ import org.apache.niolex.address.optool.OPToolService;
 import org.apache.niolex.address.util.PathUtil;
 
 /**
- * Add client authorization.
+ * Delete client authorization from the specified path.
  *
  * @author <a href="mailto:xiejiyun@foxmail.com">Xie, Jiyun</a>
  * @version 1.0.0
  * @since 2013-12-24
  */
-public class AddClientAuthCommand extends BaseCommand {
+public class DeleteClientAuthCommand extends BaseCommand {
 
     /**
      * This is the override of super method.
@@ -37,28 +37,28 @@ public class AddClientAuthCommand extends BaseCommand {
      */
     @Override
     public void processCmd(OPToolService optool, List<String> cmdOps) throws Exception {
-        if (cmdOps.size() == 3) {
-            String path = EVN.getAbsolutePath(cmdOps.get(1));
-            String clientName = cmdOps.get(2);
-            PathUtil.Path p = PathUtil.decodePath(optool.getRoot(), path);
-            switch (p.getLevel()) {
-                case SERVICE:
-                case SER_CLI:
-                case SER_VER:
-                    optool.addClientAuth(clientName, p.getService());
-                    break;
-                case CVERSION:
-                case SVERSION:
-                    optool.addClientAuth(clientName, p.getService(), p.getVersion());
-                    break;
-                default:
-                    error("addClientAuth can only work inside a Service or Version path.");
-                    return;
-            }
-            out("OK");
-        } else {
-            error("Usage: addClientAuth <path> <userName>");
+        if (cmdOps.size() != 3) {
+            error("Usage: deleteClientAuth <fullpath|relativepath> <userName>");
+            return;
         }
+        String path = EVN.getAbsolutePath(cmdOps.get(1));
+        String clientName = cmdOps.get(2);
+        PathUtil.Path p = PathUtil.decodePath(optool.getRoot(), path);
+        switch (p.getLevel()) {
+            case SERVICE:
+            case SER_CLI:
+            case SER_VER:
+                optool.removeClientAuth(clientName, p.getService());
+                break;
+            case CVERSION:
+            case SVERSION:
+                optool.removeClientAuth(clientName, p.getService(), p.getVersion());
+                break;
+            default:
+                error("deleteClientAuth can only work inside a Service or Version path.");
+                return;
+        }
+        out("OK");
     }
 
 }

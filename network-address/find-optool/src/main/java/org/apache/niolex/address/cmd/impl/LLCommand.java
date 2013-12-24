@@ -43,7 +43,7 @@ public class LLCommand extends BaseCommand {
             for (String s : list) {
                 System.out.print(s);
                 System.out.print(" ");
-                System.out.print(ACLUtil.formatACL(optool.getACL(path)));
+                System.out.print(ACLUtil.formatACL(optool.getACL(path + "/" + s)));
             }
         } else {
             error("Usage: ll <path>");
