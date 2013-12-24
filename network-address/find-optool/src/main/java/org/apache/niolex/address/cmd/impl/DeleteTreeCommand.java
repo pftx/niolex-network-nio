@@ -46,6 +46,9 @@ public class DeleteTreeCommand extends BaseCommand {
             if (p.getLevel() == PathUtil.Path.Level.CVERSION ||
                     p.getLevel() == PathUtil.Path.Level.SVERSION) {
                 optool.deleteTree(path);
+                if (path.equals(EVN.curPath)) {
+                    EVN.cdUp();
+                }
                 out("OK");
             } else {
                 error("deleteTree is Only For Delete Version.");

@@ -1,5 +1,5 @@
 /**
- * PWDCommand.java
+ * LLCommand.java
  *
  * Copyright 2013 the original author or authors.
  *
@@ -19,17 +19,17 @@ package org.apache.niolex.address.cmd.impl;
 
 import java.util.List;
 
-import org.apache.niolex.address.cmd.ICommand;
 import org.apache.niolex.address.optool.OPToolService;
+import org.apache.niolex.address.util.ACLUtil;
 
 /**
- * Show the current directory.
+ * List all the children and auth.
  *
  * @author <a href="mailto:xiejiyun@foxmail.com">Xie, Jiyun</a>
  * @version 1.0.0
- * @since 2013-12-17
+ * @since 2013-12-23
  */
-public class PWDCommand implements ICommand {
+public class LLCommand extends BaseCommand {
 
     /**
      * This is the override of super method.
@@ -37,7 +37,17 @@ public class PWDCommand implements ICommand {
      */
     @Override
     public void processCmd(OPToolService optool, List<String> cmdOps) throws Exception {
-        System.out.println(EVN.curPath);
+        String path = getPath(cmdOps);
+        if (path != null) {
+            List<String> list = optool.getChildren(path);
+            for (String s : list) {
+                System.out.print(s);
+                System.out.print(" ");
+                System.out.print(ACLUtil.formatACL(optool.getACL(path)));
+            }
+        } else {
+            error("Usage: ll <path>");
+        }
     }
 
 }

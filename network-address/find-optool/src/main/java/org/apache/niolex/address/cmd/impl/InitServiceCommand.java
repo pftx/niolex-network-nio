@@ -1,5 +1,5 @@
 /**
- * PWDCommand.java
+ * InitServiceCommand.java
  *
  * Copyright 2013 the original author or authors.
  *
@@ -19,17 +19,16 @@ package org.apache.niolex.address.cmd.impl;
 
 import java.util.List;
 
-import org.apache.niolex.address.cmd.ICommand;
 import org.apache.niolex.address.optool.OPToolService;
 
 /**
- * Show the current directory.
+ * Initialize a new service tree.
  *
  * @author <a href="mailto:xiejiyun@foxmail.com">Xie, Jiyun</a>
  * @version 1.0.0
- * @since 2013-12-17
+ * @since 2013-12-23
  */
-public class PWDCommand implements ICommand {
+public class InitServiceCommand extends BaseCommand {
 
     /**
      * This is the override of super method.
@@ -37,7 +36,19 @@ public class PWDCommand implements ICommand {
      */
     @Override
     public void processCmd(OPToolService optool, List<String> cmdOps) throws Exception {
-        System.out.println(EVN.curPath);
+        if (cmdOps.size() < 4) {
+            error("Usage: initService <serviceName> <version> <state1> ... <stateN>");
+            return;
+        }
+
+        String service = cmdOps.get(1);
+        int version = Integer.parseInt(cmdOps.get(2));
+        String[] states = new String[cmdOps.size() - 3];
+        for (int i = 3; i < cmdOps.size(); ++i) {
+            states[i - 3] = cmdOps.get(i);
+        }
+        optool.initServiceTree(service, version, states);
+        out("OK");
     }
 
 }

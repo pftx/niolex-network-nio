@@ -1,5 +1,5 @@
 /**
- * PWDCommand.java
+ * SetMetaCommand.java
  *
  * Copyright 2013 the original author or authors.
  *
@@ -19,17 +19,17 @@ package org.apache.niolex.address.cmd.impl;
 
 import java.util.List;
 
-import org.apache.niolex.address.cmd.ICommand;
 import org.apache.niolex.address.optool.OPToolService;
+import org.apache.niolex.address.util.PathUtil;
 
 /**
- * Show the current directory.
+ * Set the meta data of this client.
  *
  * @author <a href="mailto:xiejiyun@foxmail.com">Xie, Jiyun</a>
  * @version 1.0.0
- * @since 2013-12-17
+ * @since 2013-12-23
  */
-public class PWDCommand implements ICommand {
+public class SetMetaCommand extends BaseCommand {
 
     /**
      * This is the override of super method.
@@ -37,7 +37,25 @@ public class PWDCommand implements ICommand {
      */
     @Override
     public void processCmd(OPToolService optool, List<String> cmdOps) throws Exception {
-        System.out.println(EVN.curPath);
+        if (cmdOps.size() != 4) {
+            error("Usage: setMeta <userName> <Key> <Value>");
+            return;
+        }
+        String clientName = cmdOps.get(1);
+        PathUtil.Path p = PathUtil.decodePath(optool.getRoot(), EVN.curPath);
+        switch (p.getLevel()) {
+            case CVERSION:
+            case SVERSION:
+            case CLIENT:
+            case STATE:
+            case NODE:
+                break;
+            default:
+                error("setMeta only work inside a version path.");
+                return;
+        }
+        optool.updateMetaData(clientName, p.getService(), p.getVersion(), cmdOps.get(2), cmdOps.get(3));
+        out("OK");
     }
 
 }

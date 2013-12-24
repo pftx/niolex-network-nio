@@ -180,12 +180,21 @@ public class PathUtilTest extends PathUtil {
     }
 
     @Test
-    public void testDecodePathSVer() throws Exception {
+    public void testDecodePathSVer1() throws Exception {
         Path p = decodePath("find", "/find/services/org.apache.niolex.address.Test/versions");
         assertEquals(Level.SER_VER, p.getLevel());
         assertEquals("find", p.getRoot());
         assertEquals("org.apache.niolex.address.Test", p.getService());
         assertEquals(0, p.getVersion());
+    }
+
+    @Test
+    public void testDecodePathSVer2() throws Exception {
+        Path p = decodePath("find", "/find/services/org.apache.niolex.address.Test/versions/abc");
+        assertEquals(Level.SER_VER, p.getLevel());
+        assertEquals("find", p.getRoot());
+        assertEquals("org.apache.niolex.address.Test", p.getService());
+        assertEquals(-1, p.getVersion());
     }
 
     @Test
@@ -252,12 +261,21 @@ public class PathUtilTest extends PathUtil {
     }
 
     @Test
-    public void testDecodePathCVer() throws Exception {
+    public void testDecodePathCVer1() throws Exception {
         Path p = decodePath("find", "/find/services/org.apache.niolex.address.Test/clients");
         assertEquals(Level.SER_CLI, p.getLevel());
         assertEquals("find", p.getRoot());
         assertEquals("org.apache.niolex.address.Test", p.getService());
         assertEquals(0, p.getVersion());
+    }
+
+    @Test
+    public void testDecodePathCVer2() throws Exception {
+        Path p = decodePath("find", "/find/services/org.apache.niolex.address.Test/clients/go");
+        assertEquals(Level.SER_CLI, p.getLevel());
+        assertEquals("find", p.getRoot());
+        assertEquals("org.apache.niolex.address.Test", p.getService());
+        assertEquals(-1, p.getVersion());
     }
 
     @Test

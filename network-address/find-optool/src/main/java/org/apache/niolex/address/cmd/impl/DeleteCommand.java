@@ -43,7 +43,7 @@ public class DeleteCommand extends BaseCommand {
                 error("delete: cannot delete '" + getPrintPath(cmdOps) + "': Has Children");
             } else {
                 optool.deleteNode(path);
-                if (path.equals(EVN.curpath)) {
+                if (path.equals(EVN.curPath)) {
                     EVN.cdUp();
                 }
                 out("OK");

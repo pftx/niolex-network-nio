@@ -1,5 +1,5 @@
 /**
- * PWDCommand.java
+ * AddServerCommand.java
  *
  * Copyright 2013 the original author or authors.
  *
@@ -19,17 +19,16 @@ package org.apache.niolex.address.cmd.impl;
 
 import java.util.List;
 
-import org.apache.niolex.address.cmd.ICommand;
 import org.apache.niolex.address.optool.OPToolService;
 
 /**
- * Show the current directory.
+ * Add a new server account.
  *
  * @author <a href="mailto:xiejiyun@foxmail.com">Xie, Jiyun</a>
  * @version 1.0.0
- * @since 2013-12-17
+ * @since 2013-12-23
  */
-public class PWDCommand implements ICommand {
+public class AddServerCommand extends BaseCommand {
 
     /**
      * This is the override of super method.
@@ -37,7 +36,15 @@ public class PWDCommand implements ICommand {
      */
     @Override
     public void processCmd(OPToolService optool, List<String> cmdOps) throws Exception {
-        System.out.println(EVN.curPath);
+        if (cmdOps.size() != 3) {
+            error("Usage: addServer <userName> <password>");
+            return;
+        }
+        if (optool.addServer(cmdOps.get(1), cmdOps.get(2))) {
+            out("OK");
+        } else {
+            error("The server account already exists.");
+        }
     }
 
 }

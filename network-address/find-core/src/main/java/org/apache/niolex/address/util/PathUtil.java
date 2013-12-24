@@ -258,7 +258,13 @@ public abstract class PathUtil {
                 p.level = Level.SER_VER;
                 return p;
             }
-            p.version = Integer.parseInt(items[5]);
+            try {
+                p.version = Integer.parseInt(items[5]);
+            } catch (Exception e) {
+                p.version = -1;
+                p.level = Level.SER_VER;
+                return p;
+            }
             if (items.length == 6) {
                 p.level = Level.SVERSION;
                 return p;
@@ -276,7 +282,13 @@ public abstract class PathUtil {
                 p.level = Level.SER_CLI;
                 return p;
             }
-            p.version = Integer.parseInt(items[5]);
+            try {
+                p.version = Integer.parseInt(items[5]);
+            } catch (Exception e) {
+                p.version = -1;
+                p.level = Level.SER_CLI;
+                return p;
+            }
             if (items.length == 6) {
                 p.level = Level.CVERSION;
                 return p;

@@ -1,5 +1,5 @@
 /**
- * PWDCommand.java
+ * AddServerAuthCommand.java
  *
  * Copyright 2013 the original author or authors.
  *
@@ -19,17 +19,17 @@ package org.apache.niolex.address.cmd.impl;
 
 import java.util.List;
 
-import org.apache.niolex.address.cmd.ICommand;
 import org.apache.niolex.address.optool.OPToolService;
+import org.apache.niolex.address.util.PathUtil;
 
 /**
- * Show the current directory.
+ * Add server authorization.
  *
  * @author <a href="mailto:xiejiyun@foxmail.com">Xie, Jiyun</a>
  * @version 1.0.0
- * @since 2013-12-17
+ * @since 2013-12-23
  */
-public class PWDCommand implements ICommand {
+public class AddServerAuthCommand extends BaseCommand {
 
     /**
      * This is the override of super method.
@@ -37,7 +37,28 @@ public class PWDCommand implements ICommand {
      */
     @Override
     public void processCmd(OPToolService optool, List<String> cmdOps) throws Exception {
-        System.out.println(EVN.curPath);
+        if (cmdOps.size() == 3) {
+            String path = EVN.getAbsolutePath(cmdOps.get(1));
+            String serverName = cmdOps.get(2);
+            PathUtil.Path p = PathUtil.decodePath(optool.getRoot(), path);
+            switch (p.getLevel()) {
+                case STATE:
+                case NODE:
+                    optool.addServerAuth(serverName, p.getService(), p.getVersion(), p.getState());
+                    break;
+                case CVERSION:
+                case SVERSION:
+                    optool.addServerMetaAuth(serverName, p.getService(), p.getVersion());
+                    optool.addServerAuth(serverName, p.getService(), p.getVersion());
+                    break;
+                default:
+                    error("addServerAuth can only work inside a version or state path.");
+                    return;
+            }
+            out("OK");
+        } else {
+            error("Usage: addServerAuth <path> <userName>");
+        }
     }
 
 }

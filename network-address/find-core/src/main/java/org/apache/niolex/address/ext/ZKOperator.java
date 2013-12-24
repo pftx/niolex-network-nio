@@ -21,7 +21,9 @@ import static org.apache.niolex.address.util.ACLUtil.*;
 import static org.apache.niolex.address.util.PathUtil.*;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.niolex.zookeeper.core.ZKException;
 import org.apache.zookeeper.CreateMode;
@@ -138,7 +140,7 @@ public class ZKOperator extends AdvancedProducer {
      */
     public void addACL(String path, List<ACL> acl) {
         try {
-            // Add ACL in a while loop to ensure current add will end with
+            // Add ACL in a while loop to ensure concurrent add will end with
             // expected result.
             while (true) {
                 Stat stat = new Stat();
@@ -174,7 +176,7 @@ public class ZKOperator extends AdvancedProducer {
      */
     public void removeACL(String path, Id id) {
         try {
-            // Remove ACL in a while loop to ensure current remove will end with
+            // Remove ACL in a while loop to ensure concurrent remove will end with
             // expected result.
             while (true) {
                 Stat stat = new Stat();
@@ -186,6 +188,20 @@ public class ZKOperator extends AdvancedProducer {
             }
         } catch (Exception e) {
             throw ZKException.makeInstance("Failed to remove ACL.", e);
+        }
+    }
+
+    /**
+     * Remove all the ACLs of this specified Id from the subtree of the
+     * specified path.
+     *
+     * @param path the root of subtree
+     * @param id the id to be removed
+     */
+    public void removeACLTree(String path, Id id) {
+        removeACL(path, id);
+        for (String end : getChildren(path)) {
+            removeACLTree(path + "/" + end, id);
         }
     }
 
@@ -258,32 +274,8 @@ public class ZKOperator extends AdvancedProducer {
     }
 
     /////////////////////////////////////////////////////////////////////////////
-    // COMPOSITE OPERATIONS
+    // USER OPERATIONS
     /////////////////////////////////////////////////////////////////////////////
-
-    /**
-     * Init a new tree to store all the data of find service.
-     *
-     * @param rootName the root user name
-     * @param rootPasswd the root password
-     * @return true if init success, false if the root path already exists
-     */
-    public boolean initTree(String rootName, String rootPasswd) {
-        if (this.root == null) {
-            throw new IllegalStateException("Root not set.");
-        }
-        if (exists(this.root)) {
-            return false;
-        }
-        List<ACL> acl = getAllRights(rootName, rootPasswd);
-        createNode(root, acl);
-        createNode(makeOpPath(root), acl);
-        createNode(makeOpPath(root, rootName), acl);
-        createNode(makeServerPath(root), acl);
-        createNode(makeClientPath(root), acl);
-        createNode(makeServicePath(root), acl);
-        return true;
-    }
 
     /**
      * Add a new operator into find service.
@@ -355,6 +347,35 @@ public class ZKOperator extends AdvancedProducer {
         return true;
     }
 
+
+    /////////////////////////////////////////////////////////////////////////////
+    // COMPOSITE OPERATIONS
+    /////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Init a new tree to store all the data of find service.
+     *
+     * @param rootName the root user name
+     * @param rootPasswd the root password
+     * @return true if init success, false if the root path already exists
+     */
+    public boolean initTree(String rootName, String rootPasswd) {
+        if (this.root == null) {
+            throw new IllegalStateException("Root not set.");
+        }
+        if (exists(this.root)) {
+            return false;
+        }
+        List<ACL> acl = getAllRights(rootName, rootPasswd);
+        createNode(root, acl);
+        createNode(makeOpPath(root), acl);
+        createNode(makeOpPath(root, rootName), acl);
+        createNode(makeServerPath(root), acl);
+        createNode(makeClientPath(root), acl);
+        createNode(makeServicePath(root), acl);
+        return true;
+    }
+
     /**
      * Add a new service into find service storage.
      *
@@ -372,7 +393,7 @@ public class ZKOperator extends AdvancedProducer {
         List<ACL> acl = getACL(makeServicePath(root));
         createNode(path, acl);
         createNode(makeService2VersionPath(root, service), acl);
-        createNode(makeMeta2ClientPath(path, service), acl);
+        createNode(makeMeta2ClientPath(root, service), acl);
         return true;
     }
 
@@ -382,21 +403,61 @@ public class ZKOperator extends AdvancedProducer {
      * @param service the service name
      * @param version the version number
      * @param states the states list
-     * @return true if success, false if this service not found
+     * @return true if success, no false
      */
     public boolean initServiceTree(String service, int version, String[] states) {
         if (this.root == null) {
             throw new IllegalStateException("Root not set.");
         }
-        String path = makeServicePath(root, service);
+        if (!exists(makeServicePath(root, service))) {
+            addService(service);
+        }
+        addVersion(service, version);
+        addMetaVersion(service, version);
+        List<ACL> acl = getACL(makeService2VersionPath(root, service));
+        for (String state : states) {
+            createNode(makeService2NodePath(root, service, version, state), acl);
+        }
+        return true;
+    }
+
+    /**
+     * Add a new version into this service.
+     *
+     * @param service the service name
+     * @param version the new version number
+     * @return true if success, false if this service not found
+     */
+    public boolean addVersion(String service, int version) {
+        if (this.root == null) {
+            throw new IllegalStateException("Root not set.");
+        }
+        String path = makeService2VersionPath(root, service);
         if (!exists(path)) {
             return false;
         }
         List<ACL> acl = getACL(path);
         createNode(makeService2StatePath(root, service, version), acl);
-        for (String state : states) {
-            createNode(makeService2NodePath(root, service, version, state), acl);
+        return true;
+    }
+
+    /**
+     * Add a new meta data version into this service.
+     *
+     * @param service the service name
+     * @param version the new version number
+     * @return true if success, false if this service not found
+     */
+    public boolean addMetaVersion(String service, int version) {
+        if (this.root == null) {
+            throw new IllegalStateException("Root not set.");
         }
+        String path = makeMeta2ClientPath(root, service);
+        if (!exists(path)) {
+            return false;
+        }
+        List<ACL> acl = getACL(path);
+        createNode(makeMeta2VersionPath(root, service, version), acl);
         return true;
     }
 
@@ -482,6 +543,33 @@ public class ZKOperator extends AdvancedProducer {
         for (String state : list) {
             addServerAuth(serverName, service, version, state);
         }
+        return true;
+    }
+
+    /**
+     * Add server create read delete rights to all the states nodes of this version.
+     *
+     * @param serverName the server account name
+     * @param service the service name
+     * @param version the version number
+     * @return true if success, false otherwise
+     * @throws IllegalArgumentException if server account not found
+     */
+    public boolean addServerMetaAuth(String serverName, String service, int version) {
+        if (this.root == null) {
+            throw new IllegalStateException("Root not set.");
+        }
+        String path = makeMeta2VersionPath(root, service, version);
+        if (!exists(path)) {
+            return false;
+        }
+        String serverPath = makeServerPath(root, serverName);
+        if (!exists(serverPath)) {
+            throw new IllegalArgumentException("server account not found.");
+        }
+        List<ACL> acl = getACL(serverPath);
+        acl = getReadRight(serverName, acl);
+        addACLTree(path, acl);
         return true;
     }
 
@@ -585,5 +673,105 @@ public class ZKOperator extends AdvancedProducer {
     /////////////////////////////////////////////////////////////////////////////
     // META OPERATIONS
     /////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Get all the meta data of this client.
+     *
+     * @param clientName the client name
+     * @param service the service name
+     * @param version the version number
+     * @return the meta data map, or null if not found
+     */
+    public Map<String, String> getMetaData(String clientName, String service, int version) {
+        String node = makeMeta2NodePath(root, service, version, clientName);
+        if (!exists(node)) {
+            return null;
+        } else {
+            return parseMap(getData(node));
+        }
+    }
+
+    /**
+     * Update the meta data of this client: add or replace the value of the specified key.
+     *
+     * @param clientName the client name
+     * @param service the service name
+     * @param version the version number
+     * @param key the key of the meta data
+     * @param value the new value
+     * @return true if update success, false otherwise
+     */
+    public boolean updateMetaData(String clientName, String service, int version,
+            String key, String value) {
+        Map<String, String> map = getMetaData(clientName, service, version);
+        if (map == null) {
+            map = new HashMap<String, String>();
+        }
+        map.put(key, value);
+        byte[] newData = toByteArray(map);
+        return updateMetaData(clientName, service, version, newData);
+    }
+
+    /**
+     * Update the meta data of this client to this new data.
+     *
+     * @param clientName the client name
+     * @param service the service name
+     * @param version the version number
+     * @param newData the new meta data
+     * @return true if update success, false otherwise
+     */
+    public boolean updateMetaData(String clientName, String service, int version, byte[] newData) {
+        String path = makeMeta2VersionPath(root, service, version);
+        if (!exists(path)) {
+            return false;
+        }
+        String node = makeMeta2NodePath(root, service, version, clientName);
+        if (!exists(node)) {
+            createNode(node, newData);
+        } else {
+            updateNodeData(node, newData);
+        }
+        updateClientTrigger(path, clientName);
+        return true;
+    }
+
+    /**
+     * Update the client trigger in the version node.
+     *
+     * @param path the trigger path
+     * @param clientName the client name
+     */
+    public void updateClientTrigger(String path, String clientName) {
+        try {
+            // Update data in a while loop to ensure concurrent update will end with
+            // expected result.
+            while (true) {
+                Stat stat = new Stat();
+                byte[] oldData = zk.getData(path, false, stat);
+                HashMap<String, String> map = oldData == null ?
+                        new HashMap<String, String>() : parseMap(oldData);
+                String value = map.get(clientName);
+                if (value != null) {
+                    try {
+                        int i = Integer.parseInt(value);
+                        value = Integer.toString(i + 1);
+                    } catch (Exception e) {
+                        value = "6";
+                    }
+                } else {
+                    value = "1";
+                }
+                map.put(clientName, value);
+                byte[] newData = toByteArray(map);
+                try {
+                    zk.setData(path, newData, stat.getVersion());
+                    break;
+                } catch (BadVersionException e) {}
+            }
+        } catch (Exception e) {
+            throw ZKException.makeInstance("Failed to update Client Trigger.", e);
+        }
+    }
 
 }

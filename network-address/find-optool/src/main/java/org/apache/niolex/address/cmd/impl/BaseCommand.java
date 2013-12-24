@@ -43,7 +43,7 @@ public abstract class BaseCommand implements ICommand {
 
     protected String getPath(List<String> cmdOps) {
         if (cmdOps.size() == 1)
-            return EVN.curpath;
+            return EVN.curPath;
         else if (cmdOps.size() == 2)
             return EVN.getAbsolutePath(cmdOps.get(1));
         else

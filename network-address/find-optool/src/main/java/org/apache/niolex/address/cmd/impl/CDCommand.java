@@ -42,7 +42,7 @@ public class CDCommand extends BaseCommand {
         }
         String path = EVN.getAbsolutePath(cmdOps.get(1));
         if (optool.exists(path)) {
-            EVN.curpath = path;
+            EVN.curPath = path;
         } else {
             error("NO NODE: " + path);
         }

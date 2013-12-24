@@ -45,31 +45,35 @@ public class ShellMain {
         COMMAND_MAP.put("pwd", new PWDCommand());
         COMMAND_MAP.put("cd", new CDCommand());
         COMMAND_MAP.put("ls", new LSCommand());
+        COMMAND_MAP.put("ll", new LLCommand());
         // -- Node
         COMMAND_MAP.put("get", new GetCommand());
         COMMAND_MAP.put("set", new SetCommand());
         COMMAND_MAP.put("acl", new ListAuthCommand());
-        COMMAND_MAP.put("create", new ExitCommand());
+        COMMAND_MAP.put("add", new CreateCommand());
+        COMMAND_MAP.put("create", new CreateCommand());
         COMMAND_MAP.put("delete", new DeleteCommand());
         COMMAND_MAP.put("deleteTree", new DeleteTreeCommand());
         // -- Tree
-        COMMAND_MAP.put("initService", new CopyVersionCommand());
+        COMMAND_MAP.put("initService", new InitServiceCommand());
         COMMAND_MAP.put("addService", new CopyVersionCommand());
         COMMAND_MAP.put("addVersion", new CopyVersionCommand());
         COMMAND_MAP.put("addState", new CopyVersionCommand());
         COMMAND_MAP.put("copyVersion", new CopyVersionCommand());
         // -- Permission
-        COMMAND_MAP.put("addOp", new ExitCommand());
+        COMMAND_MAP.put("addOp", new AddOpCommand());
         COMMAND_MAP.put("deleteOp", new ExitCommand());
-        COMMAND_MAP.put("listOp", new ExitCommand());
+        COMMAND_MAP.put("listOp", new ListOpCommand());
         COMMAND_MAP.put("addClient", new ExitCommand());
-        COMMAND_MAP.put("addServer", new ExitCommand());
-        COMMAND_MAP.put("addAuth", new ExitCommand());
-        COMMAND_MAP.put("deleteAuth", new ExitCommand());
+        COMMAND_MAP.put("addClientAuth", new ExitCommand());
+        COMMAND_MAP.put("deleteClientAuth", new ExitCommand());
+        COMMAND_MAP.put("addServer", new AddServerCommand());
+        COMMAND_MAP.put("addServerAuth", new AddServerAuthCommand());
+        COMMAND_MAP.put("deleteServerAuth", new ExitCommand());
         COMMAND_MAP.put("listAuth", new ListAuthCommand());
         // -- Meta
-        COMMAND_MAP.put("getMeta", new ExitCommand());
-        COMMAND_MAP.put("setMeta", new ExitCommand());
+        COMMAND_MAP.put("getMeta", new GetMetaCommand());
+        COMMAND_MAP.put("setMeta", new SetMetaCommand());
         // -- List
         COMMAND_MAP.put("listService", new ExitCommand());
     }
@@ -122,7 +126,7 @@ public class ShellMain {
         // Try login.
         login();
 
-        if (EVN.userName.equals(optool.getSuperUser())) {
+        if (EVN.loginType == Environment.LoginType.OP && EVN.userName.equals(optool.getSuperUser())) {
             EVN.isSuper = true;
         }
     }
@@ -174,9 +178,9 @@ public class ShellMain {
 
     protected String getPrompt() {
         if (EVN.isSuper)
-            return "[" + EVN.userName + ":" + EVN.curpath + "]# ";
+            return "[" + EVN.userName + ":" + EVN.curPath + "]# ";
         else
-            return "[" + EVN.userName + ":" + EVN.curpath + "]$ ";
+            return "[" + EVN.userName + ":" + EVN.curPath + "]$ ";
     }
 
     public void executeLine(String line) {

@@ -25,6 +25,8 @@ import java.util.NoSuchElementException;
 
 import org.apache.niolex.commons.codec.StringUtil;
 
+import com.google.common.collect.Lists;
+
 /**
  * Store all the environments here.
  *
@@ -33,6 +35,8 @@ import org.apache.niolex.commons.codec.StringUtil;
  * @since 2013-12-16
  */
 public final class Environment {
+
+    private static final String LEX_HACK = "^_(LEX HACK)_^";
 
     // The single instance.
     public static final Environment EVN = new Environment();
@@ -67,7 +71,7 @@ public final class Environment {
 
     public String root = null;
 
-    public String curpath = "/";
+    public String curPath = "/";
 
     public boolean isSuper = false;
 
@@ -109,7 +113,7 @@ public final class Environment {
                     password = auth[1];
                 } else if (opt.equals("-root")) {
                     root = it.next();
-                    curpath = "/" + root;
+                    curPath = "/" + root;
                 } else if (opt.equals("--init")) {
                     isInit = true;
                 } else if (opt.equals("-login")) {
@@ -169,12 +173,56 @@ public final class Environment {
      * @return true if parsing succeeded, false otherwise
      */
     public boolean parseCommand(String cmdstring) {
-        String[] args = cmdstring.split("\\s+");
-        if (args.length == 0) {
+        List<String> list = Lists.newArrayList();
+        cmdstring = cmdstring.replace("\\\"", LEX_HACK);
+        final int length = cmdstring.length();
+        // status: 0 start, 1 in the middle
+        int start = 0, status = 0;
+        boolean quote = false;
+        for (int i = 0; i < length; ++i) {
+            switch (cmdstring.charAt(i)) {
+                case ' ':
+                case 0x0B:
+                case '\t':
+                    if (!quote) {
+                        if (status != 0) {
+                            list.add(cmdstring.substring(start, i));
+                            status = 0;
+                        }
+                        start = i + 1;
+                    }
+                    break;
+                case '\"':
+                    if (quote) {
+                        // The end of quote.
+                        list.add(cmdstring.substring(start, i));
+                        status = 0;
+                        start = i + 1;
+                        quote = false;
+                    } else if (status == 0) {
+                        start = i + 1;
+                        quote = true;
+                    }
+                    break;
+                default:
+                    status = 1;
+                    break;
+            }
+        }
+        // Deal the last string.
+        if (start != length) {
+            list.add(cmdstring.substring(start, length));
+        }
+        List<String> list2 = Lists.newArrayList();
+        for (String s : list) {
+            list2.add(s.replace(LEX_HACK, "\""));
+        }
+        if (list2.size() > 0) {
+            command = list2.get(0);
+        } else {
             return false;
         }
-        command = args[0];
-        cmdArgs = Arrays.asList(args);
+        cmdArgs = list2;
         return true;
     }
 
@@ -189,9 +237,9 @@ public final class Environment {
             relativePath = relativePath.substring(2);
         }
         if (StringUtil.isBlank(relativePath) || ".".equals(relativePath)) {
-            return curpath;
+            return curPath;
         }
-        String curpath = this.curpath;
+        String curpath = this.curPath;
         if ("/".equals(curpath)) {
             curpath = "";
         }
@@ -232,7 +280,7 @@ public final class Environment {
      * Change the current path to the parent directory.
      */
     public void cdUp() {
-        curpath = curpath.substring(0, curpath.lastIndexOf("/"));
+        curPath = curPath.substring(0, curPath.lastIndexOf("/"));
     }
 
 }

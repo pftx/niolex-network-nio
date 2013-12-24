@@ -1,5 +1,5 @@
 /**
- * CopyVersionCommand.java
+ * GetMetaCommand.java
  *
  * Copyright 2013 the original author or authors.
  *
@@ -18,18 +18,19 @@
 package org.apache.niolex.address.cmd.impl;
 
 import java.util.List;
+import java.util.Map;
 
 import org.apache.niolex.address.optool.OPToolService;
 import org.apache.niolex.address.util.PathUtil;
 
 /**
- * Copy one version into another version.
+ * Get meta data of this client.
  *
  * @author <a href="mailto:xiejiyun@foxmail.com">Xie, Jiyun</a>
  * @version 1.0.0
- * @since 2013-12-17
+ * @since 2013-12-23
  */
-public class CopyVersionCommand extends BaseCommand {
+public class GetMetaCommand extends BaseCommand {
 
     /**
      * This is the override of super method.
@@ -37,18 +38,37 @@ public class CopyVersionCommand extends BaseCommand {
      */
     @Override
     public void processCmd(OPToolService optool, List<String> cmdOps) throws Exception {
-        if (cmdOps.size() != 3) {
-            error("Usage: copyVersion <fromVersionNum> <toVersionNum>");
+        if (cmdOps.size() < 2) {
+            error("Usage: getMeta <userName> <key|empty for get all metas>");
             return;
         }
+        String clientName = cmdOps.get(1);
         PathUtil.Path p = PathUtil.decodePath(optool.getRoot(), EVN.curPath);
-        if (p.getService() == null) {
-            error("copyVersion can only work inside a service path.");
+        switch (p.getLevel()) {
+            case CVERSION:
+            case SVERSION:
+            case CLIENT:
+            case STATE:
+            case NODE:
+                break;
+            default:
+                error("getMeta only work inside a version path.");
+                return;
+        }
+        Map<String, String> map = optool.getMetaData(clientName, p.getService(), p.getVersion());
+        if (map == null) {
+            out("NO META.");
             return;
         }
-        int fromVersion = Integer.parseInt(cmdOps.get(1));
-        int toVersion = Integer.parseInt(cmdOps.get(2));
-        optool.copyVersion(p.getService(), fromVersion, toVersion);
+        out("META:");
+        if (cmdOps.size() >= 3) {
+            String key = cmdOps.get(2);
+            out("\t" + key + ": " + map.get(key));
+        } else {
+            for (String key : map.keySet()) {
+                out("\t" + key + ":\t" + map.get(key));
+            }
+        }
     }
 
 }
