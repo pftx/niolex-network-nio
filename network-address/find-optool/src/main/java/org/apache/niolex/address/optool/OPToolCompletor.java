@@ -30,46 +30,53 @@ class OPToolCompletor implements Completer {
      */
     public int complete(String buffer, int cursor, List<CharSequence> candidates) {
         // Guarantee that the final token is the one we're expanding
-        buffer = buffer.substring(0, cursor);
-        String token = "";
-        String[] tokens = buffer.split("\\s+");
-        if (tokens.length > 1) {
-            token = tokens[tokens.length - 1];
-        } else {
-            return completeCommand(buffer, buffer, candidates);
+        String[] tokens = buffer.substring(0, cursor).split("\\s+");
+        switch (tokens.length) {
+            case 1:
+                return completeCommand(buffer, candidates);
+            case 2:
+                return completeZNode(buffer, tokens[1], candidates);
+            default:
+                return cursor;
         }
-        if (token.startsWith("/")) {
-            return completeZNode(buffer, token, candidates);
-        } else if (token.startsWith("./") || token.startsWith("../")) {
-            return completeZNode(buffer, ShellMain.EVN.getAbsolutePath(token), candidates);
-        }
-        return cursor;
     }
 
-    private int completeZNode(String buffer, String token, List<CharSequence> candidates) {
-        String path = token;
-        int idx = path.lastIndexOf("/") + 1;
-        String prefix = path.substring(idx);
-        // Only the root path can end in a /, so strip it off every other prefix
-        String dir = idx == 1 ? "/" : path.substring(0, idx - 1);
-        if (!main.optool.exists(dir)) {
-            return buffer.length();
-        }
-        List<String> children = main.optool.getChildren(dir);
-        for (String child : children) {
-            if (child.startsWith(prefix)) {
-                candidates.add(child);
-            }
-        }
-        return candidates.size() == 0 ? buffer.length() : buffer.lastIndexOf('/') + 1;
-    }
-
-    private int completeCommand(String buffer, String token, List<CharSequence> candidates) {
+    private int completeCommand(String token, List<CharSequence> candidates) {
+        token = token.toLowerCase();
         for (String cmd : ShellMain.COMMAND_MAP.keySet()) {
-            if (cmd.startsWith(token)) {
+            if (cmd.toLowerCase().startsWith(token)) {
                 candidates.add(cmd);
             }
         }
-        return buffer.lastIndexOf(' ') + 1;
+        return 0;
+    }
+
+    private int completeZNode(String buffer, String origPath, List<CharSequence> candidates) {
+        String path = origPath;
+        if (!path.startsWith("/")) {
+            path = Environment.getInstance().getAbsolutePath(path);
+        }
+        int idx = path.lastIndexOf("/");
+        String prefix = path.substring(0, idx);
+        String last = path.substring(idx + 1);
+        // For root path, it will be empty.
+        if (prefix.length() == 0) {
+            prefix = "/";
+        }
+        if (!main.optool.exists(prefix)) {
+            return buffer.length();
+        }
+        List<String> children = main.optool.getChildren(prefix);
+        for (String child : children) {
+            if (child.startsWith(last)) {
+                candidates.add(child);
+            }
+        }
+        if (candidates.size() == 0) {
+            return buffer.length();
+        }
+        int i = buffer.lastIndexOf(origPath);
+        idx = origPath.lastIndexOf("/");
+        return  i + idx + 1;
     }
 }

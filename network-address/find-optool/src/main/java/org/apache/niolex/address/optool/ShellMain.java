@@ -114,6 +114,7 @@ public class ShellMain {
         System.out.println("Connecting to " + EVN.host);
         optool = new OPToolService(EVN.host, EVN.timeout);
         optool.setRoot(EVN.root);
+        optool.addAuthInfo(EVN.userName, EVN.password);
         // Check init tree.
         if (EVN.isInit) {
             System.out.println("                              Attention!!!");
@@ -166,6 +167,7 @@ public class ShellMain {
         boolean isJline = reader.clearScreen();
         String line;
         if (isJline) {
+            System.out.println("Welcome ~ " + EVN.userName + "!\n");
             reader.addCompleter(new OPToolCompletor(this));
             System.out.println("JLine enabled, please use <tab> key to help you speed up.");
             while ((line = reader.readLine(getPrompt())) != null) {

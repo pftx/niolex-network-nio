@@ -38,7 +38,12 @@ public class GetCommand extends BaseCommand {
     public void processCmd(OPToolService optool, List<String> cmdOps) throws Exception {
         String path = getPath(cmdOps);
         if (path != null) {
-            out("DATA => \"" + optool.getDataAsStr(path) + "\"");
+            String s = optool.getDataAsStr(path);
+            if (s == null) {
+                out("NO DATA");
+            } else {
+                out("DATA => \"" + s.replace("\n", "\\n") + "\"");
+            }
         } else {
             error("Usage: get <path>");
         }

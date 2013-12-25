@@ -40,6 +40,9 @@ public class LLCommand extends BaseCommand {
         String path = getPath(cmdOps);
         if (path != null) {
             List<String> list = optool.getChildren(path);
+            if (path.length() == 1) {
+                path = "";
+            }
             for (String s : list) {
                 System.out.print(s);
                 System.out.print(" ");

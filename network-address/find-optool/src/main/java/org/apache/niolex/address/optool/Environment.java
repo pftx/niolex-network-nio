@@ -215,7 +215,9 @@ public final class Environment {
         }
         List<String> list2 = Lists.newArrayList();
         for (String s : list) {
-            list2.add(s.replace(LEX_HACK, "\""));
+            s = s.replace(LEX_HACK, "\"");
+            s = s.replace("\\n", "\n");
+            list2.add(s);
         }
         if (list2.size() > 0) {
             command = list2.get(0);
