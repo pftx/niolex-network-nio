@@ -62,6 +62,19 @@ public class ACLUtil {
     }
 
     /**
+     * Get the only Id from the specified ACL list
+     * @param acl the ACL list
+     * @return the only Id if found
+     * @throws IllegalArgumentException if the specified ACL list is invalid
+     */
+    public static Id getId(List<ACL> acl) {
+        if (acl.size() != 1) {
+            throw new IllegalArgumentException("ACL list must have exactly one element.");
+        }
+        return acl.get(0).getId();
+    }
+
+    /**
      * Get the user's name from this Id.
      *
      * @param id the zookeeper id

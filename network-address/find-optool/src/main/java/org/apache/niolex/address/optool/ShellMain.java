@@ -54,6 +54,7 @@ public class ShellMain {
         COMMAND_MAP.put("acl", new ListAuthCommand());
         COMMAND_MAP.put("add", new CreateCommand());
         COMMAND_MAP.put("create", new CreateCommand());
+        COMMAND_MAP.put("rm", new DeleteCommand());
         COMMAND_MAP.put("delete", new DeleteCommand());
         COMMAND_MAP.put("deleteTree", new DeleteTreeCommand());
         // -- Tree

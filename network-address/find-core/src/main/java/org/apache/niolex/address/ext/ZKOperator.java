@@ -172,9 +172,10 @@ public class ZKOperator extends AdvancedProducer {
      * Remove all the ACLs of this specified Id from this path.
      *
      * @param path the node path
-     * @param id the id to be removed
+     * @param acl the ACL list must have exactly one element
      */
-    public void removeACL(String path, Id id) {
+    public void removeACL(String path, List<ACL> acl) {
+        Id id = getId(acl);
         try {
             // Remove ACL in a while loop to ensure concurrent remove will end with
             // expected result.
@@ -196,18 +197,29 @@ public class ZKOperator extends AdvancedProducer {
      * specified path.
      *
      * @param path the root of subtree
-     * @param id the id to be removed
+     * @param acl the ACL list must have exactly one element
      */
-    public void removeACLTree(String path, Id id) {
-        removeACL(path, id);
+    public void removeACLTree(String path, List<ACL> acl) {
+        removeACL(path, acl);
         for (String end : getChildren(path)) {
-            removeACLTree(path + "/" + end, id);
+            removeACLTree(path + "/" + end, acl);
         }
     }
 
     /////////////////////////////////////////////////////////////////////////////
     // LOGIN OPERATIONS
     /////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Check that the root was set.
+     *
+     * @throws IllegalStateException if root not set
+     */
+    public void checkRoot() {
+        if (this.root == null) {
+            throw new IllegalStateException("Root not set.");
+        }
+    }
 
     /**
      * Login as an operator.
@@ -217,6 +229,7 @@ public class ZKOperator extends AdvancedProducer {
      * @return true if success, false otherwise
      */
     public boolean loginOp(String username, String password) {
+        checkRoot();
         String path = makeOpPath(root, username);
         addAuthInfo(username, password);
         try {
@@ -235,6 +248,7 @@ public class ZKOperator extends AdvancedProducer {
      * @return true if success, false otherwise
      */
     public boolean loginServer(String username, String password) {
+        checkRoot();
         String path = makeServerPath(root, username);
         addAuthInfo(username, password);
         try {
@@ -253,6 +267,7 @@ public class ZKOperator extends AdvancedProducer {
      * @return true if success, false otherwise
      */
     public boolean loginClient(String username, String password) {
+        checkRoot();
         String path = makeClientPath(root, username);
         addAuthInfo(username, password);
         try {
@@ -269,8 +284,9 @@ public class ZKOperator extends AdvancedProducer {
      * @return the super user name
      */
     public String getSuperUser() {
+        checkRoot();
         List<ACL> acl = getACL(root);
-        return getUserName(acl.get(0).getId());
+        return getUserName(getId(acl));
     }
 
     /////////////////////////////////////////////////////////////////////////////
@@ -285,9 +301,7 @@ public class ZKOperator extends AdvancedProducer {
      * @return true if success, false if this operator already exists
      */
     public boolean addOperator(String opName, String opPasswd) {
-        if (this.root == null) {
-            throw new IllegalStateException("Root not set.");
-        }
+        checkRoot();
         String path = makeOpPath(root, opName);
         if (exists(path)) {
             return false;
@@ -313,9 +327,7 @@ public class ZKOperator extends AdvancedProducer {
      * @return true if success, false if this server account already exists
      */
     public boolean addServer(String serverName, String serverPasswd) {
-        if (this.root == null) {
-            throw new IllegalStateException("Root not set.");
-        }
+        checkRoot();
         String path = makeServerPath(root, serverName);
         if (exists(path)) {
             return false;
@@ -334,9 +346,7 @@ public class ZKOperator extends AdvancedProducer {
      * @return true if success, false if this client account already exists
      */
     public boolean addClient(String clientName, String clientPasswd) {
-        if (this.root == null) {
-            throw new IllegalStateException("Root not set.");
-        }
+        checkRoot();
         String path = makeClientPath(root, clientName);
         if (exists(path)) {
             return false;
@@ -354,6 +364,7 @@ public class ZKOperator extends AdvancedProducer {
      * @return the server ACL list
      */
     public List<ACL> getServerACL(String serverName) {
+        checkRoot();
         String serverPath = makeServerPath(root, serverName);
         if (!exists(serverPath)) {
             throw new IllegalArgumentException("server account not found.");
@@ -368,6 +379,7 @@ public class ZKOperator extends AdvancedProducer {
      * @return the client ACL list
      */
     public List<ACL> getClientACL(String clientName) {
+        checkRoot();
         String clientPath = makeClientPath(root, clientName);
         if (!exists(clientPath)) {
             throw new IllegalArgumentException("client account not found.");
@@ -387,9 +399,7 @@ public class ZKOperator extends AdvancedProducer {
      * @return true if init success, false if the root path already exists
      */
     public boolean initTree(String rootName, String rootPasswd) {
-        if (this.root == null) {
-            throw new IllegalStateException("Root not set.");
-        }
+        checkRoot();
         if (exists(this.root)) {
             return false;
         }
@@ -410,9 +420,7 @@ public class ZKOperator extends AdvancedProducer {
      * @return true if success, false if this service already exists
      */
     public boolean addService(String service) {
-        if (this.root == null) {
-            throw new IllegalStateException("Root not set.");
-        }
+        checkRoot();
         String path = makeServicePath(root, service);
         if (exists(path)) {
             return false;
@@ -433,9 +441,7 @@ public class ZKOperator extends AdvancedProducer {
      * @return true if success, no false
      */
     public boolean initServiceTree(String service, int version, String[] states) {
-        if (this.root == null) {
-            throw new IllegalStateException("Root not set.");
-        }
+        checkRoot();
         if (!exists(makeServicePath(root, service))) {
             addService(service);
         }
@@ -456,9 +462,7 @@ public class ZKOperator extends AdvancedProducer {
      * @return true if success, false if this service not found
      */
     public boolean addVersion(String service, int version) {
-        if (this.root == null) {
-            throw new IllegalStateException("Root not set.");
-        }
+        checkRoot();
         String path = makeService2VersionPath(root, service);
         if (!exists(path)) {
             return false;
@@ -476,9 +480,7 @@ public class ZKOperator extends AdvancedProducer {
      * @return true if success, false if this service not found
      */
     public boolean addMetaVersion(String service, int version) {
-        if (this.root == null) {
-            throw new IllegalStateException("Root not set.");
-        }
+        checkRoot();
         String path = makeMeta2ClientPath(root, service);
         if (!exists(path)) {
             return false;
@@ -497,9 +499,7 @@ public class ZKOperator extends AdvancedProducer {
      * @return true if success, false if this service or version not found
      */
     public boolean copyVersion(String service, int fromVersion, int toVersion) {
-        if (this.root == null) {
-            throw new IllegalStateException("Root not set.");
-        }
+        checkRoot();
         String path = makeService2StatePath(root, service, fromVersion);
         if (!exists(path)) {
             return false;
@@ -534,9 +534,7 @@ public class ZKOperator extends AdvancedProducer {
      * @return true if success, false if already exists
      */
     public boolean addState(String service, int version, String state) {
-        if (this.root == null) {
-            throw new IllegalStateException("Root not set.");
-        }
+        checkRoot();
         String path = makeService2NodePath(root, service, version, state);
         if (exists(path)) {
             return false;
@@ -559,9 +557,7 @@ public class ZKOperator extends AdvancedProducer {
      * @throws IllegalArgumentException if server account not found
      */
     public boolean addServerAuth(String serverName, String service, int version) {
-        if (this.root == null) {
-            throw new IllegalStateException("Root not set.");
-        }
+        checkRoot();
         String path = makeService2StatePath(root, service, version);
         if (!exists(path)) {
             return false;
@@ -584,9 +580,7 @@ public class ZKOperator extends AdvancedProducer {
      * @throws IllegalArgumentException if server account not found
      */
     public boolean addServerMetaAuth(String serverName, String service, int version) {
-        if (this.root == null) {
-            throw new IllegalStateException("Root not set.");
-        }
+        checkRoot();
         String path = makeMeta2VersionPath(root, service, version);
         if (!exists(path)) {
             return false;
@@ -608,9 +602,7 @@ public class ZKOperator extends AdvancedProducer {
      * @throws IllegalArgumentException if server account not found
      */
     public boolean addServerAuth(String serverName, String service, int version, String state) {
-        if (this.root == null) {
-            throw new IllegalStateException("Root not set.");
-        }
+        checkRoot();
         String path = makeService2NodePath(root, service, version, state);
         if (!exists(path)) {
             return false;
@@ -630,9 +622,7 @@ public class ZKOperator extends AdvancedProducer {
      * @throws IllegalArgumentException if client account not found
      */
     public boolean addClientAuth(String clientName, String service) {
-        if (this.root == null) {
-            throw new IllegalStateException("Root not set.");
-        }
+        checkRoot();
         String path = makeService2VersionPath(root, service);
         if (!exists(path)) {
             return false;
@@ -653,9 +643,7 @@ public class ZKOperator extends AdvancedProducer {
      * @throws IllegalArgumentException if client account not found
      */
     public boolean addClientAuth(String clientName, String service, int version) {
-        if (this.root == null) {
-            throw new IllegalStateException("Root not set.");
-        }
+        checkRoot();
         String path = makeService2StatePath(root, service, version);
         if (!exists(path)) {
             return false;
@@ -675,9 +663,7 @@ public class ZKOperator extends AdvancedProducer {
      * @return true if removed, false if version not found
      */
     public boolean removeServerAuth(String serverName, String service, int version) {
-        if (this.root == null) {
-            throw new IllegalStateException("Root not set.");
-        }
+        checkRoot();
         String path = makeService2StatePath(root, service, version);
         if (!exists(path)) {
             return false;
@@ -698,15 +684,13 @@ public class ZKOperator extends AdvancedProducer {
      * @return true if removed, false if version not found
      */
     public boolean removeServerMetaAuth(String serverName, String service, int version) {
-        if (this.root == null) {
-            throw new IllegalStateException("Root not set.");
-        }
+        checkRoot();
         String path = makeMeta2VersionPath(root, service, version);
         if (!exists(path)) {
             return false;
         }
         List<ACL> acl = getServerACL(serverName);
-        removeACLTree(path, acl.get(0).getId());
+        removeACLTree(path, acl);
         return true;
     }
 
@@ -720,15 +704,13 @@ public class ZKOperator extends AdvancedProducer {
      * @return true if removed, false if state not found
      */
     public boolean removeServerAuth(String serverName, String service, int version, String state) {
-        if (this.root == null) {
-            throw new IllegalStateException("Root not set.");
-        }
+        checkRoot();
         String path = makeService2NodePath(root, service, version, state);
         if (!exists(path)) {
             return false;
         }
         List<ACL> acl = getServerACL(serverName);
-        removeACLTree(path, acl.get(0).getId());
+        removeACLTree(path, acl);
         return true;
     }
 
@@ -740,15 +722,13 @@ public class ZKOperator extends AdvancedProducer {
      * @return true if removed, false if service not found
      */
     public boolean removeClientAuth(String clientName, String service) {
-        if (this.root == null) {
-            throw new IllegalStateException("Root not set.");
-        }
+        checkRoot();
         String path = makeService2VersionPath(root, service);
         if (!exists(path)) {
             return false;
         }
         List<ACL> acl = getClientACL(clientName);
-        removeACLTree(path, acl.get(0).getId());
+        removeACLTree(path, acl);
         return true;
     }
 
@@ -761,15 +741,13 @@ public class ZKOperator extends AdvancedProducer {
      * @return true if removed, false if version not found
      */
     public boolean removeClientAuth(String clientName, String service, int version) {
-        if (this.root == null) {
-            throw new IllegalStateException("Root not set.");
-        }
+        checkRoot();
         String path = makeService2StatePath(root, service, version);
         if (!exists(path)) {
             return false;
         }
         List<ACL> acl = getClientACL(clientName);
-        removeACLTree(path, acl.get(0).getId());
+        removeACLTree(path, acl);
         return true;
     }
 
@@ -786,6 +764,7 @@ public class ZKOperator extends AdvancedProducer {
      * @return the meta data map, or null if not found
      */
     public Map<String, String> getMetaData(String clientName, String service, int version) {
+        checkRoot();
         String node = makeMeta2NodePath(root, service, version, clientName);
         if (!exists(node)) {
             return null;
@@ -825,6 +804,7 @@ public class ZKOperator extends AdvancedProducer {
      * @return true if update success, false otherwise
      */
     public boolean updateMetaData(String clientName, String service, int version, byte[] newData) {
+        checkRoot();
         String path = makeMeta2VersionPath(root, service, version);
         if (!exists(path)) {
             return false;

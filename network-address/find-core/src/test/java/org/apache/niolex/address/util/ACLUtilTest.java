@@ -69,6 +69,26 @@ public class ACLUtilTest extends ACLUtil {
     }
 
     @Test
+    public void testGetIdA() throws Exception {
+        List<ACL> allRights = getAllRights("qq", "root");
+        Id id = getId(allRights);
+        String r = "'digest,'qq:qyPbmtJUmj/VX2gpl2jN4A94Afk=\n";
+        assertEquals(r.length(), id.toString().length());
+        assertEquals(r, id.toString());
+    }
+
+    @Test(expected=IllegalArgumentException.class)
+    public void testGetIdT() throws Exception {
+        List<ACL> old = getCRDRights("qq1", "root");
+        List<ACL> add = getAllRights("qq2", "root");
+        List<ACL> merged = mergeACL(old, add);
+        Id id = getId(merged);
+        String r = "'digest,'qq:qyPbmtJUmj/VX2gpl2jN4A94Afk=\n";
+        assertEquals(r.length(), id.toString().length());
+        assertEquals(r, id.toString());
+    }
+
+    @Test
     public void testGetAllRights() throws Exception {
         List<ACL> allRights = getAllRights("qq", "root");
         assertEquals(1, allRights.size());
