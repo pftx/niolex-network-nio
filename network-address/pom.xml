@@ -1,0 +1,30 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>org.apache.niolex</groupId>
+		<artifactId>niolex-parent</artifactId>
+		<version>1.0.0</version>
+		<relativePath></relativePath>
+	</parent>
+
+	<artifactId>network-address</artifactId>
+	<version>1.0.0</version>
+	<packaging>pom</packaging>
+
+	<name>network-address</name>
+	<url>http://maven.apache.org</url>
+	
+	<properties>
+		<co.re.ver>1.0.0</co.re.ver>
+		<junit.ver>4.11</junit.ver>
+	</properties>
+	
+	<modules>
+		<module>find-core</module>
+		<module>find-optool</module>
+		<module>find-rpc</module>
+	</modules>
+
+</project>
