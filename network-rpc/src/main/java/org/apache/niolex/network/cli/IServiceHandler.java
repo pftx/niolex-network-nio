@@ -21,7 +21,7 @@ import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
 
 /**
- * The interface for RetryHandler usage, this interface manage
+ * The interface for RetryHandler to use, this interface manage
  * the status of the underlying client, and store the complete url here for logging.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
@@ -47,7 +47,7 @@ public interface IServiceHandler extends InvocationHandler {
 	 * Make this client not ready.
 	 * Mark with the given exception.
 	 *
-	 * @param ioe
+	 * @param ioe the exception which makes this client not ready
 	 */
 	public abstract void notReady(IOException ioe);
 

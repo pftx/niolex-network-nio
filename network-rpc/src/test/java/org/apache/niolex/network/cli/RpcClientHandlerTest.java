@@ -22,7 +22,7 @@ import static org.mockito.Mockito.*;
 
 import java.lang.reflect.Method;
 
-import org.apache.niolex.network.cli.RpcPoolableHandler;
+import org.apache.niolex.network.cli.RpcClientHandler;
 import org.apache.niolex.network.rpc.RpcClient;
 import org.junit.Before;
 import org.junit.Test;
@@ -36,23 +36,23 @@ import org.mockito.runners.MockitoJUnitRunner;
  * @version 1.0.0
  * @since 2012-6-3
  */
-public class RpcPoolableHandlerTest {
+public class RpcClientHandlerTest {
 
 	@Mock
 	private RpcClient handler;
 
 	private String serviceUrl;
-	private RpcPoolableHandler rpcConnectionHandler;
+	private RpcClientHandler rpcConnectionHandler;
 
 	@Before
 	public void createRpcConnectionHandler() throws Throwable {
 		serviceUrl = "GOGO";
-		rpcConnectionHandler = new RpcPoolableHandler(serviceUrl, handler);
+		rpcConnectionHandler = new RpcClientHandler(serviceUrl, handler);
 		when(handler.invoke(any(Object.class), any(Method.class), any(Object[].class))).thenReturn("mailto:xiejiyun");
 	}
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.cli.RpcPoolableHandler#invoke(java.lang.Object, java.lang.reflect.Method, java.lang.Object[])}.
+	 * Test method for {@link org.apache.niolex.network.cli.RpcClientHandler#invoke(java.lang.Object, java.lang.reflect.Method, java.lang.Object[])}.
 	 * @throws Throwable
 	 */
 	@Test
@@ -62,7 +62,7 @@ public class RpcPoolableHandlerTest {
 	}
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.cli.RpcPoolableHandler#getServiceUrl()}.
+	 * Test method for {@link org.apache.niolex.network.cli.RpcClientHandler#getServiceUrl()}.
 	 */
 	@Test
 	public final void testGetServiceUrl() {
@@ -70,7 +70,7 @@ public class RpcPoolableHandlerTest {
 	}
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.cli.RpcPoolableHandler#isReady()}.
+	 * Test method for {@link org.apache.niolex.network.cli.RpcClientHandler#isReady()}.
 	 */
 	@Test
 	public final void testIsReady() {
@@ -84,7 +84,7 @@ public class RpcPoolableHandlerTest {
 	}
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.cli.RpcPoolableHandler#notReady(java.io.IOException)}.
+	 * Test method for {@link org.apache.niolex.network.cli.RpcClientHandler#notReady(java.io.IOException)}.
 	 */
 	@Test
 	public final void testNotReady() {
@@ -92,7 +92,7 @@ public class RpcPoolableHandlerTest {
 	}
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.cli.RpcPoolableHandler#getHandler()}.
+	 * Test method for {@link org.apache.niolex.network.cli.RpcClientHandler#getHandler()}.
 	 */
 	@Test
 	public final void testGetHandler() {

@@ -23,6 +23,8 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.niolex.commons.concurrent.ThreadUtil;
+import org.apache.niolex.commons.reflect.FieldUtil;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -43,56 +45,66 @@ public class RpcServiceHandlerTest {
 	}
 
 	@Test
-	public void testName() {
+	public void testRpcServiceHandlerName() {
 		Assert.assertEquals("5", listHandlers.get(0).getServiceUrl());
 		Assert.assertTrue(listHandlers.get(0).getHandler() instanceof A);
 	}
 
+    @Test
+    public void testGetServiceUrlInitReady() {
+        IServiceHandler a = new RpcServiceHandler("6", new A("67"), 20, false);
+        Assert.assertFalse(a.isReady());
+        FieldUtil.setValue(a, "nextWorkTime", System.currentTimeMillis() - 1);
+        Assert.assertTrue(a.isReady());
+        Assert.assertEquals("6", a.toString());
+    }
+
 	@Test
-	public void testReady() {
+	public void testNotReady() {
 		IServiceHandler a = listHandlers.get(0);
 		Assert.assertTrue(a.isReady());
-		a.notReady(new IOException("Failed to connect when server initialize."));
+		a.notReady(new IOException("Lex"));
 		Assert.assertFalse(a.isReady());
-		try {
-			Thread.sleep(50);
-		} catch (Throwable t) {
-		}
+		ThreadUtil.sleep(50);
 		Assert.assertTrue(a.isReady());
 	}
 
 	@Test
-	public void testNotReady() {
-		IServiceHandler a = new RpcServiceHandler("6", new A("6"), 20, false);
+	public void testIsReady() {
+		IServiceHandler a = new RpcServiceHandler("6", new A("67"), 20, false);
 		Assert.assertFalse(a.isReady());
-		try {
-			Thread.sleep(50);
-		} catch (Throwable t) {
-		}
+		FieldUtil.setValue(a, "nextWorkTime", System.currentTimeMillis() - 1);
 		Assert.assertTrue(a.isReady());
-		System.out.println(a.toString());
+		Assert.assertEquals("6", a.toString());
 	}
 
 	@Test
 	public void testInvoke() throws Throwable {
 		RpcServiceHandler a = (RpcServiceHandler)listHandlers.get(2);
 		String s = a.invoke(a, null, null).toString();
-		System.out.println(s);
+		Assert.assertEquals("7", s);
 	}
 
 }
 
 class A implements InvocationHandler {
 	private final String name;
+	private final boolean pr;
 
 	public A(String name) {
-		super();
-		this.name = name;
+	    this(name, false);
 	}
 
-	@Override
+	public A(String name, boolean pr) {
+        super();
+        this.name = name;
+        this.pr = pr;
+    }
+
+
+    @Override
 	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-		System.out.println("Call invoke for: " + name);
+        if (pr) System.out.println("A invoke for: " + name);
 		return name;
 	}
 

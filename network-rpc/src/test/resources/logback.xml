@@ -39,12 +39,23 @@
             <charset>UTF-8</charset>
         </encoder>
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>INFO</level>
+        </filter>
+    </appender>
+
+    <appender name="DBG" class="ch.qos.logback.core.ConsoleAppender">
+        <Target>System.out</Target>
+        <encoder>
+            <pattern>${log_pattern}</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
             <level>DEBUG</level>
         </filter>
     </appender>
 
     <logger name="org.apache.niolex.network.cli" level="DEBUG">
-		<appender-ref ref="CONSOLE" />
+		<appender-ref ref="DBG" />
 	</logger>
 
     <root level="INFO">

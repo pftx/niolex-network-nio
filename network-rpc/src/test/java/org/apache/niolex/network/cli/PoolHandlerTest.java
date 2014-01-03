@@ -30,11 +30,11 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 
+import org.apache.niolex.commons.reflect.ItemNotFoundException;
 import org.apache.niolex.commons.reflect.MethodUtil;
 import org.apache.niolex.commons.util.Runner;
 import org.apache.niolex.commons.util.SystemUtil;
 import org.apache.niolex.network.rpc.PoolableInvocationHandler;
-import org.apache.niolex.network.rpc.RpcClient;
 import org.apache.niolex.network.rpc.RpcException;
 import org.junit.Before;
 import org.junit.Test;
@@ -47,30 +47,30 @@ import org.junit.Test;
  */
 public class PoolHandlerTest {
 
-    ArrayList<RpcClient> col;
+    ArrayList<IServiceHandler> col;
     Method method;
 
     public void thisMethod() {}
 
     @Before
     public void set() throws Throwable {
-        col = new ArrayList<RpcClient>();
+        col = new ArrayList<IServiceHandler>();
         for (int i = 0; i < 100; ++i) {
-            RpcClient c = mock(RpcClient.class);
-            when(c.getRemoteName()).thenReturn("Id " + i);
+            IServiceHandler c = mock(IServiceHandler.class);
+            when(c.getServiceUrl()).thenReturn("Id " + i);
             if (i % 3 == 0) {
-                when(c.isValid()).thenReturn(false);
+                when(c.isReady()).thenReturn(false);
             } else {
-                when(c.isValid()).thenReturn(true);
+                when(c.isReady()).thenReturn(true);
             }
             if (i == 23) {
                 doThrow(new RpcException("Rpcc", RpcException.Type.ERROR_INVOKE, null)).when(c)
                 .invoke(any(), any(Method.class), any(Object[].class));
             } else if (i == 46) {
-                doThrow(new IOException("Root")).when(c)
+                doThrow(new ItemNotFoundException("Root", null)).when(c)
                 .invoke(any(), any(Method.class), any(Object[].class));
             } else {
-            switch (i % 7) {
+            switch (i % 9) {
                 case 1:
                     doThrow(new RpcException("Conn1", RpcException.Type.CONNECTION_CLOSED, null)).when(c)
                     .invoke(any(), any(Method.class), any(Object[].class));
@@ -79,8 +79,12 @@ public class PoolHandlerTest {
                     doThrow(new RpcException("Conn2", RpcException.Type.TIMEOUT, null)).when(c)
                     .invoke(any(), any(Method.class), any(Object[].class));
                     break;
-                case 6:
+                case 5:
                     doThrow(new IOException("Tain", new IOException("Last"))).when(c)
+                    .invoke(any(), any(Method.class), any(Object[].class));
+                    break;
+                case 7:
+                    doThrow(new Exception("Ex", new IOException("Last"))).when(c)
                     .invoke(any(), any(Method.class), any(Object[].class));
                     break;
             }
@@ -98,9 +102,10 @@ public class PoolHandlerTest {
     public void testPoolHandler() throws Throwable {
         col.remove(23);
         col.remove(45);
-        PoolHandler<RpcClient> pool = new PoolHandler<RpcClient>(3, col);
-        pool.offer(mock(RpcClient.class));
+        PoolHandler<IServiceHandler> pool = new PoolHandler<IServiceHandler>(3, col);
+        pool.offer(mock(IServiceHandler.class));
         for (int i = 0; i < 500; ++i) {
+            pool.logDebug = i % 2 == 0;
             pool.invoke(pool, method, new Object[0]);
         }
     }
@@ -110,10 +115,15 @@ public class PoolHandlerTest {
      * @throws Throwable
      */
     @Test(expected=RpcException.class)
-    public void testInvokeE() throws Throwable {
-        PoolHandler<RpcClient> pool = new PoolHandler<RpcClient>(3, col);
+    public void testInvokeRpcE() throws Throwable {
+        PoolHandler<IServiceHandler> pool = new PoolHandler<IServiceHandler>(3, col);
+        try {
         for (int i = 0; i < 200; ++i) {
             pool.invoke(pool, method, new Object[0]);
+        }
+        } catch (RpcException e) {
+            assertEquals(RpcException.Type.ERROR_INVOKE, e.getType());
+            throw e;
         }
     }
 
@@ -121,10 +131,10 @@ public class PoolHandlerTest {
      * Test method for {@link org.apache.niolex.network.cli.PoolHandler#invoke(java.lang.Object, java.lang.reflect.Method, java.lang.Object[])}.
      * @throws Throwable
      */
-    @Test(expected=IOException.class)
-    public void testInvokeR() throws Throwable {
+    @Test(expected=ItemNotFoundException.class)
+    public void testInvokeINFE() throws Throwable {
         col.remove(23);
-        PoolHandler<RpcClient> pool = new PoolHandler<RpcClient>(3, col);
+        PoolHandler<IServiceHandler> pool = new PoolHandler<IServiceHandler>(3, col);
         for (int i = 0; i < 200; ++i) {
             pool.invoke(pool, method, new Object[0]);
         }
@@ -137,9 +147,14 @@ public class PoolHandlerTest {
     @Test(expected=RpcException.class)
     public void testNoReady() throws Throwable {
         col.clear();
-        PoolHandler<RpcClient> pool = new PoolHandler<RpcClient>(2, col);
+        PoolHandler<IServiceHandler> pool = new PoolHandler<IServiceHandler>(2, col);
         pool.setWaitTimeout(2);
-        pool.invoke(pool, method, new Object[0]);
+        try {
+            pool.invoke(pool, method, new Object[0]);
+        } catch (RpcException e) {
+            assertEquals(RpcException.Type.NO_SERVER_READY, e.getType());
+            throw e;
+        }
     }
 
     /**
@@ -147,11 +162,11 @@ public class PoolHandlerTest {
      * @throws Throwable
      */
     @Test(expected=RpcException.class)
-    public void testNoItem() throws Throwable {
+    public void testInvokeNoItem() throws Throwable {
         col.clear();
-        PoolHandler<RpcClient> pool = new PoolHandler<RpcClient>(2, col);
+        PoolHandler<IServiceHandler> pool = new PoolHandler<IServiceHandler>(2, col);
         pool.setWaitTimeout(2);
-        PoolableInvocationHandler hand = (PoolableInvocationHandler) Proxy.newProxyInstance(RpcClient.class.getClassLoader(),
+        PoolableInvocationHandler hand = (PoolableInvocationHandler) Proxy.newProxyInstance(IServiceHandler.class.getClassLoader(),
                 new Class[] {PoolableInvocationHandler.class}, pool);
         hand.getRemoteName();
     }
@@ -162,9 +177,14 @@ public class PoolHandlerTest {
      */
     @Test(expected=RpcException.class)
     public void testExceedsRetry() throws Throwable {
-        PoolHandler<RpcClient> pool = new PoolHandler<RpcClient>(2, col);
+        PoolHandler<IServiceHandler> pool = new PoolHandler<IServiceHandler>(2, col);
+        try {
         for (int i = 0; i < 200; ++i) {
             pool.invoke(pool, method, new Object[0]);
+        }
+        } catch (RpcException e) {
+            assertEquals(RpcException.Type.ERROR_EXCEED_RETRY, e.getType());
+            throw e;
         }
     }
 
@@ -174,11 +194,11 @@ public class PoolHandlerTest {
     @Test
     public void testTake() {
         col.clear();
-        col.add(mock(RpcClient.class));
-        col.add(mock(RpcClient.class));
-        col.add(mock(RpcClient.class));
-        col.add(mock(RpcClient.class));
-        PoolHandler<RpcClient> pool = new PoolHandler<RpcClient>(2, col);
+        col.add(mock(IServiceHandler.class));
+        col.add(mock(IServiceHandler.class));
+        col.add(mock(IServiceHandler.class));
+        col.add(mock(IServiceHandler.class));
+        PoolHandler<IServiceHandler> pool = new PoolHandler<IServiceHandler>(2, col);
         assertNull(pool.take());
     }
 
@@ -188,7 +208,7 @@ public class PoolHandlerTest {
     @Test
     public void testTakeNull() {
         col.clear();
-        PoolHandler<RpcClient> pool = new PoolHandler<RpcClient>(2, col);
+        PoolHandler<IServiceHandler> pool = new PoolHandler<IServiceHandler>(2, col);
         pool.setWaitTimeout(2);
         assertNull(pool.take());
     }
@@ -199,11 +219,11 @@ public class PoolHandlerTest {
     @Test
     public void testTakeOne() {
         col.clear();
-        col.add(mock(RpcClient.class));
-        col.add(mock(RpcClient.class));
-        col.add(mock(RpcClient.class));
-        col.add(mock(RpcClient.class));
-        PoolHandler<RpcClient> pool = new PoolHandler<RpcClient>(2, col);
+        col.add(mock(IServiceHandler.class));
+        col.add(mock(IServiceHandler.class));
+        col.add(mock(IServiceHandler.class));
+        col.add(mock(IServiceHandler.class));
+        PoolHandler<IServiceHandler> pool = new PoolHandler<IServiceHandler>(2, col);
         assertNotNull(pool.takeOne(0));
     }
 
@@ -213,7 +233,7 @@ public class PoolHandlerTest {
     @Test
     public void testTakeOneNull() {
         col.clear();
-        PoolHandler<RpcClient> pool = new PoolHandler<RpcClient>(2, col);
+        PoolHandler<IServiceHandler> pool = new PoolHandler<IServiceHandler>(2, col);
         assertNull(pool.takeOne(2));
     }
 
@@ -223,7 +243,7 @@ public class PoolHandlerTest {
     @Test
     public void testTakeOneE() {
         col.clear();
-        PoolHandler<RpcClient> pool = new PoolHandler<RpcClient>(2, col);
+        PoolHandler<IServiceHandler> pool = new PoolHandler<IServiceHandler>(2, col);
         Thread t = Runner.run(pool, "takeOne", 1000);
         SystemUtil.sleep(2);
         t.interrupt();
@@ -234,7 +254,7 @@ public class PoolHandlerTest {
      */
     @Test
     public void testGetWaitTimeout() {
-        PoolHandler<RpcClient> pool = new PoolHandler<RpcClient>(2, col);
+        PoolHandler<IServiceHandler> pool = new PoolHandler<IServiceHandler>(2, col);
         pool.setWaitTimeout(2345);
         assertEquals(2345, pool.getWaitTimeout());
     }
@@ -244,7 +264,7 @@ public class PoolHandlerTest {
      */
     @Test
     public void testGetRetryTimes() {
-        PoolHandler<RpcClient> pool = new PoolHandler<RpcClient>(54, col);
+        PoolHandler<IServiceHandler> pool = new PoolHandler<IServiceHandler>(54, col);
         assertEquals(54, pool.getRetryTimes());
     }
 

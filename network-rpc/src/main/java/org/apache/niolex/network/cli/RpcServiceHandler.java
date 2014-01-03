@@ -44,8 +44,7 @@ public class RpcServiceHandler implements IServiceHandler {
 		this.serviceUrl = serviceUrl;
 		this.handler = handler;
 		this.errorBlockTime = errorBlockTime;
-		if (!isReady)
-			notReady(new IOException("Failed to connect when server initialize."));
+		if (!isReady) notReady(new IOException("Failed to connect when server initialize."));
 	}
 
 	/**
@@ -59,7 +58,7 @@ public class RpcServiceHandler implements IServiceHandler {
 
 	/**
 	 * This is the override of super method.
-	 * @see org.apache.niolex.network.cli.IServiceHandler#invoke(java.lang.Object, java.lang.reflect.Method, java.lang.Object[])
+	 * @see org.apache.niolex.network.cli.IServiceHandler#invoke(Object, Method, Object[])
 	 */
 	@Override
 	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
@@ -72,10 +71,7 @@ public class RpcServiceHandler implements IServiceHandler {
 	 */
 	@Override
 	public boolean isReady() {
-		boolean isReady = System.currentTimeMillis() > nextWorkTime;
-		if (!isReady && LOG.isDebugEnabled())
-			LOG.debug("Server [{}] is not ready for work.", serviceUrl);
-		return isReady;
+		return System.currentTimeMillis() > nextWorkTime;
 	}
 
 	/**
@@ -85,7 +81,8 @@ public class RpcServiceHandler implements IServiceHandler {
 	@Override
 	public void notReady(IOException ioe) {
 		nextWorkTime = System.currentTimeMillis() + errorBlockTime;
-		LOG.warn("Server [" + serviceUrl + "] has been set to not ready status: " + ioe.getMessage());
+		LOG.warn("Server [{}] is not ready, next work time - {}, error: {}.",
+		        serviceUrl, nextWorkTime, ioe.getMessage());
 	}
 
 	/**
@@ -99,7 +96,6 @@ public class RpcServiceHandler implements IServiceHandler {
 
 	/**
 	 * Get the internal handler.
-	 * This is the override of super method.
 	 * @see org.apache.niolex.network.cli.IServiceHandler#getHandler()
 	 */
 	@Override

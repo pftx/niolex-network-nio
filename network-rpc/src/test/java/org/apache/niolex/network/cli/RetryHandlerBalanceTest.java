@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.apache.niolex.commons.concurrent.ConcurrentUtil;
 import org.apache.niolex.commons.reflect.MethodUtil;
 import org.apache.niolex.commons.util.Runner;
 import org.apache.niolex.network.rpc.RpcException;
@@ -41,19 +42,19 @@ import org.junit.Test;
  * @version @version@, $Date: 2011-9-15$
  *
  */
-public class OldRetryHandlerTest {
+public class RetryHandlerBalanceTest {
     private static RetryHandler a;
     private static List<IServiceHandler> listHandlers = new ArrayList<IServiceHandler>(5);
 
     static {
     	listHandlers.addAll(RpcServiceHandlerTest.listHandlers);
     	a = new RetryHandler(listHandlers, 3, 10);
+    	a.logDebug = false;
     }
 
     @Test
     public void testName() {
         System.out.println(" => " + a.toString());
-
         Assert.assertEquals(listHandlers, a.getHandlers());
     }
 
@@ -78,15 +79,7 @@ public class OldRetryHandlerTest {
 
     public void invokeBlance(ConcurrentHashMap<String, AtomicInteger> m) throws Throwable {
     	for (int i = 0; i < 2000; ++i) {
-            String name = a.invoke(a, null, null).toString();
-            AtomicInteger t = m.get(name);
-            if (t == null) {
-                t = new AtomicInteger(0);
-                AtomicInteger q = m.putIfAbsent(name, t);
-                if (q != null) {
-                	t = q;
-                }
-            }
+            AtomicInteger t = ConcurrentUtil.initMap(m, a.invoke(a, null, null).toString(), new AtomicInteger(0));
             t.incrementAndGet();
         }
     }
@@ -108,7 +101,7 @@ public class OldRetryHandlerTest {
             t = t + 1;
             m.put(name, t);
         }
-        System.out.println(m);
+        System.out.println("ErrorBlance: " + m);
         for (Integer k : m.values()) {
             Assert.assertTrue("Must relative in 100", k > 2400);
             Assert.assertTrue("Must relative in 100", k < 2600);
@@ -124,12 +117,11 @@ public class OldRetryHandlerTest {
         RetryHandler a = new RetryHandler(listHandlers, 3, 10);
         Method m = MethodUtil.getMethods(B.class, "invoke")[0];
         for (int i = 0; i < 200; ++i) {
-            String name = a.invoke(a, m, null).toString();
-            System.out.println("Result => " + name);
+            a.invoke(a, m, null);
         }
     }
 
-    @Test(expected=Exception.class)
+    @Test(expected=NoSuchMethodException.class)
     public void testErrorException() throws Throwable {
     	List<IServiceHandler> listHandlers = new ArrayList<IServiceHandler>();
         listHandlers.add(new RpcServiceHandler("5", new C(), 1000, true));
@@ -168,15 +160,21 @@ public class OldRetryHandlerTest {
 
 class B implements InvocationHandler {
     private final String name;
+    private final boolean pr;
 
     public B(String name) {
+        this(name, false);
+    }
+
+    public B(String name, boolean pr) {
         super();
         this.name = name;
+        this.pr = pr;
     }
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        System.out.println("B invoke for: " + name);
+        if (pr) System.out.println("B invoke for: " + name);
         if (System.currentTimeMillis() % 2 == 0)
             throw new Exception("B", new SocketException("Sock"));
         return name;
@@ -197,7 +195,7 @@ class D implements InvocationHandler {
 
 	@Override
 	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-		throw new Exception("D");
+		throw new NoSuchMethodException("D");
 	}
 
 }

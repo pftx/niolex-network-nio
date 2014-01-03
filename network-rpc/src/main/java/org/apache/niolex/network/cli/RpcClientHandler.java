@@ -18,14 +18,13 @@
 package org.apache.niolex.network.cli;
 
 import java.io.IOException;
-import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 
-import org.apache.niolex.network.rpc.PoolableInvocationHandler;
+import org.apache.niolex.network.rpc.RpcClient;
 
 /**
- * This is the adapter to adapt PoolableInvocationHandler to IServiceHandler, which
- * is the interface could be managed by RetryHandler.
+ * This is the adapter to adapt RpcClient to IServiceHandler, which
+ * is the interface could be managed by RetryHandler and PoolHandler.
  *
  * We disable the error block functionality in this class.
  * If user want that, use {@link RpcServiceHandler}
@@ -33,12 +32,12 @@ import org.apache.niolex.network.rpc.PoolableInvocationHandler;
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.3, Date: 2012-6-3
  */
-public class RpcPoolableHandler implements IServiceHandler {
+public class RpcClientHandler implements IServiceHandler {
 
 	private final String serviceUrl;
-	private final PoolableInvocationHandler handler;
+	private final RpcClient handler;
 
-	public RpcPoolableHandler(String serviceUrl, PoolableInvocationHandler handler) {
+	public RpcClientHandler(String serviceUrl, RpcClient handler) {
 		super();
 		this.serviceUrl = serviceUrl;
 		this.handler = handler;
@@ -46,7 +45,7 @@ public class RpcPoolableHandler implements IServiceHandler {
 
 	/**
 	 * This is the override of super method.
-	 * @see java.lang.reflect.InvocationHandler#invoke(java.lang.Object, java.lang.reflect.Method, java.lang.Object[])
+	 * @see java.lang.reflect.InvocationHandler#invoke(Object, Method, Object[])
 	 */
 	@Override
 	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
@@ -86,7 +85,7 @@ public class RpcPoolableHandler implements IServiceHandler {
 	 */
 	@Override
 	public void notReady(IOException ioe) {
-		// We will ignore this method, the PoolableInvocationHandler will manage it's status.
+		// We will ignore this method, the RpcClient will manage it's status.
 	}
 
 	/**
@@ -94,7 +93,7 @@ public class RpcPoolableHandler implements IServiceHandler {
 	 * @see org.apache.niolex.network.cli.IServiceHandler#getHandler()
 	 */
 	@Override
-	public InvocationHandler getHandler() {
+	public RpcClient getHandler() {
 		return handler;
 	}
 }

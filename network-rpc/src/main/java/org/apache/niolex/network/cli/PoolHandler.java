@@ -23,7 +23,6 @@ import java.util.Collection;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.niolex.network.rpc.PoolableInvocationHandler;
 import org.apache.niolex.network.rpc.RpcException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,25 +31,28 @@ import org.slf4j.LoggerFactory;
  * The basic client implementation is {@link org.apache.niolex.network.client.SocketClient}
  * which is simple, and correct proven. But it can not be used in multiple threading
  * environment.
- *
+ * <br>
  * The {@link org.apache.niolex.network.client.PacketClient} can be used in multiple threads,
  * but it requires two threads for read and write. So in the multi-core server side environment,
  * we need to have a pool to manage large set of connections.
- *
+ * <br>
  * This PoolHandler is based on the {@link org.apache.niolex.network.client.SocketClient},
  * using an internal pool to make it working in multiple threading environment.
- *
+ * <br>
  * We will also handle the retry problem here. But we will leave the SocketClient creation
  * problem for you, because there maybe multiple servers for one service.
+ * <br>
+ * User can use this class as an InvocationHandler or just use it as a pool. If user want to
+ * use it as a pool, see {@link #take()} and {@link #offer(IServiceHandler)}.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.5
  * @since 2012-12-5
  */
-public class PoolHandler<CLI extends PoolableInvocationHandler> implements InvocationHandler {
+public class PoolHandler<Service extends IServiceHandler> extends BaseHandler implements InvocationHandler {
     private static final Logger LOG = LoggerFactory.getLogger(PoolHandler.class);
 
-    private final LinkedBlockingQueue<CLI> readyQueue = new LinkedBlockingQueue<CLI>();
+    private final LinkedBlockingQueue<Service> readyQueue = new LinkedBlockingQueue<Service>();
     private final int retryTimes;
     private final int handlerNum;
     private int waitTimeout = Constants.CLIENT_CONNECT_TIMEOUT;
@@ -59,82 +61,67 @@ public class PoolHandler<CLI extends PoolableInvocationHandler> implements Invoc
      * Create a PoolHandler with the specified parameters.
      *
      * @param retryTimes the number of times to retry when some kind of error occurred
-     * @param col the collections of RpcClient
+     * @param col the collections of {@link IServiceHandler}
      */
-    public PoolHandler(int retryTimes, Collection<CLI> col) {
+    public PoolHandler(int retryTimes, Collection<Service> col) {
         super();
         this.retryTimes = retryTimes;
         handlerNum = col.size();
         readyQueue.addAll(col);
+        this.logDebug = LOG.isDebugEnabled();
     }
 
+    /**
+     * Use the pool handler as a invocation handler. We will delegate call to service handler.
+     * <br>
+     * This is the override of super method.
+     * @see java.lang.reflect.InvocationHandler#invoke(java.lang.Object, java.lang.reflect.Method, java.lang.Object[])
+     */
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        CLI core;
+        Service handler;
         Throwable cause = null;
         long handleStart = 0, handleEnd = 500;
         int curTry = 0;
         while (curTry++ < retryTimes) {
-            core = take();
-            if (core == null) {
-                throw new RpcException("Failed to service " + method.getName(), RpcException.Type.NO_SERVER_READY, null);
+            handler = take();
+            if (handler == null) {
+                throw new RpcException("Failed to service " + method.toString(), RpcException.Type.NO_SERVER_READY, null);
             }
             try {
                 handleStart = System.currentTimeMillis();
-                LogContext.serviceUrl(core.getRemoteName());
-                Object obj = core.invoke(proxy, method, args);
+                LogContext.serviceUrl(handler.getServiceUrl());
+                Object obj = handler.invoke(proxy, method, args);
                 handleEnd = System.currentTimeMillis();
-                if (LOG.isDebugEnabled()) {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append(LogContext.prefix()).append(" Succeed to invoke handler on [").append(core.getRemoteName());
-                    sb.append("] time {").append(handleEnd - handleStart).append("}");
-                    LOG.debug(sb.toString());
+                if (logDebug) {
+                    LOG.debug(logInvoke(handler, method, handleEnd - handleStart));
                 }
                 return obj;
             } catch (Throwable e) {
                 handleEnd = System.currentTimeMillis();
-                StringBuilder sb = new StringBuilder();
-                sb.append(LogContext.prefix()).append(" Failed to invoke handler on [").append(core.getRemoteName());
-                sb.append("] time {").append(handleEnd - handleStart).append("} RETRY ").append(curTry);
-                sb.append(" ERRMSG: ").append(e.getMessage());
-                LOG.info(sb.toString());
-                if (e instanceof RpcException) {
-                    RpcException re = (RpcException)e;
-                    switch (re.getType()) {
-                        // For some type of RpcException, we need to retry.
-                        case TIMEOUT:
-                        case NOT_CONNECTED:
-                        case CONNECTION_CLOSED:
-                            continue;
-                        // For the others, we just throw.
-                        default:
-                            throw re;
-                    }
-                }
-                // If this exception has no cause, we think it's necessary to throw it out.
-                if (e.getCause() == null)
-                    throw e;
+                LOG.info(logError(handler, method, handleEnd - handleStart, curTry, e));
+                processException(e, handler);
                 cause = e;
             } finally {
                 // Return the resource.
-                offer(core);
+                offer(handler);
             }
         } // End of while.
-        throw new RpcException("Failed to service " + method.getName() + ": exceeds retry time [" + retryTimes + "].",
+        throw new RpcException("Failed to service " + method.toString() + ": exceeds retry time [" + retryTimes + "].",
                 RpcException.Type.ERROR_EXCEED_RETRY, cause);
     }
 
     /**
      * Retrieves and removes the head of the ready queue, or returns null if the queue is empty.
      *
-     * @return an instance of RpcClient, null if all clients are busy.
+     * @return an instance of {@link IServiceHandler}, null if all service handlers are busy.
      */
-    public CLI take() {
-        CLI core;
+    public Service take() {
+        Service core;
         int anyTried = 0;
         while ((core = takeOne(waitTimeout)) != null) {
             // First check the connection status.
-            if (core.isValid())
+            if (core.isReady())
                 return core;
             else {
                 repair(core);
@@ -148,14 +135,14 @@ public class PoolHandler<CLI extends PoolableInvocationHandler> implements Invoc
     }
 
     /**
-     * Take one RpcClient from the ready queue, will return null if can not take out any
+     * Take one IServiceHandler from the ready queue, will return null if can not take out any
      * element at the given timeout.
      * We will not check the status of this instance, so it maybe already broken.
      *
      * @param connectTimeout the timeout to take item from queue.
-     * @return an instance of RpcClient, null if timeout.
+     * @return an instance of {@link IServiceHandler}, null if timeout.
      */
-    protected CLI takeOne(int connectTimeout) {
+    protected Service takeOne(int connectTimeout) {
         try {
             return readyQueue.poll(connectTimeout, TimeUnit.MILLISECONDS);
         } catch (InterruptedException e) {
@@ -164,32 +151,32 @@ public class PoolHandler<CLI extends PoolableInvocationHandler> implements Invoc
     }
 
     /**
-     * Repair the broken rpc client. If it can not be repaired, you need to close it.
+     * Repair the broken rpc service handler. If it can not be repaired, you need to close it.
      *
-     * @param core
+     * @param core the service handler need to be repaired
      */
-    protected void repair(CLI core) {
+    protected void repair(Service core) {
         readyQueue.offer(core);
     }
 
     /**
-     * Offer the internal pool a new rpc client.
+     * Offer the internal pool a finished rpc service handler.
      *
-     * @param core
+     * @param core the service handler
      */
-    public void offer(CLI core) {
+    public void offer(Service core) {
         readyQueue.offer(core);
     }
 
     /**
-     * @return get the current rpc client wait timeout.
+     * @return get the current rpc handler wait timeout.
      */
     public int getWaitTimeout() {
         return waitTimeout;
     }
 
     /**
-     * Set the time to wait for a rpc client in milliseconds.
+     * Set the time to wait for a rpc handler in milliseconds.
      *
      * @param waitTimeout
      */
@@ -198,7 +185,7 @@ public class PoolHandler<CLI extends PoolableInvocationHandler> implements Invoc
     }
 
     /**
-     * @return the number of times to retry when client is under network problems.
+     * @return the number of times to retry when handler is under network problems.
      */
     public int getRetryTimes() {
         return retryTimes;

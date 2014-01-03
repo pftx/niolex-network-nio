@@ -20,8 +20,8 @@ package org.apache.niolex.network.cli;
 /**
  * The rpc framework use this class to write log prefix and set current service url to it.
  *
- * User application need to subclass this,  we will get the global logid from it to maintain all
- * the logs in a consistent logid.
+ * User application need to subclass this, and set a instance of it into this class.
+ * We will get the global logid from it to maintain all the logs in a consistent logid.
  *
  * User need to override these two methods:
  * {@link #setServerUrl(String)}

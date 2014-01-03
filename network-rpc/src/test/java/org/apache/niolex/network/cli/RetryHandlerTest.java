@@ -92,6 +92,20 @@ public class RetryHandlerTest {
 	}
 
 	/**
+     * Test method for {@link org.apache.niolex.network.cli.RetryHandler#RetryHandler(java.util.List, int, int)}.
+     * @throws Throwable
+     */
+    @Test
+    public void testRetryHandler() throws Throwable {
+        Method method = MethodUtil.getMethods(PoolHandlerTest.class, "thisMethod")[0];
+        retryHandler.invoke(handler1, method, null);
+        FieldUtil.setValue(retryHandler, "idx", new AtomicInteger(Integer.MAX_VALUE - 5));
+        retryHandler.invoke(handler1, method, null);
+        AtomicInteger idx = FieldUtil.getValue(retryHandler, "idx");
+        assertTrue(4 > idx.get());
+    }
+
+	/**
 	 * Test method for {@link org.apache.niolex.network.cli.RetryHandler#RetryHandler(java.util.List, int, int)}.
 	 * @throws Throwable
 	 */
@@ -147,6 +161,7 @@ public class RetryHandlerTest {
 		idxField.setAccessible(true);
 		AtomicInteger idx = (AtomicInteger)idxField.get(retryHandler);
 		idx.set(Integer.MAX_VALUE - 1000);
+		retryHandler.logDebug = false;
 		retryHandler.invoke(handler1, null, null);
 		retryHandler.invoke(handler1, null, null);
 		retryHandler.invoke(handler1, null, null);

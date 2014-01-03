@@ -17,7 +17,6 @@
  */
 package org.apache.niolex.network.cli;
 
-import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.Collections;
@@ -29,11 +28,10 @@ import org.apache.niolex.network.rpc.RpcException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
  * Retry in rpc is very important. Because the network environment is not stable.
  * This class controls retry and interval between retry.
- *
+ * <br>
  * This class have an inner list of IServiceHandler, they are the representative of real
  * clients, for example, RpcClients. For Every method call, we randomly pick one IServiceHandler
  * and invoke this method on it. If error occurred, we pick another and retry this method.
@@ -41,7 +39,7 @@ import org.slf4j.LoggerFactory;
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0, Date: 2012-5-27
  */
-public class RetryHandler implements InvocationHandler {
+public class RetryHandler extends BaseHandler implements InvocationHandler {
 	private static final Logger LOG = LoggerFactory.getLogger(RetryHandler.class);
 
 	private final AtomicInteger idx = new AtomicInteger(0);
@@ -51,20 +49,21 @@ public class RetryHandler implements InvocationHandler {
 	private final int handlerNum;
 
 	/**
-	 * The only one Constructor
+	 * The only one Constructor, initialize handlers.
 	 *
-	 * @param handlers
-	 * @param retryTimes
-	 * @param intervalBetweenRetry
+	 * @param handlers the handlers to be used
+	 * @param retryTimes number of times to retry when certain kinds of exceptions occurred
+	 * @param intervalBetweenRetry the milliseconds to sleep between retry
 	 */
 	public RetryHandler(List<IServiceHandler> handlers, int retryTimes, int intervalBetweenRetry) {
 		super();
-		// This will make the handlers order different in every client instance.
+		// This will make the handlers order different in every retry handler instance.
 		Collections.shuffle(handlers);
 		this.handlers = handlers;
 		this.handlerNum = handlers.size();
 		this.retryTimes = retryTimes;
 		this.intervalBetweenRetry = intervalBetweenRetry;
+		this.logDebug = LOG.isDebugEnabled();
 	}
 
 	@Override
@@ -97,37 +96,14 @@ public class RetryHandler implements InvocationHandler {
 				LogContext.serviceUrl(handler.getServiceUrl());
 				Object obj = handler.invoke(proxy, method, args);
 				handleEnd = System.currentTimeMillis();
-				if (LOG.isDebugEnabled()) {
-				    StringBuilder sb = new StringBuilder();
-				    sb.append(LogContext.prefix()).append(" Succeed to invoke handler on [").append(handler.getServiceUrl());
-				    sb.append("] time {").append(handleEnd - handleStart).append("}");
-					LOG.debug(sb.toString());
+				if (logDebug) {
+					LOG.debug(logInvoke(handler, method, handleEnd - handleStart));
 				}
 				return obj;
 			} catch (Throwable e) {
 			    handleEnd = System.currentTimeMillis();
-			    StringBuilder sb = new StringBuilder();
-                sb.append(LogContext.prefix()).append(" Failed to invoke handler on [").append(handler.getServiceUrl());
-                sb.append("] time {").append(handleEnd - handleStart).append("} RETRY ").append(curTry);
-                sb.append(" ERRMSG: ").append(e.getMessage());
-				LOG.info(sb.toString());
-				if (e instanceof RpcException) {
-					RpcException re = (RpcException)e;
-					switch (re.getType()) {
-					    case TIMEOUT:
-					    case NOT_CONNECTED:
-					    case CONNECTION_CLOSED:
-					        // For some type of RpcException, we need to retry.
-					        continue;
-                        default:
-                            // For the others, we just throw.
-                            throw re;
-					}
-				}
-				if (e.getCause() == null)
-					throw e;
-				else if (e.getCause() instanceof IOException)
-					handler.notReady((IOException)(e.getCause()));
+				LOG.info(logError(handler, method, handleEnd - handleStart, curTry, e));
+				processException(e, handler);
 				cause = e;
 			}
 		}

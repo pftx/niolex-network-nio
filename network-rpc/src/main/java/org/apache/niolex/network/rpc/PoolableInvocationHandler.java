@@ -22,7 +22,7 @@ import java.lang.reflect.InvocationHandler;
 import org.apache.niolex.network.ConnStatus;
 
 /**
- * This interface is for {@link org.apache.niolex.network.cli.PoolHandler}. We user
+ * This interface is for {@link org.apache.niolex.network.cli.PoolHandler}. When user
  * want to use PoolHandler, He will need to implement this interface.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
@@ -34,13 +34,13 @@ public interface PoolableInvocationHandler extends InvocationHandler {
     /**
      * Get the Rpc Service Client Stub powered by this handler.
      *
-     * @param c The interface you want to have stub.
+     * @param c The interface you want to have stub
      * @return the stub
      */
     public <T> T getService(Class<T> c);
 
     /**
-     * Set the interface this handler need to handle.
+     * Add the interface this handler need to handle.
      *
      * @param interfs
      */
