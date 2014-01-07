@@ -188,7 +188,7 @@ public class FaultTolerateAdapterTest {
 	    wt.handleWrite(sc2);
 	    fault.storePackets("haha_me", wt, null);
 	    Field f = FieldUtil.getField(FaultTolerateAdapter.class, "dataMap");
-	    Map<String, ConcurrentLinkedQueue<PacketData>> dataMap = FieldUtil.getFieldValue(f, fault);
+	    Map<String, ConcurrentLinkedQueue<PacketData>> dataMap = FieldUtil.getFieldValue(fault, f);
 	    ConcurrentLinkedQueue<PacketData> data = dataMap.get("haha_me");
 	    assertEquals(sc2, data.poll());
 	    fault.handleClose(wt);
@@ -213,7 +213,7 @@ public class FaultTolerateAdapterTest {
         list.add(sc4);
         fault.storePackets("haha_me", wt, list);
         Field f = FieldUtil.getField(FaultTolerateAdapter.class, "dataMap");
-        Map<String, ConcurrentLinkedQueue<PacketData>> dataMap = FieldUtil.getFieldValue(f, fault);
+        Map<String, ConcurrentLinkedQueue<PacketData>> dataMap = FieldUtil.getFieldValue(fault, f);
         ConcurrentLinkedQueue<PacketData> data = dataMap.get("haha_me");
         assertEquals(sc3, data.poll());
         assertEquals(sc4, data.poll());

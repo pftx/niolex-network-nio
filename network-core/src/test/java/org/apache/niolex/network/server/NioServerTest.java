@@ -272,7 +272,7 @@ public class NioServerTest {
         NioServer ns = new NioServer();
         Field f = FieldUtil.getField(NioServer.class, "ss");
         ServerSocketChannel ss = mock(ServerSocketChannel.class);
-        FieldUtil.setFieldValue(f, ns, ss);
+        FieldUtil.setFieldValue(ns, f, ss);
         when(ss.accept()).thenThrow(new ClosedChannelException());
 
         SelectionKey selectionKey = mock(SelectionKey.class);

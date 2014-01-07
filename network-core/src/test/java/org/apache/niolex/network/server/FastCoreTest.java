@@ -132,7 +132,7 @@ public class FastCoreTest {
     @Test
     public void testPacketFinished() throws Exception {
         Field f = FieldUtil.getField(FastCore.class, "receivePacket");
-        FieldUtil.setFieldValue(f, fastCore, new PacketData(7, new byte[65]));
+        FieldUtil.setFieldValue(fastCore, f, new PacketData(7, new byte[65]));
         fastCore.packetFinished();
         verify(packetHandler, times(1)).handlePacket(any(PacketData.class), any(IPacketWriter.class));
     }
@@ -140,7 +140,7 @@ public class FastCoreTest {
     @Test
     public void testPacketFinishedOther() throws Exception {
         Field f = FieldUtil.getField(FastCore.class, "receivePacket");
-        FieldUtil.setFieldValue(f, fastCore, PacketData.getHeartBeatPacket());
+        FieldUtil.setFieldValue(fastCore, f, PacketData.getHeartBeatPacket());
         fastCore.packetFinished();
         verify(packetHandler, times(0)).handlePacket(any(PacketData.class), any(IPacketWriter.class));
     }
@@ -224,7 +224,7 @@ public class FastCoreTest {
         FieldUtil.setValue(fc, "sendPacket", new PacketData(6, new byte[6]));
 
         Method m = MethodUtil.getMethod(FastCore.class, "doSendNewPacket");
-        Boolean b = (Boolean) MethodUtil.invokeMethod(m, fc);
+        Boolean b = (Boolean) MethodUtil.invokeMethod(fc, m);
         assertFalse(b);
     }
 
@@ -274,7 +274,7 @@ public class FastCoreTest {
         doThrow(new IllegalArgumentException("Test")).when(packetHandler).handleClose(any(IPacketWriter.class));
         FastCore fc = createFastCore(packetHandler);
         Method m = MethodUtil.getMethod(FastCore.class, "handleClose");
-        MethodUtil.invokeMethod(m, fc);
+        MethodUtil.invokeMethod(fc, m);
         verify(packetHandler, times(1)).handleClose(fc);
     }
 
