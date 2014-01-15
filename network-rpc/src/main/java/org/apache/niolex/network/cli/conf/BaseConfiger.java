@@ -45,6 +45,20 @@ public abstract class BaseConfiger<B extends BaseConfigBean> {
     public static final String GROUP = "groupList";
     public static final String DEFAULT = "default-group";
 
+    /**
+     * Split the string into items, trim the spaces before and after every item.
+     *
+     * @param str the string to be spliced
+     * @return the item array
+     */
+    public static String[] splitIntoItems(String str) {
+        String[] arr = str.split("[,;]");
+        for (int i = 0; i < arr.length; ++i) {
+            arr[i] = arr[i].trim();
+        }
+        return arr;
+    }
+
     private Properties props;
 
     protected Map<String, B> superMap = new HashMap<String, B>();
@@ -78,9 +92,29 @@ public abstract class BaseConfiger<B extends BaseConfigBean> {
             props.load(inStream);
             readSuperList();
             readConfigList();
-            LOG.info("Instantiate a new Configer for " + instanceMark + " succeeded.");
+            LOG.info("Instantiate a new Configer for {} succeeded.", instanceMark);
         } finally {
         	StreamUtil.closeStream(inStream);
+        }
+    }
+
+    /**
+     * Iterate all the properties and find the correct items to fill the destination.
+     *
+     * @param destination the destination map to be filled
+     */
+    protected void iterateProps(Map<String, B> destination) {
+        for (Entry<Object, Object> entry : props.entrySet()) {
+            String key = entry.getKey().toString();
+            String[] keyArr = key.split("\\.", 2);
+            if (keyArr.length != 2) {
+                continue;
+            }
+            B bean = destination.get(keyArr[0]);
+            if (bean == null) {
+                continue;
+            }
+            bean.setConfig(keyArr[1], entry.getValue().toString());
         }
     }
 
@@ -89,33 +123,14 @@ public abstract class BaseConfiger<B extends BaseConfigBean> {
     // ----------------------------------------------------------------------
 
     private void readSuperList() {
-        buildSuper();
-        configSuper();
-    }
-
-    private void buildSuper() {
         String str = props.getProperty(SUPER);
         if (!StringUtils.isBlank(str)) {
-            String[] superArr = str.split(" *[,;] *");
+            String[] superArr = splitIntoItems(str);
             for (String superName : superArr) {
                 superMap.put(superName, newConfigBean(superName));
             }
+            iterateProps(superMap);
             LOG.info("[superList] loaded, super list: " + superMap.keySet());
-        }
-    }
-
-    private void configSuper() {
-        if (superMap.isEmpty())
-            return;
-        for (Entry<Object, Object> entry : props.entrySet()) {
-            String key = entry.getKey().toString();
-            for (String superName : superMap.keySet()) {
-                if (key.startsWith(superName + ".")) {
-                    superMap.get(superName).setConfig(key.substring(superName.length() + 1),
-                            entry.getValue().toString());
-                    break;
-                }
-            }
         }
     }
 
@@ -132,7 +147,7 @@ public abstract class BaseConfiger<B extends BaseConfigBean> {
     private void buildGroup() {
         String str = props.getProperty(GROUP);
         if (!StringUtils.isBlank(str)) {
-            String[] groupArr = str.split(" *[,;] *");
+            String[] groupArr = splitIntoItems(str);
             for (String groupName : groupArr) {
                 groupMap.put(groupName, newConfigBean(groupName));
             }
@@ -164,8 +179,9 @@ public abstract class BaseConfiger<B extends BaseConfigBean> {
             String superName = props.getProperty(groupName + ".superName");
             if (!StringUtils.isBlank(superName)) {
                 BaseConfigBean superConf = superMap.get(superName);
-                if (superConf != null)
+                if (superConf != null) {
                     groupMap.get(groupName).setSuper(superConf);
+                }
             }
         }
     }
@@ -193,10 +209,26 @@ public abstract class BaseConfiger<B extends BaseConfigBean> {
     // get ConfigList
     // ----------------------------------------------------------------------
 
+    /**
+     * Get the configuration bean with the specified group name.
+     *
+     * @param groupName the group name
+     * @return the configuration bean
+     */
     public B getConfig(String groupName) {
         return groupMap.get(groupName);
     }
 
+    /**
+     * @return the default configuration bean.
+     */
+    public B getConfig() {
+        return groupMap.get(DEFAULT);
+    }
+
+    /**
+     * @return the configuration map
+     */
     public Map<String, B> getConfigs() {
         return groupMap;
     }

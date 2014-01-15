@@ -29,26 +29,22 @@ import org.junit.Test;
  */
 public class BaseConfigBeanTest {
 
-	class Head extends BaseConfigBean {
-		private long kill;
-		private short time;
-
-		/**
-		 * Constructor
-		 * @param groupName
-		 */
-		public Head(String groupName) {
-			super(groupName);
-		}
-
-		public long getKill() {
-			return kill;
-		}
-
-		public short getTime() {
-			return time;
-		}
-
+	@Test
+    public final void testSetConfigWithHeader() {
+	    BaseConfigBean c = new BaseConfigBean("FFG");
+	    assertEquals("FFG", c.getGroupName());
+	    assertFalse(c.hasHeader());
+	    c.setConfig("header.auth", "abc:de");
+	    c.setConfig("hasHeader", "true");
+	    c.setConfig("header.ref", "lex");
+	    c.setConfig("hrl", "rpc://g");
+	    assertNull(c.getHeader("auth"));
+	    assertEquals("abc:de", c.getProp("header.auth"));
+	    assertTrue(c.hasHeader());
+	    assertEquals("lex", c.getHeader("ref"));
+	    assertEquals("rpc://g", c.getProp("hrl"));
+	    c.setConfig("hasHeader", "nice");
+	    assertFalse(c.hasHeader());
 	}
 
 	/**
@@ -73,7 +69,7 @@ public class BaseConfigBeanTest {
 		c.setConfig("hasHeader", "true");
 		c.setConfig("header.cool", "Nice");
 		assertEquals("Nice", c.getHeader("cool"));
-		assertTrue(c.isHasHeader());
+		assertTrue(c.hasHeader());
 	}
 
 	@Test
@@ -107,13 +103,35 @@ public class BaseConfigBeanTest {
 	}
 
 	@Test
-	public void testSetField()
-	 throws Exception {
+	public void testSetField() throws Exception {
 		Head h = new Head("ghgh");
 		h.setConfig("kill", "912039298102988");
 		h.setConfig("time", "32767");
 		assertEquals(912039298102988l, h.getKill());
 		assertEquals(32767, h.getTime());
 	}
+
+}
+
+class Head extends BaseConfigBean {
+    private long kill;
+    private short time;
+    private String serviceUrl;
+
+    public Head(String groupName) {
+        super(groupName);
+    }
+
+    public long getKill() {
+        return kill;
+    }
+
+    public short getTime() {
+        return time;
+    }
+
+    public String getServiceUrl() {
+        return serviceUrl;
+    }
 
 }

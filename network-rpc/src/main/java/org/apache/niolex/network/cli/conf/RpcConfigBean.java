@@ -50,7 +50,8 @@ public class RpcConfigBean extends BaseConfigBean {
      */
     public String[] serverList;
     public String serviceUrl = "";
-    public String serviceType = "network/json";
+    public String serviceType = "network-json";
+    public String clientType = "BlockingClient";
 
     /**
 	 * Create a new config bean with this group name.
@@ -58,7 +59,7 @@ public class RpcConfigBean extends BaseConfigBean {
 	 *
 	 * We will set hasHeader to true in this method.
 	 *
-     * @param groupName The group name
+     * @param groupName the group name
      */
     public RpcConfigBean(String groupName) {
         super(groupName);
@@ -75,7 +76,7 @@ public class RpcConfigBean extends BaseConfigBean {
     @Override
     public void setConfig(String key, String value) {
         if ("serverList".equals(key)) {
-            serverList = value.split(" *[,;] *");
+            serverList = BaseConfiger.splitIntoItems(value);
         } else {
             super.setConfig(key, value);
         }
@@ -104,6 +105,7 @@ public class RpcConfigBean extends BaseConfigBean {
         this.serverList = co.serverList;
         this.serviceUrl = co.serviceUrl;
         this.serviceType = co.serviceType;
+        this.clientType = co.clientType;
     }
 
     @Override

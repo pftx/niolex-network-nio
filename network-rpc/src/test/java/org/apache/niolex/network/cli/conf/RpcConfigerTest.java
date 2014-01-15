@@ -69,12 +69,22 @@ public class RpcConfigerTest {
     }
 
 	@Test
-	public void testRpcConfiger()
-	 throws Exception {
+	public void testRpcConfiger() throws Exception {
 		byte[] buf = "serviceUrl=/cgi-bin/services/WdgetService.cgi".getBytes();
 		InputStream ins = new ByteArrayInputStream(buf);
 		RpcConfiger confi = new RpcConfiger(ins, "demo.properties");
 		assertEquals("/cgi-bin/services/WdgetService.cgi", confi.getConfig().serviceUrl);
 	}
 
+    @Test
+    public void testBaseConfiger() throws Exception {
+        RpcConfiger configer = new RpcConfiger("guess.properties");
+        RpcConfigBean conf = configer.getConfig("demo");
+        assertEquals(conf.serverList[0], "dy-m-st01.niolex.net:8808");
+        assertEquals(conf.serverList[2], "192.168.16.18:8808");
+        assertEquals(conf.serviceUrl, "/cgi-bin/services/WdgetService.cgi");
+        assertEquals(conf.rpcTimeout, 7000);
+        assertEquals(conf.rpcErrorRetryTimes, 5);
+        assertEquals(conf.header.get("password"), "ID(#J8329%$^S");
+    }
 }

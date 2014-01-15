@@ -25,10 +25,10 @@ import org.apache.niolex.commons.reflect.FieldUtil;
 /**
  * The base configuration bean.
  * We save all properties into the prop map, and save
- * all the header properties into the header map.
+ * all the header properties into the header map if necessary.
  * <br>
- * If you set hasHeader to false, we will not judge a property to be header
- * property or not, just take it to be common property.
+ * If you set hasHeader to false(which is the default value), we will not judge a property
+ * to be header property or not, just take it as a common property.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0, Date: 2012-5-27
@@ -52,7 +52,7 @@ public class BaseConfigBean {
 
     /**
      * Set configuration into this bean.
-     *
+     * <br>
      * If hasHeader is set to true, any property key start with header. will
      * be considered as header property.
      *
@@ -108,7 +108,7 @@ public class BaseConfigBean {
         return groupName;
     }
 
-    public boolean isHasHeader() {
+    public boolean hasHeader() {
         return hasHeader;
     }
 

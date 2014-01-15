@@ -28,24 +28,28 @@ import java.io.InputStream;
  */
 public class RpcConfiger extends BaseConfiger<RpcConfigBean> {
 
-	/**
-	 * Generated constructor from super class.
-	 *
-	 * @param fileName
-	 * @throws IOException
-	 */
+    /**
+     * Init the Configer with a property file, relative to the class path of this class.
+     *
+     * @param fileName property file path name(which must in classpath)
+     * @throws IOException when error occurred
+     */
 	public RpcConfiger(String fileName) throws IOException {
 		super(fileName);
 	}
 
-
 	/**
-	 * Generated constructor from super class.
-	 *
-	 * @param inStream
-	 * @param instanceMark
-	 * @throws IOException
-	 */
+     * Reads a property list (key and element pairs) from the input byte stream.
+     * The input stream is in a simple line-oriented format and is assumed to use the ISO 8859-1 character encoding;
+     * that is each byte is one Latin1 character. Characters not in Latin1, and certain special characters,
+     * are represented in keys and elements using Unicode escapes.
+     *
+     * The specified stream will be closed after this method returns.
+     *
+     * @param inStream the stream contains property list
+     * @param instanceMark the string mark this configer
+     * @throws IOException when error occurred
+     */
 	public RpcConfiger(InputStream inStream, String instanceMark) throws IOException {
 		super(inStream, instanceMark);
 	}
@@ -66,6 +70,7 @@ public class RpcConfiger extends BaseConfiger<RpcConfigBean> {
 	 *
 	 * @return the default config bean if group not exist, null otherwise
 	 */
+	@Override
 	public RpcConfigBean getConfig() {
 		return (RpcConfigBean)super.getConfig(BaseConfiger.DEFAULT);
 	}

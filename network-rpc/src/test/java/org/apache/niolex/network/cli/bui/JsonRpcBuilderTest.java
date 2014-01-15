@@ -17,12 +17,22 @@
  */
 package org.apache.niolex.network.cli.bui;
 
+import static org.junit.Assert.*;
+
 import java.io.IOException;
 
+import org.apache.niolex.commons.bean.Pair;
+import org.apache.niolex.network.IClient;
 import org.apache.niolex.network.cli.IServiceHandler;
 import org.apache.niolex.network.cli.conf.RpcConfigBean;
+import org.apache.niolex.network.client.BlockingClient;
+import org.apache.niolex.network.client.PacketClient;
+import org.apache.niolex.network.client.SocketClient;
 import org.apache.niolex.network.demo.json.DemoJsonRpcServer;
+import org.apache.niolex.network.rpc.PacketInvoker;
+import org.apache.niolex.network.rpc.RemoteInvoker;
 import org.apache.niolex.network.rpc.RpcClient;
+import org.apache.niolex.network.rpc.SingleInvoker;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -42,6 +52,43 @@ public class JsonRpcBuilderTest {
 	@AfterClass
 	public static void down() {
 		DemoJsonRpcServer.stop();
+	}
+
+	@Test
+    public void testBuildClientP() throws Exception {
+	    RpcConfigBean bean = new RpcConfigBean("a");
+	    bean.clientType = "PacketClient";
+	    bean.rpcTimeout = 300;
+        JsonRpcBuilder bui = new JsonRpcBuilder();
+        Pair<IClient,RemoteInvoker> pair = bui.buildClient(bean, "abc://localhost:8808/gogogo");
+        assertTrue(pair.a instanceof PacketClient);
+        assertTrue(pair.b instanceof PacketInvoker);
+        PacketInvoker pi = (PacketInvoker)pair.b;
+        assertEquals(300, pi.getRpcHandleTimeout());
+	}
+
+	@Test
+	public void testBuildClientB() throws Exception {
+	    RpcConfigBean bean = new RpcConfigBean("a");
+	    bean.clientType = "BlockingClient";
+	    bean.rpcTimeout = 300;
+	    JsonRpcBuilder bui = new JsonRpcBuilder();
+	    Pair<IClient,RemoteInvoker> pair = bui.buildClient(bean, "abc://localhost:8808/gogogo");
+	    assertTrue(pair.a instanceof BlockingClient);
+	    assertTrue(pair.b instanceof PacketInvoker);
+	    PacketInvoker pi = (PacketInvoker)pair.b;
+	    assertEquals(300, pi.getRpcHandleTimeout());
+	}
+
+	@Test
+	public void testBuildClientS() throws Exception {
+	    RpcConfigBean bean = new RpcConfigBean("a");
+	    bean.clientType = "SocketClient";
+	    bean.rpcTimeout = 300;
+	    JsonRpcBuilder bui = new JsonRpcBuilder();
+	    Pair<IClient,RemoteInvoker> pair = bui.buildClient(bean, "abc://localhost:8808/gogogo");
+	    assertTrue(pair.a instanceof SocketClient);
+	    assertTrue(pair.b instanceof SingleInvoker);
 	}
 
 	/**
