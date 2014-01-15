@@ -18,13 +18,15 @@
 package org.apache.niolex.network.cli;
 
 /**
- * The rpc framework use this class to write log prefix and set current service url to it.
- *
- * User application need to subclass this, and set a instance of it into this class.
+ * The rpc framework use this class to get log prefix and set current service url to it.
+ * <br>
+ * User application need to subclass this to provide log prefix, i.e. a global LOG ID,
+ * and store the service URL for proper use. Set a instance of your class into the global
+ * field by {@link #setInstance(LogContext)} to make your class work.
  * We will get the global logid from it to maintain all the logs in a consistent logid.
- *
+ * <br>
  * User need to override these two methods:
- * {@link #setServerUrl(String)}
+ * {@link #setServiceUrl(String)}
  * {@link #getLogPrefix()}
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
@@ -34,7 +36,7 @@ public class LogContext {
 
 	/**
 	 * This class is just for unit test and demo run.
-	 * For products, please extend LogContext and create your own subclass.
+	 * For productions, please extend LogContext and create your own subclass.
 	 */
     private static LogContext INSTANCE = new LogContext();
 
@@ -50,7 +52,7 @@ public class LogContext {
 
     /**
      * Just return GID here for demo & unit test.
-     *
+     * <br>
      * Subclass need to override this method to provide their own implementation,
      * return the global log prefix for rpc framework. This framework will log with this prefix.
      *
@@ -62,13 +64,13 @@ public class LogContext {
 
     /**
      * Just do nothing here.
-     *
+     * <br>
      * Subclass need to override this method to provide their own implementation,
-     * this rpc framework will inject the current using server URL into this method.
+     * this rpc framework will inject the current using service URL into this method.
      *
-     * @param serverUrl the current using server url
+     * @param serviceUrl the current using service url
      */
-    protected void setServerUrl(String serverUrl) {
+    protected void setServiceUrl(String serviceUrl) {
     	// Do nothing here, for demo.
     }
 
@@ -84,9 +86,9 @@ public class LogContext {
     /**
      * Framework internal use only.
      *
-     * @param serverUrl the current using server Url
+     * @param serviceUrl the current using service Url
      */
-    static void serviceUrl(String serverUrl) {
-        INSTANCE.setServerUrl(serverUrl);
+    static void serviceUrl(String serviceUrl) {
+        INSTANCE.setServiceUrl(serviceUrl);
     }
 }

@@ -17,15 +17,16 @@
  */
 package org.apache.niolex.network.cli.conf;
 
-import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.apache.niolex.commons.reflect.FieldUtil;
 
 /**
  * The base configuration bean.
  * We save all properties into the prop map, and save
  * all the header properties into the header map.
- *
+ * <br>
  * If you set hasHeader to false, we will not judge a property to be header
  * property or not, just take it to be common property.
  *
@@ -55,8 +56,8 @@ public class BaseConfigBean {
      * If hasHeader is set to true, any property key start with header. will
      * be considered as header property.
      *
-     * @param key
-     * @param value
+     * @param key the property key
+     * @param value the property value
      */
     public void setConfig(String key, String value) {
     	// 1. process header
@@ -66,7 +67,7 @@ public class BaseConfigBean {
 		}
 		try {
 			// 2. process fields
-			setField(this.getClass().getDeclaredField(key), value);
+		    FieldUtil.setValueAutoConvert(this, key, value);
 		} catch (Exception e) {
 			// 3. save other property into map
 			prop.put(key, value);
@@ -81,30 +82,6 @@ public class BaseConfigBean {
     protected void setSuper(final BaseConfigBean superConf) {
 	    prop.putAll(superConf.prop);
 	    header.putAll(superConf.header);
-	}
-
-    /**
-     * Set the value into this field.
-     * We only support short, int, long, boolean and string for now.
-     *
-     * @param field
-     * @param value
-     * @throws Exception
-     */
-	private void setField(Field field, String value) throws Exception {
-		Class<?> cls = field.getType();
-		field.setAccessible(true);
-		if (cls.equals(int.class)) {
-			field.setInt(this, Integer.parseInt(value));
-		} else if (cls.equals(short.class)) {
-			field.setShort(this, Short.parseShort(value));
-		} else if (cls.equals(long.class)) {
-			field.setLong(this, Long.parseLong(value));
-		} else if (cls.equals(boolean.class)) {
-			field.setBoolean(this, Boolean.parseBoolean(value));
-		} else {
-			field.set(this, value);
-		}
 	}
 
     // /////////////////////////////////////////////////////////////////////////////////////

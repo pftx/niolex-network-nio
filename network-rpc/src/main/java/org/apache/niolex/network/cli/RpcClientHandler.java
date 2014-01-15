@@ -37,6 +37,12 @@ public class RpcClientHandler implements IServiceHandler {
 	private final String serviceUrl;
 	private final RpcClient handler;
 
+	/**
+	 * Construct a rpc client handler.
+	 *
+	 * @param serviceUrl the service url
+	 * @param handler the rpc client instance
+	 */
 	public RpcClientHandler(String serviceUrl, RpcClient handler) {
 		super();
 		this.serviceUrl = serviceUrl;

@@ -19,10 +19,12 @@ package org.apache.niolex.network.cli;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.apache.niolex.commons.test.Check;
 import org.apache.niolex.commons.util.SystemUtil;
 import org.apache.niolex.network.rpc.RpcException;
 import org.slf4j.Logger;
@@ -33,8 +35,16 @@ import org.slf4j.LoggerFactory;
  * This class controls retry and interval between retry.
  * <br>
  * This class have an inner list of IServiceHandler, they are the representative of real
- * clients, for example, RpcClients. For Every method call, we randomly pick one IServiceHandler
- * and invoke this method on it. If error occurred, we pick another and retry this method.
+ * clients, for example, RpcClients. All the items in the list must be thread-safe, because
+ * we will use it in multiple threads concurrently. For Every method call, we randomly pick
+ * one IServiceHandler and invoke that method on it.
+ * <br>
+ * If error occurred, we randomly pick the another handler and invoke that method again.
+ * We will do {@link IServiceHandler#isReady()} check before using a handler. Since we work
+ * in a random order, we are very balanced. But if there are more than a half handlers were
+ * broken, we may fail to find a working handler after we retry 2 times the number of
+ * handlers. If that happened, we will throw RpcException with type NO_SERVER_READY. But
+ * this kind of thing will rarely happen.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0, Date: 2012-5-27
@@ -47,41 +57,50 @@ public class RetryHandler extends BaseHandler implements InvocationHandler {
 	private final int retryTimes;
 	private final int intervalBetweenRetry;
 	private final int handlerNum;
+	private final int maxValue;
+	private final int maxTry;
 
 	/**
-	 * The only one Constructor, initialize handlers.
+	 * The only one Constructor, initialize handlers. We shuffle handlers inside to make sure
+	 * every instance will have different handler order.
+	 * <p>
+	 * The intervalBetweenRetry is an approach to avoid we retry too fast when temporary
+	 * network problem occurred.
+	 * </p>
 	 *
-	 * @param handlers the handlers to be used
+	 * @param handlers the handlers to be used, must have at least one item
 	 * @param retryTimes number of times to retry when certain kinds of exceptions occurred
 	 * @param intervalBetweenRetry the milliseconds to sleep between retry
 	 */
 	public RetryHandler(List<IServiceHandler> handlers, int retryTimes, int intervalBetweenRetry) {
 		super();
+		this.handlers = new ArrayList<IServiceHandler>(handlers);
 		// This will make the handlers order different in every retry handler instance.
-		Collections.shuffle(handlers);
-		this.handlers = handlers;
-		this.handlerNum = handlers.size();
+		Collections.shuffle(this.handlers);
 		this.retryTimes = retryTimes;
 		this.intervalBetweenRetry = intervalBetweenRetry;
 		this.logDebug = LOG.isDebugEnabled();
+		this.handlerNum = this.handlers.size();
+		Check.lt(0, handlerNum, "handlers must have at least one item.");
+		// We do not use the last 1000 iterations.
+		this.maxValue = (Integer.MAX_VALUE / handlerNum - 1000) * handlerNum;
+		this.maxTry = 2 * handlerNum;
 	}
 
 	@Override
 	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-		// If the idx is too large, we restore it to 0.
-	    if (idx.get() > Integer.MAX_VALUE - 1000) {
+		// If the id generator is too large, we restore it to 0.
+	    if (idx.get() > maxValue) {
 	    	idx.set(0);
 	    }
 	    IServiceHandler handler;
 		Throwable cause = null;
 		long handleStart = 0, handleEnd = intervalBetweenRetry;
-		int anyTried = 0;
 		int curTry = 0;
-		while (curTry < retryTimes && anyTried < handlerNum) {
+		for (int anyTried = 0; curTry < retryTimes && anyTried < maxTry; ++anyTried) {
 			// Try this.
 			handler = handlers.get(idx.getAndIncrement() % handlerNum);
-			// Count the tried server number.
-			++anyTried;
+
 			if (!handler.isReady()) {
 				continue;
 			}
@@ -107,10 +126,10 @@ public class RetryHandler extends BaseHandler implements InvocationHandler {
 				cause = e;
 			}
 		}
-		if (anyTried == handlerNum) {
-			throw new RpcException("Failed to service " + method.getName(), RpcException.Type.NO_SERVER_READY, null);
+		if (curTry != retryTimes) {
+			throw new RpcException("Failed to service " + method.toString(), RpcException.Type.NO_SERVER_READY, null);
 		}
-		throw new RpcException("Failed to service " + method.getName() + ": exceeds retry time [" + retryTimes + "].",
+		throw new RpcException("Failed to service " + method.toString() + ": exceeds retry time [" + retryTimes + "].",
 				RpcException.Type.ERROR_EXCEED_RETRY, cause);
 	}
 

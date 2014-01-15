@@ -139,19 +139,20 @@ public class PoolHandler<Service extends IServiceHandler> extends BaseHandler im
      * element at the given timeout.
      * We will not check the status of this instance, so it maybe already broken.
      *
-     * @param connectTimeout the timeout to take item from queue.
+     * @param waitTimeout the timeout to take item from queue.
      * @return an instance of {@link IServiceHandler}, null if timeout.
      */
-    protected Service takeOne(int connectTimeout) {
+    protected Service takeOne(int waitTimeout) {
         try {
-            return readyQueue.poll(connectTimeout, TimeUnit.MILLISECONDS);
+            return readyQueue.poll(waitTimeout, TimeUnit.MILLISECONDS);
         } catch (InterruptedException e) {
             return null;
         }
     }
 
     /**
-     * Repair the broken rpc service handler. If it can not be repaired, you need to close it.
+     * Repair the broken rpc service handler. If it can not be repaired, you need to close it
+     * and create a new one.
      *
      * @param core the service handler need to be repaired
      */
@@ -169,14 +170,14 @@ public class PoolHandler<Service extends IServiceHandler> extends BaseHandler im
     }
 
     /**
-     * @return get the current rpc handler wait timeout.
+     * @return get the current rpc service handler wait timeout.
      */
     public int getWaitTimeout() {
         return waitTimeout;
     }
 
     /**
-     * Set the time to wait for a rpc handler in milliseconds.
+     * Set the time to wait for get a rpc service handler in milliseconds.
      *
      * @param waitTimeout
      */

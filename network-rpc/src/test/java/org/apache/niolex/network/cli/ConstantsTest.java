@@ -25,15 +25,15 @@ import org.junit.Test;
  * @version 1.0.5
  * @since 2012-12-6
  */
-public class ConstantsTest {
+public class ConstantsTest extends Constants {
 
     /**
      * Test method for {@link org.apache.niolex.network.cli.Constants#init(java.lang.String)}.
      */
     @Test
     public void testInit() {
-        new Constants() {};
         Constants.init("Not yet implemented");
+        System.out.println(Constants.CLIENT_ENCODING);
     }
 
 }

@@ -19,22 +19,17 @@ package org.apache.niolex.network.cli;
 
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.niolex.commons.reflect.FieldUtil;
 import org.apache.niolex.commons.reflect.MethodUtil;
-import org.apache.niolex.commons.util.Runner;
-import org.apache.niolex.commons.util.SystemUtil;
 import org.apache.niolex.network.rpc.RpcException;
 import org.junit.Before;
 import org.junit.Test;
@@ -42,12 +37,14 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-@RunWith(MockitoJUnitRunner.class)
 /**
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.5, $Date: 2012-11-13$
  */
+@RunWith(MockitoJUnitRunner.class)
 public class RetryHandlerTest {
+
+    private static final Method method = MethodUtil.getMethod(PoolHandlerTest.class, "thisMethod");
 
 	private List<IServiceHandler> handlers;
 
@@ -60,7 +57,7 @@ public class RetryHandlerTest {
 	@Mock
 	private IServiceHandler handler3;
 
-	private int intervalBetweenRetry = 10;
+	private int intervalBetweenRetry = 5;
 
 	private int retryTimes = 3;
 
@@ -84,10 +81,20 @@ public class RetryHandlerTest {
 	 * Test method for {@link org.apache.niolex.network.cli.RetryHandler#RetryHandler(java.util.List, int, int)}.
 	 * @throws Throwable
 	 */
+	@Test(expected=IllegalArgumentException.class)
+	public void testRetryHandlerInit() throws Throwable {
+	    List<IServiceHandler> list = Collections.emptyList();
+	    new RetryHandler(list, retryTimes, intervalBetweenRetry);
+	}
+
+	/**
+	 * Test method for {@link org.apache.niolex.network.cli.RetryHandler#RetryHandler(java.util.List, int, int)}.
+	 * @throws Throwable
+	 */
 	@Test
 	public void testInvokeSuccess() throws Throwable {
-	    Method method = MethodUtil.getMethods(PoolHandlerTest.class, "thisMethod")[0];
 		retryHandler.invoke(handler1, method, null);
+		retryHandler.logDebug = false;
 		retryHandler.invoke(handler1, method, null);
 	}
 
@@ -96,32 +103,13 @@ public class RetryHandlerTest {
      * @throws Throwable
      */
     @Test
-    public void testRetryHandler() throws Throwable {
-        Method method = MethodUtil.getMethods(PoolHandlerTest.class, "thisMethod")[0];
+    public void testRetryHandlerCrossMaxValue() throws Throwable {
         retryHandler.invoke(handler1, method, null);
         FieldUtil.setValue(retryHandler, "idx", new AtomicInteger(Integer.MAX_VALUE - 5));
         retryHandler.invoke(handler1, method, null);
         AtomicInteger idx = FieldUtil.getValue(retryHandler, "idx");
         assertTrue(4 > idx.get());
     }
-
-	/**
-	 * Test method for {@link org.apache.niolex.network.cli.RetryHandler#RetryHandler(java.util.List, int, int)}.
-	 * @throws Throwable
-	 */
-	@Test
-	public void testInvokeSleep() throws Throwable {
-	    when(handler2.isReady()).thenReturn(true);
-	    retryHandler = new RetryHandler(handlers, retryTimes, 1000);
-	    doThrow(new RpcException("Conn1", RpcException.Type.TIMEOUT, null)).when(handler1)
-        .invoke(any(), any(Method.class), any(Object[].class));
-	    Thread t = Runner.run(this, "testInvokeSuccess");
-        SystemUtil.sleep(2);
-        t.interrupt();
-        SystemUtil.sleep(10);
-        t.interrupt();
-        t.join();
-	}
 
 	/**
 	 * Test method for {@link org.apache.niolex.network.cli.RetryHandler#RetryHandler(java.util.List, int, int)}.
@@ -139,15 +127,14 @@ public class RetryHandlerTest {
 	 * @throws Throwable
 	 */
 	@Test
-	public void testInvoke() throws Throwable {
+	public void testThrowException() throws Throwable {
 		RuntimeException er = new RuntimeException("cde");
-		Method m = MethodUtil.getMethods(getClass())[0];
 		when(handler2.getServiceUrl()).thenThrow(er);
 		when(handler2.isReady()).thenReturn(true);
 		boolean flag = false;
 		try {
-			retryHandler.invoke(handler1, m, null);
-			retryHandler.invoke(handler1, m, null);
+			retryHandler.invoke(handler1, method, null);
+			retryHandler.invoke(handler1, method, null);
 		} catch (RuntimeException f) {
 			assertEquals(er, f);
 			flag = true;
@@ -156,23 +143,13 @@ public class RetryHandlerTest {
 	}
 
 	@Test
-	public void testInvokeOverMax() throws Throwable {
-		Field idxField = FieldUtil.getField(RetryHandler.class, "idx");
-		idxField.setAccessible(true);
-		AtomicInteger idx = (AtomicInteger)idxField.get(retryHandler);
-		idx.set(Integer.MAX_VALUE - 1000);
-		retryHandler.logDebug = false;
-		retryHandler.invoke(handler1, null, null);
-		retryHandler.invoke(handler1, null, null);
-		retryHandler.invoke(handler1, null, null);
-		System.out.println("DKDKDK " + idx.get());
-		assertTrue(idx.get() < 8);
-	}
-
-	@Test
-	public void testInvokeNothing() throws Throwable {
-		retryHandler = new RetryHandler(new ArrayList<IServiceHandler>(), retryTimes, intervalBetweenRetry);
-		Method m = MethodUtil.getMethods(getClass())[0];
+	public void testInvokeNoServerReady() throws Throwable {
+	    ArrayList<IServiceHandler> list = new ArrayList<IServiceHandler>();
+	    list.add(new RpcServiceHandler("5", new C(), 1000, true));
+	    list.add(new RpcServiceHandler("5", new C(), 1000, true));
+	    list.add(new RpcServiceHandler("5", new C(), 1000, true));
+		retryHandler = new RetryHandler(list, 5, intervalBetweenRetry);
+		Method m = MethodUtil.getMethods(getClass()).get(0);
 		try {
 			retryHandler.invoke(handler1, m, null);
 			assertTrue(false);
@@ -182,12 +159,12 @@ public class RetryHandlerTest {
 	}
 
 	@Test
-	public void testInvokeAllBad() throws Throwable {
+	public void testInvokeExceedsMaxRetry() throws Throwable {
 		handlers = new ArrayList<IServiceHandler>();
 		when(handler2.isReady()).thenReturn(true);
 		when(handler3.isReady()).thenReturn(true);
 		RuntimeException e = new RuntimeException("cde", new Throwable("efg"));
-		Method m = MethodUtil.getMethods(getClass())[0];
+		Method m = MethodUtil.getMethods(getClass()).get(0);
 
 		when(handler2.invoke(handler1, m, null)).thenThrow(e);
 		when(handler3.invoke(handler1, m, null)).thenThrow(e);
@@ -197,7 +174,7 @@ public class RetryHandlerTest {
 		handlers.add(handler3);
 
 		retryHandler = new RetryHandler(handlers, 2, intervalBetweenRetry);
-		for (int i = 0; i < 4; ++i) {
+		for (int i = 0; i < 8; ++i) {
 			try {
 				retryHandler.invoke(handler1, m, null);
 				assertTrue(false);
@@ -213,7 +190,7 @@ public class RetryHandlerTest {
 		when(handler2.isReady()).thenReturn(true);
 		when(handler3.isReady()).thenReturn(true);
 		RuntimeException e = new RuntimeException("cde");
-		Method m = MethodUtil.getMethods(getClass())[0];
+		Method m = MethodUtil.getMethods(getClass()).get(0);
 
 		when(handler2.invoke(handler1, m, null)).thenThrow(e);
 		when(handler3.invoke(handler1, m, null)).thenThrow(e);
@@ -221,11 +198,13 @@ public class RetryHandlerTest {
 		handlers.add(handler3);
 
 		retryHandler = new RetryHandler(handlers, 2, intervalBetweenRetry);
-		try {
-			retryHandler.invoke(handler1, m, null);
-			assertTrue(false);
-		} catch (RuntimeException f) {
-			assertEquals(e, f);
+		for (int i = 0; i < 8; ++i) {
+    		try {
+    			retryHandler.invoke(handler1, m, null);
+    			assertTrue(false);
+    		} catch (RuntimeException f) {
+    			assertEquals(e, f);
+    		}
 		}
 	}
 
@@ -235,7 +214,7 @@ public class RetryHandlerTest {
 		when(handler3.isReady()).thenReturn(true);
 		IOException ioe = new IOException("ioio");
 		RuntimeException e = new RuntimeException("cde", ioe);
-		Method m = MethodUtil.getMethods(getClass())[0];
+		Method m = MethodUtil.getMethods(getClass()).get(0);
 
 		when(handler2.invoke(handler1, m, null)).thenThrow(e);
 		when(handler3.invoke(handler1, m, null)).thenThrow(e);
@@ -265,7 +244,7 @@ public class RetryHandlerTest {
 	 */
 	@Test
 	public void testGetHandlers() {
-		assertEquals(handlers, retryHandler.getHandlers());
+		assertEquals(3, retryHandler.getHandlers().size());
 	}
 
 }

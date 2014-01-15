@@ -30,24 +30,24 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-@RunWith(MockitoJUnitRunner.class)
 /**
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
  * @since 2012-6-3
  */
+@RunWith(MockitoJUnitRunner.class)
 public class RpcClientHandlerTest {
 
 	@Mock
 	private RpcClient handler;
 
 	private String serviceUrl;
-	private RpcClientHandler rpcConnectionHandler;
+	private RpcClientHandler rpcClientHandler;
 
 	@Before
 	public void createRpcConnectionHandler() throws Throwable {
 		serviceUrl = "GOGO";
-		rpcConnectionHandler = new RpcClientHandler(serviceUrl, handler);
+		rpcClientHandler = new RpcClientHandler(serviceUrl, handler);
 		when(handler.invoke(any(Object.class), any(Method.class), any(Object[].class))).thenReturn("mailto:xiejiyun");
 	}
 
@@ -57,7 +57,7 @@ public class RpcClientHandlerTest {
 	 */
 	@Test
 	public final void testInvoke() throws Throwable {
-		Object o = rpcConnectionHandler.invoke(handler, null, null);
+		Object o = rpcClientHandler.invoke(handler, null, null);
 		assertEquals("mailto:xiejiyun", o);
 	}
 
@@ -66,7 +66,7 @@ public class RpcClientHandlerTest {
 	 */
 	@Test
 	public final void testGetServiceUrl() {
-		assertEquals(serviceUrl, rpcConnectionHandler.getServiceUrl());
+		assertEquals(serviceUrl, rpcClientHandler.getServiceUrl());
 	}
 
 	/**
@@ -74,13 +74,13 @@ public class RpcClientHandlerTest {
 	 */
 	@Test
 	public final void testIsReady() {
-		assertFalse(rpcConnectionHandler.isReady());
+		assertFalse(rpcClientHandler.isReady());
 	}
 
 	@Test
 	public final void testIsReadyTrue() {
 		when(handler.isValid()).thenReturn(true);
-		assertTrue(rpcConnectionHandler.isReady());
+		assertTrue(rpcClientHandler.isReady());
 	}
 
 	/**
@@ -88,7 +88,7 @@ public class RpcClientHandlerTest {
 	 */
 	@Test
 	public final void testNotReady() {
-		rpcConnectionHandler.notReady(null);
+		rpcClientHandler.notReady(null);
 	}
 
 	/**
@@ -96,13 +96,13 @@ public class RpcClientHandlerTest {
 	 */
 	@Test
 	public final void testGetHandler() {
-		assertEquals(handler, rpcConnectionHandler.getHandler());
+		assertEquals(handler, rpcClientHandler.getHandler());
 	}
 
 	@Test
 	public void testToString()
 	 throws Exception {
-		assertEquals(serviceUrl, rpcConnectionHandler.toString());
+		assertEquals(serviceUrl, rpcClientHandler.toString());
 	}
 
 }

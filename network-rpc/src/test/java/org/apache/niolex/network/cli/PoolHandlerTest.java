@@ -47,8 +47,9 @@ import org.junit.Test;
  */
 public class PoolHandlerTest {
 
+    public static final Method method = MethodUtil.getMethod(PoolHandlerTest.class, "thisMethod");
+
     ArrayList<IServiceHandler> col;
-    Method method;
 
     public void thisMethod() {}
 
@@ -70,28 +71,27 @@ public class PoolHandlerTest {
                 doThrow(new ItemNotFoundException("Root", null)).when(c)
                 .invoke(any(), any(Method.class), any(Object[].class));
             } else {
-            switch (i % 9) {
-                case 1:
-                    doThrow(new RpcException("Conn1", RpcException.Type.CONNECTION_CLOSED, null)).when(c)
-                    .invoke(any(), any(Method.class), any(Object[].class));
-                    break;
-                case 3:
-                    doThrow(new RpcException("Conn2", RpcException.Type.TIMEOUT, null)).when(c)
-                    .invoke(any(), any(Method.class), any(Object[].class));
-                    break;
-                case 5:
-                    doThrow(new IOException("Tain", new IOException("Last"))).when(c)
-                    .invoke(any(), any(Method.class), any(Object[].class));
-                    break;
-                case 7:
-                    doThrow(new Exception("Ex", new IOException("Last"))).when(c)
-                    .invoke(any(), any(Method.class), any(Object[].class));
-                    break;
-            }
+                switch (i % 9) {
+                    case 1:
+                        doThrow(new RpcException("Conn1", RpcException.Type.CONNECTION_CLOSED, null)).when(c)
+                        .invoke(any(), any(Method.class), any(Object[].class));
+                        break;
+                    case 3:
+                        doThrow(new RpcException("Conn2", RpcException.Type.TIMEOUT, null)).when(c)
+                        .invoke(any(), any(Method.class), any(Object[].class));
+                        break;
+                    case 5:
+                        doThrow(new IOException("Tain", new IOException("Last"))).when(c)
+                        .invoke(any(), any(Method.class), any(Object[].class));
+                        break;
+                    case 7:
+                        doThrow(new Exception("Ex", new IOException("Last"))).when(c)
+                        .invoke(any(), any(Method.class), any(Object[].class));
+                        break;
+                }
             }
             col.add(c);
         }
-        method = MethodUtil.getMethods(PoolHandlerTest.class, "thisMethod")[0];
     }
 
     /**
@@ -118,9 +118,9 @@ public class PoolHandlerTest {
     public void testInvokeRpcE() throws Throwable {
         PoolHandler<IServiceHandler> pool = new PoolHandler<IServiceHandler>(3, col);
         try {
-        for (int i = 0; i < 200; ++i) {
-            pool.invoke(pool, method, new Object[0]);
-        }
+            for (int i = 0; i < 200; ++i) {
+                pool.invoke(pool, method, new Object[0]);
+            }
         } catch (RpcException e) {
             assertEquals(RpcException.Type.ERROR_INVOKE, e.getType());
             throw e;
@@ -179,9 +179,9 @@ public class PoolHandlerTest {
     public void testExceedsRetry() throws Throwable {
         PoolHandler<IServiceHandler> pool = new PoolHandler<IServiceHandler>(2, col);
         try {
-        for (int i = 0; i < 200; ++i) {
-            pool.invoke(pool, method, new Object[0]);
-        }
+            for (int i = 0; i < 200; ++i) {
+                pool.invoke(pool, method, new Object[0]);
+            }
         } catch (RpcException e) {
             assertEquals(RpcException.Type.ERROR_EXCEED_RETRY, e.getType());
             throw e;

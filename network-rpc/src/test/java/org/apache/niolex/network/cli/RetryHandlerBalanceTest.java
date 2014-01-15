@@ -17,7 +17,8 @@
  */
 package org.apache.niolex.network.cli;
 
-import java.io.IOException;
+import static org.junit.Assert.assertEquals;
+
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.net.SocketException;
@@ -29,7 +30,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.niolex.commons.concurrent.ConcurrentUtil;
-import org.apache.niolex.commons.reflect.MethodUtil;
 import org.apache.niolex.commons.util.Runner;
 import org.apache.niolex.network.rpc.RpcException;
 import org.junit.Assert;
@@ -43,23 +43,18 @@ import org.junit.Test;
  *
  */
 public class RetryHandlerBalanceTest {
-    private static RetryHandler a;
-    private static List<IServiceHandler> listHandlers = new ArrayList<IServiceHandler>(5);
 
-    static {
-    	listHandlers.addAll(RpcServiceHandlerTest.listHandlers);
-    	a = new RetryHandler(listHandlers, 3, 10);
-    	a.logDebug = false;
-    }
-
-    @Test
-    public void testName() {
-        System.out.println(" => " + a.toString());
-        Assert.assertEquals(listHandlers, a.getHandlers());
-    }
+    private RetryHandler a;
 
     @Test
     public void testInvokeBlance() throws Throwable {
+        List<IServiceHandler> listHandlers = new ArrayList<IServiceHandler>();
+        listHandlers.add(new RpcServiceHandler("5", new A("5"), 20, true));
+        listHandlers.add(new RpcServiceHandler("6", new A("6"), 28, true));
+        listHandlers.add(new RpcServiceHandler("7", new A("7"), 17, true));
+        listHandlers.add(new RpcServiceHandler("8", new A("8"), 5000, true));
+        a = new RetryHandler(listHandlers, 3, 10);
+        a.logDebug = false;
     	ConcurrentHashMap<String, AtomicInteger> m = new ConcurrentHashMap<String, AtomicInteger>();
     	Thread t[] = new Thread[5];
         t[0] = Runner.run(this, "invokeBlance", m);
@@ -86,12 +81,13 @@ public class RetryHandlerBalanceTest {
 
     @Test
     public void testErrorBlance() throws Throwable {
-    	for (int i = 0; i < 4; ++i) {
-    		if (listHandlers.get(i).toString().equals("8")) {
-    			listHandlers.get(i).notReady(new IOException("For test"));
-    			break;
-    		}
-    	}
+        List<IServiceHandler> listHandlers = new ArrayList<IServiceHandler>();
+        listHandlers.add(new RpcServiceHandler("5", new A("5"), 20, true));
+        listHandlers.add(new RpcServiceHandler("6", new A("6"), 28, true));
+        listHandlers.add(new RpcServiceHandler("7", new A("7"), 17, true));
+        listHandlers.add(new RpcServiceHandler("8", new A("8"), 5000, false));
+        a = new RetryHandler(listHandlers, 3, 10);
+        a.logDebug = false;
         Map<String, Integer> m = new HashMap<String, Integer>();
         for (int i = 0; i < 7500; ++i) {
             String name = a.invoke(a, null, null).toString();
@@ -112,25 +108,34 @@ public class RetryHandlerBalanceTest {
     public void testErrorRetry() throws Throwable {
         List<IServiceHandler> listHandlers = new ArrayList<IServiceHandler>();
         listHandlers.add(new RpcServiceHandler("5", new B("5"), 100, true));
-        listHandlers.add(new RpcServiceHandler("6", new B("6"), 100, true));
+        listHandlers.add(new RpcServiceHandler("6", new C(), 100, true));
         listHandlers.add(new RpcServiceHandler("8", new A("8"), 5000, true));
-        RetryHandler a = new RetryHandler(listHandlers, 3, 10);
-        Method m = MethodUtil.getMethods(B.class, "invoke")[0];
-        for (int i = 0; i < 200; ++i) {
-            a.invoke(a, m, null);
+        a = new RetryHandler(listHandlers, 3, 10);
+        a.logDebug = false;
+        for (int i = 0; i < 300; ++i) {
+            a.invoke(a, null, null);
         }
     }
 
-    @Test(expected=NoSuchMethodException.class)
+    @Test
     public void testErrorException() throws Throwable {
     	List<IServiceHandler> listHandlers = new ArrayList<IServiceHandler>();
         listHandlers.add(new RpcServiceHandler("5", new C(), 1000, true));
         listHandlers.add(new RpcServiceHandler("6", new C(), 1000, true));
         listHandlers.add(new RpcServiceHandler("8", new D(), 1000, true));
         RetryHandler a = new RetryHandler(listHandlers, 3, 10);
-        Method m = MethodUtil.getMethods(B.class, "invoke")[0];
-        String name = a.invoke(a, m, null).toString();
-        System.out.println(name);
+        a.logDebug = false;
+        int i = 0;
+        for (; i < 30; ++i) {
+            try {
+                String name = a.invoke(a, null, null).toString();
+                System.out.println(name);
+                break;
+            } catch (NoSuchMethodException e) {
+                ;
+            }
+        }
+        assertEquals(30, i);
     }
 
     @Test(expected=RpcException.class)
@@ -140,21 +145,14 @@ public class RetryHandlerBalanceTest {
         listHandlers.add(new RpcServiceHandler("6", new B("6"), 100, false));
         listHandlers.add(new RpcServiceHandler("8", new A("8"), 5000, false));
         RetryHandler a = new RetryHandler(listHandlers, 3, 10);
-        Method m = MethodUtil.getMethods(B.class, "invoke")[0];
-        String name = a.invoke(a, m, null).toString();
-        System.out.println(name);
-    }
-
-    @Test(expected=RpcException.class)
-    public void testFail2() throws Throwable {
-    	List<IServiceHandler> listHandlers = new ArrayList<IServiceHandler>();
-    	listHandlers.add(new RpcServiceHandler("5", new B("5"), 100, false));
-    	listHandlers.add(new RpcServiceHandler("6", new B("6"), 100, false));
-    	listHandlers.add(new RpcServiceHandler("8", new A("8"), 5000, false));
-    	RetryHandler a = new RetryHandler(listHandlers, 2, 10);
-    	Method m = MethodUtil.getMethods(B.class, "invoke")[0];
-    	String name = a.invoke(a, m, null).toString();
-    	System.out.println(name);
+        a.logDebug = false;
+        try {
+            String name = a.invoke(a, PoolHandlerTest.method, null).toString();
+            System.out.println(name);
+        } catch (RpcException e) {
+            assertEquals(RpcException.Type.NO_SERVER_READY, e.getType());
+            throw e;
+        }
     }
 }
 
@@ -176,7 +174,7 @@ class B implements InvocationHandler {
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         if (pr) System.out.println("B invoke for: " + name);
         if (System.currentTimeMillis() % 2 == 0)
-            throw new Exception("B", new SocketException("Sock"));
+            throw new SocketException("Sock E will retry");
         return name;
     }
 
@@ -186,7 +184,7 @@ class C implements InvocationHandler {
 
 	@Override
 	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-		throw new Exception("C", new SocketException("Sock"));
+		throw new Exception("C", new SocketException("Inner Sock E will retry too"));
 	}
 
 }

@@ -21,8 +21,13 @@ import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
 
 /**
- * The interface for RetryHandler to use, this interface manage
- * the status of the underlying client, and store the complete url here for logging.
+ * The interface for {@link RetryHandler} and {@link PoolHandler} to use, this interface manage
+ * the status of the underlying service client, and store the complete url here for logging.
+ * <br>
+ * For any RPC framework, there will be a client side stub managing connections to the real
+ * server, and transmit data between client and server. Application programmers will need to
+ * wrap the real client stub by a wrapper class which implement this interface, and then use
+ * {@link RetryHandler} and {@link PoolHandler} to manage multiple clients.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0, Date: 2012-6-3
@@ -30,29 +35,32 @@ import java.lang.reflect.InvocationHandler;
 public interface IServiceHandler extends InvocationHandler {
 
 	/**
-	 * Get the Service Url of the underlying rpc client.
+	 * Get the service url the underlying rpc client is using to connect
+	 * to the rpc server, for request tracking.
 	 *
 	 * @return the current service url
 	 */
-	public abstract String getServiceUrl();
+	public String getServiceUrl();
 
 	/**
-	 * Whether this client is ready or not.
+	 * Whether the underlying rpc client is ready or not.
 	 *
 	 * @return true if this client is ready, false otherwise
 	 */
-	public abstract boolean isReady();
+	public boolean isReady();
 
 	/**
-	 * Make this client not ready.
-	 * Mark with the given exception.
+	 * Make this client not ready with the given exception.
 	 *
 	 * @param ioe the exception which makes this client not ready
 	 */
-	public abstract void notReady(IOException ioe);
+	public void notReady(IOException ioe);
 
 	/**
-	 * Get the underlying client stub, which is also an InvocationHandler
+	 * Get the underlying client stub, which is also an InvocationHandler.
+	 * <p>
+	 * If there is no underlying client stub, return this
+	 * </p>
 	 *
 	 * @return the underlying client stub
 	 */

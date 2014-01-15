@@ -61,12 +61,12 @@ public class LogContextTest {
 	}
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.cli.LogContext#setServerUrl(java.lang.String)}.
+	 * Test method for {@link org.apache.niolex.network.cli.LogContext#setServiceUrl(java.lang.String)}.
 	 */
 	@Test
-	public final void testSetServerUrl() {
+	public final void testSetServiceUrl() {
 		LogContext.serviceUrl("http://www.niolex.com.org");
-		verify(instance).setServerUrl("http://www.niolex.com.org");
+		verify(instance).setServiceUrl("http://www.niolex.com.org");
 	}
 
 }
