@@ -29,14 +29,13 @@ import org.junit.Test;
  * @version 1.0.0
  * @since 2012-6-20
  */
-public class ServiceHandlerFactoryTest {
+public class ServiceHandlerFactoryTest extends ServiceHandlerFactory {
 
 	/**
 	 * Test method for {@link org.apache.niolex.network.cli.init.ServiceHandlerFactory#getBuilder(java.lang.String)}.
 	 */
 	@Test
 	public void testGetBuilder() {
-		new ServiceHandlerFactory();
 		ServiceHandlerBuilder factory = mock(ServiceHandlerBuilder.class);
 		ServiceHandlerFactory.registerBuilder("network/mock", factory);
 		assertEquals(factory, ServiceHandlerFactory.getBuilder("network/mock"));

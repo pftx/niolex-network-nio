@@ -17,13 +17,15 @@
  */
 package org.apache.niolex.network.cli.init;
 
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.*;
 
-import org.apache.niolex.network.cli.bui.JsonRpcBuilder;
+import org.apache.niolex.network.cli.IServiceHandler;
+import org.apache.niolex.network.cli.RetryHandler;
 import org.apache.niolex.network.cli.conf.RpcConfigBean;
 import org.apache.niolex.network.cli.init.ServiceHandlerBuilder;
 import org.apache.niolex.network.cli.init.ServiceHandlerFactory;
 import org.apache.niolex.network.cli.init.RpcInitUtil;
+import org.junit.Assert;
 import org.junit.Test;
 
 /**
@@ -31,34 +33,38 @@ import org.junit.Test;
  * @version 1.0.0
  * @since 2012-6-5
  */
-public class RpcInitUtilTest {
+public class RpcInitUtilTest extends RpcInitUtil {
 
 	/**
 	 * Test method for {@link org.apache.niolex.network.cli.init.RpcInitUtil#buildProxy(org.apache.niolex.network.cli.conf.RpcConfigBean, org.apache.niolex.network.cli.init.ServiceHandlerFactory)}.
 	 */
-	@SuppressWarnings("static-access")
 	@Test(expected=IllegalStateException.class)
 	public void testBuildProxy() {
-		RpcInitUtil u = new RpcInitUtil();
 		ServiceHandlerBuilder factory = mock(ServiceHandlerBuilder.class);
 		ServiceHandlerFactory.registerBuilder("network/json", factory);
 		RpcConfigBean conf = new RpcConfigBean("d");
 		conf.serverList = new String[0];
-		u.buildProxy(conf);
+		RpcInitUtil.buildProxy(conf);
 	}
 
 	/**
 	 * Test method for {@link org.apache.niolex.network.cli.init.RpcInitUtil#buildProxy(org.apache.niolex.network.cli.conf.RpcConfigBean, org.apache.niolex.network.cli.init.ServiceHandlerFactory)}.
+	 * @throws Exception
 	 */
-	@SuppressWarnings("static-access")
-	@Test(expected=IllegalStateException.class)
-	public void testBuildProxy2() {
-		RpcInitUtil u = new RpcInitUtil();
-		ServiceHandlerFactory.registerBuilder("network/json", new JsonRpcBuilder());
+	@Test
+	public void testBuildProxySuccess() throws Exception {
 		RpcConfigBean conf = new RpcConfigBean("d");
-		conf.serverList = new String[1];
+		conf.serverList = new String[2];
 		conf.serverList[0] = "locidd:3022df";
-		u.buildProxy(conf);
+		conf.serverList[1] = "error";
+
+		ServiceHandlerBuilder factory = mock(ServiceHandlerBuilder.class);
+		when(factory.build(conf, "locidd:3022df")).thenReturn(mock(IServiceHandler.class));
+		when(factory.build(conf, "error")).thenThrow(new Exception("error from mock"));
+		ServiceHandlerFactory.registerBuilder("network/json", factory);
+
+		RetryHandler h = RpcInitUtil.buildProxy(conf);
+		Assert.assertEquals(1, h.getHandlers().size());
 	}
 
 }

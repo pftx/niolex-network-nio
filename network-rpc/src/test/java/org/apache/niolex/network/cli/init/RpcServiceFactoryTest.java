@@ -19,12 +19,19 @@ package org.apache.niolex.network.cli.init;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.*;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Map;
 
+import org.apache.niolex.commons.reflect.FieldUtil;
+import org.apache.niolex.network.cli.IServiceHandler;
+import org.apache.niolex.network.cli.RetryHandler;
 import org.apache.niolex.network.cli.bui.JsonRpcBuilder;
 import org.apache.niolex.network.cli.conf.BaseConfiger;
+import org.apache.niolex.network.cli.conf.RpcConfigBean;
 import org.apache.niolex.network.cli.conf.RpcConfiger;
 import org.apache.niolex.network.demo.json.DemoJsonRpcServer;
 import org.apache.niolex.network.rpc.anno.RpcConfig;
@@ -33,16 +40,21 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.google.common.collect.Lists;
+
 /**
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
  * @since 2012-6-5
  */
 public class RpcServiceFactoryTest {
+    private static RpcServiceFactory rpcFactory;
 
 	@BeforeClass
 	public static void up() throws IOException {
 		DemoJsonRpcServer.main(null);
+		ServiceHandlerFactory.registerBuilder("network/json", new JsonRpcBuilder());
+		rpcFactory = RpcServiceFactory.getInstance("/org/apache/niolex/network/cli/bui/rpc.properties");
 	}
 
 	@AfterClass
@@ -58,9 +70,7 @@ public class RpcServiceFactoryTest {
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void testGetInstance() throws IOException {
-		ServiceHandlerFactory.registerBuilder("network/json", new JsonRpcBuilder());
-		RpcServiceFactory in = RpcServiceFactory.getInstance("/org/apache/niolex/network/cli/bui/rpc.properties");
-		in.getService("nan", ServiceHandlerFactory.class);
+		rpcFactory.getService("nan", ServiceHandlerFactory.class);
 		fail("Not yet implemented");
 	}
 
@@ -71,9 +81,7 @@ public class RpcServiceFactoryTest {
 	 */
 	@Test
 	public void testGetServiceStringClassOfT() throws IOException {
-		ServiceHandlerFactory.registerBuilder("network/json", new JsonRpcBuilder());
-		RpcServiceFactory factory = RpcServiceFactory.getInstance("/org/apache/niolex/network/cli/bui/rpc.properties");
-		LocalService ser = factory.getService(LocalService.class);
+		LocalService ser = rpcFactory.getService(LocalService.class);
 		for (int i = 0; i < 10; ++i) {
 			int r = ser.add(2, 3214, 123, 12, i);
 			System.out.println(r);
@@ -88,9 +96,7 @@ public class RpcServiceFactoryTest {
 	 */
 	@Test
 	public void testGetServiceStringClassOfF() throws IOException {
-		ServiceHandlerFactory.registerBuilder("network/json", new JsonRpcBuilder());
-		RpcServiceFactory factory = RpcServiceFactory.getInstance("/org/apache/niolex/network/cli/bui/rpc.properties");
-		EfService ser = factory.getService(EfService.class);
+		EfService ser = rpcFactory.getService(EfService.class);
 		for (int i = 0; i < 10; ++i) {
 			int r = ser.add(2, 3214, 123, 12, i);
 			System.out.println(r);
@@ -104,10 +110,23 @@ public class RpcServiceFactoryTest {
 	 */
 	@Test
 	public void testGetConfiger() throws IOException {
-		ServiceHandlerFactory.registerBuilder("network/json", new JsonRpcBuilder());
-		RpcServiceFactory in = RpcServiceFactory.getInstance("/org/apache/niolex/network/cli/bui/rpc.properties");
-		RpcConfiger con = in.getConfiger();
-		con.getConfig();
+		RpcConfiger con = rpcFactory.getConfiger();
+		RpcConfigBean bean = con.getConfig();
+		assertEquals("/cgi-bin/services/WdgetService.cgi", bean.serviceUrl);
+	}
+
+	@Test
+    public void testFakeHandler() throws Throwable {
+	    Map<String, RetryHandler> handlers = FieldUtil.getValue(rpcFactory, "handlers");
+	    RetryHandler h = mock(RetryHandler.class);
+	    List<IServiceHandler> value = Lists.newArrayList();
+	    value.add(mock(IServiceHandler.class));
+        when(h.getHandlers()).thenReturn(value);
+	    handlers.put("fake", h);
+	    Fake f = rpcFactory.getService(Fake.class);
+	    String p = "Lex";
+	    f.sayHi(p);
+	    verify(h, times(1)).invoke(any(Object.class), any(Method.class), any(Object[].class));
 	}
 
 }
@@ -135,4 +154,9 @@ interface EfService {
 
 	@RpcMethod(16)
 	public String tr();
+}
+
+@RpcConfig("fake")
+interface Fake {
+    public void sayHi(String name);
 }

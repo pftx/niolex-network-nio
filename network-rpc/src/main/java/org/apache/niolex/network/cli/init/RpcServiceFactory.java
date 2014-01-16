@@ -35,7 +35,6 @@ import org.apache.niolex.network.rpc.anno.RpcConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
  * Create RPC Service Stub from this Factory.
  *
@@ -44,6 +43,17 @@ import org.slf4j.LoggerFactory;
  */
 public class RpcServiceFactory {
 	private static final Logger LOG = LoggerFactory.getLogger(RpcServiceFactory.class);
+
+	/**
+	 * Create a new factory with a property file.
+	 *
+	 * @param fileName the property file path
+	 * @return the created instance for this property file
+	 * @throws IOException
+	 */
+	public static final RpcServiceFactory getInstance(String fileName) throws IOException {
+	    return new RpcServiceFactory(fileName);
+	}
 
 	private Map<String, RetryHandler> handlers = new HashMap<String, RetryHandler>();
 	private RpcConfiger configer;
@@ -66,17 +76,6 @@ public class RpcServiceFactory {
 				sb.append("    ").append(handler).append("\n");
 			LOG.info(sb.toString());
 		}
-	}
-
-	/**
-	 * Create a new factory with a property file.
-	 *
-	 * @param fileName the property file path
-	 * @return the created instance for this property file
-	 * @throws IOException
-	 */
-	public static final RpcServiceFactory getInstance(String fileName) throws IOException {
-	    return new RpcServiceFactory(fileName);
 	}
 
 	/**

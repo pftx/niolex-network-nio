@@ -50,7 +50,7 @@ public class RpcConfigBean extends BaseConfigBean {
      */
     public String[] serverList;
     public String serviceUrl = "";
-    public String serviceType = "network-json";
+    public String serviceType = "network/json";
     public String clientType = "BlockingClient";
 
     /**

@@ -52,8 +52,8 @@ public class RpcInitUtil {
 		for (int i = 0; i < serverNum; ++i) {
 			completeUrl = conf.serverList[i] + conf.serviceUrl;
 			try {
-				ServiceHandlerBuilder proxy = ServiceHandlerFactory.getBuilder(conf.serviceType);
-				IServiceHandler cli = proxy.build(conf, completeUrl);
+				ServiceHandlerBuilder builder = ServiceHandlerFactory.getBuilder(conf.serviceType);
+				IServiceHandler cli = builder.build(conf, completeUrl);
 				listHandlers.add(cli);
 			} catch (Exception e) {
 				LOG.warn("Failed to build rpc proxy for " + completeUrl + " : " + e.toString());
