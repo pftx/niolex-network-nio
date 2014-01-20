@@ -51,7 +51,7 @@ public class RpcServiceImpl implements RpcService {
 		if (arg != null) {
 			return arg.size();
 		}
-		return 0;
+		return -1;
 	}
 
 	/**

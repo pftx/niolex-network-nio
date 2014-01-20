@@ -18,6 +18,7 @@
 package org.apache.niolex.network.rpc;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.lang.reflect.Type;
@@ -26,7 +27,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.apache.niolex.commons.reflect.MethodUtil;
 import org.apache.niolex.commons.util.SystemUtil;
 import org.apache.niolex.network.Config;
 import org.apache.niolex.network.ConnStatus;
@@ -44,7 +44,7 @@ import org.slf4j.LoggerFactory;
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0, Date: 2012-6-1
  */
-public class RpcClient implements PoolableInvocationHandler, IPacketHandler {
+public class RpcClient implements IPacketHandler, InvocationHandler {
 	private static final Logger LOG = LoggerFactory.getLogger(RpcClient.class);
 
 	/**
@@ -68,7 +68,7 @@ public class RpcClient implements PoolableInvocationHandler, IPacketHandler {
 	private int connectRetryTimes = Config.RPC_CONNECT_RETRY_TIMES;
 
 	/**
-	 * The PacketClient to send and receive Rpc packets.
+	 * The low layer client to send and receive Rpc packets.
 	 */
 	private final IClient client;
 
@@ -88,8 +88,12 @@ public class RpcClient implements PoolableInvocationHandler, IPacketHandler {
 	private volatile ConnStatus connStatus;
 
 	/**
-	 * Create a RpcClient with this client as the backed communication tool.
-	 * The PacketClient will be managed internally, please use this.connect() to connect.
+	 * Create a RpcClient with the specified client as the backed communication tool and
+	 * the invoker must match the specified client. The converter must match the converter
+	 * at the server side.
+	 * <br>
+	 * The client will be managed internally, please use {@link #connect()} to connect
+	 * and leave the client for us to manage.
 	 *
 	 * @param client the backed communication tool
 	 * @param invoker use this to send packets to server and wait for response
@@ -119,6 +123,7 @@ public class RpcClient implements PoolableInvocationHandler, IPacketHandler {
 	public void stop() {
 		this.connStatus = ConnStatus.CLOSED;
 		this.client.stop();
+		this.invoker.handleClose(this.client);
 	}
 
 	/**
@@ -128,7 +133,6 @@ public class RpcClient implements PoolableInvocationHandler, IPacketHandler {
 	 * @return the stub
 	 */
 	@SuppressWarnings("unchecked")
-	@Override
     public <T> T getService(Class<T> c) {
 		this.addInferface(c);
 		return (T) Proxy.newProxyInstance(RpcClient.class.getClassLoader(),
@@ -154,7 +158,6 @@ public class RpcClient implements PoolableInvocationHandler, IPacketHandler {
 	@Override
 	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 		checkStatus();
-		RpcException rep = null;
 		Short rei = executeMap.get(method);
 		if (rei != null) {
 			// 1. Prepare parameters
@@ -175,9 +178,8 @@ public class RpcClient implements PoolableInvocationHandler, IPacketHandler {
 			// 5. Process result.
 			if (respData == null) {
 				checkStatus();
-				rep = new RpcException("Timeout for this remote procedure call.",
+				throw new RpcException("Timeout for this remote procedure call.",
 						RpcException.Type.TIMEOUT, null);
-				throw rep;
 			} else {
 				int exp = respData.getReserved() - reqData.getReserved();
 				boolean isEx = false;
@@ -191,15 +193,13 @@ public class RpcClient implements PoolableInvocationHandler, IPacketHandler {
 				}
 				Object ret = prepareReturn(respData.getData(), method.getGenericReturnType(), isEx);
 				if (isEx) {
-					rep = (RpcException) ret;
-					throw rep;
+				    throw (RpcException) ret;
 				}
 				return ret;
 			}
 		} else {
-			rep = new RpcException("The method you want to invoke is not a remote procedure call.",
+		    throw new RpcException("The method you want to invoke is not a remote procedure call.",
 					RpcException.Type.METHOD_NOT_FOUND, null);
-			throw rep;
 		}
 	}
 
@@ -207,7 +207,7 @@ public class RpcClient implements PoolableInvocationHandler, IPacketHandler {
 	 * Generate serial number
 	 * The serial number will be 1, 3, 5, ...
 	 *
-	 * @param rc
+	 * @param rc the request packet
 	 */
 	private void serialPacket(PacketData rc) {
 		short seri = (short) (auto.addAndGet(2));
@@ -216,12 +216,14 @@ public class RpcClient implements PoolableInvocationHandler, IPacketHandler {
 	}
 
 	/**
-	 * Set the Rpc Configs, this method will parse all the configurations and generate execute map.
-	 * @param interfs
+	 * This method will parse all the configurations in the interface and generate the execute map.
+	 * <br>
+	 * Please call this method before use the interface.
+	 *
+	 * @param interfs the interface
 	 */
-	@Override
 	public void addInferface(Class<?> interfs) {
-		Method[] arr = MethodUtil.getMethods(interfs);
+		Method[] arr = interfs.getDeclaredMethods();
 		for (Method m : arr) {
 			if (m.isAnnotationPresent(RpcMethod.class)) {
 				RpcMethod rp = m.getAnnotation(RpcMethod.class);
@@ -230,17 +232,17 @@ public class RpcClient implements PoolableInvocationHandler, IPacketHandler {
 					LOG.warn("Duplicate configuration for code: {}", rp.value());
 				}
 			}
-		} // End of arr
+		}
 	}
 
 	/**
 	 * De-serialize returned byte array into objects.
 	 *
-	 * @param ret
-	 * @param type
-	 * @param isEx
-	 * @return the object
-	 * @throws Exception
+	 * @param ret the returned byte array
+	 * @param type the return type
+	 * @param isEx is the returned type an exception?
+	 * @return the object the object parsed from the byte array
+	 * @throws Exception if necessary
 	 */
 	protected Object prepareReturn(byte[] ret, Type type, boolean isEx) throws Exception {
 		if (isEx) {
@@ -325,7 +327,7 @@ public class RpcClient implements PoolableInvocationHandler, IPacketHandler {
 	 * Set the server Internet address this client want to connect
 	 * This method must be called before {@link #connect()}
 	 *
-	 * @param serverAddress
+	 * @param serverAddress the server address
 	 */
 	public void setServerAddress(InetSocketAddress serverAddress) {
 	    client.setServerAddress(serverAddress);

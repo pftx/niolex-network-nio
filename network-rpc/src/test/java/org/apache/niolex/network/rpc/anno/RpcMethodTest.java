@@ -37,7 +37,7 @@ public class RpcMethodTest {
 	@Test
 	@RpcMethod(23)
 	public void testValue() {
-		Method m = MethodUtil.getMethods(getClass(), "testValue")[0];
+		Method m = MethodUtil.getFirstMethod(getClass(), "testValue");
 		RpcMethod r = m.getAnnotation(RpcMethod.class);
 		assertEquals(23, r.value());
 	}

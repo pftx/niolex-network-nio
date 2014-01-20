@@ -53,7 +53,7 @@ public class SocketJsonRpcClient {
         k = ser.size(args);
         System.out.println("Out 3 => " + k);
         k = ser.size(null);
-        System.out.println("Out 0 => " + k);
+        System.out.println("Out -1 => " + k);
         k = ser.add(3, 4, 5);
         System.out.println("Out 12 => " + k);
 
@@ -73,7 +73,7 @@ public class SocketJsonRpcClient {
             k = ser.size(args);
             assertt(k, 2, "Out 2 => " + k);
             k = ser.size(null);
-            assertt(k, 0, "Out 3 => " + k);
+            assertt(k, -1, "Out 3 => " + k);
             long xou = System.currentTimeMillis() - xin;
             if (xou > maxin) {
                 maxin = xou;

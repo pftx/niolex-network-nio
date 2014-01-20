@@ -34,7 +34,6 @@ import org.apache.niolex.commons.reflect.ItemNotFoundException;
 import org.apache.niolex.commons.reflect.MethodUtil;
 import org.apache.niolex.commons.util.Runner;
 import org.apache.niolex.commons.util.SystemUtil;
-import org.apache.niolex.network.rpc.PoolableInvocationHandler;
 import org.apache.niolex.network.rpc.RpcException;
 import org.junit.Before;
 import org.junit.Test;
@@ -166,9 +165,9 @@ public class PoolHandlerTest {
         col.clear();
         PoolHandler<IServiceHandler> pool = new PoolHandler<IServiceHandler>(2, col);
         pool.setWaitTimeout(2);
-        PoolableInvocationHandler hand = (PoolableInvocationHandler) Proxy.newProxyInstance(IServiceHandler.class.getClassLoader(),
-                new Class[] {PoolableInvocationHandler.class}, pool);
-        hand.getRemoteName();
+        IServiceHandler hand = (IServiceHandler) Proxy.newProxyInstance(IServiceHandler.class.getClassLoader(),
+                new Class[] {IServiceHandler.class}, pool);
+        hand.getServiceUrl();
     }
 
     /**

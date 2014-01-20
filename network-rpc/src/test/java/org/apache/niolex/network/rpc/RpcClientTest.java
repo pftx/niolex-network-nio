@@ -17,8 +17,7 @@
  */
 package org.apache.niolex.network.rpc;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 
 import java.lang.reflect.Method;
@@ -26,7 +25,9 @@ import java.net.InetSocketAddress;
 
 import org.junit.Assert;
 
+import org.apache.niolex.commons.reflect.MethodFilter;
 import org.apache.niolex.commons.reflect.MethodUtil;
+import org.apache.niolex.network.ConnStatus;
 import org.apache.niolex.network.client.PacketClient;
 import org.apache.niolex.network.demo.json.RpcService;
 import org.apache.niolex.network.rpc.PacketInvoker;
@@ -42,6 +43,10 @@ import org.junit.Test;
  */
 public class RpcClientTest {
 
+    public static final Method getFirstMethod(Class<?> clazz, String methodName) {
+        return MethodUtil.getMethods(clazz, MethodFilter.c().includeAll().n(methodName)).get(0);
+    }
+
 	/**
 	 * Test method for
 	 * {@link org.apache.niolex.network.rpc.RpcClient#invoke(java.lang.Object, java.lang.reflect.Method, java.lang.Object[])}
@@ -49,14 +54,20 @@ public class RpcClientTest {
 	 * @throws Throwable
 	 */
 	@Test(expected = RpcException.class)
-	public void testInvoke_1() throws Throwable {
+	public void testInvokeNotConnected() throws Throwable {
 		PacketClient pc = new PacketClient();
 		RpcClient rr = new RpcClient(pc, new PacketInvoker(), new JsonConverter());
 		rr.addInferface(RpcService.class);
 		rr.setServerAddress(new InetSocketAddress("localhost", 8808));
 		assertFalse(rr.isValid());
-		Method method = MethodUtil.getMethods(RpcService.class, "add")[0];
-		rr.invoke(rr, method, null);
+		assertEquals(ConnStatus.INNITIAL, rr.getConnStatus());
+		Method method = getFirstMethod(RpcService.class, "add");
+		try {
+		    rr.invoke(rr, method, null);
+		} catch (RpcException r) {
+		    assertEquals(RpcException.Type.NOT_CONNECTED, r.getType());
+		    throw r;
+		}
 		fail("Not yet implemented");
 	}
 
@@ -67,14 +78,19 @@ public class RpcClientTest {
 	 * @throws Throwable
 	 */
 	@Test(expected = RpcException.class)
-	public void testInvoke_a() throws Throwable {
+	public void testInvokeTimeout() throws Throwable {
 	    PacketClient pc = mock(PacketClient.class);
 	    PacketInvoker in = mock(PacketInvoker.class);
 	    RpcClient rr = new RpcClient(pc, in, new JsonConverter());
 	    rr.addInferface(RpcService.class);
 	    rr.connect();
-	    Method method = MethodUtil.getMethods(RpcService.class, "add")[0];
-	    rr.invoke(rr, method, new Object[0]);
+	    Method method = getFirstMethod(RpcService.class, "add");
+	    try {
+	        rr.invoke(rr, method, new Object[0]);
+	    } catch (RpcException r) {
+            assertEquals(RpcException.Type.TIMEOUT, r.getType());
+            throw r;
+        }
 	}
 
 	/**
@@ -84,18 +100,23 @@ public class RpcClientTest {
 	 * @throws Throwable
 	 */
 	@Test(expected = RpcException.class)
-	public void testInvoke_2() throws Throwable {
+	public void testInvokeClosed() throws Throwable {
 		PacketClient pc = new PacketClient();
 		RpcClient rr = new RpcClient(pc, new PacketInvoker(), new JsonConverter());
 		rr.addInferface(RpcService.class);
 		rr.stop();
-		Method method = MethodUtil.getMethods(RpcService.class, "add")[0];
-		rr.invoke(rr, method, null);
+		Method method = getFirstMethod(RpcService.class, "add");
+		try {
+            rr.invoke(rr, method, new Object[0]);
+        } catch (RpcException r) {
+            assertEquals(RpcException.Type.CONNECTION_CLOSED, r.getType());
+            throw r;
+        }
 		fail("Not yet implemented");
 	}
 
 	@Test
-	public void testHandleClose1() throws Throwable {
+	public void testHandleCloseAlreadyClosed() throws Throwable {
 		PacketClient pc = new PacketClient(new InetSocketAddress("localhost", 8808));
 		RpcClient rr = new RpcClient(pc, new PacketInvoker(), new JsonConverter());
 		rr.addInferface(RpcService.class);
@@ -108,7 +129,7 @@ public class RpcClientTest {
 	}
 
 	@Test
-	public void testHandleClose2() throws Throwable {
+	public void testHandleCloseFailedToReconnect() throws Throwable {
 	    PacketClient pc = new PacketClient(new InetSocketAddress("localhost", 8808));
 	    RpcClient rr = new RpcClient(pc, new PacketInvoker(), new JsonConverter());
 	    rr.addInferface(RpcService.class);

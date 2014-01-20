@@ -53,13 +53,13 @@ public class DemoJsonRpcServerTest {
 
 	@Test
 	public void test() throws Throwable {
-		Method method = MethodUtil.getMethods(RpcServiceImpl.class, "testMe")[0];
+		Method method = MethodUtil.getFirstMethod(RpcServiceImpl.class, "testMe");
 		Type t = method.getGenericReturnType();
 		System.out.println("test " + t.toString());
 		Type[] ts = method.getGenericParameterTypes();
 		System.out.println("test " + ts.length);
 
-		method = MethodUtil.getMethods(RpcServiceImpl.class, "add")[0];
+		method = MethodUtil.getFirstMethod(RpcServiceImpl.class, "add");
 		t = method.getGenericReturnType();
 		System.out.println("test " + t.toString());
 		ts = method.getGenericParameterTypes();

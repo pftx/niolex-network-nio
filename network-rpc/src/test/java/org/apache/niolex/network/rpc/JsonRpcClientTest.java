@@ -17,14 +17,12 @@
  */
 package org.apache.niolex.network.rpc;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
 
-import org.apache.niolex.commons.reflect.MethodUtil;
 import org.apache.niolex.network.ConnStatus;
 import org.apache.niolex.network.CoreRunner;
 import org.apache.niolex.network.client.PacketClient;
@@ -67,8 +65,12 @@ public class JsonRpcClientTest {
 		client.addInferface(getClass());
 		client.addInferface(RpcService.class);
 		client.setConnectTimeout(1234);
-		assertTrue(client.isValid());
 		assertTrue(client.getConnStatus() == ConnStatus.CONNECTED);
+	}
+
+	@Test
+    public void testIsValid() {
+	    assertTrue(client.isValid());
 	}
 
 	/**
@@ -76,14 +78,25 @@ public class JsonRpcClientTest {
 	 */
 	@Test(expected=RpcException.class)
 	public void testPrepareReturn() {
-		String r = ser.throwEx();
-		fail(r);
+	    try {
+	        String r = ser.throwEx();
+	        fail(r);
+	    } catch (RpcException e) {
+	        assertEquals(RpcException.Type.ERROR_INVOKE, e.getType());
+	        System.out.println(e);
+	        throw e;
+	    }
 	}
 
 	@Test(expected=RpcException.class)
-	public void invoke() throws Throwable {
-		Method method = MethodUtil.getMethods(JsonRpcClientTest.class, "invoke")[0];
-		client.invoke(ser, method, null);
+	public void invokeMethodNotFound() throws Throwable {
+		Method method = RpcClientTest.getFirstMethod(JsonRpcClientTest.class, "testRetryConnect");
+		try {
+		    client.invoke(ser, method, null);
+		} catch (RpcException e) {
+		    assertEquals(RpcException.Type.METHOD_NOT_FOUND, e.getType());
+            throw e;
+		}
 	}
 
 	/**
@@ -92,12 +105,11 @@ public class JsonRpcClientTest {
 	 */
 	@Test
 	public void testRetryConnect() throws Throwable {
-		client.setSleepBetweenRetryTime(400);
-		client.setConnectRetryTimes(2);
+		client.setSleepBetweenRetryTime(200);
+		client.setConnectRetryTimes(4);
 		DemoJsonRpcServer.stop();
 		Thread.sleep(CoreRunner.CO_SLEEP);
 		DemoJsonRpcServer.main(null);
-		//client.handleError(null);
 		Thread.sleep(10 * CoreRunner.CO_SLEEP);
 		assertTrue(client.getConnStatus() == ConnStatus.CONNECTED);
 	}

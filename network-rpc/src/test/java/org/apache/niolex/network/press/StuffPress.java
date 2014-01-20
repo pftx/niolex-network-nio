@@ -19,8 +19,10 @@ package org.apache.niolex.network.press;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.niolex.commons.test.Counter;
+import org.apache.niolex.commons.test.MockUtil;
 import org.apache.niolex.commons.test.StopWatch;
 import org.apache.niolex.commons.test.StopWatch.Stop;
 import org.apache.niolex.network.client.SocketClient;
@@ -38,11 +40,12 @@ import org.apache.niolex.network.rpc.conv.ProtoStuffConverter;
  */
 public class StuffPress {
 
-	static int SIZE = 8024;
+	static int SIZE = 51200;
 	static int THREAD_NUM = 5;
 	static int SHUFFLE_NUM = 50;
 	static final StopWatch stopWatch = new StopWatch(1);
 	static final Counter ERROR_CNT = new Counter();
+	static final AtomicInteger CNT = new AtomicInteger();
 	static String ADDR = "localhost";
 
 	/**
@@ -124,8 +127,10 @@ public class StuffPress {
 
 		@Override
 		public void run() {
-			int i = SIZE;
-			while (i-- > 0) {
+		    int i = MockUtil.randInt(102192133);
+		    int LEN = a.length() + b.length();
+			while (CNT.getAndIncrement() < SIZE) {
+			    --i;
 				Stop s = stopWatch.start();
 				IntArray aa = new IntArray();
 				aa.arr = new int[] {3, 4, 5, 6, 7, 8, 9, i};
@@ -150,7 +155,7 @@ public class StuffPress {
 				sarr.arr = new String[] {a, b};
 				String c = service.concat(sarr);
 				s.stop();
-				if (c.length() < 14) {
+				if (c.length() != LEN) {
 					System.out.println("Out3 => " + k);
 				}
 				Thread.yield();

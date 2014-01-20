@@ -55,7 +55,7 @@ public class DemoJsonRpcClient {
 		k = ser.size(list);
 		System.out.println("3 => " + k);
 		k = ser.size(null);
-		System.out.println("0 => " + k);
+		System.out.println("NULL => " + k);
 		k = ser.add(3, 4, 5);
 		System.out.println("12 => " + k);
 

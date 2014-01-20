@@ -38,8 +38,7 @@ public class RpcExceptionTest {
 	}
 
 	@Test
-	public void testGetExplanation()
-	 throws Exception {
+	public void testGetExplanation() throws Exception {
 	    assertEquals(RpcException.Type.valueOf("ERROR_INVOKE").getExplanation(), "Error occured when server invoke this method on site.");
 		assertEquals(RpcException.Type.ERROR_INVOKE.getExplanation(), "Error occured when server invoke this method on site.");
 	}

@@ -20,6 +20,7 @@ package org.apache.niolex.network.rpc;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -37,6 +38,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Server side RPC packet handler.
+ * We use and internal thread pool to invoke real methods on server side
+ * target, and use a queue size to track the server status.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0, Date: 2012-6-1
@@ -71,7 +74,8 @@ public class RpcPacketHandler implements IPacketHandler {
 
 	/**
 	 * Create an RpcPacketHandler with the specified pool size.
-	 * @param threadsNumber
+	 *
+	 * @param threadsNumber the threads number of the execute pool
 	 */
 	public RpcPacketHandler(int threadsNumber) {
 		super();
@@ -81,8 +85,9 @@ public class RpcPacketHandler implements IPacketHandler {
 
 	/**
 	 * Create an RpcPacketHandler with the specified pool size & converter.
-	 * @param threadsNumber
-	 * @param converter
+	 *
+	 * @param threadsNumber the threads number of the execute pool
+	 * @param converter the packet converter
 	 */
 	public RpcPacketHandler(int threadsNumber, IConverter converter) {
 		super();
@@ -99,13 +104,12 @@ public class RpcPacketHandler implements IPacketHandler {
 	public void handlePacket(PacketData sc, IPacketWriter wt) {
 		// Heart beat will be handled in FastCore, so we will not encounter it here.
 		RpcExecuteItem ei = executeMap.get(sc.getCode());
-		RpcException rep = null;
 		if (ei != null) {
 			RpcExecute re = new RpcExecute(ei.getTarget(), ei.getMethod(), sc, wt);
 			queueSize.incrementAndGet();
 			tPool.execute(re);
 		} else {
-			rep = new RpcException("The method you want to invoke doesn't exist.",
+		    RpcException rep = new RpcException("The method you want to invoke doesn't exist.",
 					RpcException.Type.METHOD_NOT_FOUND, null);
 			handleReturn(sc, wt, rep, 1);
 		}
@@ -126,10 +130,10 @@ public class RpcPacketHandler implements IPacketHandler {
 		/**
 		 * The only constructor.
 		 *
-		 * @param host
-		 * @param method
-		 * @param sc
-		 * @param wt
+		 * @param host the host object for the method to be invoked
+		 * @param method the method to be invoked
+		 * @param sc the parameter packet
+		 * @param wt the result packet writer
 		 */
 		public RpcExecute(Object host, Method method, PacketData sc, IPacketWriter wt) {
 			super();
@@ -146,36 +150,33 @@ public class RpcPacketHandler implements IPacketHandler {
 		@Override
 		public void run() {
 			try {
-				execute();
+				RpcException rep = null;
+				Object[] args = null;
+				try {
+				    Type[] generic = method.getGenericParameterTypes();
+				    if (generic != null && generic.length > 0) {
+				        args = converter.prepareParams(sc.getData(), generic);
+				    }
+				} catch (Exception e1) {
+				    rep = new RpcException("Error occured when prepare params.",
+				            RpcException.Type.ERROR_PARSE_PARAMS, e1);
+				    handleReturn(sc, wt, rep, 1);
+				    return;
+				}
+				try {
+				    Object ret = method.invoke(host, args);
+				    handleReturn(sc, wt, ret, 0);
+				} catch (Exception e1) {
+				    rep = new RpcException("Error occured when invoke method.",
+				            RpcException.Type.ERROR_INVOKE, e1);
+				    handleReturn(sc, wt, rep, 1);
+				}
 			} finally {
 				LOG.debug("Packet handled. key {}, queue size {}.", RpcUtil.generateKey(sc),
 						queueSize.decrementAndGet());
 			}
 		}
 
-		private void execute() {
-			RpcException rep = null;
-			Object[] args = null;
-			try {
-				Type[] generic = method.getGenericParameterTypes();
-				if (generic != null && generic.length > 0) {
-					args = converter.prepareParams(sc.getData(), generic);
-				}
-			} catch (Exception e1) {
-				rep = new RpcException("Error occured when prepare params.",
-						RpcException.Type.ERROR_PARSE_PARAMS, e1);
-				handleReturn(sc, wt, rep, 1);
-				return;
-			}
-			try {
-				Object ret = method.invoke(host, args);
-				handleReturn(sc, wt, ret, 0);
-			} catch (Exception e1) {
-				rep = new RpcException("Error occured when invoke method.",
-						RpcException.Type.ERROR_INVOKE, e1);
-				handleReturn(sc, wt, rep, 1);
-			}
-		}
 	}// End of RpcExecute
 
 	/**
@@ -216,43 +217,65 @@ public class RpcPacketHandler implements IPacketHandler {
 	}
 
 	/**
-	 * Set the Rpc Configs, this method will parse all the configurations and generate execute map.
+	 * Set the Rpc Configurations, this method will parse all the configurations and generate the execute map.
 	 * One can call this method repeatedly.
 	 *
-	 * @param confs
+	 * @param confs the configuration item array
 	 */
 	public void setRpcConfigs(ConfigItem[] confs) {
 		for (ConfigItem conf : confs) {
 		    addRpcConfig(conf);
-		} // End of confs
+		}
 	}
 
 	/**
-	 * Set the Rpc Config, this method will parse the configuration and generate execute map.
+	 * Add the Rpc Config, this method will parse the configuration and generate execute map.
      * One can call this method repeatedly to add more Rpc Config.
      *
-	 * @param conf
+	 * @param conf the configuration item
 	 */
 	public void addRpcConfig(ConfigItem conf) {
-	    Method[] arr = MethodUtil.getMethods(conf.getInterface());
-        for (Method m : arr) {
+	    List<Method> methods = MethodUtil.getMethods(conf.getInterface());
+	    addRpcConfig(methods, conf.getTarget());
+	}
+
+	/**
+	 * Parse all the methods of this target, find rpc methods and add them into the
+	 * execute map.
+	 *
+	 * @param target the target object
+	 */
+	public void addRpcConfig(Object target) {
+	    List<Method> methods = MethodUtil.getAllMethodsIncludeInterfaces(target.getClass());
+        addRpcConfig(methods, target);
+	}
+
+	/**
+	 * Parse this methods list, find rpc methods and generate execute map.
+	 *
+	 * @param methods the methods list to be checked
+	 * @param target the target object
+	 */
+    public void addRpcConfig(List<Method> methods, Object target) {
+        for (Method m : methods) {
             if (m.isAnnotationPresent(RpcMethod.class)) {
                 RpcMethod rp = m.getAnnotation(RpcMethod.class);
                 RpcExecuteItem rei = new RpcExecuteItem();
                 rei.setMethod(m);
-                rei.setTarget(conf.getTarget());
+                rei.setTarget(target);
                 rei = executeMap.put(rp.value(), rei);
                 if (rei != null) {
-                    LOG.warn("Duplicate configuration for code: {}", rp.value());
+                    LOG.warn("Duplicate configuration for code: {}, old method: {}, new method: {}.",
+                            rp.value(), rei.getMethod(), m);
                 }
             }
-        } // End of arr
+        }
 	}
 
 	/**
 	 * Get the number of methods invocations we are handling currently.
 	 *
-	 * @return current size
+	 * @return current queue size
 	 */
 	public int getQueueSize() {
 		return queueSize.get();
@@ -261,7 +284,7 @@ public class RpcPacketHandler implements IPacketHandler {
 	/**
 	 * Set the converter to translate data.
 	 *
-	 * @param converter
+	 * @param converter the packet data converter
 	 */
 	public void setConverter(IConverter converter) {
 		this.converter = converter;

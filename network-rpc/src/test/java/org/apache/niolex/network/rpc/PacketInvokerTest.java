@@ -17,8 +17,7 @@
  */
 package org.apache.niolex.network.rpc;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 
 import java.util.concurrent.CountDownLatch;
@@ -34,14 +33,6 @@ import org.junit.Test;
  */
 public class PacketInvokerTest {
 
-	/**
-	 * Test method for {@link org.apache.niolex.network.rpc.PacketInvoker#handleClose(org.apache.niolex.network.IPacketWriter)}.
-	 */
-	@Test
-	public void testHandlePacket() {
-		PacketInvoker in = new PacketInvoker();
-		in.handlePacket(PacketData.getHeartBeatPacket(), null);
-	}
 
 	@Test
 	public void testInvoke() throws Exception {
@@ -53,7 +44,7 @@ public class PacketInvokerTest {
 		final CountDownLatch latch = new CountDownLatch(1);
 		final CountDownLatch latch2 = new CountDownLatch(1);
 		final PacketData qq = rc.clone();
-		rc.setReserved((byte)-128);
+		rc.setReserved((byte) 128);
 		Thread r = new Thread() {
 			public void run() {
 				latch2.countDown();
@@ -74,7 +65,7 @@ public class PacketInvokerTest {
 	 * @throws InterruptedException
 	 */
 	@Test
-	public void testInvokeAndHandleClose() throws InterruptedException {
+	public void testInvokeTimeout() throws InterruptedException {
 		final PacketInvoker in = new PacketInvoker();
 		final PacketData rc = new PacketData(56, new byte[76]);
 		final IClient client = mock(IClient.class);
@@ -82,7 +73,8 @@ public class PacketInvokerTest {
 		Thread r = new Thread() {
 			public void run() {
 				latch.countDown();
-				in.invoke(rc, client);
+				Object o = in.invoke(rc, client);
+				assertNull(o);
 			}
 		};
 		r.start();
@@ -90,7 +82,22 @@ public class PacketInvokerTest {
 		assertTrue(!r.isInterrupted());
 		r.interrupt();
 		Thread.sleep(10);
-		in.handleClose(null);
+		r.join();
+	}
+
+    /**
+     * Test method for {@link org.apache.niolex.network.rpc.PacketInvoker#handleClose(org.apache.niolex.network.IPacketWriter)}.
+     */
+    @Test
+    public void testHandlePacketIgnore() {
+        PacketInvoker in = new PacketInvoker();
+        in.handlePacket(PacketData.getHeartBeatPacket(), null);
+    }
+
+	@Test
+	public void testHandleClose() throws Exception {
+	    PacketInvoker in = new PacketInvoker();
+	    in.handleClose(null);
 	}
 
 	/**

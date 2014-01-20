@@ -25,9 +25,9 @@ import org.apache.niolex.network.PacketData;
  * This invoker can only handle invoke serially.
  * Please use this invoker with SocketClient only.
  *
- * @see org.apache.niolex.network.client.SocketClient
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0, Date: 2012-6-13
+ * @see org.apache.niolex.network.client.SocketClient
  */
 public class SingleInvoker implements RemoteInvoker {
 	private PacketData res;
@@ -60,5 +60,13 @@ public class SingleInvoker implements RemoteInvoker {
 		client.handleWrite(packet);
 		return res;
 	}
+
+    /**
+     * This is the override of super method.
+     * @see org.apache.niolex.network.rpc.RemoteInvoker#setRpcHandleTimeout(int)
+     */
+    @Override
+    public void setRpcHandleTimeout(int rpcHandleTimeout) {
+    }
 
 }

@@ -17,6 +17,8 @@
  */
 package org.apache.niolex.network.rpc;
 
+import org.apache.niolex.commons.reflect.FieldUtil;
+
 /**
  * The Base Exception thrown in this Rpc framework.
  *
@@ -29,6 +31,48 @@ public class RpcException extends RuntimeException {
 	 * Generated serial number.
 	 */
 	private static final long serialVersionUID = -4027742478277292216L;
+
+	/**
+     * The rpc exception type. User can get the detailed explanation from this enum.
+     *
+     * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
+     * @version 1.0.0, Date: 2012-11-8
+     */
+    public static enum Type {
+        TIMEOUT("Rpc timeout, maybe network problem, server busy etc."),
+        NOT_CONNECTED("Client has not connected to server yet."),
+        CONNECTION_CLOSED("Client connection to server is closed due to previous problems."),
+        METHOD_NOT_FOUND("The method client want to invoke is not found on server side."),
+        ERROR_PARSE_PARAMS("Error occured when server try to parse parameters."),
+        ERROR_INVOKE("Error occured when server invoke this method on site."),
+        ERROR_PARSE_RETURN("Error occured when client try to parse the value returned from server."),
+        UNKNOWN("Unknown other error."),
+        NO_SERVER_READY("No rpc server is ready for now."),
+        ERROR_EXCEED_RETRY("We retried the number of times according to config, but still error.");
+
+        /**
+         * the detailed explanation for error type.
+         */
+        private final String explanation;
+
+        /**
+         * Create a type with detailed explanation.
+         *
+         * @param explanation
+         */
+        private Type(String explanation) {
+            this.explanation = explanation;
+        }
+
+        /**
+         * Get the detailed explanation for error type.
+         * @return the detailed explanation
+         */
+        public String getExplanation() {
+            return explanation;
+        }
+
+    }
 
 	/**
 	 * The exception type.
@@ -47,9 +91,9 @@ public class RpcException extends RuntimeException {
 	/**
 	 * Create a RpcException with a message, an exception type, and a throwable.
 	 *
-	 * @param message
-	 * @param type
-	 * @param cause
+	 * @param message the exception message
+	 * @param type the exception type
+	 * @param cause the cause
 	 */
 	public RpcException(String message, Type type, Throwable cause) {
 		super(message, cause);
@@ -71,50 +115,22 @@ public class RpcException extends RuntimeException {
 		return type;
 	}
 
+	/**
+	 * Used by Serial Tools.
+	 *
+	 * @param type the exception type to set
+	 */
 	public void setType(Type type) {
 		this.type = type;
 	}
 
 	/**
-	 * The rpc exception type. User can get the detailed explanation from this enum.
+	 * Used by Serial Tools.
 	 *
-	 * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
-	 * @version 1.0.0, Date: 2012-11-8
+	 * @param message the exception message
 	 */
-	public static enum Type {
-		TIMEOUT("Rpc timeout, maybe network problem, server busy etc."),
-		NOT_CONNECTED("Client has not connected to server yet."),
-		CONNECTION_CLOSED("Client connection to server is closed due to previous problems."),
-		METHOD_NOT_FOUND("The method client want to invoke is not found on server side."),
-		ERROR_PARSE_PARAMS("Error occured when server try to parse parameters."),
-		ERROR_INVOKE("Error occured when server invoke this method on site."),
-		ERROR_PARSE_RETURN("Error occured when client try to parse the value returned from server."),
-		UNKNOWN("Unknown other error."),
-		NO_SERVER_READY("No rpc server is ready for now."),
-		ERROR_EXCEED_RETRY("We retried the number of times according to config, but still error.");
-
-		/**
-		 * the detailed explanation for error type.
-		 */
-		private final String explanation;
-
-		/**
-		 * Create a type with detailed explanation.
-		 *
-		 * @param explanation
-		 */
-		private Type(String explanation) {
-			this.explanation = explanation;
-		}
-
-		/**
-		 * Get the detailed explanation for error type.
-		 * @return the detailed explanation
-		 */
-		public String getExplanation() {
-			return explanation;
-		}
-
+	public void setMessage(String message) {
+	    FieldUtil.setValue(this, "detailMessage", message);
 	}
 
 }

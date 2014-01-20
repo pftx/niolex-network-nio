@@ -40,4 +40,12 @@ public interface RemoteInvoker extends IPacketHandler {
 	 */
 	public PacketData invoke(PacketData packet, IClient client);
 
+	/**
+     * The rpc holding thread will return null if the result is not ready after
+     * this time.
+     *
+     * @param rpcHandleTimeout the timeout to set to
+     */
+    public void setRpcHandleTimeout(int rpcHandleTimeout);
+
 }
