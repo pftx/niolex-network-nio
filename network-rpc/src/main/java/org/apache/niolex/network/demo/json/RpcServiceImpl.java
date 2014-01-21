@@ -18,6 +18,7 @@
 package org.apache.niolex.network.demo.json;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import org.apache.niolex.commons.util.DateTimeUtil;
 
@@ -60,7 +61,7 @@ public class RpcServiceImpl implements RpcService {
 	 */
 	@Override
 	public String throwEx() {
-		throw new RuntimeException("org.apache.niolex.network.demo.json.RpcService#throwEx()");
+		throw new NoSuchElementException("org.apache.niolex.network.demo.json.RpcService#throwEx()");
 	}
 
 	/**

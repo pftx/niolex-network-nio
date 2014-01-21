@@ -20,6 +20,7 @@ package org.apache.niolex.network.rpc.util;
 import static org.junit.Assert.*;
 
 import java.io.ByteArrayOutputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Type;
 import java.util.Date;
 
@@ -50,6 +51,20 @@ public class RpcUtilTest extends RpcUtil {
         assertEquals(RpcException.Type.ERROR_INVOKE, ox.getType());
         System.out.println(ox.getCause());
 	}
+
+    @Test
+    public void testSerializeRpcWithInvocationTargetException() throws Exception {
+        Exception e2 = new ArrayStoreException("Can not alloc memory.#49$");
+        Exception e = new InvocationTargetException(e2);
+        RpcException ex = new RpcException("This is not Good.", RpcException.Type.ERROR_INVOKE, e);
+        byte[] bb = RpcUtil.serializeRpcException(ex);
+        assertNotNull(bb);
+        System.out.println(StringUtil.utf8ByteToStr(bb));
+        RpcException ox = RpcUtil.parseRpcException(bb);
+        assertEquals("This is not Good.", ox.getMessage());
+        assertEquals(RpcException.Type.ERROR_INVOKE, ox.getType());
+        System.out.println(ox.getCause());
+    }
 
 	@Test
 	public void testSerializeRpcExceptionNoRoot() throws Exception {

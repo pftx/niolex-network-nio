@@ -20,6 +20,7 @@ package org.apache.niolex.network.rpc.util;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Type;
 import java.net.URL;
 import java.net.URLConnection;
@@ -65,6 +66,9 @@ public abstract class RpcUtil {
 
 		Throwable cause = ex.getCause();
 		if (cause != null) {
+		    if (cause instanceof InvocationTargetException) {
+		        cause = cause.getCause();
+		    }
 		    sb.append(ThrowableUtil.throwableToString(cause));
 		}
 

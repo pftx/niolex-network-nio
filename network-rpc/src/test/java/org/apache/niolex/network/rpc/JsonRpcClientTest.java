@@ -22,6 +22,7 @@ import static org.junit.Assert.*;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
+import java.util.NoSuchElementException;
 
 import org.apache.niolex.network.ConnStatus;
 import org.apache.niolex.network.CoreRunner;
@@ -83,7 +84,10 @@ public class JsonRpcClientTest {
 	        fail(r);
 	    } catch (RpcException e) {
 	        assertEquals(RpcException.Type.ERROR_INVOKE, e.getType());
+	        assertTrue(e.getCause() instanceof NoSuchElementException);
+	        assertEquals("org.apache.niolex.network.demo.json.RpcService#throwEx()", e.getCause().getMessage());
 	        System.out.println(e);
+	        System.out.println(" => " + e.getCause());
 	        throw e;
 	    }
 	}
