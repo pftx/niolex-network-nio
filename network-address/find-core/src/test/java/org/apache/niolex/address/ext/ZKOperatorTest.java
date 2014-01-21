@@ -181,7 +181,7 @@ public class ZKOperatorTest {
         when(zk.setACL(anyString(), anyList(), anyInt())).thenThrow(throwable1, throwable2, throwable1, throwable2);
         //
         List<ACL> acl = OPMain.getCDR4Server();
-        FieldUtil.setFieldValue(f, zkop, zk);
+        FieldUtil.setFieldValue(zkop, f, zk);
         boolean flag = false;
         try {
             zkop.removeACL("/localhost:9001", acl);
@@ -199,7 +199,7 @@ public class ZKOperatorTest {
             assertEquals(e.getCode(), ZKException.Code.OTHER);
         }
         assertTrue(flag);
-        FieldUtil.setFieldValue(f, zkop, zkback);
+        FieldUtil.setFieldValue(zkop, f, zkback);
     }
 
     @Test
@@ -428,7 +428,7 @@ public class ZKOperatorTest {
         KeeperException throwable2 = KeeperException.create(KeeperException.Code.APIERROR);
         when(zk.setData(anyString(), any(byte[].class), anyInt())).thenThrow(throwable1, throwable2, throwable1, throwable2);
         //
-        FieldUtil.setFieldValue(f, zkop, zk);
+        FieldUtil.setFieldValue(zkop, f, zk);
         boolean flag = false;
         try {
             String path = "/find/services/org.new/clients/1";
@@ -438,7 +438,7 @@ public class ZKOperatorTest {
             assertEquals(e.getCode(), ZKException.Code.OTHER);
         }
         assertTrue(flag);
-        FieldUtil.setFieldValue(f, zkop, zkback);
+        FieldUtil.setFieldValue(zkop, f, zkback);
     }
 
 }
