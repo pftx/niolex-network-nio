@@ -26,6 +26,8 @@ import org.apache.niolex.commons.stream.KryoOutstream;
 import org.apache.niolex.network.rpc.IConverter;
 
 /**
+ * Using Kryo to serialize data.
+ *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0, $Date: 2012-12-2$
  */
@@ -42,8 +44,7 @@ public class KryoConverter implements IConverter {
         KryoInstream kin = new KryoInstream(in);
         Object[] rr = new Object[generic.length];
         for (int i = 0; i < generic.length; ++i) {
-            Type t = generic[i];
-            rr[i] = kin.readObject((Class<Object>) t);
+            rr[i] = kin.readObject((Class<Object>) generic[i]);
         }
         return rr;
     }

@@ -87,6 +87,7 @@ public class SmileConverterTest {
     public final void testPrepareReturn() throws Exception {
         GeneralTestConverter g = new GeneralTestConverter(con);
         g.testReturn();
+        g.testSimple();
     }
 
     /**
@@ -98,7 +99,6 @@ public class SmileConverterTest {
     public final void testSerializeReturn() throws Exception {
         GeneralTestConverter g = new GeneralTestConverter(con);
         g.testComplicate();
-        g.testSimple();
     }
 
 }

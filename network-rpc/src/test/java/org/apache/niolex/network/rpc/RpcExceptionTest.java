@@ -43,4 +43,11 @@ public class RpcExceptionTest {
 		assertEquals(RpcException.Type.ERROR_INVOKE.getExplanation(), "Error occured when server invoke this method on site.");
 	}
 
+    @Test
+    public void testSetMessage() throws Exception {
+        RpcException r = new RpcException();
+        r.setMessage("not yet implemented");
+        assertEquals("not yet implemented", r.getMessage());
+    }
+
 }

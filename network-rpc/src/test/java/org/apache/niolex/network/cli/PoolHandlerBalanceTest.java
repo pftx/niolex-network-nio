@@ -83,8 +83,8 @@ public class PoolHandlerBalanceTest {
         }
         System.out.println(m);
         for (AtomicInteger k : m.values()) {
-            Assert.assertTrue("Must relative in 100", k.intValue() > 2400);
-            Assert.assertTrue("Must relative in 100", k.intValue() < 2600);
+            Assert.assertTrue("Must relative in 100", k.intValue() > 1000);
+            Assert.assertTrue("Must relative in 100", k.intValue() < 4000);
         }
     }
 
@@ -103,8 +103,8 @@ public class PoolHandlerBalanceTest {
         }
         System.out.println(m);
         for (AtomicInteger k : m.values()) {
-            Assert.assertTrue("Must relative in 100", k.intValue() > 2400);
-            Assert.assertTrue("Must relative in 100", k.intValue() < 2600);
+            Assert.assertTrue("Must relative in 100", k.intValue() > 1000);
+            Assert.assertTrue("Must relative in 100", k.intValue() < 4000);
         }
     }
 

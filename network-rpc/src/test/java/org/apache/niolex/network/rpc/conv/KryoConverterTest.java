@@ -81,6 +81,7 @@ public class KryoConverterTest {
         assertEquals(r[0], params[0]);
         assertEquals(r[2], params[2]);
         assertEquals(r[3], params[3]);
-        assertEquals(r[4], params[4]);    }
+        assertEquals(r[4], params[4]);
+    }
 
 }

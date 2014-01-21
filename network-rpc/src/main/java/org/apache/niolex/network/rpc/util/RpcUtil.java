@@ -19,6 +19,7 @@ package org.apache.niolex.network.rpc.util;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Type;
 import java.net.URL;
 import java.net.URLConnection;
@@ -28,6 +29,8 @@ import java.util.List;
 import org.apache.niolex.commons.codec.Base64Util;
 import org.apache.niolex.commons.codec.StringUtil;
 import org.apache.niolex.commons.stream.JsonProxy;
+import org.apache.niolex.commons.stream.StreamUtil;
+import org.apache.niolex.commons.util.ThrowableUtil;
 import org.apache.niolex.network.PacketData;
 import org.apache.niolex.network.rpc.RpcException;
 import org.codehaus.jackson.type.TypeReference;
@@ -59,21 +62,12 @@ public abstract class RpcUtil {
 	public static final byte[] serializeRpcException(RpcException ex) {
 		StringBuilder sb = new StringBuilder();
 		sb.append(ex.getMessage()).append(SEP_RPCEX).append(ex.getType()).append(SEP_RPCEX);
+
 		Throwable cause = ex.getCause();
-		// Find the root cause.
-		while (cause != null && cause.getCause() != null) {
-		    cause = cause.getCause();
-		}
-		// Mark the cause.
 		if (cause != null) {
-			sb.append(cause.toString());
-			StackTraceElement[] sarr = cause.getStackTrace();
-			if (sarr != null && sarr.length >= 1) {
-			    sb.append('@').append(sarr[0].toString());
-			}
-		} else {
-			sb.append("NullCause@air cloud");
+		    sb.append(ThrowableUtil.throwableToString(cause));
 		}
+
 		return StringUtil.strToUtf8Byte(sb.toString());
 	}
 
@@ -84,10 +78,19 @@ public abstract class RpcUtil {
 	 * @return the exception
 	 */
 	public static final RpcException parseRpcException(byte[] data) {
-		String[] strs = StringUtil.utf8ByteToStr(data).split(SEP_RPCEX);
+		String[] strs = StringUtil.split(StringUtil.utf8ByteToStr(data), SEP_RPCEX, true);
+
 		RpcException.Type type = RpcException.Type.valueOf(strs[1]);
-		RpcException ex = new RpcException(strs[0], type,
-				new Throwable(strs[2]));
+		Throwable root = null;
+		if (strs[2].length() != 0) {
+		    try {
+                root = ThrowableUtil.strToThrowable(strs[2]);
+            } catch (Exception e) {
+                root = e;
+            }
+		}
+
+		RpcException ex = new RpcException(strs[0], type, root);
 		return ex;
 	}
 
@@ -216,6 +219,7 @@ public abstract class RpcUtil {
      * @return true if connected to server, false otherwise
      */
     public static boolean checkServerStatus(String completeUrl, int connectTimeout, int readTimeout) {
+        InputStream inputStream = null;
 		try {
 			URL u = new URL(completeUrl);
 			URLConnection proxy = u.openConnection();
@@ -224,20 +228,22 @@ public abstract class RpcUtil {
 			proxy.setDoInput(true);
 			proxy.setDoOutput(false);
 			proxy.connect();
-			if (proxy.getContentLength() <= 1) {
+			inputStream = proxy.getInputStream();
+			int len = proxy.getContentLength();
+			if (len == -1) {
+			    len = StreamUtil.readData(inputStream, new byte[1024]);
+			}
+			if (len < 2) {
 				LOG.warn("Failed to connect to " + completeUrl + " : Server response too short.");
 				return false;
 			}
-			String serverStatus = proxy.getHeaderField(0);
-			if (serverStatus != null && serverStatus.matches(".*[45][0-9][02-9].*")) {
-				LOG.warn("Failed to connect to " + completeUrl + " : Invalid server response " + serverStatus);
-				return false;
-			}
-			LOG.info("Server [" + completeUrl + "] status: " + serverStatus);
+			LOG.info("Server [" + completeUrl + "] status: " + proxy.getHeaderField(0));
 			return true;
-		} catch (Exception e) {
+		} catch (IOException e) {
 			LOG.warn("Failed to connect to " + completeUrl + " : " + e.getMessage());
 			return false;
+		} finally {
+		    StreamUtil.closeStream(inputStream);
 		}
 	}
 

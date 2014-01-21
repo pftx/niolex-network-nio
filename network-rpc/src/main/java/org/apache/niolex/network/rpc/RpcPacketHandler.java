@@ -27,7 +27,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.niolex.commons.reflect.MethodUtil;
-import org.apache.niolex.network.Config;
 import org.apache.niolex.network.IPacketHandler;
 import org.apache.niolex.network.IPacketWriter;
 import org.apache.niolex.network.PacketData;
@@ -65,9 +64,6 @@ public class RpcPacketHandler implements IPacketHandler {
 	 */
 	public RpcPacketHandler() {
 		int threadsNumber = Runtime.getRuntime().availableProcessors() * 5;
-		if (threadsNumber > Config.RPC_HANDLER_POOL_SIZE) {
-			threadsNumber = Config.RPC_HANDLER_POOL_SIZE;
-		}
 		tPool = Executors.newFixedThreadPool(threadsNumber);
 		LOG.info("RpcPacketHandler started to work with {} threads.", threadsNumber);
 	}
@@ -154,7 +150,7 @@ public class RpcPacketHandler implements IPacketHandler {
 				Object[] args = null;
 				try {
 				    Type[] generic = method.getGenericParameterTypes();
-				    if (generic != null && generic.length > 0) {
+				    if (generic.length > 0) {
 				        args = converter.prepareParams(sc.getData(), generic);
 				    }
 				} catch (Exception e1) {
@@ -192,6 +188,8 @@ public class RpcPacketHandler implements IPacketHandler {
 			byte[] arr = null;
 			if (data == null) {
 				arr = new byte[0];
+			} else if (exception == 1) {
+			    arr = RpcUtil.serializeRpcException((RpcException)data);
 			} else {
 				arr = converter.serializeReturn(data);
 			}

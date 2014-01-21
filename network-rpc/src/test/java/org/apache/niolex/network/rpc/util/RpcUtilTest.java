@@ -17,23 +17,18 @@
  */
 package org.apache.niolex.network.rpc.util;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import java.io.ByteArrayOutputStream;
 import java.lang.reflect.Type;
 import java.util.Date;
 
+import org.apache.niolex.commons.codec.StringUtil;
 import org.apache.niolex.commons.compress.JacksonUtil;
 import org.apache.niolex.commons.test.Benchmark;
 import org.apache.niolex.commons.test.Benchmark.Bean;
 import org.apache.niolex.network.PacketData;
 import org.apache.niolex.network.rpc.RpcException;
-import org.apache.niolex.network.rpc.util.RpcUtil;
 import org.junit.Test;
 
 /**
@@ -41,15 +36,15 @@ import org.junit.Test;
  * @version 1.0.0
  * @since 2012-7-24
  */
-public class RpcUtilTest {
+public class RpcUtilTest extends RpcUtil {
 
 	@Test
-	public void testSerializeRpc() {
-		new RpcUtil(){};
+	public void testSerializeRpcWithRoot() {
 		Exception e = new ArrayStoreException("Can not alloc memory.#49$");
 		RpcException ex = new RpcException("This is not Good.", RpcException.Type.ERROR_INVOKE, e);
 		byte[] bb = RpcUtil.serializeRpcException(ex);
 		assertNotNull(bb);
+		System.out.println(StringUtil.utf8ByteToStr(bb));
 		RpcException ox = RpcUtil.parseRpcException(bb);
 		assertEquals("This is not Good.", ox.getMessage());
         assertEquals(RpcException.Type.ERROR_INVOKE, ox.getType());
@@ -57,15 +52,26 @@ public class RpcUtilTest {
 	}
 
 	@Test
-	public void testSerializeRpcException() throws Exception {
+	public void testSerializeRpcExceptionNoRoot() throws Exception {
 		byte[] bb = RpcUtil.serializeRpcException(new RpcException("This is good",
 				RpcException.Type.CONNECTION_CLOSED, null));
 		assertNotNull(bb);
 		RpcException ex = RpcUtil.parseRpcException(bb);
 		assertEquals("This is good", ex.getMessage());
-		assertEquals("NullCause@air cloud", ex.getCause().getMessage());
 		assertEquals(RpcException.Type.CONNECTION_CLOSED, ex.getType());
+		assertNull(ex.getCause());
 	}
+
+    @Test
+    public void testParseRpcException() throws Exception {
+        String s = "This is not Good.#~@&ERROR_INVOKE#~@&java.lang2.ArrayStoreException/^*(V)*^/Can not alloc memory.#49$/^*(V)*^/RpcUtilTest";
+        byte[] bb = StringUtil.strToAsciiByte(s);
+        RpcException ox = RpcUtil.parseRpcException(bb);
+        assertEquals("This is not Good.", ox.getMessage());
+        assertEquals(RpcException.Type.ERROR_INVOKE, ox.getType());
+        System.out.println(ox.getCause());
+        assertTrue(ox.getCause() instanceof ClassNotFoundException);
+    }
 
 	/**
 	 * Test method for {@link org.apache.niolex.network.rpc.util.RpcUtil#parseJson(byte[], java.lang.reflect.Type[])}.
@@ -115,6 +121,22 @@ public class RpcUtilTest {
 		System.out.println(s);
 		assertEquals(s, "ffff1021");
 	}
+
+
+    @Test
+    public void testGenerateKeyShortByteByte() throws Exception {
+        PacketData abc = new PacketData(65535);
+        byte vr = 66;
+        byte rr = 125;
+        for (int i = 0; i < 1000; ++i) {
+            abc.setVersion(vr++);
+            abc.setReserved(rr++);
+            int k = generateKey(abc);
+            abc.setReserved(rr++);
+            int s = generateKey(abc);
+            assertEquals(s, k);
+        }
+    }
 
 	@Test
 	public void testGenerateKeyMaxReser() {
@@ -176,7 +198,7 @@ public class RpcUtilTest {
 	@Test
 	public void testGenerateKey20000() {
 	    PacketData abc = new PacketData(128);
-	    for (int i = 2147483641; i < 100000; i += 2) {
+	    for (int i = 2147483641, j = 0; j < 10000; i += 2, ++j) {
 	        abc.setVersion((byte) (i >> 8));
 	        abc.setReserved((byte) i);
 	        int k = RpcUtil.generateKey(abc);
@@ -235,10 +257,10 @@ public class RpcUtilTest {
 	 */
 	@Test
 	public final void testGenSessionId() {
-		String s = RpcUtil.genSessionId(45);
-		String q = RpcUtil.genSessionId(45);
-		assertEquals(45, s.length());
-		assertEquals(45, q.length());
+		String s = RpcUtil.genSessionId(145);
+		String q = RpcUtil.genSessionId(145);
+		assertEquals(145, s.length());
+		assertEquals(145, q.length());
 		assertNotEquals(s, q);
 	}
 
@@ -247,23 +269,40 @@ public class RpcUtilTest {
 	 * .
 	 */
 	@Test
-	public final void testCheckServerStatus() {
+	public final void testCheckServerStatusLenMinus1() {
 		boolean b = RpcUtil.checkServerStatus("http://www.baidu.com", 4000, 4000);
-		System.out.println(b);
 		assertTrue(b);
+	}
+
+	@Test
+	public final void testCheckServerStatusLessThan2() {
+	    String url = RpcUtilTest.class.getResource("onebyte.txt").toExternalForm();
+	    boolean d = RpcUtil.checkServerStatus(url, 4000, 4000);
+	    assertFalse(d);
+	}
+
+	@Test
+	public final void testCheckServerStatusEx404() {
+	    boolean e = RpcUtil.checkServerStatus("http://www.cs.zju.edu.cn/org/codes/404.html", 4000, 4000);
+	    assertFalse(e);
+	}
+
+	@Test
+    public final void testCheckServerStatusEx404Again() {
 		boolean c = RpcUtil.checkServerStatus("http://www.apache.org/tomcat.php", 4000, 4000);
-		System.out.println(c);
 		assertFalse(c);
-		boolean d = RpcUtil.checkServerStatus(RpcUtilTest.class.getResource("onebyte.txt").toExternalForm(),
-		        4000, 4000);
-		System.out.println(d);
-		assertFalse(d);
-		boolean e = RpcUtil.checkServerStatus("http://www.cs.zju.edu.cn/org/codes/404.html", 4000, 4000);
-		System.out.println(e);
-		assertFalse(e);
+    }
+
+    @Test
+	public final void testCheckServerStatusIOEx() {
 		boolean f = RpcUtil.checkServerStatus("http://www.facebook.com", 1000, 1000);
-		System.out.println(f);
 		assertFalse(f);
 	}
+
+    @Test(expected=IllegalArgumentException.class)
+    public final void testCheckServerStatusNull() {
+        boolean f = RpcUtil.checkServerStatus("http://www.facebook.com", -1000, -1000);
+        assertFalse(f);
+    }
 
 }

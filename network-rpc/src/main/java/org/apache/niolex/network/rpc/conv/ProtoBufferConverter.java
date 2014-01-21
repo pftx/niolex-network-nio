@@ -22,7 +22,6 @@ import java.lang.reflect.Type;
 import org.apache.niolex.commons.seri.ProtoUtil;
 import org.apache.niolex.network.rpc.IConverter;
 import org.apache.niolex.network.rpc.RpcException;
-import org.apache.niolex.network.rpc.util.RpcUtil;
 
 import com.google.protobuf.GeneratedMessage;
 
@@ -58,11 +57,7 @@ public class ProtoBufferConverter implements IConverter {
 	 */
 	@Override
 	public Object prepareReturn(byte[] ret, Type type) throws Exception {
-		if (type.equals(RpcException.class)) {
-			return RpcUtil.parseRpcException(ret);
-		} else {
-			return ProtoUtil.parseOne(ret, type);
-		}
+	    return ProtoUtil.parseOne(ret, type);
 	}
 
 	/**
@@ -74,8 +69,6 @@ public class ProtoBufferConverter implements IConverter {
 		if (ret instanceof GeneratedMessage) {
 			GeneratedMessage gen = (GeneratedMessage) ret;
 			return gen.toByteArray();
-		} else if (ret instanceof RpcException) {
-			return RpcUtil.serializeRpcException((RpcException) ret);
 		} else {
 			throw new RpcException("Message is not protobuf type: " + ret.getClass(),
 					RpcException.Type.ERROR_PARSE_PARAMS, null);

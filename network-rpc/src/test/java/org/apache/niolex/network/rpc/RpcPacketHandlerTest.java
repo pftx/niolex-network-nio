@@ -20,12 +20,17 @@ package org.apache.niolex.network.rpc;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
+import java.lang.reflect.Method;
+import java.lang.reflect.Type;
+
+import org.apache.niolex.commons.reflect.MethodUtil;
 import org.apache.niolex.network.CoreRunner;
 import org.apache.niolex.network.IPacketWriter;
 import org.apache.niolex.network.PacketData;
 import org.apache.niolex.network.demo.json.RpcService;
 import org.apache.niolex.network.demo.json.RpcServiceImpl;
 import org.apache.niolex.network.rpc.conv.JsonConverter;
+import org.apache.niolex.network.rpc.util.RpcUtil;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
@@ -42,12 +47,13 @@ public class RpcPacketHandlerTest {
 	 * .
 	 */
 	@Test
-	public void testHandlePacket() {
+	public void testRpcPacketHandler() {
 		RpcPacketHandler rr = new RpcPacketHandler(3);
 		rr.setConverter(new JsonConverter());
 		IPacketWriter tt = mock(IPacketWriter.class);
 		rr.handlePacket(new PacketData(5, new byte[5]), tt);
 		verify(tt).handleWrite(any(PacketData.class));
+		assertEquals(0, rr.getQueueSize());
 	}
 
 	@Test
@@ -55,7 +61,14 @@ public class RpcPacketHandlerTest {
 		RpcPacketHandler rr = new RpcPacketHandler();
 		IPacketWriter tt = mock(IPacketWriter.class);
 		rr.handlePacket(PacketData.getHeartBeatPacket(), tt);
-		verify(tt, never()).handleWrite(any(PacketData.class));
+		ArgumentCaptor<PacketData> au = ArgumentCaptor.forClass(PacketData.class);
+        verify(tt, times(1)).handleWrite(au.capture());
+        assertEquals(0, au.getValue().getCode());
+        assertEquals(1, au.getValue().getVersion());
+        assertEquals(1, au.getValue().getReserved());
+        RpcException r = RpcUtil.parseRpcException(au.getValue().getData());
+        assertEquals(RpcException.Type.METHOD_NOT_FOUND, r.getType());
+        assertNull(r.getCause());
 	}
 
 	/**
@@ -85,13 +98,26 @@ public class RpcPacketHandlerTest {
 	}
 
 	@Test
-	public void testHandleNe() {
-		RpcPacketHandler rr = new RpcPacketHandler(2);
-		rr.setConverter(new JsonConverter());
-		IPacketWriter wt = mock(IPacketWriter.class);
-		PacketData p = new PacketData(9, new byte[9]);
-		rr.handlePacket(p, wt);
-		assertEquals(0, rr.getQueueSize());
+	public void testHandleNe() throws Exception {
+	    RpcPacketHandler rr = new RpcPacketHandler(3);
+        rr.setConverter(new JsonConverter());
+        ConfigItem[] confs = new ConfigItem[1];
+        ConfigItem c = new ConfigItem();
+        c.setInterface(RpcService.class);
+        c.setTarget(new RpcServiceImpl());
+        confs[0] = c;
+        rr.setRpcConfigs(confs);
+        PacketData p = new PacketData(16, new byte[9]);
+        p.setVersion((byte) 79);
+        p.setReserved((byte) 127);
+        IPacketWriter wt = mock(IPacketWriter.class);
+        rr.handlePacket(p, wt);
+        Thread.sleep(3 * CoreRunner.CO_SLEEP);
+        ArgumentCaptor<PacketData> au = ArgumentCaptor.forClass(PacketData.class);
+        verify(wt).handleWrite(au.capture());
+        assertEquals(16, au.getValue().getCode());
+        assertEquals(79, au.getValue().getVersion());
+        assertEquals(-128, au.getValue().getReserved());
 	}
 
 	@Test
@@ -116,5 +142,63 @@ public class RpcPacketHandlerTest {
 		assertEquals(79, au.getValue().getVersion());
 		assertEquals(100, au.getValue().getReserved());
 	}
+
+	@Test
+	public void testHandleReturn() throws Exception {
+	    RpcPacketHandler rr = new RpcPacketHandler(3);
+	    IConverter mm = mock(IConverter.class);
+	    when(mm.prepareParams(any(byte[].class), any(Type[].class))).thenThrow(new Error("This is your fault."));
+        rr.setConverter(mm);
+	    ConfigItem[] confs = new ConfigItem[1];
+	    ConfigItem c = new ConfigItem();
+	    c.setInterface(RpcService.class);
+	    c.setTarget(new RpcServiceImpl());
+	    confs[0] = c;
+	    rr.setRpcConfigs(confs);
+	    PacketData p = new PacketData(14, new byte[9]);
+	    p.setVersion((byte) 79);
+	    p.setReserved((byte) 99);
+	    IPacketWriter wt = mock(IPacketWriter.class);
+	    rr.handlePacket(p, wt);
+	    Thread.sleep(3 * CoreRunner.CO_SLEEP);
+	    ArgumentCaptor<PacketData> au = ArgumentCaptor.forClass(PacketData.class);
+	    verify(wt, never()).handleWrite(au.capture());
+	}
+
+    @Test
+    public void testAddRpcConfigObject() throws Exception {
+        RpcPacketHandler rr = new RpcPacketHandler(3);
+        rr.addRpcConfig("Lex");
+    }
+
+    @Test
+    public void testGetQueueSize() throws Exception {
+        RpcPacketHandler rr = new RpcPacketHandler(3);
+        Method m = MethodUtil.getFirstMethod(rr, "handleReturn");
+        m.setAccessible(true);
+        PacketData p = new PacketData(14, new byte[9]);
+        p.setVersion((byte) 79);
+        p.setReserved((byte) 127);
+        IPacketWriter wt = mock(IPacketWriter.class);
+        ArgumentCaptor<PacketData> au = ArgumentCaptor.forClass(PacketData.class);
+        m.invoke(rr, p, wt, null, 1);
+        verify(wt).handleWrite(au.capture());
+        assertEquals(14, au.getValue().getCode());
+        assertEquals(79, au.getValue().getVersion());
+        assertEquals(-128, au.getValue().getReserved());
+        assertEquals(0, au.getValue().getLength());
+    }
+
+    @Test
+    public void testSetConverter() throws Exception {
+        RpcPacketHandler rr = new RpcPacketHandler(3);
+        Method m = MethodUtil.getFirstMethod(rr, "handleReturn");
+        m.setAccessible(true);
+        PacketData p = new PacketData(14, new byte[9]);
+        p.setVersion((byte) 79);
+        p.setReserved((byte) 127);
+        IPacketWriter wt = mock(IPacketWriter.class);
+        m.invoke(rr, p, wt, "aabbc", 0);
+    }
 
 }

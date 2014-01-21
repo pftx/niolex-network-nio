@@ -35,6 +35,7 @@ import org.apache.niolex.network.IPacketHandler;
 import org.apache.niolex.network.IPacketWriter;
 import org.apache.niolex.network.PacketData;
 import org.apache.niolex.network.rpc.anno.RpcMethod;
+import org.apache.niolex.network.rpc.util.RpcUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -181,13 +182,8 @@ public class RpcClient implements IPacketHandler, InvocationHandler {
 				throw new RpcException("Timeout for this remote procedure call.",
 						RpcException.Type.TIMEOUT, null);
 			} else {
-				int exp = respData.getReserved() - reqData.getReserved();
-				boolean isEx = false;
-				// 127 + 1 = -128
-				// -128 - 127 = -255
-				if (exp == 1 || exp == -255) {
-					isEx = true;
-				}
+				boolean isEx = isException(respData.getReserved() - reqData.getReserved());
+
 				if (respData.getLength() == 0) {
 				    return null;
 				}
@@ -213,6 +209,18 @@ public class RpcClient implements IPacketHandler, InvocationHandler {
 		short seri = (short) (auto.addAndGet(2));
 		rc.setReserved((byte) seri);
 		rc.setVersion((byte) (seri >> 8));
+	}
+
+	/**
+	 * Check whether this code is an exception.
+	 *
+	 * @param exp the exception code
+	 * @return true if it's exception
+	 */
+	private boolean isException(int exp) {
+	    // 127 + 1 = -128
+        // -128 - 127 = -255
+	    return exp == 1 || exp == -255;
 	}
 
 	/**
@@ -246,8 +254,8 @@ public class RpcClient implements IPacketHandler, InvocationHandler {
 	 */
 	protected Object prepareReturn(byte[] ret, Type type, boolean isEx) throws Exception {
 		if (isEx) {
-			type = RpcException.class;
-		} else if (type == null || type.toString().equalsIgnoreCase("void")) {
+			return RpcUtil.parseRpcException(ret);
+		} else if (type == null || type == void.class) {
 			return null;
 		}
 		return converter.prepareReturn(ret, type);

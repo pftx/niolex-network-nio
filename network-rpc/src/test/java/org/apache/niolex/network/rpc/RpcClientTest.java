@@ -18,7 +18,7 @@
 package org.apache.niolex.network.rpc;
 
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.*;
 
 import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
@@ -116,6 +116,18 @@ public class RpcClientTest {
 	}
 
 	@Test
+	public void testInvokeException() throws Throwable {
+	    PacketClient pc = mock(PacketClient.class);
+        PacketInvoker in = mock(PacketInvoker.class);
+        RpcClient rr = new RpcClient(pc, in, new JsonConverter());
+
+        Method m = MethodUtil.getFirstMethod(rr, "isException");
+        m.setAccessible(true);
+        assertTrue((Boolean)m.invoke(rr, 1));
+        assertTrue((Boolean)m.invoke(rr, -255));
+	}
+
+	@Test
 	public void testHandleCloseAlreadyClosed() throws Throwable {
 		PacketClient pc = new PacketClient(new InetSocketAddress("localhost", 8808));
 		RpcClient rr = new RpcClient(pc, new PacketInvoker(), new JsonConverter());
@@ -140,5 +152,14 @@ public class RpcClientTest {
 	    Assert.assertEquals(1, rr.getConnectRetryTimes());
 	    rr.handleClose(pc);
 	}
+
+    @Test
+    public void testPrepareReturn() throws Exception {
+        PacketClient pc = mock(PacketClient.class);
+        PacketInvoker in = mock(PacketInvoker.class);
+        RpcClient rr = new RpcClient(pc, in, new JsonConverter());
+        assertNull(rr.prepareReturn(null, null, false));
+        assertNull(rr.prepareReturn(null, void.class, false));
+    }
 
 }
