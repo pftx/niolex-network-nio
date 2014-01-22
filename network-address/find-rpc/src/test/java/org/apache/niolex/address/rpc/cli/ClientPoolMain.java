@@ -1,6 +1,6 @@
 /**
  * ClientPoolMain.java
- * 
+ *
  * Copyright 2013 Niolex, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,8 +18,8 @@
 package org.apache.niolex.address.rpc.cli;
 
 import org.apache.niolex.address.rpc.DemoService;
-import org.apache.niolex.address.rpc.cli.BasePool;
-import org.apache.niolex.address.rpc.cli.ClientPoolFactory;
+import org.apache.niolex.address.rpc.cli.BaseStub;
+import org.apache.niolex.address.rpc.cli.RpcClientFactory;
 import org.apache.niolex.commons.util.SystemUtil;
 
 
@@ -39,14 +39,14 @@ public class ClientPoolMain {
         System.setProperty("zk.cluster.address", "10.22.241.233:8181");
         System.setProperty("zk.session.timeout", "30000");
         System.setProperty("zk.root", "dev");
-        ClientPoolFactory factory = new ClientPoolFactory("abcd", "abcde");
+        RpcClientFactory factory = new RpcClientFactory("abcd", "abcde");
         // 准备启动了
         if (!factory.connectToZK()) {
             System.out.println("Failed to connect to ZK.");
             System.exit(-1);
         }
         // 获得远程对象，这里有一个连接池，简单起见我们就直接获得对象了
-        BasePool<DemoService> pool = factory.getPool(DemoService.class);
+        BaseStub<DemoService> pool = factory.getPool(DemoService.class);
         DemoService demo = pool.build().getService();
         // 开始操作
         int c = demo.calc(3, 4, 5);

@@ -1,6 +1,6 @@
 /**
  * RpcInterface.java
- * 
+ *
  * Copyright 2012 Niolex, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,7 +26,7 @@ import java.lang.annotation.Target;
 /**
  * Annotate the target interface to config some properties for Find-Rpc.
  * This annotation is Required.
- * 
+ *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.5, $Date: 2012-11-30$
  */
@@ -39,17 +39,18 @@ public @interface RpcInterface {
      * Optionally specify <code>serviceType</code> of the current interface.
      * default to use application/json as the transcoding protocol.
      */
-    String serviceType() default "network-json";
-    
+    String serviceType() default "network/json";
+
     /**
      * Optionally specify <code>serviceName</code> of the current interface.
      * default to the current interface name with package together.
      */
     String serviceName() default "";
-    
+
     /**
      * Optionally specify <code>version</code> of the current interface.
-     * default to 100.
+     * default to 1.0.0.001
      */
-    int version() default 100;
+    String version() default "1.0.0.001";
+
 }

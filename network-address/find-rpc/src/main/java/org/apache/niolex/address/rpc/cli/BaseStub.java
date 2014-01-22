@@ -1,19 +1,19 @@
 /**
- * BasePool.java
+ * BaseStub.java
  *
- * Copyright 2012 Niolex, Inc.
+ * Copyright 2014 the original author or authors.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * We licenses this file to you under the Apache License, version 2.0
+ * (the "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at:
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  */
 package org.apache.niolex.address.rpc.cli;
 
@@ -23,20 +23,24 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.niolex.commons.bean.MutableOne;
+import org.apache.niolex.commons.codec.StringUtil;
 import org.apache.niolex.network.cli.Constants;
-import org.apache.niolex.network.cli.PoolHandler;
 import org.apache.niolex.network.rpc.RpcClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The Base Client Pool, Manage the server addresses here.
+ * The base client side stub, handle the events sent from ZK server, deal with RPC server
+ * add/remove events and generate client stub.
+ * <br>
+ * We manage all the server addresses here.
  *
- * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
- * @version 1.0.5, $Date: 2013-03-30$
+ * @author <a href="mailto:xiejiyun@foxmail.com">Xie, Jiyun</a>
+ * @version 1.0.0
+ * @since 2014-1-22
  */
-public abstract class BasePool<T> implements MutableOne.DataChangeListener<List<String>> {
-    private static final Logger LOG = LoggerFactory.getLogger(BasePool.class);
+public abstract class BaseStub<T> implements MutableOne.DataChangeListener<List<String>> {
+    private static final Logger LOG = LoggerFactory.getLogger(BaseStub.class);
 
     /**
      * The network connection parameters.
@@ -52,30 +56,26 @@ public abstract class BasePool<T> implements MutableOne.DataChangeListener<List<
     protected int rpcErrorRetryTimes = Constants.CLIENT_RPC_RETRY_TIMES;
 
     /**
-     * The internal pool size, could not be changed after creation.
+     * The set save all the ready server node information.
      */
-    protected final int poolSize;
-    protected double weightShare;
-
     protected final Set<NodeInfo> readySet = new HashSet<NodeInfo>();
 
     protected final Class<T> interfaze;
     protected T stub;
 
-    protected PoolHandler<RpcClient> poolHandler;
-
+    /**
+     * The current stub status, true if it's ready to work
+     */
     protected boolean isWorking;
 
     /**
-     * Create a Base Pool with this pool size and interface.
+     * Create a Base stub with this pool size and interface.
      *
-     * @param poolSize the client pool size.
      * @param interfaze the service interface.
      * @param mutableOne the server address list of this service.
      */
-    public BasePool(int poolSize, Class<T> interfaze, MutableOne<List<String>> mutableOne) {
+    public BaseStub(Class<T> interfaze, MutableOne<List<String>> mutableOne) {
         super();
-        this.poolSize = poolSize;
         this.interfaze = interfaze;
         this.isWorking = false;
         mutableOne.addListener(this);
@@ -100,12 +100,14 @@ public abstract class BasePool<T> implements MutableOne.DataChangeListener<List<
         // Parse config information.
         for (String node : nodeList) {
             NodeInfo info = new NodeInfo();
-            String[] pr = node.split(":");
+            // Address format:
+            //          Protocol:IP:Port:Weight
+            String[] pr = StringUtil.split(node, ":", true);
             if (pr.length < 4) {
                 LOG.info("Invalid address format: {}.", node);
                 continue;
             }
-            info.setProtocol(pr[0]);
+            info.setProtocol(pr[0].replace('^', '/'));
             info.setAddress(new InetSocketAddress(pr[1], Integer.parseInt(pr[2])));
             info.setWeight(Integer.parseInt(pr[3]));
             infoSet.add(info);
@@ -122,7 +124,7 @@ public abstract class BasePool<T> implements MutableOne.DataChangeListener<List<
                 addSet.add(info);
             }
         }
-        // make the change now.
+        // Try to make the change by now.
         if (isWorking) {
             if (!delSet.isEmpty())
                 markDeleted(delSet);
@@ -149,9 +151,9 @@ public abstract class BasePool<T> implements MutableOne.DataChangeListener<List<
     protected abstract void markNew(HashSet<NodeInfo> addSet);
 
     /**
-     * Build this pool for use. This method can only be called once.
+     * Build this client stub for use. This method can only be called once.
      */
-    public abstract BasePool<T> build();
+    public abstract BaseStub<T> build();
 
     /**
      * Destroy this pool, disconnect all the connections.
@@ -168,6 +170,16 @@ public abstract class BasePool<T> implements MutableOne.DataChangeListener<List<
             throw new IllegalStateException("Please build this pool first!");
         }
         return stub;
+    }
+
+    /**
+     * The bridge method help subclass to retrieve client set from node info.
+     *
+     * @param info the node info
+     * @return the client set
+     */
+    protected Set<RpcClient> clientSet(NodeInfo info) {
+        return info.clientSet;
     }
 
 
@@ -244,5 +256,4 @@ public abstract class BasePool<T> implements MutableOne.DataChangeListener<List<
     public void setRpcErrorRetryTimes(int rpcErrorRetryTimes) {
         this.rpcErrorRetryTimes = rpcErrorRetryTimes;
     }
-
 }

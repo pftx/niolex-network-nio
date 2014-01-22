@@ -1,6 +1,6 @@
 /**
  * ConverterCenter.java
- * 
+ *
  * Copyright 2012 Niolex, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,44 +28,44 @@ import org.apache.niolex.network.rpc.conv.ProtoStuffConverter;
 /**
  * Manage all the converters available. Client can use {@link #addConverter(String, IConverter)}
  * to add customized converters for special purpose.
- * 
+ *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.5, $Date: 2012-11-30$
  */
 public class ConverterCenter {
-    
+
     /**
      * The internal hash map of converters.
      */
     private static Map<String, IConverter> builderMap = new HashMap<String, IConverter>();
-    
+
     /**
      * We put all the network-rpc default converters into the map.
      */
     static {
-        builderMap.put("network-json", new JsonConverter());
-        builderMap.put("network-proto", new ProtoBufferConverter());
-        builderMap.put("network-stuff", new ProtoStuffConverter());
+        builderMap.put("network/json", new JsonConverter());
+        builderMap.put("network/proto", new ProtoBufferConverter());
+        builderMap.put("network/stuff", new ProtoStuffConverter());
     }
 
     /**
      * Add a custom converter into converter center.
-     * 
-     * @param serviceType
-     * @param iconv
+     *
+     * @param serviceType the service type i.e. network/amqp
+     * @param iconv the converter
      */
     public static void addConverter(String serviceType, IConverter iconv) {
         builderMap.put(serviceType, iconv);
     }
-    
+
     /**
      * Get the converter associated with this service type.
-     * 
-     * @param serviceType
-     * @return null if not found
+     *
+     * @param serviceType the service type
+     * @return the related converter or null if not found
      */
     public static IConverter getConverter(String serviceType) {
         return builderMap.get(serviceType);
     }
-    
+
 }

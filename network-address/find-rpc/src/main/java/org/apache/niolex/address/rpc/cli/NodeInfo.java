@@ -1,6 +1,6 @@
 /**
  * NodeInfo.java
- * 
+ *
  * Copyright 2012 Niolex, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,31 +25,31 @@ import org.apache.niolex.network.rpc.RpcClient;
 
 /**
  * Store server address node information.
- * 
+ *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.5, $Date: 2012-12-4$
  */
 public class NodeInfo {
-    
+
+    /**
+     * Store all the clients using this node information.
+     */
+    protected final Set<RpcClient> clientSet = new HashSet<RpcClient>();
+
     /**
      * The data convert protocol.
      */
     private String protocol;
-    
+
     /**
      * The server address.
      */
     private InetSocketAddress address;
-    
+
     /**
      * The weight of this server, default to 1.
      */
     private int weight;
-    
-    /**
-     * All the clients using this node information.
-     */
-    protected Set<RpcClient> clientSet = new HashSet<RpcClient>();
 
     /**
      * @return the protocol
@@ -99,10 +99,7 @@ public class NodeInfo {
      */
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((address == null) ? 0 : address.hashCode());
-        return result;
+        return ((address == null) ? 0 : address.hashCode());
     }
 
     /**
@@ -112,13 +109,13 @@ public class NodeInfo {
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
-        if (obj == null) return false;
         if (!(obj instanceof NodeInfo)) return false;
         NodeInfo other = (NodeInfo) obj;
         if (address == null) {
-            if (other.address != null) return false;
-        } else if (!address.equals(other.address)) return false;
-        return true;
+            return other.address == null;
+        } else {
+            return address.equals(other.address);
+        }
     }
 
     /**
@@ -127,7 +124,7 @@ public class NodeInfo {
      */
     @Override
     public String toString() {
-        return "NodeInfo [" + protocol + "//" + address + "#" + weight + "]";
+        return protocol + ":/" + address + "#" + weight;
     }
 
 }

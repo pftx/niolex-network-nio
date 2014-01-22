@@ -1,6 +1,6 @@
 /**
- * RpcServiceFactory.java
- * 
+ * RpcClientFactory.java
+ *
  * Copyright 2012 Niolex, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,6 +23,7 @@ import java.util.List;
 import org.apache.commons.lang.StringUtils;
 import org.apache.niolex.address.client.Consumer;
 import org.apache.niolex.address.rpc.RpcInterface;
+import org.apache.niolex.address.rpc.cli.pool.SimplePool;
 import org.apache.niolex.address.rpc.svr.RpcExpose;
 import org.apache.niolex.commons.bean.MutableOne;
 import org.slf4j.Logger;
@@ -30,16 +31,20 @@ import org.slf4j.LoggerFactory;
 
 
 /**
- * This class Wrap the ZK client detail and build ClientPool for Application user.
- * 
+ * This class Wrap the ZK client detail and build Rpc client stub for Application user.
+ * <br>
+ * There are two implementations here.
+ * 1. The pool implementation: We use the pool handler as the internal structure.
+ * 2. The stub implementation: We use the retry handler as the internal structure.
+ *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.5, $Date: 2012-11-30$
  */
-public class ClientPoolFactory {
-    private static final Logger LOG = LoggerFactory.getLogger(ClientPoolFactory.class);
-    
+public class RpcClientFactory {
+    private static final Logger LOG = LoggerFactory.getLogger(RpcClientFactory.class);
+
     private Consumer zkConsumer;
-    
+
     // ------------------------------------------------
     // ZK parameters
     private String zkClusterAddress;
@@ -48,11 +53,11 @@ public class ClientPoolFactory {
     private String zkUserName;
     private String zkPassword;
     // ------------------------------------------------
-    
+
     /**
-     * Construct a RpcServiceFactory with all the ZK parameters from system properties
+     * Construct a RpcClientFactory with all the ZK parameters from system properties
      */
-    public ClientPoolFactory() {
+    public RpcClientFactory() {
         super();
         // Init ZK parameters
         zkClusterAddress = System.getProperty("zk.cluster.address");
@@ -68,21 +73,21 @@ public class ClientPoolFactory {
     }
 
     /**
-     * Construct a RpcServiceFactory with the specified user name and password, all the
+     * Construct a RpcClientFactory with the specified user name and password, all the
      * other ZK parameters from system properties
-     * 
-     * @param zkUserName
-     * @param zkPassword
+     *
+     * @param zkUserName the ZK user name
+     * @param zkPassword the ZK password
      */
-    public ClientPoolFactory(String zkUserName, String zkPassword) {
+    public RpcClientFactory(String zkUserName, String zkPassword) {
         this();
         this.zkUserName = zkUserName;
         this.zkPassword = zkPassword;
     }
-    
+
     /**
      * Connect to ZK, so we can get service addresses from it.
-     * 
+     *
      * @return true if connected, false otherwise.
      */
     public boolean connectToZK() {
@@ -96,9 +101,9 @@ public class ClientPoolFactory {
         }
         return false;
     }
-    
+
     /**
-     * Disconnect from ZK, so we can stop this client pool factory.
+     * Disconnect from ZK, so we can stop this client stub factory.
      */
     public void disconnectFromZK() {
         if (zkConsumer != null) {
@@ -106,10 +111,10 @@ public class ClientPoolFactory {
             zkConsumer = null;
         }
     }
-    
+
     /**
      * Get the client pool for this service.
-     * 
+     *
      * @param interfaze the service interface.
      * @param serviceName the service name.
      * @param state the state of the service you want to have.
@@ -117,24 +122,24 @@ public class ClientPoolFactory {
      * @param poolSize the client pool size.
      * @return the client pool.
      */
-    public <T> BasePool<T> getPool(Class<T> interfaze, String serviceName, String state,
+    public <T> BaseStub<T> getPool(Class<T> interfaze, String serviceName, String state,
             String version, int poolSize) {
         MutableOne<List<String>> mutableOne = zkConsumer.getAddressList(serviceName, version, state);
-        BasePool<T> pool = new SimplePool<T>(poolSize, interfaze, mutableOne);
+        BaseStub<T> pool = new SimplePool<T>(poolSize, interfaze, mutableOne);
         // The pool is ready for use.
         return pool;
     }
-    
+
     /**
      * Get the client pool for this service.
-     * 
+     *
      * @param interfaze the service interface.
      * @param state the state of the service you want to have.
      * @param version the service version.
      * @param poolSize the client pool size.
      * @return the client pool.
      */
-    public <T> BasePool<T> getPool(Class<T> interfaze, String state, String version, int poolSize) {
+    public <T> BaseStub<T> getPool(Class<T> interfaze, String state, String version, int poolSize) {
         RpcInterface inter = interfaze.getAnnotation(RpcInterface.class);
         String serviceName = inter.serviceName();
         if (StringUtils.isBlank(serviceName)) {
@@ -142,42 +147,42 @@ public class ClientPoolFactory {
         }
         return getPool(interfaze, serviceName, state, version, poolSize);
     }
-    
+
     /**
      * Get the client pool for this service.
-     * 
+     *
      * @param interfaze the service interface.
      * @param state the state of the service you want to have.
      * @param poolSize the client pool size.
      * @return the client pool.
      */
-    public <T> BasePool<T> getPool(Class<T> interfaze, String state, int poolSize) {
+    public <T> BaseStub<T> getPool(Class<T> interfaze, String state, int poolSize) {
         RpcInterface inter = interfaze.getAnnotation(RpcInterface.class);
         return getPool(interfaze, state, "" + inter.version(), poolSize);
     }
-    
+
     /**
      * Get the client pool for this service.
-     * 
+     *
      * @param interfaze the service interface.
      * @param poolSize the client pool size.
      * @return the client pool.
      */
-    public <T> BasePool<T> getPool(Class<T> interfaze, int poolSize) {
+    public <T> BaseStub<T> getPool(Class<T> interfaze, int poolSize) {
         RpcInterface inter = interfaze.getAnnotation(RpcInterface.class);
         return getPool(interfaze, RpcExpose.DFT_STATE, "" + inter.version(), poolSize);
     }
-    
+
     /**
      * Get the client pool for this service.
-     * 
+     *
      * @param interfaze the service interface.
      * @return the client pool.
      */
-    public <T> BasePool<T> getPool(Class<T> interfaze) {
+    public <T> BaseStub<T> getPool(Class<T> interfaze) {
         return getPool(interfaze, 0);
     }
-    
+
     //-------------------------------------------------------------------------
     // GETTERS & SETTERS
     //-------------------------------------------------------------------------
@@ -251,5 +256,5 @@ public class ClientPoolFactory {
     public void setZkPassword(String zkPassword) {
         this.zkPassword = zkPassword;
     }
-    
+
 }

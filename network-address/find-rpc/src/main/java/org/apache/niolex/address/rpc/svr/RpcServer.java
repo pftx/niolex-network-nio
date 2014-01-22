@@ -1,6 +1,6 @@
 /**
  * RpcServer.java
- * 
+ *
  * Copyright 2012 Niolex, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,6 +23,7 @@ import java.util.List;
 import org.apache.niolex.address.rpc.ConverterCenter;
 import org.apache.niolex.address.rpc.RpcInterface;
 import org.apache.niolex.address.server.Producer;
+import org.apache.niolex.address.util.VersionUtil;
 import org.apache.niolex.network.rpc.ConfigItem;
 import org.apache.niolex.network.rpc.IConverter;
 import org.apache.niolex.network.rpc.RpcPacketHandler;
@@ -34,19 +35,19 @@ import org.slf4j.LoggerFactory;
 /**
  * The RpcServer will proxy a MultiNioServer inside, and deal with server side
  * object publish job.
- * 
+ *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.5, $Date: 2012-11-30$
  */
 public class RpcServer {
     protected static final Logger LOG = LoggerFactory.getLogger(RpcServer.class);
-    
+
     private MultiNioServer svr = new MultiNioServer();
     private RpcPacketHandler handler;
     private Producer zkProducer;
     private int handlerThreadsNumber;
     private List<RpcExpose> exposeList;
-    
+
     // ------------------------------------------------
     // ZK parameters
     private String zkClusterAddress;
@@ -114,7 +115,7 @@ public class RpcServer {
             }
             ee.serviceType = serviceType;
             if (ee.version == 0) {
-                ee.version = inter.version();
+                ee.version = VersionUtil.encodeVersion(inter.version());
             }
             if (ee.state == null || ee.state.isEmpty()) {
                 ee.state = RpcExpose.DFT_STATE;
@@ -158,7 +159,7 @@ public class RpcServer {
 
     /**
      * Stop this RpcServer, including the internal connection to ZK.
-     * 
+     *
      * @see org.apache.niolex.network.server.MultiNioServer#stop()
      */
     public void stop() {
@@ -168,7 +169,7 @@ public class RpcServer {
         }
         svr.stop();
     }
-    
+
     /**
      * @return current handler queue size
      * @see org.apache.niolex.network.rpc.RpcPacketHandler#getQueueSize()
@@ -282,7 +283,7 @@ public class RpcServer {
     public int getAcceptTimeOut() {
         return svr.getAcceptTimeOut();
     }
-    
+
     /**
      * @param acceptTimeOut
      * @see org.apache.niolex.network.server.NioServer#setAcceptTimeOut(int)
@@ -298,7 +299,7 @@ public class RpcServer {
     public int getPort() {
         return svr.getPort();
     }
-    
+
     /**
      * @param port
      * @see org.apache.niolex.network.server.NioServer#setPort(int)
@@ -322,5 +323,5 @@ public class RpcServer {
     public void setSelectorThreadsNumber(int threadsNumber) {
         svr.setThreadsNumber(threadsNumber);
     }
-    
+
 }
