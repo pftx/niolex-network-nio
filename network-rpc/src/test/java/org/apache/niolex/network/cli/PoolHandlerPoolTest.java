@@ -43,7 +43,7 @@ public class PoolHandlerPoolTest {
             when(m.getServiceUrl()).thenReturn(Integer.toString(i));
             list.add(m);
         }
-        pool = new PoolHandler<IServiceHandler>(2, list);
+        pool = new PoolHandler<IServiceHandler>(list, 2);
     }
 
     /**

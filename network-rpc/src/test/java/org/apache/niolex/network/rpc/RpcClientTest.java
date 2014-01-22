@@ -116,15 +116,25 @@ public class RpcClientTest {
 	}
 
 	@Test
-	public void testInvokeException() throws Throwable {
+	public void testIsException() throws Throwable {
 	    PacketClient pc = mock(PacketClient.class);
         PacketInvoker in = mock(PacketInvoker.class);
         RpcClient rr = new RpcClient(pc, in, new JsonConverter());
+
+        rr.connect(); // 1
+        assertTrue(rr.isValid());
+        rr.connect(); // 2
+        assertTrue(rr.isValid());
 
         Method m = MethodUtil.getFirstMethod(rr, "isException");
         m.setAccessible(true);
         assertTrue((Boolean)m.invoke(rr, 1));
         assertTrue((Boolean)m.invoke(rr, -255));
+
+        rr.stop(); // -- stopped
+        assertFalse(rr.isValid());
+        rr.stop(); // -- this time will be skipped
+        assertFalse(rr.isValid());
 	}
 
 	@Test
@@ -160,6 +170,11 @@ public class RpcClientTest {
         RpcClient rr = new RpcClient(pc, in, new JsonConverter());
         assertNull(rr.prepareReturn(null, null, false));
         assertNull(rr.prepareReturn(null, void.class, false));
+    }
+
+    @Test
+    public void testAddInferface() throws Exception {
+        System.out.println("not yet implemented");
     }
 
 }

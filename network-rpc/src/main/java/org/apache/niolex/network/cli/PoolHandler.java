@@ -60,14 +60,14 @@ public class PoolHandler<Service extends IServiceHandler> extends BaseHandler im
     /**
      * Create a PoolHandler with the specified parameters.
      *
-     * @param retryTimes the number of times to retry when some kind of error occurred
      * @param col the collections of {@link IServiceHandler}
+     * @param retryTimes the number of times to retry when some kind of error occurred
      */
-    public PoolHandler(int retryTimes, Collection<Service> col) {
+    public PoolHandler(Collection<Service> col, int retryTimes) {
         super();
-        this.retryTimes = retryTimes;
         handlerNum = col.size();
         readyQueue.addAll(col);
+        this.retryTimes = retryTimes;
         this.logDebug = LOG.isDebugEnabled();
     }
 

@@ -101,7 +101,7 @@ public class PoolHandlerTest {
     public void testPoolHandler() throws Throwable {
         col.remove(23);
         col.remove(45);
-        PoolHandler<IServiceHandler> pool = new PoolHandler<IServiceHandler>(3, col);
+        PoolHandler<IServiceHandler> pool = new PoolHandler<IServiceHandler>(col, 3);
         pool.offer(mock(IServiceHandler.class));
         for (int i = 0; i < 500; ++i) {
             pool.logDebug = i % 2 == 0;
@@ -115,7 +115,7 @@ public class PoolHandlerTest {
      */
     @Test(expected=RpcException.class)
     public void testInvokeRpcE() throws Throwable {
-        PoolHandler<IServiceHandler> pool = new PoolHandler<IServiceHandler>(3, col);
+        PoolHandler<IServiceHandler> pool = new PoolHandler<IServiceHandler>(col, 3);
         try {
             for (int i = 0; i < 200; ++i) {
                 pool.invoke(pool, method, new Object[0]);
@@ -133,7 +133,7 @@ public class PoolHandlerTest {
     @Test(expected=ItemNotFoundException.class)
     public void testInvokeINFE() throws Throwable {
         col.remove(23);
-        PoolHandler<IServiceHandler> pool = new PoolHandler<IServiceHandler>(3, col);
+        PoolHandler<IServiceHandler> pool = new PoolHandler<IServiceHandler>(col, 3);
         for (int i = 0; i < 200; ++i) {
             pool.invoke(pool, method, new Object[0]);
         }
@@ -146,7 +146,7 @@ public class PoolHandlerTest {
     @Test(expected=RpcException.class)
     public void testNoReady() throws Throwable {
         col.clear();
-        PoolHandler<IServiceHandler> pool = new PoolHandler<IServiceHandler>(2, col);
+        PoolHandler<IServiceHandler> pool = new PoolHandler<IServiceHandler>(col, 2);
         pool.setWaitTimeout(2);
         try {
             pool.invoke(pool, method, new Object[0]);
@@ -163,7 +163,7 @@ public class PoolHandlerTest {
     @Test(expected=RpcException.class)
     public void testInvokeNoItem() throws Throwable {
         col.clear();
-        PoolHandler<IServiceHandler> pool = new PoolHandler<IServiceHandler>(2, col);
+        PoolHandler<IServiceHandler> pool = new PoolHandler<IServiceHandler>(col, 2);
         pool.setWaitTimeout(2);
         IServiceHandler hand = (IServiceHandler) Proxy.newProxyInstance(IServiceHandler.class.getClassLoader(),
                 new Class[] {IServiceHandler.class}, pool);
@@ -176,7 +176,7 @@ public class PoolHandlerTest {
      */
     @Test(expected=RpcException.class)
     public void testExceedsRetry() throws Throwable {
-        PoolHandler<IServiceHandler> pool = new PoolHandler<IServiceHandler>(2, col);
+        PoolHandler<IServiceHandler> pool = new PoolHandler<IServiceHandler>(col, 2);
         try {
             for (int i = 0; i < 200; ++i) {
                 pool.invoke(pool, method, new Object[0]);
@@ -197,7 +197,7 @@ public class PoolHandlerTest {
         col.add(mock(IServiceHandler.class));
         col.add(mock(IServiceHandler.class));
         col.add(mock(IServiceHandler.class));
-        PoolHandler<IServiceHandler> pool = new PoolHandler<IServiceHandler>(2, col);
+        PoolHandler<IServiceHandler> pool = new PoolHandler<IServiceHandler>(col, 2);
         assertNull(pool.take());
     }
 
@@ -207,7 +207,7 @@ public class PoolHandlerTest {
     @Test
     public void testTakeNull() {
         col.clear();
-        PoolHandler<IServiceHandler> pool = new PoolHandler<IServiceHandler>(2, col);
+        PoolHandler<IServiceHandler> pool = new PoolHandler<IServiceHandler>(col, 2);
         pool.setWaitTimeout(2);
         assertNull(pool.take());
     }
@@ -222,7 +222,7 @@ public class PoolHandlerTest {
         col.add(mock(IServiceHandler.class));
         col.add(mock(IServiceHandler.class));
         col.add(mock(IServiceHandler.class));
-        PoolHandler<IServiceHandler> pool = new PoolHandler<IServiceHandler>(2, col);
+        PoolHandler<IServiceHandler> pool = new PoolHandler<IServiceHandler>(col, 2);
         assertNotNull(pool.takeOne(0));
     }
 
@@ -232,7 +232,7 @@ public class PoolHandlerTest {
     @Test
     public void testTakeOneNull() {
         col.clear();
-        PoolHandler<IServiceHandler> pool = new PoolHandler<IServiceHandler>(2, col);
+        PoolHandler<IServiceHandler> pool = new PoolHandler<IServiceHandler>(col, 2);
         assertNull(pool.takeOne(2));
     }
 
@@ -242,7 +242,7 @@ public class PoolHandlerTest {
     @Test
     public void testTakeOneE() {
         col.clear();
-        PoolHandler<IServiceHandler> pool = new PoolHandler<IServiceHandler>(2, col);
+        PoolHandler<IServiceHandler> pool = new PoolHandler<IServiceHandler>(col, 2);
         Thread t = Runner.run(pool, "takeOne", 1000);
         SystemUtil.sleep(2);
         t.interrupt();
@@ -253,7 +253,7 @@ public class PoolHandlerTest {
      */
     @Test
     public void testGetWaitTimeout() {
-        PoolHandler<IServiceHandler> pool = new PoolHandler<IServiceHandler>(2, col);
+        PoolHandler<IServiceHandler> pool = new PoolHandler<IServiceHandler>(col, 2);
         pool.setWaitTimeout(2345);
         assertEquals(2345, pool.getWaitTimeout());
     }
@@ -263,7 +263,7 @@ public class PoolHandlerTest {
      */
     @Test
     public void testGetRetryTimes() {
-        PoolHandler<IServiceHandler> pool = new PoolHandler<IServiceHandler>(54, col);
+        PoolHandler<IServiceHandler> pool = new PoolHandler<IServiceHandler>(col, 54);
         assertEquals(54, pool.getRetryTimes());
     }
 

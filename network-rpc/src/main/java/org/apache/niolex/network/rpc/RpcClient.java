@@ -111,20 +111,32 @@ public class RpcClient implements IPacketHandler, InvocationHandler {
 
 	/**
 	 * Connect the backed communication client, and set the internal status.
-	 * @throws IOException
+	 *
+	 * @throws IOException if necessary
 	 */
 	public void connect() throws IOException {
-		this.client.connect();
-		this.connStatus = ConnStatus.CONNECTED;
+	    if (connStatus != ConnStatus.CONNECTED) {
+	        client.connect();
+	        connStatus = ConnStatus.CONNECTED;
+	    }
 	}
 
 	/**
 	 * Stop this client, and stop the backed communication client.
 	 */
 	public void stop() {
-		this.connStatus = ConnStatus.CLOSED;
-		this.client.stop();
-		this.invoker.handleClose(this.client);
+	    if (connStatus != ConnStatus.CLOSED) {
+	        closeClient();
+	    }
+	}
+
+	/**
+	 * Close the backed client, and invoke the handle close method on the invoker.
+	 */
+	protected void closeClient() {
+	    connStatus = ConnStatus.CLOSED;
+	    client.stop();
+	    invoker.handleClose(client);
 	}
 
 	/**
@@ -135,7 +147,7 @@ public class RpcClient implements IPacketHandler, InvocationHandler {
 	 */
 	@SuppressWarnings("unchecked")
     public <T> T getService(Class<T> c) {
-		this.addInferface(c);
+		addInferface(c);
 		return (T) Proxy.newProxyInstance(RpcClient.class.getClassLoader(),
                 new Class[] {c}, this);
 	}
@@ -235,10 +247,7 @@ public class RpcClient implements IPacketHandler, InvocationHandler {
 		for (Method m : arr) {
 			if (m.isAnnotationPresent(RpcMethod.class)) {
 				RpcMethod rp = m.getAnnotation(RpcMethod.class);
-				Short rei = executeMap.put(m, rp.value());
-				if (rei != null) {
-					LOG.warn("Duplicate configuration for code: {}", rp.value());
-				}
+				executeMap.put(m, rp.value());
 			}
 		}
 	}
@@ -280,16 +289,14 @@ public class RpcClient implements IPacketHandler, InvocationHandler {
 	 */
 	@Override
 	public void handleClose(IPacketWriter wt) {
-		if (this.connStatus == ConnStatus.CLOSED) {
+		if (connStatus == ConnStatus.CLOSED) {
 			return;
 		}
 		this.connStatus = ConnStatus.CONNECTING;
 		if (!retryConnect()) {
 			LOG.error("We can not re-connect to server after retry times, RpcClient with stop.");
 			// Try to shutdown this Client, inform all the threads.
-			this.connStatus = ConnStatus.CLOSED;
-			this.client.stop();
-			this.invoker.handleClose(wt);
+			closeClient();
 		}
 	}
 
