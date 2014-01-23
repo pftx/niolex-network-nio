@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.apache.niolex.address.rpc.cli.NodeInfo;
 import org.apache.niolex.network.cli.PoolHandler;
 import org.apache.niolex.network.cli.RpcClientHandler;
 import org.apache.niolex.network.rpc.RpcClient;
@@ -33,7 +32,7 @@ import org.apache.niolex.network.rpc.RpcClient;
  * In order to manage clients that can be used in multiple threads, we add clients
  * multiple times into the ready queue.
  *
- * We also remove those clients marked as deleted from the ready queue.
+ * We also remove those clients marked as deleted from the ready queue when appropriate.
  *
  * @author <a href="mailto:xiejiyun@foxmail.com">Xie, Jiyun</a>
  * @version 1.0.0
@@ -41,8 +40,19 @@ import org.apache.niolex.network.rpc.RpcClient;
  */
 public class MultiplexPoolHandler extends PoolHandler<RpcClientHandler> {
 
+    /**
+     * Translate the list of rpc clients into list of rpc client handlers.
+     *
+     * @param col the list of rpc clients
+     * @param url the corresponding URL
+     * @return the translated rpc client handlers list
+     */
     public static final List<RpcClientHandler> translate(Collection<RpcClient> col, String url) {
-        return null;
+        List<RpcClientHandler> list = new ArrayList<RpcClientHandler>();
+        for (RpcClient cli : col) {
+            list.add(new RpcClientHandler(url, cli));
+        }
+        return list;
     }
 
     /**
@@ -141,19 +151,32 @@ public class MultiplexPoolHandler extends PoolHandler<RpcClientHandler> {
     }
 
     /**
-     * @param cliList
+     * Add these new rpc client handlers into the ready queue.
+     *
+     * @param cliList the new rpc client handler list
      */
-    public void addNew(List<RpcClientHandler> cliList) {
-        // TODO Auto-generated method stub
-
+    public synchronized void addNew(List<RpcClientHandler> cliList) {
+        // First, add all of them into the backup list.
+        backupHandlers.addAll(cliList);
+        // Then, add them into the working queue.
+        for (RpcClientHandler h : cliList) {
+            super.offer(h);
+            for (int i = 1; i < currentMultiplex; ++i) {
+                super.offer(new RpcClientHandler(h.getServiceUrl(), h.getHandler()));
+            }
+        }
     }
 
     /**
-     *
+     * Destroy this pool, disconnect all the clients.
      */
-    public void destroy() {
-        // TODO Auto-generated method stub
-
+    public synchronized void destroy() {
+        // Disable #addMultiplex
+        currentMultiplex = maxMultiplex;
+        for (RpcClientHandler h : backupHandlers) {
+            RpcClient client = h.getHandler();
+            client.setConnectRetryTimes(0);
+        }
     }
 
 }

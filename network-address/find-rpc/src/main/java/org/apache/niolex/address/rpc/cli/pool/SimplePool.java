@@ -112,7 +112,7 @@ public class SimplePool<T> extends BaseStub<T> {
     /**
      * Build all the clients for this server address.
      *
-     * @param info the node info
+     * @param info the node info which contains server address
      */
     protected void buildClients(NodeInfo info) {
         // omitting decimal fractions smaller than 0.5 and counting all others, including 0.5, as 1
@@ -150,7 +150,7 @@ public class SimplePool<T> extends BaseStub<T> {
      */
     @SuppressWarnings("unchecked")
     @Override
-    public synchronized BaseStub<T> build() {
+    public synchronized SimplePool<T> build() {
         // Check duplicate call.
         if (isWorking) {
             return this;
@@ -174,7 +174,6 @@ public class SimplePool<T> extends BaseStub<T> {
         // Rpc client is ready, let's create the pool handler.
         Collections.shuffle(cliList);
         poolHandler = new MultiplexPoolHandler(cliList, rpcErrorRetryTimes, 10);
-        poolHandler.setWaitTimeout(rpcTimeout);
         // Pool creation done.
         stub = (T) Proxy.newProxyInstance(SimplePool.class.getClassLoader(),
                 new Class[] {interfaze}, poolHandler);

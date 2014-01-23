@@ -55,7 +55,7 @@ public class PoolHandler<Service extends IServiceHandler> extends BaseHandler im
     private final LinkedBlockingQueue<Service> readyQueue = new LinkedBlockingQueue<Service>();
     private final int retryTimes;
     private final int handlerNum;
-    private int waitTimeout = Constants.CLIENT_CONNECT_TIMEOUT;
+    private int waitTimeout = Constants.CLIENT_RPC_INTERVAL_BT_RETRY;
 
     /**
      * Create a PoolHandler with the specified parameters.

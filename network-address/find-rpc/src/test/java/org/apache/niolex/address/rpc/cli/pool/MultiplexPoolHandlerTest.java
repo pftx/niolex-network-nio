@@ -21,12 +21,18 @@ package org.apache.niolex.address.rpc.cli.pool;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import org.apache.niolex.commons.reflect.FieldUtil;
+import org.apache.niolex.network.IClient;
 import org.apache.niolex.network.cli.RpcClientHandler;
 import org.apache.niolex.network.rpc.RpcClient;
+import org.apache.niolex.network.rpc.SingleInvoker;
+import org.apache.niolex.network.rpc.conv.JsonConverter;
 import org.junit.Test;
 
 /**
@@ -38,10 +44,7 @@ public class MultiplexPoolHandlerTest {
 
     @Test
     public void testMultiplexPoolHandler() throws Exception {
-        RpcClient cli = mock(RpcClient.class);
-        when(cli.getConnectRetryTimes()).thenReturn(3);
-        when(cli.isValid()).thenReturn(true);
-        RpcClientHandler handler = new RpcClientHandler("test", cli);
+        RpcClientHandler handler = makeHandler();
         MultiplexPoolHandler han = new MultiplexPoolHandler(Collections.singleton(handler), 2, 2);
         han.setWaitTimeout(1);
         assertEquals(handler, han.take());
@@ -51,10 +54,7 @@ public class MultiplexPoolHandlerTest {
 
     @Test
     public void testTake() throws Exception {
-        RpcClient cli = mock(RpcClient.class);
-        when(cli.getConnectRetryTimes()).thenReturn(3);
-        when(cli.isValid()).thenReturn(true);
-        RpcClientHandler handler = new RpcClientHandler("test", cli);
+        RpcClientHandler handler = makeHandler();
         MultiplexPoolHandler han = new MultiplexPoolHandler(Collections.singleton(handler), 2, 1);
         han.setWaitTimeout(1);
         assertEquals(handler, han.take());
@@ -123,6 +123,95 @@ public class MultiplexPoolHandlerTest {
         MultiplexPoolHandler han = new MultiplexPoolHandler(Collections.singleton(handler1), 2, 2);
         assertTrue(han.isClosed(cli2));
         assertFalse(han.isClosed(cli1));
+    }
+
+    @Test
+    public void testTranslate() throws Exception {
+        RpcClient cli1 = mock(RpcClient.class);
+        List<RpcClientHandler> list = MultiplexPoolHandler.translate(Collections.singleton(cli1), "http://go");
+        assertEquals(1, list.size());
+        assertEquals(cli1, list.get(0).getHandler());
+    }
+
+    public void travelPool(MultiplexPoolHandler han) {
+        RpcClientHandler handler = han.take();
+        if (handler == null) return;
+        han.offer(handler);
+        for (int i = 0; i < 100; ++i) {
+            RpcClientHandler h = han.take();
+            if (h == null) return;
+            han.offer(h);
+            if (h == handler) {
+                break;
+            }
+        }
+    }
+
+    public RpcClientHandler makeHandler() {
+        RpcClient cli = mock(RpcClient.class);
+        when(cli.getConnectRetryTimes()).thenReturn(3);
+        when(cli.isValid()).thenReturn(true);
+        return new RpcClientHandler("test", cli);
+    }
+
+    @Test
+    public void testAddNew() throws Exception {
+        RpcClientHandler handler = makeHandler();
+        MultiplexPoolHandler han = new MultiplexPoolHandler(Collections.singleton(handler), 2, 3);
+        han.setWaitTimeout(1);
+        travelPool(han);
+        ArrayList<RpcClientHandler> list = new ArrayList<RpcClientHandler>();
+        list.add(makeHandler());
+        list.add(makeHandler());
+        list.add(makeHandler());
+        han.addNew(list);
+        travelPool(han);
+        ArrayList<RpcClientHandler> backupHandlers = FieldUtil.getValue(han, "backupHandlers");
+        assertEquals(4, backupHandlers.size());
+        LinkedBlockingQueue<RpcClientHandler> readyQueue = FieldUtil.getValue(han, "readyQueue");
+        assertEquals(4, readyQueue.size());
+        RpcClientHandler h1 = han.take();
+        RpcClientHandler h2 = han.take();
+        RpcClientHandler h3 = han.take();
+        RpcClientHandler h4 = han.take();
+        travelPool(han);
+        han.offer(h1);
+        han.offer(h2);
+        han.offer(h3);
+        han.offer(h4);
+        travelPool(han);
+        ArrayList<RpcClientHandler> list2 = new ArrayList<RpcClientHandler>();
+        list2.add(makeHandler());
+        han.addNew(list2);
+        assertEquals(5, backupHandlers.size());
+        assertEquals(10, readyQueue.size());
+        han.destroy();
+    }
+
+    public RpcClientHandler makeHandler2() throws IOException {
+        RpcClient cli = new RpcClient(mock(IClient.class), new SingleInvoker(), new JsonConverter());
+        cli.connect();
+        cli.setConnectRetryTimes(5);
+        return new RpcClientHandler("test", cli);
+    }
+
+    @Test
+    public void testDestroy() throws Exception {
+        ArrayList<RpcClientHandler> list = new ArrayList<RpcClientHandler>();
+        list.add(makeHandler2());
+        list.add(makeHandler2());
+        list.add(makeHandler2());
+        MultiplexPoolHandler han = new MultiplexPoolHandler(list, 2, 3);
+        han.setWaitTimeout(1);
+        LinkedBlockingQueue<RpcClientHandler> readyQueue = FieldUtil.getValue(han, "readyQueue");
+        ArrayList<RpcClientHandler> backupHandlers = FieldUtil.getValue(han, "backupHandlers");
+        travelPool(han);
+        han.destroy();
+        travelPool(han);
+        assertNull(han.take());
+        assertNull(han.take());
+        assertEquals(3, backupHandlers.size());
+        assertEquals(0, readyQueue.size());
     }
 
 }
