@@ -94,6 +94,9 @@ public abstract class BaseStub<T> implements MutableOne.DataChangeListener<List<
      */
     @Override
     public void onDataChange(List<String> oldList, List<String> nodeList) {
+        if (nodeList == null) {
+            return;
+        }
         HashSet<NodeInfo> infoSet = new HashSet<NodeInfo>();
         HashSet<NodeInfo> delSet = new HashSet<NodeInfo>();
         HashSet<NodeInfo> addSet = new HashSet<NodeInfo>();

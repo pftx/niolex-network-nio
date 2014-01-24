@@ -49,7 +49,6 @@ public class BaseStubTest {
      */
     @Before
     public void setUp() throws Exception {
-        mutableOne.updateData(new ArrayList<String>());
         stub = new BaseMock(RpcService.class, mutableOne);
     }
 
