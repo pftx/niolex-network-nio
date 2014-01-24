@@ -18,6 +18,11 @@
 package org.apache.niolex.address.rpc.cli.pool;
 
 
+import org.apache.niolex.network.demo.json.RpcService;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
@@ -26,6 +31,36 @@ import org.junit.Test;
  * @since 2014-1-23
  */
 public class SimplePoolTest {
+
+    private SimplePool<RpcService> pool;
+
+    /**
+     * @throws java.lang.Exception
+     */
+    @BeforeClass
+    public static void setUpBeforeClass() throws Exception {
+    }
+
+    /**
+     * @throws java.lang.Exception
+     */
+    @AfterClass
+    public static void tearDownAfterClass() throws Exception {
+    }
+
+    /**
+     * @throws java.lang.Exception
+     */
+    @Before
+    public void setUp() throws Exception {
+    }
+
+    /**
+     * @throws java.lang.Exception
+     */
+    @After
+    public void tearDown() throws Exception {
+    }
 
     @Test
     public void testMarkDeleted() throws Exception {

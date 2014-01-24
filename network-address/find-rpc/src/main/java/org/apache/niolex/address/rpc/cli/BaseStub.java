@@ -17,13 +17,13 @@
  */
 package org.apache.niolex.address.rpc.cli;
 
-import java.net.InetSocketAddress;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import org.apache.niolex.commons.bean.MutableOne;
 import org.apache.niolex.commons.codec.StringUtil;
+import org.apache.niolex.commons.net.NetUtil;
 import org.apache.niolex.network.cli.Constants;
 import org.apache.niolex.network.rpc.RpcClient;
 import org.slf4j.Logger;
@@ -99,18 +99,9 @@ public abstract class BaseStub<T> implements MutableOne.DataChangeListener<List<
         HashSet<NodeInfo> addSet = new HashSet<NodeInfo>();
         // Parse config information.
         for (String node : nodeList) {
-            NodeInfo info = new NodeInfo();
-            // Address format:
-            //          Protocol:IP:Port:Weight
-            String[] pr = StringUtil.split(node, ":", true);
-            if (pr.length < 4) {
-                LOG.info("Invalid address format: {}.", node);
-                continue;
-            }
-            info.setProtocol(pr[0].replace('^', '/'));
-            info.setAddress(new InetSocketAddress(pr[1], Integer.parseInt(pr[2])));
-            info.setWeight(Integer.parseInt(pr[3]));
-            infoSet.add(info);
+            NodeInfo info = makeNodeInfo(node);
+            if (info != null)
+                infoSet.add(info);
         }
         // Check deleted items.
         for (NodeInfo info : readySet) {
@@ -137,28 +128,30 @@ public abstract class BaseStub<T> implements MutableOne.DataChangeListener<List<
     }
 
     /**
-     * Mark the deleted node as not retry, and move it from ready set into delete set.
+     * Make a new node info bean from the string representation.
      *
-     * @param delSet the node info list waiting to be deleted
+     * @param node the node string
+     * @return the node info bean
      */
-    protected abstract void markDeleted(HashSet<NodeInfo> delSet);
-
-    /**
-     * Add new server addresses to this pool, subclass need to connect to these new servers.
-     *
-     * @param addSet the node info list waiting to be added
-     */
-    protected abstract void markNew(HashSet<NodeInfo> addSet);
-
-    /**
-     * Build this client stub for use. This method can only be called once.
-     */
-    public abstract BaseStub<T> build();
-
-    /**
-     * Destroy this pool, disconnect all the connections.
-     */
-    public abstract void destroy();
+    public NodeInfo makeNodeInfo(String node) {
+        try {
+            NodeInfo info = new NodeInfo();
+            // Address format:
+            //          Protocol:IP:Port:Weight
+            String[] pr = StringUtil.split(node, ":", true);
+            if (pr.length < 4) {
+                LOG.warn("Invalid server address format: {}.", node);
+                return null;
+            }
+            info.setProtocol(pr[0].replace('^', '/'));
+            info.setAddress(NetUtil.ipPort2InetSocketAddress(pr[1] + ":" + pr[2]));
+            info.setWeight(Integer.parseInt(pr[3]));
+            return info;
+        } catch (Exception e) {
+            LOG.warn("Invalid server address format: {}, msg: {}", node, e.toString());
+            return null;
+        }
+    }
 
     /**
      * Get the Rpc Service Client Side Stub powered by this rpc client pool.
@@ -181,6 +174,34 @@ public abstract class BaseStub<T> implements MutableOne.DataChangeListener<List<
     protected Set<RpcClient> clientSet(NodeInfo info) {
         return info.clientSet;
     }
+
+    //-------------------------------------------------------------------------
+    // ABSTRACT METHODS
+    //-------------------------------------------------------------------------
+
+    /**
+     * Mark the deleted node as not retry, and move it from ready set into delete set.
+     *
+     * @param delSet the node info list waiting to be deleted
+     */
+    protected abstract void markDeleted(HashSet<NodeInfo> delSet);
+
+    /**
+     * Add new server addresses to this pool, subclass need to connect to these new servers.
+     *
+     * @param addSet the node info list waiting to be added
+     */
+    protected abstract void markNew(HashSet<NodeInfo> addSet);
+
+    /**
+     * Build this client stub for use. This method can only be called once.
+     */
+    public abstract BaseStub<T> build();
+
+    /**
+     * Destroy this pool, disconnect all the connections.
+     */
+    public abstract void destroy();
 
 
     //-------------------------------------------------------------------------
@@ -256,4 +277,5 @@ public abstract class BaseStub<T> implements MutableOne.DataChangeListener<List<
     public void setRpcErrorRetryTimes(int rpcErrorRetryTimes) {
         this.rpcErrorRetryTimes = rpcErrorRetryTimes;
     }
+
 }
