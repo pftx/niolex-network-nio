@@ -1,6 +1,6 @@
 /**
  * DemoService.java
- * 
+ *
  * Copyright 2013 Niolex, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,6 +21,7 @@ import org.apache.niolex.address.rpc.RpcInterface;
 import org.apache.niolex.network.rpc.anno.RpcMethod;
 
 /**
+ * Demo for test. Interface.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.5
@@ -28,13 +29,13 @@ import org.apache.niolex.network.rpc.anno.RpcMethod;
  */
 @RpcInterface
 public interface DemoService {
-    
+
     @RpcMethod(1)
     public int calc(int ...arr);
-    
+
     @RpcMethod(2)
     public String getTime();
-    
+
     @RpcMethod(3)
     public void tick(int tk);
 }

@@ -1,6 +1,6 @@
 /**
  * DemoServiceImpl.java
- * 
+ *
  * Copyright 2013 Niolex, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,21 +17,22 @@
  */
 package org.apache.niolex.address.rpc.svr;
 
-import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 import org.apache.niolex.address.rpc.DemoService;
+import org.apache.niolex.commons.net.NetUtil;
 import org.apache.niolex.commons.util.DateTimeUtil;
 
 
 /**
+ * Demo for test. Implementation.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.5
  * @since 2013-1-7
  */
 public class DemoServiceImpl implements DemoService {
-    
+
     private int tick;
 
     /**
@@ -57,7 +58,7 @@ public class DemoServiceImpl implements DemoService {
     @Override
     public String getTime() {
         try {
-            return InetAddress.getLocalHost().getHostAddress() + ":" + DateTimeUtil.formatDate2DateTimeStr();
+            return NetUtil.getLocalIP() + ":" + DateTimeUtil.formatDate2DateTimeStr();
         } catch (UnknownHostException e) {
             return "N/A:" + DateTimeUtil.formatDate2DateTimeStr();
         }
