@@ -30,7 +30,7 @@ import org.junit.Test;
  * @version 1.0.0
  * @since 2014-1-24
  */
-public class ConverterCenterTest {
+public class ConverterCenterTest extends ConverterCenter {
 
     /**
      * @throws java.lang.Exception

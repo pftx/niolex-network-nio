@@ -18,13 +18,14 @@
 package org.apache.niolex.address.rpc.cli;
 
 
+import static org.apache.niolex.address.rpc.AddressUtilTest.*;
 import static org.junit.Assert.*;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.niolex.address.rpc.AddressUtil;
 import org.apache.niolex.commons.bean.MutableOne;
 import org.apache.niolex.network.demo.json.RpcService;
 import org.apache.niolex.network.rpc.RpcClient;
@@ -39,8 +40,6 @@ import org.junit.Test;
  */
 public class BaseStubTest {
 
-    private static int ip = 1;
-    private static int port = 1000;
     MutableOne<List<String>> mutableOne = new MutableOne<List<String>>();
     private BaseMock stub;
 
@@ -57,13 +56,6 @@ public class BaseStubTest {
      */
     @After
     public void tearDown() throws Exception {
-    }
-
-    private List<String> makeAddress() {
-        List<String> add = new ArrayList<String>();
-        add.add("rtp:10.1.2." + (ip++) + ":" + (port++) + ":2");
-        add.add("rtp:10.1.2." + (ip++) + ":" + (port++) + ":3");
-        return add;
     }
 
     @Test
@@ -88,11 +80,6 @@ public class BaseStubTest {
         assertEquals(4, stub.readySet.size());
     }
 
-    @Test
-    public void testMakeNodeInfo() throws Exception {
-        assertNull(stub.makeNodeInfo("rpc:10.256.2.10:8090:3"));
-    }
-
     @Test(expected=IllegalStateException.class)
     public void testGetService() throws Exception {
         stub.getService();
@@ -100,7 +87,7 @@ public class BaseStubTest {
 
     @Test
     public void testClientSet() throws Exception {
-        NodeInfo info = stub.makeNodeInfo("rpc:10.254.2.10:8090:3");
+        NodeInfo info = AddressUtil.parseAddress("rpc#10.254.2.10:8090#3");
         Set<RpcClient> set = stub.clientSet(info);
         assertEquals(0, set.size());
         assertEquals("rpc://10.254.2.10:8090#3", info.toString());

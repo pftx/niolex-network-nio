@@ -18,6 +18,7 @@
 package org.apache.niolex.address.rpc.cli.pool;
 
 
+import static org.apache.niolex.address.rpc.AddressUtilTest.*;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 
@@ -47,9 +48,6 @@ import org.junit.Test;
  * @since 2014-1-23
  */
 public class SimplePoolTest {
-
-    private static int ip = 1;
-    private static int port = 1000;
 
     /**
      * @throws java.lang.Exception
@@ -81,13 +79,6 @@ public class SimplePoolTest {
         ArrayList<RpcClientHandler> empty = new ArrayList<RpcClientHandler>();
         FieldUtil.setValue(pool, "poolHandler", new MultiplexPoolHandler(empty, 2, 2));
         readySet = FieldUtil.getValue(pool, "readySet");
-    }
-
-    private List<String> makeAddress() {
-        List<String> add = new ArrayList<String>();
-        add.add("rtp:10.1.2." + (ip++) + ":" + (port++) + ":2");
-        add.add("rtp:10.1.2." + (ip++) + ":" + (port++) + ":3");
-        return add;
     }
 
     @Test

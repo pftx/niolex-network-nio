@@ -21,13 +21,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.niolex.address.rpc.AddressUtil;
 import org.apache.niolex.commons.bean.MutableOne;
-import org.apache.niolex.commons.codec.StringUtil;
-import org.apache.niolex.commons.net.NetUtil;
 import org.apache.niolex.network.cli.Constants;
 import org.apache.niolex.network.rpc.RpcClient;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * The base client side stub, handle the events sent from ZK server, deal with RPC server
@@ -40,7 +37,6 @@ import org.slf4j.LoggerFactory;
  * @since 2014-1-22
  */
 public abstract class BaseStub<T> implements MutableOne.DataChangeListener<List<String>> {
-    private static final Logger LOG = LoggerFactory.getLogger(BaseStub.class);
 
     /**
      * The network connection parameters.
@@ -102,7 +98,7 @@ public abstract class BaseStub<T> implements MutableOne.DataChangeListener<List<
         HashSet<NodeInfo> addSet = new HashSet<NodeInfo>();
         // Parse config information.
         for (String node : nodeList) {
-            NodeInfo info = makeNodeInfo(node);
+            NodeInfo info = AddressUtil.parseAddress(node);
             if (info != null)
                 infoSet.add(info);
         }
@@ -127,32 +123,6 @@ public abstract class BaseStub<T> implements MutableOne.DataChangeListener<List<
         } else {
             readySet.removeAll(delSet);
             readySet.addAll(addSet);
-        }
-    }
-
-    /**
-     * Make a new node info bean from the string representation.
-     *
-     * @param node the node string
-     * @return the node info bean
-     */
-    public NodeInfo makeNodeInfo(String node) {
-        try {
-            NodeInfo info = new NodeInfo();
-            // Address format:
-            //          Protocol:IP:Port:Weight
-            String[] pr = StringUtil.split(node, ":", true);
-            if (pr.length < 4) {
-                LOG.warn("Invalid server address format: {}.", node);
-                return null;
-            }
-            info.setProtocol(pr[0].replace('^', '/'));
-            info.setAddress(NetUtil.ipPort2InetSocketAddress(pr[1] + ":" + pr[2]));
-            info.setWeight(Integer.parseInt(pr[3]));
-            return info;
-        } catch (Exception e) {
-            LOG.warn("Invalid server address format: {}, msg: {}", node, e.toString());
-            return null;
         }
     }
 
