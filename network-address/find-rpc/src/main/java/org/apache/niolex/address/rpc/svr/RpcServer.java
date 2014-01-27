@@ -17,13 +17,12 @@
  */
 package org.apache.niolex.address.rpc.svr;
 
-import java.net.InetAddress;
 import java.util.List;
 
+import org.apache.niolex.address.rpc.AddressUtil;
 import org.apache.niolex.address.rpc.ConverterCenter;
-import org.apache.niolex.address.rpc.RpcInterface;
 import org.apache.niolex.address.server.Producer;
-import org.apache.niolex.address.util.VersionUtil;
+import org.apache.niolex.commons.util.SystemUtil;
 import org.apache.niolex.network.rpc.ConfigItem;
 import org.apache.niolex.network.rpc.IConverter;
 import org.apache.niolex.network.rpc.RpcPacketHandler;
@@ -34,7 +33,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * The RpcServer will proxy a MultiNioServer inside, and deal with server side
- * object publish job.
+ * service object publish job. User can publish multiple services at the same time, but
+ * they must use the same service type and the method code must be unique.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.5, $Date: 2012-11-30$
@@ -51,10 +51,10 @@ public class RpcServer {
     // ------------------------------------------------
     // ZK parameters
     private String zkClusterAddress;
+    private String zkEnvironment;
     private int zkSessionTimeout;
     private String zkUserName;
     private String zkPassword;
-    private String zkEnvironment;
     // ------------------------------------------------
 
     /**
@@ -64,15 +64,10 @@ public class RpcServer {
         super();
         // Init ZK parameters
         zkClusterAddress = System.getProperty("zk.cluster.address");
-        try {
-            zkSessionTimeout = Integer.parseInt(System.getProperty("zk.session.timeout"));
-        } catch (Exception e) {}
+        zkEnvironment = SystemUtil.getSystemPropertyWithDefault("zk.root", "dev");
+        zkSessionTimeout = SystemUtil.getSystemPropertyAsInt("zk.session.timeout", 6000);
         zkUserName = System.getProperty("zk.svr.username");
         zkPassword = System.getProperty("zk.svr.password");
-        zkEnvironment = System.getProperty("zk.root");
-        if (zkEnvironment == null) {
-            zkEnvironment = "dev";
-        }
     }
 
     /**
@@ -90,40 +85,21 @@ public class RpcServer {
         ConfigItem[] list = new ConfigItem[exposeList.size()];
         int i = 0;
         for (RpcExpose ee : exposeList) {
-            // Fix the interface if it's not set.
-            if (ee.interfaze == null) {
-                ee.interfaze = ee.target.getClass().getInterfaces()[0];
-            }
-            RpcInterface inter = ee.interfaze.getAnnotation(RpcInterface.class);
-            if (inter == null) {
-                LOG.error("There is no annotation [RpcInterface] on {}, system will stop.", ee.interfaze);
+            if (!ee.build()) {
+                // LOGGED at RpcExpose#build()
                 return false;
             }
-            ee.serviceName = inter.serviceName();
-            if (ee.serviceName == null || ee.serviceName.isEmpty()) {
-                ee.serviceName = ee.interfaze.getCanonicalName();
-            }
             if (serviceType == null) {
-                serviceType = inter.serviceType();
+                serviceType = ee.getServiceType();
+            }
+            if (serviceType.equals(ee.getServiceType())) {
+                list[i++] = new ConfigItem(ee.interfaze, ee.target);
             } else {
-                if (!serviceType.equals(inter.serviceType())) {
-                    // We are using only one converter for one RpcPacketHandler, so ...
-                    LOG.error("One RpcServer must use one service type, but there are two: {}, {}!!!!",
-                            serviceType, inter.serviceType());
-                    return false;
-                }
+                // We are using only one converter for one RpcPacketHandler, so ...
+                LOG.error("One RpcServer must use one service type, but there are two: {}, {}!!!!",
+                        serviceType, ee.getServiceType());
+                return false;
             }
-            ee.serviceType = serviceType;
-            if (ee.version == 0) {
-                ee.version = VersionUtil.encodeVersion(inter.version());
-            }
-            if (ee.state == null || ee.state.isEmpty()) {
-                ee.state = RpcExpose.DFT_STATE;
-            }
-            if (ee.weight == 0) {
-                ee.weight = 1;
-            }
-            list[i++] = new ConfigItem(ee.interfaze, ee.target);
         }
         handler.setRpcConfigs(list);
         // Set converter
@@ -142,10 +118,7 @@ public class RpcServer {
                 zkProducer.setRoot(zkEnvironment);
                 zkProducer.addAuthInfo(zkUserName, zkPassword);
                 for (RpcExpose ee : exposeList) {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append(ee.serviceType).append(":").append(InetAddress.getLocalHost().getHostAddress());
-                    sb.append(":").append(svr.getPort()).append(":").append(ee.weight).append(":");
-                    String address = sb.toString();
+                    String address = AddressUtil.generateAddress(ee, getPort());
                     zkProducer.publishService(ee.serviceName, ee.version, ee.state, address,
                             null, true, true);
                 }
@@ -207,6 +180,20 @@ public class RpcServer {
     }
 
     /**
+     * @return the zkEnvironment
+     */
+    public String getZkEnvironment() {
+        return zkEnvironment;
+    }
+
+    /**
+     * @param zkEnvironment the zkEnvironment to set
+     */
+    public void setZkEnvironment(String zkEnvironment) {
+        this.zkEnvironment = zkEnvironment;
+    }
+
+    /**
      * @return the zkSessionTimeout
      */
     public int getZkSessionTimeout() {
@@ -246,20 +233,6 @@ public class RpcServer {
      */
     public void setZkPassword(String zkPassword) {
         this.zkPassword = zkPassword;
-    }
-
-    /**
-     * @return the zkEnvironment
-     */
-    public String getZkEnvironment() {
-        return zkEnvironment;
-    }
-
-    /**
-     * @param zkEnvironment the zkEnvironment to set
-     */
-    public void setZkEnvironment(String zkEnvironment) {
-        this.zkEnvironment = zkEnvironment;
     }
 
     /**

@@ -26,6 +26,7 @@ import org.apache.niolex.address.rpc.RpcInterface;
 import org.apache.niolex.address.rpc.cli.pool.SimplePool;
 import org.apache.niolex.address.rpc.svr.RpcExpose;
 import org.apache.niolex.commons.bean.MutableOne;
+import org.apache.niolex.commons.util.SystemUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,15 +62,10 @@ public class RpcClientFactory {
         super();
         // Init ZK parameters
         zkClusterAddress = System.getProperty("zk.cluster.address");
-        try {
-            zkSessionTimeout = Integer.parseInt(System.getProperty("zk.session.timeout"));
-        } catch (Exception e) {}
+        zkEnvironment = SystemUtil.getSystemPropertyWithDefault("zk.root", "dev");
+        zkSessionTimeout = SystemUtil.getSystemPropertyAsInt("zk.session.timeout", 6000);
         zkUserName = System.getProperty("zk.cli.username");
         zkPassword = System.getProperty("zk.cli.password");
-        zkEnvironment = System.getProperty("zk.root");
-        if (zkEnvironment == null) {
-            zkEnvironment = "dev";
-        }
     }
 
     /**

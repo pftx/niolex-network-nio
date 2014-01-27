@@ -1,6 +1,6 @@
 /**
  * RpcExpose.java
- * 
+ *
  * Copyright 2012 Niolex, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,17 +17,25 @@
  */
 package org.apache.niolex.address.rpc.svr;
 
+import org.apache.niolex.address.rpc.RpcInterface;
+import org.apache.niolex.address.util.VersionUtil;
+import org.apache.niolex.commons.codec.StringUtil;
+import org.apache.niolex.commons.test.Check;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * RpcExpose bean, Application developer use this bean to expose their own
  * objects for remote invoke.
- * 
+ *
  * Only {@link #target} is required, others are optional.
- * 
+ *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.5, $Date: 2012-11-30$
  */
 public class RpcExpose {
-    
+
+    public static final Logger LOG = LoggerFactory.getLogger(RpcServer.class);
     public static final String DFT_STATE = "default";
 
     /**
@@ -64,20 +72,20 @@ public class RpcExpose {
      * The expose version.
      */
     protected int version;
-    
+
     /**
      * Create a RpcExpose with the minimum parameter.
-     * 
+     *
      * @param target the weight of this target
      */
     public RpcExpose(Object target) {
         super();
         this.target = target;
     }
-    
+
     /**
      * Create a RpcExpose with all the proper parameters.
-     * 
+     *
      * @param interfaze the interface to expose
      * @param target the target to invoke
      * @param state the state of this target
@@ -92,7 +100,45 @@ public class RpcExpose {
     }
 
     /**
-     * @return the interfaze
+     * Build this RPC expose bean, check every field for validity.
+     *
+     * @return true if OK, false if failed to validate it
+     */
+    public boolean build() {
+        // Fix the interface if it's not set.
+        Check.notNull(target, "target must not be null.");
+        if (interfaze == null) {
+            interfaze = target.getClass().getInterfaces()[0];
+        }
+        if (StringUtil.isBlank(state)) {
+            state = RpcExpose.DFT_STATE;
+        }
+        if (weight == 0) {
+            weight = 1;
+        }
+        RpcInterface inter = interfaze.getAnnotation(RpcInterface.class);
+        if (inter == null) {
+            LOG.error("There is no annotation [RpcInterface] on {}, we can not publish this service.", interfaze);
+            return false;
+        }
+        if (StringUtil.isBlank(serviceName)) {
+            if (StringUtil.isBlank(inter.serviceName())) {
+                serviceName = interfaze.getCanonicalName();
+            } else {
+                serviceName = inter.serviceName();
+            }
+        }
+        if (StringUtil.isBlank(serviceType)) {
+            serviceType = inter.serviceType();
+        }
+        if (version == 0) {
+            version = VersionUtil.encodeVersion(inter.version());
+        }
+        return true;
+    }
+
+    /**
+     * @return the interface
      */
     public Class<?> getInterfaze() {
         return interfaze;
@@ -100,7 +146,7 @@ public class RpcExpose {
 
     /**
      * @param interfaze
-     *            the interfaze to set
+     *            the interface to set
      */
     public void setInterfaze(Class<?> interfaze) {
         this.interfaze = interfaze;
