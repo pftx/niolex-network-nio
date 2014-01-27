@@ -36,10 +36,10 @@ public class ClientPoolMain {
      */
     public static void main(String[] args) {
         // 配置环境变量
-        System.setProperty("zk.cluster.address", "10.22.241.233:8181");
+        System.setProperty("zk.cluster.address", "localhost:9181");
         System.setProperty("zk.session.timeout", "30000");
-        System.setProperty("zk.root", "dev");
-        RpcClientFactory factory = new RpcClientFactory("abcd", "abcde");
+        System.setProperty("zk.root", "find");
+        RpcClientFactory factory = new RpcClientFactory("redis-client", "abcde");
         // 准备启动了
         if (!factory.connectToZK()) {
             System.out.println("Failed to connect to ZK.");

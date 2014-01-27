@@ -1,6 +1,6 @@
 /**
  * RpcServerMain.java
- * 
+ *
  * Copyright 2013 Niolex, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -40,18 +40,18 @@ public class RpcServerMain {
     public static void main(String[] args) {
         // 获得要暴露的对象，可以从Spring容器里面拿出来，这里简单new
         DemoService demo = new DemoServiceImpl();
-        
+
         // 配置需要远程暴露的对象，可以一次性暴露一个List
         RpcExpose exp = new RpcExpose(demo);
         exp.setWeight(1);
         List<RpcExpose> exposeList = Collections.singletonList(exp);
 
         // 准备启动了，这些属性都可以通过相应的setter直接设置
-        System.setProperty("zk.cluster.address", "10.22.241.233:8181");
+        System.setProperty("zk.cluster.address", "localhost:9181");
         System.setProperty("zk.session.timeout", "10000");
         System.setProperty("zk.svr.username", "redis");
         System.setProperty("zk.svr.password", "mailto:xiejiyun");
-        System.setProperty("zk.root", "dev");
+        System.setProperty("zk.root", "find");
         RpcServer rpc = new RpcServer();
         rpc.setHandlerThreadsNumber(5);
         rpc.setSelectorThreadsNumber(2);

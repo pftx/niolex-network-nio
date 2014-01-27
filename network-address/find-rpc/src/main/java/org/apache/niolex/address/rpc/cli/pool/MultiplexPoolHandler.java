@@ -176,6 +176,7 @@ public class MultiplexPoolHandler extends PoolHandler<RpcClientHandler> {
         for (RpcClientHandler h : backupHandlers) {
             RpcClient client = h.getHandler();
             client.setConnectRetryTimes(0);
+            client.stop();
         }
     }
 

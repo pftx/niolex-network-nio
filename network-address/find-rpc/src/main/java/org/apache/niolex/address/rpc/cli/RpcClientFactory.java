@@ -20,12 +20,14 @@ package org.apache.niolex.address.rpc.cli;
 import java.io.IOException;
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.niolex.address.client.Consumer;
 import org.apache.niolex.address.rpc.RpcInterface;
 import org.apache.niolex.address.rpc.cli.pool.SimplePool;
 import org.apache.niolex.address.rpc.svr.RpcExpose;
+import org.apache.niolex.address.util.VersionUtil;
 import org.apache.niolex.commons.bean.MutableOne;
+import org.apache.niolex.commons.codec.StringUtil;
+import org.apache.niolex.commons.test.Check;
 import org.apache.niolex.commons.util.SystemUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -113,13 +115,13 @@ public class RpcClientFactory {
      *
      * @param interfaze the service interface.
      * @param serviceName the service name.
-     * @param state the state of the service you want to have.
      * @param version the service version.
+     * @param state the state of the service you want to have.
      * @param poolSize the client pool size.
      * @return the client pool.
      */
-    public <T> BaseStub<T> getPool(Class<T> interfaze, String serviceName, String state,
-            String version, int poolSize) {
+    public <T> BaseStub<T> getPool(Class<T> interfaze, String serviceName,
+            String version, String state, int poolSize) {
         MutableOne<List<String>> mutableOne = zkConsumer.getAddressList(serviceName, version, state);
         BaseStub<T> pool = new SimplePool<T>(poolSize, interfaze, mutableOne);
         // The pool is ready for use.
@@ -130,18 +132,19 @@ public class RpcClientFactory {
      * Get the client pool for this service.
      *
      * @param interfaze the service interface.
-     * @param state the state of the service you want to have.
      * @param version the service version.
+     * @param state the state of the service you want to have.
      * @param poolSize the client pool size.
      * @return the client pool.
      */
-    public <T> BaseStub<T> getPool(Class<T> interfaze, String state, String version, int poolSize) {
+    public <T> BaseStub<T> getPool(Class<T> interfaze, String version, String state, int poolSize) {
         RpcInterface inter = interfaze.getAnnotation(RpcInterface.class);
+        Check.notNull(inter, "There is no annotation [RpcInterface] on " + interfaze.getName());
         String serviceName = inter.serviceName();
-        if (StringUtils.isBlank(serviceName)) {
+        if (StringUtil.isBlank(serviceName)) {
             serviceName = interfaze.getCanonicalName();
         }
-        return getPool(interfaze, serviceName, state, version, poolSize);
+        return getPool(interfaze, serviceName, version, state, poolSize);
     }
 
     /**
@@ -154,7 +157,8 @@ public class RpcClientFactory {
      */
     public <T> BaseStub<T> getPool(Class<T> interfaze, String state, int poolSize) {
         RpcInterface inter = interfaze.getAnnotation(RpcInterface.class);
-        return getPool(interfaze, state, "" + inter.version(), poolSize);
+        Check.notNull(inter, "There is no annotation [RpcInterface] on " + interfaze.getName());
+        return getPool(interfaze, "" + VersionUtil.encodeVersion(inter.version()), state, poolSize);
     }
 
     /**
@@ -166,7 +170,8 @@ public class RpcClientFactory {
      */
     public <T> BaseStub<T> getPool(Class<T> interfaze, int poolSize) {
         RpcInterface inter = interfaze.getAnnotation(RpcInterface.class);
-        return getPool(interfaze, RpcExpose.DFT_STATE, "" + inter.version(), poolSize);
+        Check.notNull(inter, "There is no annotation [RpcInterface] on " + interfaze.getName());
+        return getPool(interfaze, "" + VersionUtil.encodeVersion(inter.version()), RpcExpose.DFT_STATE, poolSize);
     }
 
     /**
