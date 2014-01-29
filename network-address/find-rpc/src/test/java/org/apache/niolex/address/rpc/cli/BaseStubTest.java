@@ -41,14 +41,14 @@ import org.junit.Test;
 public class BaseStubTest {
 
     MutableOne<List<String>> mutableOne = new MutableOne<List<String>>();
-    private BaseMock stub;
+    private BaseMock<RpcService> stub;
 
     /**
      * @throws java.lang.Exception
      */
     @Before
     public void setUp() throws Exception {
-        stub = new BaseMock(RpcService.class, mutableOne);
+        stub = new BaseMock<RpcService>(RpcService.class, mutableOne);
     }
 
     /**
@@ -200,7 +200,8 @@ public class BaseStubTest {
 
 }
 
-class BaseMock extends BaseStub<RpcService> {
+class BaseMock<T> extends BaseStub<T> {
+    MutableOne<List<String>> mutableOne;
     int newCnt, delCnt;
 
     /**
@@ -208,8 +209,9 @@ class BaseMock extends BaseStub<RpcService> {
      * @param interfaze
      * @param mutableOne
      */
-    public BaseMock(Class<RpcService> interfaze, MutableOne<List<String>> mutableOne) {
+    public BaseMock(Class<T> interfaze, MutableOne<List<String>> mutableOne) {
         super(interfaze, mutableOne);
+        this.mutableOne = mutableOne;
     }
 
     /**
@@ -235,7 +237,7 @@ class BaseMock extends BaseStub<RpcService> {
      * @see org.apache.niolex.address.rpc.cli.BaseStub#build()
      */
     @Override
-    public BaseStub<RpcService> build() {
+    public BaseStub<T> build() {
         return null;
     }
 

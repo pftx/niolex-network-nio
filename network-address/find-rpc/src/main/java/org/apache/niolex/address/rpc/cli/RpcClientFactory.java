@@ -72,7 +72,7 @@ public class RpcClientFactory {
 
     /**
      * Construct a RpcClientFactory with the specified user name and password, all the
-     * other ZK parameters from system properties
+     * other ZK parameters are from system properties
      *
      * @param zkUserName the ZK user name
      * @param zkPassword the ZK password

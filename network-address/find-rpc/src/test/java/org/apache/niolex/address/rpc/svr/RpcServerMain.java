@@ -33,6 +33,7 @@ import org.apache.niolex.address.rpc.svr.RpcServer;
  */
 public class RpcServerMain {
     private static int port = 8723;
+    private static RpcServer rpc;
 
     /**
      * @param args
@@ -52,7 +53,7 @@ public class RpcServerMain {
         System.setProperty("zk.svr.username", "redis");
         System.setProperty("zk.svr.password", "mailto:xiejiyun");
         System.setProperty("zk.root", "find");
-        RpcServer rpc = new RpcServer();
+        rpc = new RpcServer();
         rpc.setHandlerThreadsNumber(5);
         rpc.setSelectorThreadsNumber(2);
         rpc.setAcceptTimeOut(10000);
@@ -66,6 +67,10 @@ public class RpcServerMain {
             System.out.println("Server started.");
             System.out.println("====================================");
         }
+    }
+
+    public static void stop() {
+        rpc.stop();
     }
 
 }

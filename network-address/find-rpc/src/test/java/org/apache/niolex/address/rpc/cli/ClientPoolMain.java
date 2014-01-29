@@ -58,7 +58,8 @@ public class ClientPoolMain {
             demo.tick(i);
         }
         System.out.println("服务器当前时间: " + demo.getTime());
-        SystemUtil.sleep(5000);
+        if (args == null)
+            SystemUtil.sleep(5000);
         for (int i = 0; i < 30; ++i) {
             demo.tick(i);
         }

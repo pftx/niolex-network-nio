@@ -71,8 +71,8 @@ public class MultiplexPoolHandlerTest {
         han.addMultiplex();//2
         han.addMultiplex();//3
         han.addMultiplex();//3, return immediately
-        int currentMultiplex = FieldUtil.getValue(han, "currentMultiplex");
-        assertEquals(3, currentMultiplex);
+        Integer currentMultiplex = FieldUtil.getValue(han, "currentMultiplex");
+        assertEquals(3, currentMultiplex.intValue());
         LinkedBlockingQueue<RpcClientHandler> readyQueue = FieldUtil.getValue(han, "readyQueue");
         assertEquals(1, readyQueue.size());
     }
