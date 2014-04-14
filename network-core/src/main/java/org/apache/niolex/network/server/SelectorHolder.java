@@ -19,8 +19,10 @@ package org.apache.niolex.network.server;
 
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
-import java.util.HashSet;
+import java.util.Comparator;
+import java.util.Iterator;
 import java.util.Set;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -41,10 +43,30 @@ public class SelectorHolder {
      */
     private static final int INTEREST_OPS = SelectionKey.OP_READ | SelectionKey.OP_WRITE;
 
+    /**
+     * A dummy comparator, compare any object by it's hash code.
+     *
+     * @author <a href="mailto:xiejiyun@foxmail.com">Xie, Jiyun</a>
+     * @version 1.0.0
+     * @since 2014-4-14
+     */
+    private static class DummyComparator implements Comparator<Object> {
+
+        /**
+         * This is the override of super method.
+         * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
+         */
+        @Override
+        public int compare(Object o1, Object o2) {
+            return o1.hashCode() - o2.hashCode();
+        }
+
+    }
+
 	/**
 	 * This set store all the interested selection Keys.
 	 */
-	private final Set<SelectionKey> selectionKeySet = new HashSet<SelectionKey>();
+	private final Set<SelectionKey> selectionKeySet = new ConcurrentSkipListSet<SelectionKey>(new DummyComparator());
 
 	/**
 	 * This flag indicates the status of selector, so we will not wake up duplicated.
@@ -87,18 +109,11 @@ public class SelectorHolder {
 		if (selectorThread == Thread.currentThread()) {
 			selectionKey.interestOps(INTEREST_OPS);
 		} else {
-		    addSelectionKey(selectionKey);
+		    // Add the selection key into the key set, do not need synchronize it,
+		    // because we are using current set.
+		    selectionKeySet.add(selectionKey);
 			wakeup();
 		}
-	}
-
-	/**
-	 * Add the selection key into the key set in a synchronized method.
-	 *
-	 * @param selectionKey
-	 */
-	private synchronized void addSelectionKey(SelectionKey selectionKey) {
-	    selectionKeySet.add(selectionKey);
 	}
 
 	/**
@@ -116,15 +131,13 @@ public class SelectorHolder {
 	 * <br><b>
 	 * This method can only be invoked in the selector's thread.</b>
 	 */
-	protected synchronized void changeAllInterestOps() {
+	protected void changeAllInterestOps() {
 		isAwake.set(false);
-		if (selectionKeySet.isEmpty()) {
-			return;
+		Iterator<SelectionKey> iterator = selectionKeySet.iterator();
+		while (iterator.hasNext()) {
+		    iterator.next().interestOps(INTEREST_OPS);
+		    iterator.remove();
 		}
-		for (SelectionKey selectionKey : selectionKeySet) {
-			selectionKey.interestOps(INTEREST_OPS);
-		}
-		selectionKeySet.clear();
 	}
 
 
