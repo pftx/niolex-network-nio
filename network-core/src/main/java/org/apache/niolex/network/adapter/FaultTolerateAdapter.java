@@ -172,10 +172,10 @@ public class FaultTolerateAdapter implements IPacketHandler, WriteEventListener 
 
 	/**
 	 * Override super method
-	 * @see org.apache.niolex.network.event.WriteEventListener#afterSend(org.apache.niolex.network.event.WriteEvent)
+	 * @see org.apache.niolex.network.event.WriteEventListener#afterSent(org.apache.niolex.network.event.WriteEvent)
 	 */
 	@Override
-	public void afterSend(WriteEvent wEvent) {
+	public void afterSent(WriteEvent wEvent) {
 		IPacketWriter wt = wEvent.getPacketWriter();
 		CircularList<PacketData> list = wt.getAttached(KEY_RRLIST);
 		if (list != null) {

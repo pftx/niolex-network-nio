@@ -41,7 +41,7 @@ public interface IPacketWriter {
      * Write Packet to the remote peer.
      * You can write as many packets as you want.
      * Please do not write any packets after the channel is closed, or the system
-     * Behavior will not be defined.
+     * Behavior will be undefined.
      * This method will return immediately after the packet is put into the outgoing
      * queue. It will not indicate the packet has been sent.
      *
@@ -66,7 +66,7 @@ public interface IPacketWriter {
      *
      * @param key the user defined key
      * @param value the user attachment
-     * @return The current stored object, or null if nothing is stored now.
+     * @return the current stored object, or null if nothing is stored currently.
      */
     public Object attachData(String key, Object value);
 

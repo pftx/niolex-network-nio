@@ -119,7 +119,7 @@ public abstract class BasePacketWriter implements IPacketWriter {
 		wEvent.setPacketData(sc);
 		wEvent.setPacketWriter(this);
 		for (WriteEventListener listener : listenerList) {
-			listener.afterSend(wEvent);
+			listener.afterSent(wEvent);
 		}
 	}
 

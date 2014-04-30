@@ -37,7 +37,7 @@ import org.apache.niolex.network.PacketData;
 public class WriteEvent {
 
 	/**
-	 * The packet writer who send this packet.
+	 * The packet writer who sent this packet.
 	 */
 	private IPacketWriter packetWriter;
 
@@ -47,7 +47,7 @@ public class WriteEvent {
 	private PacketData packetData;
 
 	/**
-	 * @return The packet writer who send this packet.
+	 * @return The packet writer who sent this packet.
 	 */
 	public IPacketWriter getPacketWriter() {
 		return packetWriter;

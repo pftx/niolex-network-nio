@@ -147,10 +147,10 @@ public class HeartBeatAdapter implements IPacketHandler, WriteEventListener, Run
 
 	/**
 	 * Override super method
-	 * @see org.apache.niolex.network.event.WriteEventListener#afterSend(WriteEvent)
+	 * @see org.apache.niolex.network.event.WriteEventListener#afterSent(WriteEvent)
 	 */
 	@Override
-	public void afterSend(WriteEvent wEvent) {
+	public void afterSent(WriteEvent wEvent) {
 		IPacketWriter wt = wEvent.getPacketWriter();
 		if (wt.getAttached(KEY) != null) {
 	    	wt.attachData(KEY, System.currentTimeMillis());

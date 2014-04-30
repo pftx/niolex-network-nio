@@ -121,7 +121,7 @@ public class SocketClient extends BaseClient {
 	 *
 	 * @throws IOException if network problem
 	 */
-	public void handleRead() throws IOException {
+	public synchronized void handleRead() throws IOException {
 		while (true) {
 		    PacketData readPacket = readPacket();
 			LOG.debug("Packet received. desc {}, size {}.", readPacket.descriptor(), readPacket.getLength());

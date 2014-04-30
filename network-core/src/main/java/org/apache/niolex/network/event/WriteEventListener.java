@@ -30,7 +30,7 @@ package org.apache.niolex.network.event;
 public interface WriteEventListener {
 
 	/**
-	 * This event is fired just after we send the packet to remote peer.
+	 * This event is fired just after we sent the packet to remote peer.
 	 * <br>
 	 * Notion! We fire this event only indicate that the data is sent to network
 	 * buffer, it will be transfered to remote if no I/O error occur.
@@ -38,6 +38,6 @@ public interface WriteEventListener {
 	 *
 	 * @param wEvent
 	 */
-	public void afterSend(WriteEvent wEvent);
+	public void afterSent(WriteEvent wEvent);
 
 }

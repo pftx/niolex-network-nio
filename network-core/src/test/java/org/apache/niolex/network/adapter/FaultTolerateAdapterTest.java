@@ -138,7 +138,7 @@ public class FaultTolerateAdapterTest {
         WriteEvent wEvent = new WriteEvent();
         wEvent.setPacketData(sc2);
         wEvent.setPacketWriter(bpw);
-        fault.afterSend(wEvent);
+        fault.afterSent(wEvent);
         bpw.handleWrite(sc3);
         fault.handleClose(bpw);
         // After close, the dataMap have 2 item.
@@ -259,7 +259,7 @@ public class FaultTolerateAdapterTest {
 		IPacketWriter wt = mock(IPacketWriter.class);
 		w.setPacketData(sc2);
 		w.setPacketWriter(wt);
-		fault.afterSend(w);
+		fault.afterSent(w);
 	}
 
 	/**
@@ -276,7 +276,7 @@ public class FaultTolerateAdapterTest {
 		PacketData sc2 = new PacketData(3, "AJ231FIU3212312EALKD".getBytes());
 		w.setPacketData(sc2);
 		w.setPacketWriter(wt);
-		fault.afterSend(w);
+		fault.afterSent(w);
 		fault.handleClose(wt);
 
 		// after error.
