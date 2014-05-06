@@ -19,10 +19,7 @@ package org.apache.niolex.network.server;
 
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.Set;
-import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -43,30 +40,10 @@ public class SelectorHolder {
      */
     private static final int INTEREST_OPS = SelectionKey.OP_READ | SelectionKey.OP_WRITE;
 
-    /**
-     * A dummy comparator, compare any object by it's hash code.
-     *
-     * @author <a href="mailto:xiejiyun@foxmail.com">Xie, Jiyun</a>
-     * @version 1.0.0
-     * @since 2014-4-14
-     */
-    private static class DummyComparator implements Comparator<Object> {
-
-        /**
-         * This is the override of super method.
-         * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
-         */
-        @Override
-        public int compare(Object o1, Object o2) {
-            return o1.hashCode() - o2.hashCode();
-        }
-
-    }
-
 	/**
 	 * This set store all the interested selection Keys.
 	 */
-	private final Set<SelectionKey> selectionKeySet = new ConcurrentSkipListSet<SelectionKey>(new DummyComparator());
+	private final ConcurrentLinkedQueue<SelectionKey> selectionKeyQueue = new ConcurrentLinkedQueue<SelectionKey>();
 
 	/**
 	 * This flag indicates the status of selector, so we will not wake up duplicated.
@@ -111,7 +88,7 @@ public class SelectorHolder {
 		} else {
 		    // Add the selection key into the key set, do not need synchronize it,
 		    // because we are using current set.
-		    selectionKeySet.add(selectionKey);
+		    selectionKeyQueue.add(selectionKey);
 			wakeup();
 		}
 	}
@@ -133,10 +110,9 @@ public class SelectorHolder {
 	 */
 	protected void changeAllInterestOps() {
 		isAwake.set(false);
-		Iterator<SelectionKey> iterator = selectionKeySet.iterator();
-		while (iterator.hasNext()) {
-		    iterator.next().interestOps(INTEREST_OPS);
-		    iterator.remove();
+		SelectionKey k;
+		while ((k = selectionKeyQueue.poll()) != null) {
+		    k.interestOps(INTEREST_OPS);
 		}
 	}
 
