@@ -51,7 +51,7 @@ public class AddressRegiSerializer extends BaseSerializer<AddressRegiBean> {
 	 */
 	@Override
 	public AddressRegiBean toObj(byte[] arr) {
-		String[] arr2 = StringUtil.utf8ByteToStr(arr).split(Config.NAME_FIELD_SEP_REGEX, 2);
+		String[] arr2 = StringUtil.split(StringUtil.utf8ByteToStr(arr), Config.NAME_FIELD_SEP, false);
 		if (arr2.length != 2) {
 			throw new IllegalArgumentException("Data is invalid.");
 		}

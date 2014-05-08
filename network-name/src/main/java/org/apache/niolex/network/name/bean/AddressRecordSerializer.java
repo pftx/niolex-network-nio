@@ -53,7 +53,7 @@ public class AddressRecordSerializer extends BaseSerializer<AddressRecord> {
 	 */
 	@Override
 	public AddressRecord toObj(byte[] arr) {
-		String[] arr2 = StringUtil.utf8ByteToStr(arr).split(Config.NAME_FIELD_SEP_REGEX, 4);
+		String[] arr2 = StringUtil.split(StringUtil.utf8ByteToStr(arr), Config.NAME_FIELD_SEP, false);
 		if (arr2.length != 3) {
 			throw new IllegalArgumentException("Data is invalid.");
 		}

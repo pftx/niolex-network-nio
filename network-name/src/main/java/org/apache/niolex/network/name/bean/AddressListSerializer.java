@@ -18,6 +18,7 @@
 package org.apache.niolex.network.name.bean;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.niolex.commons.codec.StringUtil;
@@ -58,10 +59,10 @@ public class AddressListSerializer extends BaseSerializer<List<String>> {
 	@Override
 	public List<String> toObj(byte[] arr) {
 		if (arr.length == 0) {
-			return Arrays.asList();
+			return Collections.emptyList();
 		}
 		String s = StringUtil.utf8ByteToStr(arr);
-		return Arrays.asList(s.split(Config.NAME_FIELD_SEP_REGEX));
+		return Arrays.asList(StringUtil.split(s, Config.NAME_FIELD_SEP, false));
 	}
 
 }
