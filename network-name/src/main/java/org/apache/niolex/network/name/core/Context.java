@@ -37,25 +37,26 @@ import org.apache.niolex.network.serialize.StringSerializer;
  */
 public class Context {
 
-    private static PacketTransformer transformer;
+    private static final PacketTransformer transformer;
+
+    static {
+        transformer = PacketTransformer.getInstance();
+        // 获取地址信息只传一个字符串，表达服务的key
+        transformer.addSerializer(new StringSerializer(Config.CODE_NAME_OBTAIN));
+        // 反向传输整个地址列表，表达地址
+        transformer.addSerializer(new AddressListSerializer(Config.CODE_NAME_DATA));
+        // 传输增量
+        transformer.addSerializer(new AddressRecordSerializer(Config.CODE_NAME_DIFF));
+        // 注册服务
+        transformer.addSerializer(new AddressRegiSerializer(Config.CODE_NAME_PUBLISH));
+    }
 
     /**
      * Initialize transformer here.
      *
      * @return the transformer
      */
-    public static synchronized final PacketTransformer getTransformer() {
-        if (transformer == null) {
-            transformer = PacketTransformer.getInstance();
-            // 获取地址信息只传一个字符串，表达服务的key
-            transformer.addSerializer(new StringSerializer(Config.CODE_NAME_OBTAIN));
-            // 反向传输整个地址列表，表达地址
-            transformer.addSerializer(new AddressListSerializer(Config.CODE_NAME_DATA));
-            // 传输增量
-            transformer.addSerializer(new AddressRecordSerializer(Config.CODE_NAME_DIFF));
-            // 注册服务
-            transformer.addSerializer(new AddressRegiSerializer(Config.CODE_NAME_PUBLISH));
-        }
+    public static final PacketTransformer getTransformer() {
         return transformer;
     }
 
@@ -66,7 +67,7 @@ public class Context {
      * @param rec the record
      */
     public static final void fireEvent(IEventDispatcher dispatcher, AddressRecord rec) {
-        PacketData sent = getTransformer().getPacketData(Config.CODE_NAME_DIFF, rec);
+        PacketData sent = transformer.getPacketData(Config.CODE_NAME_DIFF, rec);
         dispatcher.fireEvent(new Event<PacketData>(rec.getAddressKey(), sent));
     }
 
