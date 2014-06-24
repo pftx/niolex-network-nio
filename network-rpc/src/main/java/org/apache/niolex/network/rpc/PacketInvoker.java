@@ -62,7 +62,7 @@ public class PacketInvoker implements RemoteInvoker {
 	public PacketData invoke(PacketData rc, IClient client) {
 		// 1. Set up the waiting information
 		Integer key = RpcUtil.generateKey(rc);
-		WaitOn<PacketData> waitOn = blocker.initWait(key);
+		WaitOn<PacketData> waitOn = blocker.init(key);
 		// 2. Send request to remote server
 		client.handleWrite(rc);
 		// 3. Wait for result.

@@ -21,7 +21,7 @@ package org.apache.niolex.network.name.event;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.*;
 
-import org.apache.niolex.commons.event.Event;
+import org.apache.niolex.commons.event.BaseEvent;
 import org.apache.niolex.network.IPacketWriter;
 import org.apache.niolex.network.PacketData;
 import org.junit.Test;
@@ -49,7 +49,7 @@ public class WriteEventListenerTest {
         IPacketWriter w = mock(IPacketWriter.class);
         WriteEventListener l = WriteEventListener.obtain(w);
         PacketData sc = new PacketData(33);
-        l.eventHappened(new Event<PacketData>("abc", sc));
+        l.eventHappened(new BaseEvent<PacketData>("abc", sc));
         verify(w).handleWrite(sc);
     }
 

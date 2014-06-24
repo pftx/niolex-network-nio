@@ -20,9 +20,9 @@ package org.apache.niolex.network.name.core;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.niolex.commons.event.BaseEvent;
 import org.apache.niolex.commons.event.ConcurrentEventDispatcher;
-import org.apache.niolex.commons.event.Event;
-import org.apache.niolex.commons.event.IEventDispatcher;
+import org.apache.niolex.commons.event.Dispatcher;
 import org.apache.niolex.network.Config;
 import org.apache.niolex.network.IPacketHandler;
 import org.apache.niolex.network.IPacketWriter;
@@ -52,7 +52,7 @@ public class NameServer implements IPacketHandler {
 	/**
 	 * Used to manage all the events.
 	 */
-	private final IEventDispatcher dispatcher = new ConcurrentEventDispatcher();
+	private final Dispatcher dispatcher = new ConcurrentEventDispatcher();
 
 	/**
 	 * Used to transform packets from and to java beans.
@@ -135,7 +135,7 @@ public class NameServer implements IPacketHandler {
 				attachData(wt, rec);
 				//Fire event
 				PacketData sent = transformer.getPacketData(Config.CODE_NAME_DIFF, rec);
-				dispatcher.fireEvent(new Event<PacketData>(rec.getAddressKey(), sent));
+				dispatcher.fireEvent(new BaseEvent<PacketData>(rec.getAddressKey(), sent));
 				LOG.info("Client {} try to publish address {}.", wt.getRemoteName(), rec.toString());
 				break;
 			default:

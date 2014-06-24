@@ -17,8 +17,8 @@
  */
 package org.apache.niolex.network.name.core;
 
-import org.apache.niolex.commons.event.Event;
-import org.apache.niolex.commons.event.IEventDispatcher;
+import org.apache.niolex.commons.event.BaseEvent;
+import org.apache.niolex.commons.event.Dispatcher;
 import org.apache.niolex.network.Config;
 import org.apache.niolex.network.PacketData;
 import org.apache.niolex.network.name.bean.AddressListSerializer;
@@ -66,9 +66,9 @@ public class Context {
      * @param dispatcher the dispatcher used to send events
      * @param rec the record
      */
-    public static final void fireEvent(IEventDispatcher dispatcher, AddressRecord rec) {
+    public static final void fireEvent(Dispatcher dispatcher, AddressRecord rec) {
         PacketData sent = transformer.getPacketData(Config.CODE_NAME_DIFF, rec);
-        dispatcher.fireEvent(new Event<PacketData>(rec.getAddressKey(), sent));
+        dispatcher.fireEvent(new BaseEvent<PacketData>(rec.getAddressKey(), sent));
     }
 
 }

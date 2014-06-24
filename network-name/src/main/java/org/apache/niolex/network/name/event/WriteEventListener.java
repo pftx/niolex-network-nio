@@ -18,7 +18,7 @@
 package org.apache.niolex.network.name.event;
 
 import org.apache.niolex.commons.event.Event;
-import org.apache.niolex.commons.event.EventListener;
+import org.apache.niolex.commons.event.Listener;
 import org.apache.niolex.network.IPacketWriter;
 import org.apache.niolex.network.PacketData;
 
@@ -27,7 +27,7 @@ import org.apache.niolex.network.PacketData;
  * @version 1.0.0
  * @since 2013-11-29
  */
-public class WriteEventListener extends EventListener<Event<PacketData>> {
+public class WriteEventListener implements Listener<PacketData> {
 
     /**
      * Attach the event listener.
@@ -65,7 +65,7 @@ public class WriteEventListener extends EventListener<Event<PacketData>> {
 
     /**
      * This is the override of super method.
-     * @see org.apache.niolex.commons.event.EventListener#eventHappened(Event)
+     * @see org.apache.niolex.commons.event.EventUtil#eventHappened(Event)
      */
     @Override
     public void eventHappened(Event<PacketData> e) {

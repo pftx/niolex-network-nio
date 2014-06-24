@@ -24,7 +24,7 @@ import static org.mockito.Mockito.*;
 import java.util.List;
 
 import org.apache.niolex.commons.event.Event;
-import org.apache.niolex.commons.event.IEventDispatcher;
+import org.apache.niolex.commons.event.Dispatcher;
 import org.apache.niolex.network.name.bean.AddressRecord.Status;
 import org.junit.Test;
 
@@ -90,7 +90,7 @@ public class RecordStorageTest {
 	 */
 	@Test
 	public void testDeleteGarbage() throws Throwable {
-		IEventDispatcher dd = mock(IEventDispatcher.class);
+		Dispatcher dd = mock(Dispatcher.class);
 		RecordStorage rs = new RecordStorage(dd, 0);
 		rs.setDeleteTime(-1);
 		assertEquals(-1, rs.getDeleteTime());
@@ -122,7 +122,7 @@ public class RecordStorageTest {
      */
     @Test
     public void testDeleteGarbageNotNow() throws Throwable {
-        IEventDispatcher dd = mock(IEventDispatcher.class);
+        Dispatcher dd = mock(Dispatcher.class);
         RecordStorage rs = new RecordStorage(dd, 0);
         rs.setDeleteTime(500);
         AddressRegiBean ben = new AddressRegiBean("network/name", "local/8004");

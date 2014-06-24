@@ -117,7 +117,7 @@ public class AddressSubscriber extends NameClient {
 		// Register this subscriber.
 		PacketData obtain = transformer.getPacketData(Config.CODE_NAME_OBTAIN, serviceKey);
 		savePacket(obtain);
-		WaitOn<List<String>> on = waiter.initWait(serviceKey);
+		WaitOn<List<String>> on = waiter.init(serviceKey);
 		client().handleWrite(obtain);
 		try {
 			List<String> list = on.waitForResult(rpcHandleTimeout);

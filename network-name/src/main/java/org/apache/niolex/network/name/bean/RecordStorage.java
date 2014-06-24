@@ -24,7 +24,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.niolex.commons.concurrent.ConcurrentUtil;
-import org.apache.niolex.commons.event.IEventDispatcher;
+import org.apache.niolex.commons.event.Dispatcher;
 import org.apache.niolex.commons.util.Runme;
 import org.apache.niolex.network.name.bean.AddressRecord.Status;
 import org.apache.niolex.network.name.core.Context;
@@ -121,7 +121,7 @@ public class RecordStorage extends Runme {
 	private final ConcurrentHashMap<String, RecordContainer> mapStorage = new ConcurrentHashMap<String, RecordContainer>();
 
 	// 当服务过期后发布实现的分发器
-	private final IEventDispatcher dispatcher;
+	private final Dispatcher dispatcher;
 
 	// 当服务断线后需要保留的时间
 	private int deleteTime;
@@ -132,7 +132,7 @@ public class RecordStorage extends Runme {
      * @param dispatcher the event dispatcher
      * @param deleteTime the delete time after server disconnected
      */
-    public RecordStorage(IEventDispatcher dispatcher, int deleteTime) {
+    public RecordStorage(Dispatcher dispatcher, int deleteTime) {
         super();
         this.dispatcher = dispatcher;
         this.deleteTime = deleteTime;
