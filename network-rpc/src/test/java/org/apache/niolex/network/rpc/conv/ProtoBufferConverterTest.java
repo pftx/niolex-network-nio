@@ -80,7 +80,7 @@ public class ProtoBufferConverterTest {
 				.addPhone(PhoneNumber.newBuilder().setNumber("123122311" + i).setType(PhoneType.WORK).build())
 				.build();
 		byte[] bs = con.serializeParams(new Object[] { p });
-		Person q = (Person) ProtoUtil.parseMulti(bs, new Type[] { Person.class })[0];
+		Person q = (Person) ProtoUtil.parseMulti(bs, new Class<?>[] { Person.class })[0];
 		assertEquals(p, q);
 	}
 

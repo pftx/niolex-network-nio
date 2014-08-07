@@ -233,7 +233,7 @@ public class RpcPacketHandler implements IPacketHandler {
 	 * @param conf the configuration item
 	 */
 	public void addRpcConfig(ConfigItem conf) {
-	    List<Method> methods = MethodUtil.getMethods(conf.getInterface());
+	    List<Method> methods = MethodUtil.getThisMethods(conf.getInterface());
 	    addRpcConfig(methods, conf.getTarget());
 	}
 

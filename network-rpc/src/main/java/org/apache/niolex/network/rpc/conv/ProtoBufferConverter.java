@@ -21,9 +21,7 @@ import java.lang.reflect.Type;
 
 import org.apache.niolex.commons.seri.ProtoUtil;
 import org.apache.niolex.network.rpc.IConverter;
-import org.apache.niolex.network.rpc.RpcException;
-
-import com.google.protobuf.GeneratedMessage;
+import org.apache.niolex.network.rpc.util.RpcUtil;
 
 /**
  * Using Google Protocol Buffer to serialize data.
@@ -39,7 +37,7 @@ public class ProtoBufferConverter implements IConverter {
 	 */
 	@Override
 	public Object[] prepareParams(byte[] data, Type[] generic) throws Exception {
-		return ProtoUtil.parseMulti(data, generic);
+		return ProtoUtil.parseMulti(data, RpcUtil.checkParams(generic));
 	}
 
 	/**
@@ -55,9 +53,10 @@ public class ProtoBufferConverter implements IConverter {
 	 * Override super method
 	 * @see org.apache.niolex.network.rpc.IConverter#prepareReturn(byte[], java.lang.reflect.Type)
 	 */
-	@Override
+	@SuppressWarnings("unchecked")
+    @Override
 	public Object prepareReturn(byte[] ret, Type type) throws Exception {
-	    return ProtoUtil.parseOne(ret, type);
+	    return ProtoUtil.parseOne(ret, (Class<Object>) type);
 	}
 
 	/**
@@ -66,13 +65,7 @@ public class ProtoBufferConverter implements IConverter {
 	 */
 	@Override
 	public byte[] serializeReturn(Object ret) throws Exception {
-		if (ret instanceof GeneratedMessage) {
-			GeneratedMessage gen = (GeneratedMessage) ret;
-			return gen.toByteArray();
-		} else {
-			throw new RpcException("Message is not protobuf type: " + ret.getClass(),
-					RpcException.Type.ERROR_PARSE_PARAMS, null);
-		}
+	    return ProtoUtil.seriOne(ret);
 	}
 
 }

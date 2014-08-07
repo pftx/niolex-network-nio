@@ -149,7 +149,7 @@ public class RetryHandlerTest {
 	    list.add(new RpcServiceHandler("5", new C(), 1000, true));
 	    list.add(new RpcServiceHandler("5", new C(), 1000, true));
 		retryHandler = new RetryHandler(list, 5, intervalBetweenRetry);
-		Method m = MethodUtil.getMethods(getClass()).get(0);
+		Method m = MethodUtil.getThisMethods(getClass()).get(0);
 		try {
 			retryHandler.invoke(handler1, m, null);
 			assertTrue(false);
@@ -164,7 +164,7 @@ public class RetryHandlerTest {
 		when(handler2.isReady()).thenReturn(true);
 		when(handler3.isReady()).thenReturn(true);
 		RuntimeException e = new RuntimeException("cde", new Throwable("efg"));
-		Method m = MethodUtil.getMethods(getClass()).get(0);
+		Method m = MethodUtil.getThisMethods(getClass()).get(0);
 
 		when(handler2.invoke(handler1, m, null)).thenThrow(e);
 		when(handler3.invoke(handler1, m, null)).thenThrow(e);
@@ -190,7 +190,7 @@ public class RetryHandlerTest {
 		when(handler2.isReady()).thenReturn(true);
 		when(handler3.isReady()).thenReturn(true);
 		RuntimeException e = new RuntimeException("cde");
-		Method m = MethodUtil.getMethods(getClass()).get(0);
+		Method m = MethodUtil.getThisMethods(getClass()).get(0);
 
 		when(handler2.invoke(handler1, m, null)).thenThrow(e);
 		when(handler3.invoke(handler1, m, null)).thenThrow(e);
@@ -214,7 +214,7 @@ public class RetryHandlerTest {
 		when(handler3.isReady()).thenReturn(true);
 		IOException ioe = new IOException("ioio");
 		RuntimeException e = new RuntimeException("cde", ioe);
-		Method m = MethodUtil.getMethods(getClass()).get(0);
+		Method m = MethodUtil.getThisMethods(getClass()).get(0);
 
 		when(handler2.invoke(handler1, m, null)).thenThrow(e);
 		when(handler3.invoke(handler1, m, null)).thenThrow(e);
