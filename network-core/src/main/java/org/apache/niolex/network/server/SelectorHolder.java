@@ -87,7 +87,7 @@ public class SelectorHolder {
 			selectionKey.interestOps(INTEREST_OPS);
 		} else {
 		    // Add the selection key into the key set, do not need synchronize it,
-		    // because we are using current set.
+		    // because we are using concurrent set.
 		    selectionKeyQueue.add(selectionKey);
 			wakeup();
 		}
