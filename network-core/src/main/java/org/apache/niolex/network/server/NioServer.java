@@ -79,7 +79,7 @@ public class NioServer implements IServer, Runnable {
     /**
      * The accept timeout, which is not important, user can leave it as it is.
      */
-    protected int acceptTimeOut = Config.SERVER_ACCEPT_TIMEOUT;
+    protected int acceptTimeout = Config.SERVER_ACCEPT_TIMEOUT;
 
     /**
      * The current server port number. We will asign a default if user do not specify it.
@@ -137,7 +137,7 @@ public class NioServer implements IServer, Runnable {
             while (isListening) {
                 // Setting the timeout for accept method. Avoid that this server can not be shut
                 // down when this thread is waiting to accept.
-                mainSelector.select(acceptTimeOut);
+                mainSelector.select(acceptTimeout);
                 selectorHolder.changeAllInterestOps();
                 Set<SelectionKey> selectedKeys = mainSelector.selectedKeys();
                 for (SelectionKey selectionKey : selectedKeys) {
@@ -285,20 +285,20 @@ public class NioServer implements IServer, Runnable {
 
     /**
 	 * Override super method
-	 * @see org.apache.niolex.network.IServer#getAcceptTimeOut()
+	 * @see org.apache.niolex.network.IServer#getAcceptTimeout()
 	 */
     @Override
-	public int getAcceptTimeOut() {
-        return acceptTimeOut;
+	public int getAcceptTimeout() {
+        return acceptTimeout;
     }
 
     /**
 	 * Override super method
-	 * @see org.apache.niolex.network.IServer#setAcceptTimeOut(int)
+	 * @see org.apache.niolex.network.IServer#setAcceptTimeout(int)
 	 */
     @Override
-	public void setAcceptTimeOut(int acceptTimeOut) {
-        this.acceptTimeOut = acceptTimeOut;
+	public void setAcceptTimeout(int acceptTimeout) {
+        this.acceptTimeout = acceptTimeout;
     }
 
 }

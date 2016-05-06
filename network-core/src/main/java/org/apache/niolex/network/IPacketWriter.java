@@ -47,7 +47,7 @@ public interface IPacketWriter {
      *
      * @see org.apache.niolex.network.event.WriteEventListener
      *
-     * @param sc The Packet to write
+     * @param sc the Packet to write
      */
     public void handleWrite(PacketData sc);
 
@@ -56,7 +56,7 @@ public interface IPacketWriter {
      * The {@link #handleWrite(PacketData)} method return immediately after the packet is put into
      * the outgoing queue. This method will tell you the packet is sent by event.
      *
-     * @param listener
+     * @param listener the packet sent event listener
      */
     public void addEventListener(WriteEventListener listener);
 

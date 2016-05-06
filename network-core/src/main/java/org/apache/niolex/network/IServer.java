@@ -70,17 +70,17 @@ public interface IServer {
 	public void setPacketHandler(IPacketHandler packetHandler);
 
 	/**
-	 * @return the acceptTimeOut
+	 * @return the acceptTimeout
 	 */
-	public int getAcceptTimeOut();
+	public int getAcceptTimeout();
 
 	/**
 	 * Set the server accept timeout
 	 * <br>
      * This method must be called before {@link #start()}
 	 *
-	 * @param acceptTimeOut the acceptTimeOut to set
+	 * @param acceptTimeout the socket accept timeout in milliseconds
 	 */
-	public void setAcceptTimeOut(int acceptTimeOut);
+	public void setAcceptTimeout(int acceptTimeout);
 
 }

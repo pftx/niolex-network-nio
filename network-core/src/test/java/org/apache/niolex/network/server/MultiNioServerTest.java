@@ -59,7 +59,7 @@ public class MultiNioServerTest {
 		nioServer = new MultiNioServer();
 		nioServer.setThreadsNumber(3);
 		nioServer.setPort(port);
-		nioServer.setAcceptTimeOut(100);
+		nioServer.setAcceptTimeout(100);
 		nioServer.start();
 	}
 

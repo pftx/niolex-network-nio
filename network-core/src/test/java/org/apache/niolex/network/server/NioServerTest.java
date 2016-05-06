@@ -80,7 +80,7 @@ public class NioServerTest {
     public void testCannotStart() {
         MultiNioServer nioServer  = new MultiNioServer(3);
         nioServer.setPort(-1);
-        nioServer.setAcceptTimeOut(10);
+        nioServer.setAcceptTimeout(10);
         nioServer.start();
         nioServer.stop();
         nioServer.stop();
@@ -88,8 +88,8 @@ public class NioServerTest {
 
 	@Test
 	public void testSetter() throws Exception {
-		nioServer.setAcceptTimeOut(6233);
-		assertEquals(6233, nioServer.getAcceptTimeOut());
+		nioServer.setAcceptTimeout(6233);
+		assertEquals(6233, nioServer.getAcceptTimeout());
 		assertEquals(port, nioServer.getPort());
 		assertEquals(packetHandler, nioServer.getPacketHandler());
 	}

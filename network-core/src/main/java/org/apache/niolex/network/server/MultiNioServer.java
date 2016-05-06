@@ -201,7 +201,7 @@ public class MultiNioServer extends NioServer {
 		public void run() {
 			try {
 				while (isListening) {
-					selector.select(acceptTimeOut);
+					selector.select(acceptTimeout);
 					selectorHolder.changeAllInterestOps();
 					Set<SelectionKey> selectedKeys = selector.selectedKeys();
 		            for (SelectionKey selectionKey : selectedKeys) {
