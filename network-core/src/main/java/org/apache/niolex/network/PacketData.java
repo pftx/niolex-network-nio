@@ -111,7 +111,7 @@ public class PacketData extends Packet implements Cloneable {
     }
 
     /**
-     * Generate Data from this Packet into the ByteBuffer.
+     * Generate Header Data from this Packet and put it into the ByteBuffer.
      * Please make sure there are at least 8 bytes left in the buffer.
      *
      * @param bb byte buffer used to put the header

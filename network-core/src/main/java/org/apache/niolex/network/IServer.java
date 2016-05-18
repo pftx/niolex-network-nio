@@ -29,7 +29,7 @@ public interface IServer {
 	/**
 	 * Start the Server, bind to the Port.
 	 * Server need to start threads internally to run the main loop.
-	 * This method need to return after this server is started.
+	 * <b>This method need to return after this server is started.</b>
 	 */
 	public boolean start();
 
@@ -54,7 +54,7 @@ public interface IServer {
 	public void setPort(int port);
 
 	/**
-	 * Get the packet handler set to the server.
+	 * Get the packet handler set to this server.
 	 *
 	 * @return the packetHandler
 	 */
@@ -70,7 +70,7 @@ public interface IServer {
 	public void setPacketHandler(IPacketHandler packetHandler);
 
 	/**
-	 * @return the acceptTimeout
+	 * @return the accept timeout
 	 */
 	public int getAcceptTimeout();
 

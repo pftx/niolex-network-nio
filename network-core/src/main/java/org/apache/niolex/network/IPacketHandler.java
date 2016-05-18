@@ -37,8 +37,8 @@ public interface IPacketHandler {
     public void handlePacket(PacketData sc, IPacketWriter wt);
 
     /**
-     * The remote peer identified by this {@link IPacketWriter} is broken.
-     * User need to do private data clean here.
+     * The remote peer identified by this {@link IPacketWriter} is broken.<br>
+     * User need to do private data clean here.<br>
      * It's Guaranteed by the system there will be no more data send to user application
      * after this method has been called.
      *

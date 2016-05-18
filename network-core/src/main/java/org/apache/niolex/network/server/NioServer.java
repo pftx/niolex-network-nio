@@ -47,7 +47,7 @@ public class NioServer implements IServer, Runnable {
     private static final Logger LOG = LoggerFactory.getLogger(NioServer.class);
 
     /**
-     * The server socket channel, which is where the server listening.
+     * The server socket channel, which is where the server is listening.
      */
     private ServerSocketChannel ss;
 
@@ -72,7 +72,7 @@ public class NioServer implements IServer, Runnable {
     protected IPacketHandler packetHandler;
 
     /**
-     * The current server status.
+     * The current server listen status.
      */
     protected volatile boolean isListening = false;
 
@@ -119,8 +119,8 @@ public class NioServer implements IServer, Runnable {
      */
     private void startLoop() {
         isListening = true;
-        selectorHolder = new SelectorHolder(mainThread, mainSelector);
         mainThread = new Thread(this, "NioServer");
+        selectorHolder = new SelectorHolder(mainThread, mainSelector);
         mainThread.start();
     }
 

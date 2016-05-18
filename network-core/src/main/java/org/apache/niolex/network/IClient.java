@@ -34,7 +34,7 @@ public interface IClient extends IPacketWriter {
 	 * Do real connect action, connect to server.
 	 * This method will return immediately after get connected.
 	 *
-	 * @throws IOException if an error occurs during the connection
+	 * @throws IOException if an I/O error occured during the connection
 	 */
 	public void connect() throws IOException;
 
@@ -44,7 +44,7 @@ public interface IClient extends IPacketWriter {
 	public void stop();
 
 	/**
-	 * Test whether this client is working for now
+	 * Test whether this client is working right now
 	 *
 	 * @return the current status
 	 */

@@ -37,9 +37,9 @@ public enum ConnStatus {
     private final String explanation;
 
     /**
-     * Create a type with detailed explanation.
+     * Create a connection status type with detailed explanation.
      *
-     * @param explanation
+     * @param explanation the explanation of this status
      */
     private ConnStatus(String explanation) {
         this.explanation = explanation;
