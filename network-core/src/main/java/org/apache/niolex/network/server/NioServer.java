@@ -156,10 +156,9 @@ public class NioServer implements IServer, Runnable {
      * Handle accept, read, write. Please do not override this method.
      */
     protected final void handleKey(SelectionKey selectionKey) {
-        SocketChannel client = null;
         try {
             if (selectionKey.isAcceptable()) {
-                client = ss.accept();
+                SocketChannel client = ss.accept();
                 // Try to ensure the returned client to be correct.
                 if (client == null) {
                 	return;
@@ -203,17 +202,17 @@ public class NioServer implements IServer, Runnable {
     /**
      * Read packets from the socket channel.
      *
-     * @param core
+     * @param core the fast core
      */
     protected final void handleRead(FastCore core) {
-    	// Call this method repeatedly to empty the input channel.
+    	// Call this method repeatedly to empty the read buffer.
     	while (core.handleRead());
     }
 
     /**
      * Write packets into the socket channel.
      *
-     * @param core
+     * @param core the fast core
      */
     protected final void handleWrite(FastCore core) {
     	// Call this method repeatedly to fulfill the write buffer.

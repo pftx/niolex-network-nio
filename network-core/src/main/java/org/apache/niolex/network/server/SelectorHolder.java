@@ -41,31 +41,31 @@ public class SelectorHolder {
     private static final int INTEREST_OPS = SelectionKey.OP_READ | SelectionKey.OP_WRITE;
 
 	/**
-	 * This set store all the interested selection Keys.
+	 * This queue store all the interested selection Keys.
 	 */
 	private final ConcurrentLinkedQueue<SelectionKey> selectionKeyQueue = new ConcurrentLinkedQueue<SelectionKey>();
 
 	/**
-	 * This flag indicates the status of selector, so we will not wake up duplicated.
+	 * This flag indicates the status of selector, so we will not wake up duplicately.
 	 */
 	private final AtomicBoolean isAwake = new AtomicBoolean(false);
 
 	/**
 	 * This thread is the thread running the selector.
 	 */
-	private Thread selectorThread;
+	private final Thread selectorThread;
 
 	/**
 	 * This is the selector being held.
 	 */
-	private Selector selector;
+	private final Selector selector;
 
 
 	/**
 	 * The Constructor, must set selector thread and selector itself.
 	 *
-	 * @param selectorThread
-	 * @param selector
+	 * @param selectorThread the selector thread
+	 * @param selector the selector
 	 */
 	public SelectorHolder(Thread selectorThread, Selector selector) {
 		super();
@@ -76,18 +76,18 @@ public class SelectorHolder {
 	/**
 	 * {@link FastCore} use this method to register the wish of changing interest operations.
 	 * We will change the interest operations into both read and write.
-	 *
+	 * <br>
 	 * If the change is in the selector thread, we change it directly.
-	 * Otherwise, we save it into the set and wakeup the selector to register the change.
+	 * Otherwise, we save it into the queue and wakeup the selector to register the change.
 	 *
-	 * @param selectionKey
+	 * @param selectionKey the selection key to interest write operation
 	 */
 	public void changeInterestOps(SelectionKey selectionKey) {
 		if (selectorThread == Thread.currentThread()) {
 			selectionKey.interestOps(INTEREST_OPS);
 		} else {
 		    // Add the selection key into the key set, do not need synchronize it,
-		    // because we are using concurrent set.
+		    // because we are using concurrent queue.
 		    selectionKeyQueue.add(selectionKey);
 			wakeup();
 		}
@@ -118,7 +118,7 @@ public class SelectorHolder {
 
 
 	/**
-	 * @return  The selector this holder is managing.
+	 * @return the selector this holder is managing.
 	 */
 	public Selector getSelector() {
 		return selector;
