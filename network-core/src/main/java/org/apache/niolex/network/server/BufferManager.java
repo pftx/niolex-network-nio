@@ -86,14 +86,14 @@ public class BufferManager {
     }
 
     /**
-     * @return the maxQueueSize
+     * @return the max queue size
      */
     public int getMaxQueueSize() {
         return maxQueueSize;
     }
 
     /**
-     * @param maxQueueSize the maxQueueSize to set
+     * @param maxQueueSize the max queue size to set
      */
     public void setMaxQueueSize(int maxQueueSize) {
         this.maxQueueSize = maxQueueSize;
