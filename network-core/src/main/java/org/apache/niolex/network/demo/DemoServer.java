@@ -45,7 +45,7 @@ public class DemoServer {
     /**
      * The Server Demo, use it in command line.
      *
-     * @param args
+     * @param args the command line arguments
      */
     public static void main(String[] args) throws IOException {
         DemoUtil.parseArgs(args);

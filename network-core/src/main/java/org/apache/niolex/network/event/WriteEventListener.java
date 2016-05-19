@@ -36,7 +36,7 @@ public interface WriteEventListener {
 	 * buffer, it will be transfered to remote if no I/O error occur.
 	 * So you can not be 100% sure that the remote will get this packet.
 	 *
-	 * @param wEvent
+	 * @param wEvent the write event
 	 */
 	public void afterSent(WriteEvent wEvent);
 
