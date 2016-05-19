@@ -31,6 +31,11 @@ import org.slf4j.LoggerFactory;
 /**
  * The PacketClient connect to NioServer, send and receive packets in it's
  * own threads. This client can be used in multiple threads.
+ * <br>
+ * This class is suitable for users don't want to do any I/O in their own threads.
+ * after call {@link #handleWrite(PacketData)}, we will just put the packet into
+ * our internal queue and just return. All the I/O will be handled in our internal
+ * threads.
  *
  * @author Xie, Jiyun
  * @version 1.0.0, Date: 2012-6-13
@@ -61,7 +66,7 @@ public class PacketClient extends BaseClient {
 	/**
      * Create a PacketClient with this Server Address.<br>
      *
-     * @param serverAddress
+     * @param serverAddress the server address to connect to
      */
     public PacketClient(InetSocketAddress serverAddress) {
         super();

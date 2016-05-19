@@ -27,9 +27,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The BlockingClient connect to NioServer, send packet one by one, but receive packets in it's
- * own thread. So this client can be used in multiple threads, and we save one write thread for
- * you compare to {@link PacketClient}.
+ * The BlockingClient connect to NioServer, send packet one by one in blocking mode, but receive
+ * packets in it's own thread. This client can be used in multiple threads, and we save one write
+ * thread for you compare to {@link PacketClient}.
+ * <br>
+ * If you don't want to send packet in blocking mode (blocking your own thread), please try out
+ * {@link PacketClient}.
  *
  * @author Xie, Jiyun
  * @version 1.0.8, Date: 2012-12-13

@@ -27,14 +27,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The blocking implementation of IClient. This client can only be used in one
- * thread. If you want to reuse client in multithreading, use {@link PacketClient}
- * or {@link BlockingClient}.
- *
- * We will try to read one packet from remote after send on packet. If you are
- * in the situation that server will not respond, please use {@link #setAutoRead(boolean)}
- * If it's set to false, we will not read from server, please invoke
- * {@link #handleRead()} manually.
+ * The blocking implementation of IClient. We use synchronized methods to handle read and write.
+ * Users maybe use this class in multi-threads, but you need to handle packet read carefully.
+ * <br>
+ * If you set {@link #setAutoRead(boolean)} to true, then we will read one packet after write every
+ * packet. (Heart beat packet will be ignored).<br>
+ * If it's set to false, we will not read from server, please invoke {@link #handleRead()} manually.
+ * <br>
+ * If you want to let us handle read operations, use {@link PacketClient} or {@link BlockingClient}
+ * instead.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0, Date: 2012-6-13
@@ -57,7 +58,8 @@ public class SocketClient extends BaseClient {
 
 	/**
 	 * Create a SocketClient with the Server Address
-	 * @param serverAddress
+	 * 
+	 * @param serverAddress the server address to connect to
 	 */
 	public SocketClient(InetSocketAddress serverAddress) {
 		super();
@@ -103,7 +105,7 @@ public class SocketClient extends BaseClient {
 			    handleRead();
 			}
 		} catch (IOException e) {
-		    // When IO exception occurred, this socket is invalid, we close it.
+		    // When IO exception occurred, this socket is invalid, we need to close it.
 		    if (this.isWorking) {
 		        stop();
 		        // Notify the handler. We use a new thread to do this, because the packet handler might
@@ -119,7 +121,7 @@ public class SocketClient extends BaseClient {
 	 * Read one packet from remote server. If we read a heart beat, we will
 	 * retry again until we read a real packet.
 	 *
-	 * @throws IOException if network problem
+	 * @throws IOException if network problem occurred
 	 */
 	public synchronized void handleRead() throws IOException {
 		while (true) {
@@ -144,7 +146,7 @@ public class SocketClient extends BaseClient {
     /**
      * Set whether you need we automatically read one data packet for you after handleWrite.
      *
-     * @param autoRead
+     * @param autoRead the new autoRead status
      */
     public void setAutoRead(boolean autoRead) {
         this.autoRead = autoRead;
