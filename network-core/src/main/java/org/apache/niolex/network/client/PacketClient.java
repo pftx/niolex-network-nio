@@ -224,7 +224,8 @@ public class PacketClient extends BaseClient {
 
         /**
          * Send new packet to remote server.
-         * @throws IOException
+         * 
+         * @throws IOException if I/O related error occurred
          */
         public void sendNewPacket(PacketData sendPacket) throws IOException {
             writePacket(sendPacket);
