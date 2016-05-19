@@ -53,7 +53,7 @@ public class BlockingClient extends BaseClient {
 	/**
      * Create a BlockingClient with this Server Address.
      *
-     * @param serverAddress
+     * @param serverAddress the server address to connect to
      */
     public BlockingClient(InetSocketAddress serverAddress) {
         super();
@@ -134,11 +134,8 @@ public class BlockingClient extends BaseClient {
             } catch(Exception e) {
                 if (isWorking) {
                     LOG.error("Error occured in read loop.", e);
-                    // Notice!
                     /**
-                     * Blocking Client Error will be handled in the Read Loop.
-                     * So the Write Loop will just return, so there will be just one Error to the
-                     * Upper layer.
+                     * Notice!! ~ Blocking Client Error will be handled in the Read Loop.
                      */
                     BlockingClient.this.stop();
                     packetHandler.handleClose(BlockingClient.this);

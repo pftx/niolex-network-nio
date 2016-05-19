@@ -17,6 +17,8 @@
  */
 package org.apache.niolex.network.client;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -91,7 +93,7 @@ public abstract class BaseClient implements IClient {
     protected int socketBufferSize = Config.SO_BUFFER_SIZE;
 
     /**
-     * Prepare socket and connect to the server address.
+     * Prepare socket and connect to the specified server address.
      *
      * @return the prepared socket
      * @throws IOException if any I/O error occurs
@@ -107,8 +109,8 @@ public abstract class BaseClient implements IClient {
         socket.setSoTimeout(connectTimeout);
         socket.setTcpNoDelay(true);
         socket.connect(serverAddress);
-        in = socket.getInputStream();
-        out = socket.getOutputStream();
+        in = new BufferedInputStream(socket.getInputStream(), socketBufferSize);
+        out = new BufferedOutputStream(socket.getOutputStream(), socketBufferSize);
         return socket;
     }
 
