@@ -135,9 +135,7 @@ public class FaultTolerateAdapterTest {
         PacketData sc3 = new PacketData(59, "(*&SDFJIODF".getBytes());
         PacketData sc4 = new PacketData(69, "(*)(@NKNF:DSL:M".getBytes());
         fault.handlePacket(sc, bpw);
-        WriteEvent wEvent = new WriteEvent();
-        wEvent.setPacketData(sc2);
-        wEvent.setPacketWriter(bpw);
+        WriteEvent wEvent = new WriteEvent(bpw, sc2);
         fault.afterSent(wEvent);
         bpw.handleWrite(sc3);
         fault.handleClose(bpw);
@@ -254,11 +252,9 @@ public class FaultTolerateAdapterTest {
 	 */
 	@Test
 	public void testHandleRR() {
-		WriteEvent w = new WriteEvent();
 		PacketData sc2 = new PacketData(3, "AJ231FIUEALKD".getBytes());
 		IPacketWriter wt = mock(IPacketWriter.class);
-		w.setPacketData(sc2);
-		w.setPacketWriter(wt);
+		WriteEvent w = new WriteEvent(wt, sc2);
 		fault.afterSent(w);
 	}
 
@@ -272,10 +268,8 @@ public class FaultTolerateAdapterTest {
 		PacketData sc = new PacketData(Config.CODE_REGR_UUID, "AJFIUEALKD".getBytes());
 		IPacketWriter wt = new TBasePacketWriter();
 		fault.handlePacket(sc, wt);
-		WriteEvent w = new WriteEvent();
 		PacketData sc2 = new PacketData(3, "AJ231FIU3212312EALKD".getBytes());
-		w.setPacketData(sc2);
-		w.setPacketWriter(wt);
+		WriteEvent w = new WriteEvent(wt, sc2);
 		fault.afterSent(w);
 		fault.handleClose(wt);
 

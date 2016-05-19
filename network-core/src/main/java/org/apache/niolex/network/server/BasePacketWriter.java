@@ -115,9 +115,7 @@ public abstract class BasePacketWriter implements IPacketWriter {
 	 * @param sc the packet sent just now
 	 */
 	protected void fireSendEvent(PacketData sc) {
-		WriteEvent wEvent = new WriteEvent();
-		wEvent.setPacketData(sc);
-		wEvent.setPacketWriter(this);
+		WriteEvent wEvent = new WriteEvent(this, sc);
 		for (WriteEventListener listener : listenerList) {
 			listener.afterSent(wEvent);
 		}

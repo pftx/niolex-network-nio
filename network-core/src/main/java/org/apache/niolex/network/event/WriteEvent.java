@@ -39,22 +39,30 @@ public class WriteEvent {
 	/**
 	 * The packet writer who sent this packet.
 	 */
-	private IPacketWriter packetWriter;
+	private final IPacketWriter packetWriter;
 
 	/**
 	 * The packet just sent to remote peer.
 	 */
-	private PacketData packetData;
+	private final PacketData packetData;
 
 	/**
+	 * Construct a write event.
+	 * 
+	 * @param packetWriter the packet writer
+	 * @param packetData the packet data
+	 */
+	public WriteEvent(IPacketWriter packetWriter, PacketData packetData) {
+        super();
+        this.packetWriter = packetWriter;
+        this.packetData = packetData;
+    }
+
+    /**
 	 * @return The packet writer who sent this packet.
 	 */
 	public IPacketWriter getPacketWriter() {
 		return packetWriter;
-	}
-
-	public void setPacketWriter(IPacketWriter packetWriter) {
-		this.packetWriter = packetWriter;
 	}
 
 	/**
@@ -62,10 +70,6 @@ public class WriteEvent {
 	 */
 	public PacketData getPacketData() {
 		return packetData;
-	}
-
-	public void setPacketData(PacketData packetData) {
-		this.packetData = packetData;
 	}
 
 }

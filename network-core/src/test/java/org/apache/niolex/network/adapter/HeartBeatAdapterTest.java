@@ -109,8 +109,7 @@ public class HeartBeatAdapterTest {
     public void testAfterSendOK() throws Exception {
         IPacketWriter wt = spy(new TBasePacketWriter());
         wt.attachData(Config.ATTACH_KEY_HEART_BEAT, System.currentTimeMillis());
-        WriteEvent wEvent = new WriteEvent();
-        wEvent.setPacketWriter(wt);
+        WriteEvent wEvent = new WriteEvent(wt, null);
         ha.afterSent(wEvent);
         verify(wt, times(2)).attachData(anyString(), anyObject());
     }
@@ -118,8 +117,7 @@ public class HeartBeatAdapterTest {
     @Test
     public void testAfterSendNotAttach() throws Exception {
         IPacketWriter wt = spy(new TBasePacketWriter());
-        WriteEvent wEvent = new WriteEvent();
-        wEvent.setPacketWriter(wt);
+        WriteEvent wEvent = new WriteEvent(wt, null);
         ha.afterSent(wEvent);
         verify(wt, never()).attachData(anyString(), anyObject());
     }
@@ -170,9 +168,7 @@ public class HeartBeatAdapterTest {
 		ha.handlePacket(regi_hb, wt_no);
 
 		// wt2 has to send a packet.
-		WriteEvent wEvent = new WriteEvent();
-		wEvent.setPacketData(data);
-		wEvent.setPacketWriter(wt_no);
+		WriteEvent wEvent = new WriteEvent(wt_no, data);
 		ha.afterSent(wEvent);
 
 		wt_no.attachData(Config.ATTACH_KEY_HEART_BEAT, null);
