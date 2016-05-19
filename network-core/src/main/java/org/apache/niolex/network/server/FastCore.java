@@ -133,7 +133,6 @@ public class FastCore extends BasePacketWriter {
 		this.packetHandler = packetHandler;
 		this.selector = selector;
 		this.socketChannel = channel;
-		this.selectionKey = channel.register(selector.getSelector(), SelectionKey.OP_READ, this);
 
 		// Initialize local variables.
         sendStatus = Status.NONE;
@@ -145,6 +144,8 @@ public class FastCore extends BasePacketWriter {
         so.setSoLinger(false, 0);
         so.setSendBufferSize(Config.SO_BUFFER_SIZE);
         so.setReceiveBufferSize(Config.SO_BUFFER_SIZE);
+        this.selectionKey = channel.register(selector.getSelector(), SelectionKey.OP_READ, this);
+        
         remoteName = so.getRemoteSocketAddress().toString();
         StringBuilder sb = new StringBuilder();
         sb.append("Remote Client [").append(remoteName);

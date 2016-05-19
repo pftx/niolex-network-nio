@@ -148,7 +148,7 @@ public class MultiNioServer extends NioServer {
 	}
 
 	/**
-	 * Run the wrapped selector endlessly in separate threads.
+	 * Run the wrapped selector endlessly in each separate thread.
 	 *
 	 * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
 	 * @version 1.0.0
@@ -156,9 +156,9 @@ public class MultiNioServer extends NioServer {
 	 */
 	private class RunnableSelector implements Runnable {
 		private final LinkedList<SocketChannel> clientQueue = new LinkedList<SocketChannel>();
-		private final SelectorHolder selectorHolder;
 		private final Selector selector;
 		private final Thread thread;
+		private final SelectorHolder selectorHolder;
 
 		public RunnableSelector(ThreadGroup tPool, String name) throws IOException {
 			super();
@@ -171,7 +171,7 @@ public class MultiNioServer extends NioServer {
 		/**
 		 * Register the client to this selector.
 		 *
-		 * @param client
+		 * @param client the socket channel
 		 */
 		public synchronized void registerClient(SocketChannel client) {
 			clientQueue.add(client);
@@ -179,10 +179,10 @@ public class MultiNioServer extends NioServer {
 		}
 
 		/**
-		 * Close the internal selector and wait for the thread to shutdown.
+		 * Close the internal selector and wait for this thread to stop.
 		 *
-		 * @throws IOException
-		 * @throws InterruptedException
+		 * @throws IOException if I/O errors occurred
+		 * @throws InterruptedException if interrupted when waiting for stop thread
 		 */
 		public void close() throws IOException, InterruptedException {
 			for (SelectionKey skey : selector.keys()) {
@@ -220,7 +220,7 @@ public class MultiNioServer extends NioServer {
 		/**
 		 * Add all the clients into this selector now.
 		 *
-		 * @throws IOException
+		 * @throws IOException if I/O errors occurred
 		 */
 		public synchronized void addClients() throws IOException {
 			// Check the status, if there is any clients need to attach.
