@@ -55,7 +55,7 @@ public abstract class BasePacketWriter implements IPacketWriter {
 	/**
 	 * The channel status.
 	 */
-	private boolean isChannelClosed = false;
+	private volatile boolean isChannelClosed = false;
 
 	/**
 	 * This is an empty constructor.
@@ -101,7 +101,7 @@ public abstract class BasePacketWriter implements IPacketWriter {
 		isChannelClosed = true;
 		attachMap.clear();
 		attachMap = null;
-		// We do not clear this queue, because some adapter might use it.
+		// We do not clear this queue, because some adapter might want to use it.
 		// But we still need to set it to null to help GC.
 		sendPacketsQueue = null;
 		listenerList.clear();
@@ -112,7 +112,7 @@ public abstract class BasePacketWriter implements IPacketWriter {
 	 * Sub class need to use this method to fire send event.
 	 * Please do not override.
 	 *
-	 * @param sc
+	 * @param sc the packet sent just now
 	 */
 	protected void fireSendEvent(PacketData sc) {
 		WriteEvent wEvent = new WriteEvent();
@@ -126,7 +126,7 @@ public abstract class BasePacketWriter implements IPacketWriter {
 	/**
 	 * Sub class need to use this method to get packets to send.
 	 *
-	 * @return the next packet
+	 * @return the next packet to be sent to client
 	 */
 	protected PacketData handleNext() {
 		return sendPacketsQueue.poll();

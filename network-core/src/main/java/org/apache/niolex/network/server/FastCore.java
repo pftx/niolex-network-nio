@@ -31,7 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This is the fast core of server side packet processing component.
+ * This is the fast core, the server side packet processing component.
  * This is definitely the core of the whole network server.<br>
  * For any reader want to understand this framework, read this class carefully.
  * We handle read, write, network error etc all here.
@@ -64,7 +64,7 @@ public class FastCore extends BasePacketWriter {
      *
      */
     public static enum Status {
-        HEADER, BODY, NONE
+        HEADER, BODY, NONE;
     }
 
     /**
@@ -123,9 +123,9 @@ public class FastCore extends BasePacketWriter {
      * Constructor of FastCore, manage a SocketChannel inside.
      * We will register read operation to the selector in this method.
      *
-     * @param packetHandler
-     * @param selector
-     * @param channel
+     * @param packetHandler the packet handler
+     * @param selector the socket selector
+     * @param channel the socket channel
      */
     public FastCore(IPacketHandler packetHandler, SelectorHolder selector,
     		SocketChannel channel) throws IOException {
