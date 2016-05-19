@@ -17,7 +17,7 @@
  */
 package org.apache.niolex.network.handler;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -26,6 +26,7 @@ import static org.mockito.Mockito.when;
 import org.apache.niolex.network.IPacketHandler;
 import org.apache.niolex.network.IPacketWriter;
 import org.apache.niolex.network.PacketData;
+import org.apache.niolex.network.handler.DispatchPacketHandler.Handle;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -52,6 +53,84 @@ public class DispatchPacketHandlerTest {
         handler.addHandler((short) 3, pHandler1);
         handler.addHandler((short) 5, pHandler2);
         handler.setDefaultHandler(pHandler3);
+    }
+    
+    @Test
+    public void testHandle() {
+        Handle h = new Handle((short)3, pHandler1);
+        assertEquals(pHandler1, h.getHandler());
+        assertEquals(3, h.getEndCode().intValue());
+        assertEquals(3, h.getStartCode().intValue());
+        assertEquals("[3 - 3]", h.toString());
+    }
+    
+    @Test(expected=IllegalArgumentException.class)
+    public void testAddRangeHandler() {
+        IPacketHandler pHandler4 = mock(IPacketHandler.class);
+        IPacketHandler pHandler5 = mock(IPacketHandler.class);
+        handler.addHandler(7, 8, pHandler4);
+        handler.addHandler(5, 6, pHandler5);
+    }
+    
+    @Test(expected=IllegalArgumentException.class)
+    public void testAddHandler() {
+        handler.addHandler(9,7, handler);
+    }
+    
+    @Test
+    public void testAddRangeHandlerOverlap() {
+        IPacketHandler pHandler4 = new SummaryPacketHandler();
+        handler.addHandler(8, 90, pHandler4);
+        try {
+            handler.addHandler(50, 51, handler);
+            assertTrue(false);
+        } catch (IllegalArgumentException e) {
+            assertEquals("Overlapped with another handler. Handler class: org.apache.niolex.network.handler.SummaryPacketHandler, range: [8, 90].", e.getMessage());
+        }
+        try {
+            handler.addHandler(6, 9, handler);
+            assertTrue(false);
+        } catch (IllegalArgumentException e) {
+            assertEquals("Overlapped with another handler. Handler class: org.apache.niolex.network.handler.SummaryPacketHandler, range: [8, 90].", e.getMessage());
+        }
+        try {
+            handler.addHandler(88, 99, handler);
+            assertTrue(false);
+        } catch (IllegalArgumentException e) {
+            assertEquals("Overlapped with another handler. Handler class: org.apache.niolex.network.handler.SummaryPacketHandler, range: [8, 90].", e.getMessage());
+        }
+        try {
+            handler.addHandler(6, 99, handler);
+            assertTrue(false);
+        } catch (IllegalArgumentException e) {
+            assertEquals("Overlapped with another handler. Handler class: org.apache.niolex.network.handler.SummaryPacketHandler, range: [8, 90].", e.getMessage());
+        }
+        try {
+            handler.addHandler((short)66, handler);
+            assertTrue(false);
+        } catch (IllegalArgumentException e) {
+            assertEquals("Overlapped with another handler. Handler class: org.apache.niolex.network.handler.SummaryPacketHandler, range: [8, 90].", e.getMessage());
+        }
+    }
+    
+    @Test
+    public void testAddRangeHandlerOverlapChange() {
+        IPacketHandler pHandler4 = new SummaryPacketHandler();
+        IPacketHandler pHandler5 = new SummaryPacketHandler();
+        handler.addHandler(80, 90, pHandler4);
+        try {
+            handler.addHandler(50, 81, handler);
+            assertTrue(false);
+        } catch (IllegalArgumentException e) {
+            assertEquals("Overlapped with another handler. Handler class: org.apache.niolex.network.handler.SummaryPacketHandler, range: [80, 90].", e.getMessage());
+        }
+        handler.addHandler(66, 77, pHandler5);
+        try {
+            handler.addHandler(50, 81, handler);
+            assertTrue(false);
+        } catch (IllegalArgumentException e) {
+            assertEquals("Overlapped with another handler. Handler class: org.apache.niolex.network.handler.SummaryPacketHandler, range: [66, 77].", e.getMessage());
+        }
     }
 
     @Test
@@ -85,6 +164,7 @@ public class DispatchPacketHandlerTest {
         handler.handlePacket(sc, ip);
         handler.handlePacket(sc, ip);
         handler.handlePacket(sc, ip);
+        handler.handlePacket(sc, ip);
         verify(pHandler1, times(2)).handlePacket(sc, ip);
         verify(pHandler2, times(1)).handlePacket(sc, ip);
         verify(pHandler3, times(0)).handlePacket(sc, ip);
@@ -106,6 +186,27 @@ public class DispatchPacketHandlerTest {
         verify(pHandler2, times(1)).handlePacket(sc, ip);
         verify(pHandler3, times(2)).handlePacket(sc, ip);
         assertEquals(2, handler.getDispatchSize());
+    }
+    
+    @Test
+    public void testHandlePacketOverlap() {
+        IPacketHandler pHandler4 = mock(IPacketHandler.class);
+        IPacketHandler pHandler5 = mock(IPacketHandler.class);
+        handler.addHandler(7, 8, pHandler4);
+        handler.addHandler(1, 2, pHandler5);
+        
+        PacketData sc = mock(PacketData.class);
+        when(sc.getCode()).thenReturn((short) 0, (short) 1, (short) 2, (short) 1, (short) 0, (short) 3, (short) 3, (short) 4, (short) 4, (short) 5, (short) 6, (short) 7, (short) 8, (short) 9, (short) 8);
+        IPacketWriter ip = mock(IPacketWriter.class);
+        for (int i = 0; i < 15; ++i)
+            handler.handlePacket(sc, ip);
+        
+        verify(pHandler1, times(2)).handlePacket(sc, ip); // 3
+        verify(pHandler2, times(1)).handlePacket(sc, ip); // 5
+        verify(pHandler3, times(6)).handlePacket(sc, ip); // d
+        verify(pHandler4, times(3)).handlePacket(sc, ip);
+        verify(pHandler5, times(3)).handlePacket(sc, ip);
+        assertEquals(4, handler.getDispatchSize());
     }
 
     @Test

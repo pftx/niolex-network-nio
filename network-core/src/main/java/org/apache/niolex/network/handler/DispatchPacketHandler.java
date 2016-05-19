@@ -17,8 +17,8 @@
  */
 package org.apache.niolex.network.handler;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 import org.apache.niolex.network.IPacketHandler;
 import org.apache.niolex.network.IPacketWriter;
@@ -31,31 +31,113 @@ import org.slf4j.LoggerFactory;
  * Dispatch Packet by packet code.
  * Every code can be a type of packet, so register a Handler for a kind of Packet.
  * For example, code 0 for HeartBeat, code 1 for get description.
- *
- * User can set a default handler to handle all other packets not handled by dispatch map.
- * We do not support range handler now, so this handler is more demo than useful.
+ * <br>
+ * User can set a default handler to handle all other packets not handled by any
+ * of the registered handlers.
+ * We support range handler now, see {@link #addHandler(Short, Short, IPacketHandler)}
+ * for details.
  *
  * @author Xie, Jiyun
  *
  */
 public class DispatchPacketHandler implements IPacketHandler {
 	private static final Logger LOG = LoggerFactory.getLogger(DispatchPacketHandler.class);
+	
+	/**
+	 * This class is used to store handler mapping information.
+	 * 
+	 * @author <a href="mailto:xiejiyun@foxmail.com">Xie, Jiyun</a>
+	 * @version 1.0.0
+	 * @since May 19, 2016
+	 */
+	public static final class Handle {
+	    private final Short startCode;
+	    private final Short endCode;
+	    private final IPacketHandler handler;
+	    
+	    public Handle(Short code, IPacketHandler handler) {
+            this(code, code, handler);
+        }
+	    
+        public Handle(Short startCode, Short endCode, IPacketHandler handler) {
+            super();
+            this.startCode = startCode;
+            this.endCode = endCode;
+            this.handler = handler;
+        }
+        
+        public Short getStartCode() {
+            return startCode;
+        }
+        
+        public Short getEndCode() {
+            return endCode;
+        }
+        
+        public IPacketHandler getHandler() {
+            return handler;
+        }
 
-    private final Map<Short, IPacketHandler> dispatchMap = new HashMap<Short, IPacketHandler>();
+        @Override
+        public String toString() {
+            return String.format("[%d - %d]", startCode, endCode);
+        }
+	}
+
+    private final TreeMap<Short, Handle> dispatchMap = new TreeMap<Short, Handle>();
     private IPacketHandler defaultHandler;
 
     /**
-     * Add a handler for code <code>code</code>.
+     * Add a handler for packet with the specified code.
      *
      * @param code the packet code
      * @param handler the packet handler
      */
     public void addHandler(Short code, IPacketHandler handler) {
-        dispatchMap.put(code, handler);
+        addHandler(code, code, handler);
+    }
+    
+    /**
+     * Add a handler for packets with packet code between startCode and endCode(includes both end).
+     *
+     * @param startCode the start packet code
+     * @param endCode the end packet code
+     * @param handler the packet handler
+     * @throws IllegalArgumentException if the packet code range overlapped with another handler.
+     */
+    public void addHandler(int startCode, int endCode, IPacketHandler handler) {
+        addHandler(Short.valueOf((short)startCode), Short.valueOf((short)endCode), handler);
+    }
+    
+    /**
+     * Add a handler for packets with packet code between startCode and endCode(includes both end).
+     *
+     * @param startCode the start packet code
+     * @param endCode the end packet code
+     * @param handler the packet handler
+     * @throws IllegalArgumentException if the packet code range overlapped with another handler.
+     */
+    public void addHandler(Short startCode, Short endCode, IPacketHandler handler) {
+        if (startCode > endCode) {
+            throw new IllegalArgumentException("startCode must less than or equal to endCode.");
+        }
+        // We need to check whether this new range overlap with and old range
+        // -- Returns a key-value mapping associated with the least key greater than or
+        // equal to the given key, or null if there is no such key.
+        Map.Entry<Short, Handle> entry = dispatchMap.ceilingEntry(startCode);
+        if (entry != null && entry.getValue().startCode <= endCode) {
+            StringBuilder sb = new StringBuilder();
+            Handle h = entry.getValue();
+            sb.append("Overlapped with another handler. Handler class: ");
+            sb.append(h.getHandler().getClass().getName()).append(", range: [");
+            sb.append(h.getStartCode()).append(", ").append(h.getEndCode()).append("].");
+            throw new IllegalArgumentException(sb.toString());
+        }
+        dispatchMap.put(endCode, new Handle(startCode, endCode, handler));
     }
 
     /**
-     * Every Handler registered will be invoked for {@link #handleClose(IPacketWriter)} User need
+     * Every Handler registered will be invoked for {@link #handleClose(IPacketWriter)}. User need
      * to decide what to do.
      *
      * Override super method
@@ -63,8 +145,8 @@ public class DispatchPacketHandler implements IPacketHandler {
      */
     @Override
     public void handleClose(IPacketWriter wt) {
-        for (IPacketHandler h : dispatchMap.values()) {
-            h.handleClose(wt);
+        for (Handle h : dispatchMap.values()) {
+            h.handler.handleClose(wt);
         }
         if (defaultHandler != null) {
             defaultHandler.handleClose(wt);
@@ -80,18 +162,20 @@ public class DispatchPacketHandler implements IPacketHandler {
      */
     @Override
     public void handlePacket(PacketData sc, IPacketWriter wt) {
-        IPacketHandler h = dispatchMap.get(sc.getCode());
-        if (h != null) {
-            h.handlePacket(sc, wt);
+        short code = sc.getCode();
+        Map.Entry<Short, Handle> entry = dispatchMap.ceilingEntry(code);
+        
+        if (entry != null && entry.getValue().startCode <= code) {
+            entry.getValue().handler.handlePacket(sc, wt);
         } else if (defaultHandler != null) {
             defaultHandler.handlePacket(sc, wt);
         } else {
-            LOG.warn("No handler registered for Packet with code {}.", sc.getCode());
+            LOG.warn("No handler registered for Packet with code {}.", code);
         }
     }
 
     /**
-     * Get the current default handler
+     * Get the current default handler.
      *
      * @return the default handler
      */
@@ -100,7 +184,7 @@ public class DispatchPacketHandler implements IPacketHandler {
     }
 
     /**
-     * Set the current default handler
+     * Set the current default handler.
      *
      * @param defaultHandler the new default handler
      */
