@@ -208,7 +208,7 @@ public class FastCore extends BasePacketWriter {
      * HEADER -> Need read header, means nothing is read by now
      * BODY -> Header is read, need to read body now
      * </pre>
-     * @return true if there are some more data needs read.
+     * @return true if there are some more data needs to be read.
      */
     public boolean handleRead() {
         try {
@@ -285,7 +285,7 @@ public class FastCore extends BasePacketWriter {
                     	socketChannel.write(sendBuffer);
                         return !sendBuffer.hasRemaining();
                     } else {
-                    	// Tell listener this packet has been send now.
+                    	// Tell listener this packet has been sent just now.
                     	this.fireSendEvent(sendPacket);
                     	sendStatus = Status.NONE;
                     	LOG.debug("Packet sent. desc {}, size {}.", sendPacket.descriptor(), sendPacket.getLength());
@@ -306,7 +306,7 @@ public class FastCore extends BasePacketWriter {
      * If there is nothing to send, we will detach the write operation from selection key.
      *
      * @return true if there are some more free space to write to.
-     * @throws IOException
+     * @throws IOException if I/O error occurred
      */
     private boolean sendNewPacket() throws IOException {
     	sendPacket = super.handleNext();
@@ -317,11 +317,11 @@ public class FastCore extends BasePacketWriter {
             if (isEmpty()) {
                 // Nothing to send, remove the OP_WRITE from selector.
                 selectionKey.interestOps(SelectionKey.OP_READ);
+                return false;
             } else {
                 // Queue is not empty, we return true, system will redo the packet handle.
                 return true;
             }
-            return false;
         } else {
         	return doSendNewPacket();
         }
@@ -331,7 +331,7 @@ public class FastCore extends BasePacketWriter {
      * Do really send the packet.
      *
      * @return true if there are some more free space to write to.
-     * @throws IOException
+     * @throws IOException if I/O error occurred
      */
     private boolean doSendNewPacket() throws IOException {
     	if (sendPacket.getLength() + 8 <= DIRECT_BUFFER_SIZE) {
@@ -355,7 +355,7 @@ public class FastCore extends BasePacketWriter {
     /**
      * Error occurred when read or write.
      * Anyway, socket is closed.
-     * Need to close socket and invoke {@link #channelClosed()} clean Map.
+     * Need to close socket and invoke {@link #channelClosed()} to clean internal Maps.
      * <br>
      * We will call {@link IPacketHandler#handleClose(org.apache.niolex.network.IPacketWriter)} internally.
      */
