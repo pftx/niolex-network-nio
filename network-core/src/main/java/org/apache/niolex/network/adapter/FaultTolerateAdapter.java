@@ -17,6 +17,7 @@
  */
 package org.apache.niolex.network.adapter;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -44,9 +45,9 @@ import org.slf4j.LoggerFactory;
  * <p>
  * The difference between handler and adapter is that adapter can be applied on everything and handler
  * only deal with a specific situation.
- * <p>
+ * <p><b>
  * In this adapter, the first connect packet need to be Session ID Packet, otherwise it can not handle the
- * fault toleration properly.
+ * fault toleration properly.</b>
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
@@ -61,8 +62,9 @@ public class FaultTolerateAdapter implements IPacketHandler, WriteEventListener 
 
 	private static final int RR_SIZE = Config.SERVER_CACHE_TOLERATE_PACKETS_SIZE;
 
-	private final Map<String, ConcurrentLinkedQueue<PacketData>> dataMap =
-			new LRUHashMap<String, ConcurrentLinkedQueue<PacketData>>(Config.SERVER_FAULT_TOLERATE_MAP_SIZE);
+	// Synchronized map for concurrent access.
+	private final Map<String, ConcurrentLinkedQueue<PacketData>> dataMap = Collections.synchronizedMap(
+			new LRUHashMap<String, ConcurrentLinkedQueue<PacketData>>(Config.SERVER_FAULT_TOLERATE_MAP_SIZE));
 
 	// The Handler need to be adapted.
 	private final IPacketHandler other;
@@ -70,8 +72,9 @@ public class FaultTolerateAdapter implements IPacketHandler, WriteEventListener 
 	private final PacketTransformer transformer;
 
 	/**
-	 * Implements a constructor, please pass a handler in.
-	 * Decode Session ID with StringSerializer.
+	 * Create a FaultTolerateAdapter to adapt the handler passed in.
+	 * 
+	 * @param other the handler need to be adapted
 	 */
 	public FaultTolerateAdapter(IPacketHandler other) {
 		transformer = PacketTransformer.getInstance();
@@ -85,9 +88,9 @@ public class FaultTolerateAdapter implements IPacketHandler, WriteEventListener 
 			other.handlePacket(sc, wt);
 		} else {
 			String ssid = transformer.getDataObject(sc);
-			if (wt instanceof BasePacketWriter) {
-			    restorePackets(ssid, (BasePacketWriter) wt);
-			}
+			// Restore last time data.
+			restorePackets(ssid, wt);
+			
 			// Prepare environment for the next fault tolerate.
 			wt.attachData(KEY_UUID, ssid);
 			wt.attachData(KEY_RRLIST, new CircularList<PacketData>(RR_SIZE));
@@ -100,24 +103,22 @@ public class FaultTolerateAdapter implements IPacketHandler, WriteEventListener 
 	 * Restore the stored packets into the recovered client.
 	 *
 	 * @param ssid the client session ID
-	 * @param bpw the basic packet writer
+	 * @param writer the basic packet writer
 	 */
-	protected void restorePackets(String ssid, BasePacketWriter bpw) {
+	protected void restorePackets(String ssid, IPacketWriter writer) {
 	    ConcurrentLinkedQueue<PacketData> data = dataMap.get(ssid);
         if (data == null) {
+            // No data to recover.
             return;
         }
+        
+        // Clean data from the LRU map.
         dataMap.remove(ssid);
         PacketData sc;
-        ConcurrentLinkedQueue<PacketData> newQueue = bpw.getRemainQueue();
         final int size = data.size();
-        // We do this poll and write to add all the data in the new queue to the back of this old queue.
-        while ((sc = newQueue.poll()) != null) {
-            data.add(sc);
-        }
-        // Do the real fault tolerance.
+        // Do the real fault tolerance. Write all the data into the reconnected client.
         while ((sc = data.poll()) != null) {
-            bpw.handleWrite(sc);
+            writer.handleWrite(sc);
         }
         LOG.info("Fault tolerate recoverd for client [{}] list size {}.", ssid, size);
 	}
@@ -149,6 +150,7 @@ public class FaultTolerateAdapter implements IPacketHandler, WriteEventListener 
 	    // Store the non-send data.
         ConcurrentLinkedQueue<PacketData> els = bpw.getRemainQueue();
         int remainSize = els.size();
+        
         /**
          * Due to the network buffer, the last N packets may have send to client or
          * not. We try to re-send them when client re-connected.

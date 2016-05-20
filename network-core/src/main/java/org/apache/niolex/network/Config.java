@@ -73,13 +73,13 @@ public interface Config extends Const {
 	 * The fault tolerate map size, which contains all the fault client data.
 	 * Configure this size too much will consume much memory.
 	 */
-	int SERVER_FAULT_TOLERATE_MAP_SIZE = 256;
+	int SERVER_FAULT_TOLERATE_MAP_SIZE = 4096;
 
 	/**
 	 * Save this number of sent packets. Nio sent packets asynchronously, so there may
 	 * be some packet sent to buffer but failed to send to client.
 	 */
-	int SERVER_CACHE_TOLERATE_PACKETS_SIZE = 5;
+	int SERVER_CACHE_TOLERATE_PACKETS_SIZE = 8;
 
 	/**
 	 * Server socket accept timeout, set it too large will cause server no responding to stop command.
