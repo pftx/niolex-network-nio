@@ -24,7 +24,7 @@ import org.apache.niolex.network.IPacketWriter;
 import org.apache.niolex.network.PacketData;
 
 /**
- * Save read data into the list passed in.
+ * Save all the read packet data into the list passed in the constructor.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
