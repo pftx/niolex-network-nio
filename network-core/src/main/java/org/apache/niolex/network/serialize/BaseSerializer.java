@@ -64,7 +64,7 @@ public abstract class BaseSerializer<T> implements ISerializer {
 	 * serialize object to byte array.
 	 *
 	 * @param t the object
-	 * @return the result
+	 * @return the result byte array
 	 */
 	public abstract byte[] toBytes(T t);
 

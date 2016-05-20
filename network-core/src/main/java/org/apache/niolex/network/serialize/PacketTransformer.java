@@ -26,7 +26,7 @@ import org.apache.niolex.network.PacketData;
  * Transform packet into object according to packet code.
  * <br>
  * The packet code is a 2-bytes short integer.
- * The system will use some this code, according to the following map:<pre>
+ * The system will use some packet code, according to the following map:<pre>
  * CODE		USAGE
  * 0		Heart Beat
  * 1-65500	User Range
