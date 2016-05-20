@@ -40,7 +40,7 @@ import org.apache.niolex.network.server.MultiNioServer;
  */
 public class DemoServer {
 
-    private static MultiNioServer s = new MultiNioServer();
+    private static MultiNioServer server = new MultiNioServer();
 
     /**
      * The Server Demo, use it in command line.
@@ -49,19 +49,19 @@ public class DemoServer {
      */
     public static void main(String[] args) throws IOException {
         DemoUtil.parseArgs(args);
-        s.setPort(PORT);
+        server.setPort(PORT);
         if (POOL_SIZE != 0)
-            s.setThreadsNumber(POOL_SIZE);
+            server.setThreadsNumber(POOL_SIZE);
         DispatchPacketHandler handler = new DispatchPacketHandler();
         handler.addHandler((short)2, new EchoPacketHandler());
         handler.addHandler((short)3, new SummaryPacketHandler());
-        handler.addHandler((short)4, new SessionPacketHandler(new LastTalkFactory()));
-        s.setPacketHandler(handler);
-        s.start();
+        handler.addHandler(4, 100, new SessionPacketHandler(new LastTalkFactory()));
+        server.setPacketHandler(handler);
+        server.start();
     }
 
     public static void stop() {
-        s.stop();
+        server.stop();
     }
 
 }
