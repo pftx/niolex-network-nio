@@ -63,12 +63,13 @@ public class HeartBeatAdapter implements IPacketHandler, WriteEventListener, Run
     private int heartBeatInterval = Config.SERVER_HEARTBEAT_INTERVAL;
 
     /**
-     * The max heart beat relaxation time.
+     * The max heart beat relaxation time. If packet not sent during (heartBeatInterval - maxHeartBeatRelaxation),
+     * we will send a heart beat.
      */
     private int maxHeartBeatRelaxation = heartBeatInterval / 8;
 
     /**
-     * The status of this adapter.
+     * The working status of this adapter.
      */
     private volatile boolean isWorking;
 
@@ -85,7 +86,7 @@ public class HeartBeatAdapter implements IPacketHandler, WriteEventListener, Run
     /**
      * The constructor of this adapter.
      *
-     * @param other
+     * @param other the packet handler to be adapted
      */
     public HeartBeatAdapter(IPacketHandler other) {
 		super();
@@ -135,7 +136,8 @@ public class HeartBeatAdapter implements IPacketHandler, WriteEventListener, Run
 
 	/**
 	 * Register this writer for heart beat.
-	 * @param wt
+	 * 
+	 * @param wt the packet writer used to register heart beat
 	 */
 	public void registerHeartBeat(IPacketWriter wt) {
 		// Attach the current time stamp to the packet writer, and save it to the queue.
@@ -152,8 +154,13 @@ public class HeartBeatAdapter implements IPacketHandler, WriteEventListener, Run
 	@Override
 	public void afterSent(WriteEvent wEvent) {
 		IPacketWriter wt = wEvent.getPacketWriter();
-		if (wt.getAttached(KEY) != null) {
-	    	wt.attachData(KEY, System.currentTimeMillis());
+		Long ttm = wt.getAttached(KEY);
+		if (ttm != null) {
+		    long cttm = System.currentTimeMillis();
+		    
+		    // We relax attach time stamp for 50ms to increase performance.
+		    if (ttm + 50 < cttm)
+		        wt.attachData(KEY, cttm);
 		}
 	}
 
@@ -214,7 +221,7 @@ public class HeartBeatAdapter implements IPacketHandler, WriteEventListener, Run
 	 * The heartBeatInterval to set
 	 * There will be a +-(12.5%) max relaxation for heart beat.
 	 *
-	 * @param heartBeatInterval
+	 * @param heartBeatInterval the heart beat internal to set in milliseconds
 	 */
 	public void setHeartBeatInterval(int heartBeatInterval) {
         this.heartBeatInterval = heartBeatInterval;
@@ -225,14 +232,14 @@ public class HeartBeatAdapter implements IPacketHandler, WriteEventListener, Run
 	 * Whether do we need to send heart beat to all clients.
 	 * If this flag is true, client will not need to register heart beat.
 	 *
-	 * @param forceHeartBeat
+	 * @param forceHeartBeat the force heart beat flag to set
 	 */
 	public void setForceHeartBeat(boolean forceHeartBeat) {
 		this.forceHeartBeat = forceHeartBeat;
 	}
 
 	/**
-	 * Return the status of this adapter
+	 * Return the current working status of this adapter.
 	 *
 	 * @return the current status
 	 */
