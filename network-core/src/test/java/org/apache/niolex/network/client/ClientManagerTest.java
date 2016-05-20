@@ -99,7 +99,7 @@ public class ClientManagerTest {
         SocketClient sc = new SocketClient();
         sc.isWorking = true;
         ClientManager cm = new ClientManager(sc);
-        cm.setAddressList(Arrays.asList(new InetSocketAddress("localhost", 8809)));
+        cm.setAddressList(Arrays.asList(new InetSocketAddress("localhost", 8899)));
         assertTrue(cm.connect());
     }
 

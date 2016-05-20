@@ -17,13 +17,17 @@
  */
 package org.apache.niolex.network.client;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 
@@ -204,18 +208,6 @@ public class BaseClientTest extends BaseClient {
         IPacketHandler packetHandler = mock(IPacketHandler.class);
         setPacketHandler(packetHandler);
         assertEquals(packetHandler, this.packetHandler);
-    }
-
-    @Test
-    public void testGetServerAddress() throws Exception {
-        setServerAddress("www.baidu.com:8123");
-        System.out.println(getServerAddress());
-    }
-
-    @Test
-    public void testSetServerAddressInetSocketAddress() throws Exception {
-        setServerAddress(new InetSocketAddress("www.baidu.com", 8080));
-        System.out.println(getServerAddress());
     }
 
     @Test

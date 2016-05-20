@@ -164,7 +164,7 @@ public class ClientManager {
     /**
      * The internal method to do real connect.
      *
-     * @throws IOException
+     * @throws IOException if I/O related error occurred
      */
     private void doConnect() throws IOException {
         addressIndex = (addressIndex + 1) % addressList.size();
@@ -177,7 +177,7 @@ public class ClientManager {
     /**
      * Wait for we finally get a connection or been interrupted.
      * <p>
-     * Notion! Please call {@link #connect()} or
+     * Attention! Please call {@link #connect()} or
      * {@link #retryConnect()} first! We will not start a thread
      * to try to connect to server in this method.
      *
@@ -195,7 +195,7 @@ public class ClientManager {
      * as closed.
      * <p>
      * We will set the {@link #connectRetryTimes} to 0 to stop the thread
-     * try to reconnect. So if any user want to reuse this client manager
+     * trying to reconnect. So if any user want to reuse this client manager
      * please re-set this field.
      */
     public void close() {
@@ -224,7 +224,7 @@ public class ClientManager {
      * Set the time in milliseconds that client with sleep between retry to connect
      * to server.
      *
-     * @param sleepBetweenRetryTime
+     * @param sleepBetweenRetryTime the sleep between retry time to set
      */
     public void setSleepBetweenRetryTime(int sleepBetweenRetryTime) {
         this.sleepBetweenRetryTime = sleepBetweenRetryTime;
@@ -240,7 +240,7 @@ public class ClientManager {
     /**
      * Set retry times.
      *
-     * @param connectRetryTimes
+     * @param connectRetryTimes the connect retry times to set
      */
     public void setConnectRetryTimes(int connectRetryTimes) {
         this.connectRetryTimes = connectRetryTimes;
@@ -257,7 +257,7 @@ public class ClientManager {
      * Set the server address list.
      * We will shuffle it here in order to make it act more randomly.
      *
-     * @param addressList
+     * @param addressList the servers address list
      */
     public void setAddressList(List<InetSocketAddress> addressList) {
         Collections.shuffle(addressList);
@@ -268,7 +268,7 @@ public class ClientManager {
      * Set the server address list.
      * We will shuffle it here in order to make it act more randomly.
      *
-     * @param addressStr
+     * @param addressStr the servers address list string
      */
     public void setAddressList(String addressStr) {
         String[] addrArr = addressStr.split("[,; ]+");

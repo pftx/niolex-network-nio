@@ -135,18 +135,18 @@ public class FaultTolerateAdapterTest {
         PacketData sc3 = new PacketData(59, "(*&SDFJIODF".getBytes());
         PacketData sc4 = new PacketData(69, "(*)(@NKNF:DSL:M".getBytes());
         fault.handlePacket(sc, bpw);
+        bpw.handleWrite(sc3);
         WriteEvent wEvent = new WriteEvent(bpw, sc2);
         fault.afterSent(wEvent);
-        bpw.handleWrite(sc3);
         fault.handleClose(bpw);
         // After close, the dataMap have 2 item.
         TBasePacketWriter wt = spy(new TBasePacketWriter());
         wt.handleWrite(sc4);
         fault.handlePacket(sc, wt);
         ConcurrentLinkedQueue<PacketData> data = wt.getRemainQueue();
+        assertEquals(sc4, data.poll());
         assertEquals(sc2, data.poll());
         assertEquals(sc3, data.poll());
-        assertEquals(sc4, data.poll());
     }
 
 	/**
@@ -284,7 +284,8 @@ public class FaultTolerateAdapterTest {
 		verify(wt3).attachData(Config.ATTACH_KEY_FAULTTO_UUID, "AJFIUEALKD");
 
 		ArgumentCaptor<PacketData> argument = ArgumentCaptor.forClass(PacketData.class);
-		verify(wt3, times(1)).handleWrite((PacketData) argument.capture());
+		verify(wt3, times(0)).handleWrite((PacketData) argument.capture());
+		verify(wt2, times(1)).handleWrite((PacketData) argument.capture());
 		assertEquals(sc2, argument.getValue());
 	}
 
