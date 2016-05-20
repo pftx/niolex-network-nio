@@ -25,11 +25,13 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.nio.channels.spi.AbstractSelector;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.niolex.commons.reflect.FieldUtil;
 import org.apache.niolex.commons.reflect.MethodUtil;
@@ -46,7 +48,9 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.stubbing.Answer;
 
 /**
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
@@ -107,6 +111,13 @@ public class FastCoreTest {
 		fastCore.handleWrite(sc);
 		fastCore.handleWrite(sc);
 		verify(selectorH).changeInterestOps(any(SelectionKey.class));
+		fastCore.handleWrite(sc);
+		fastCore.handleWrite(sc);
+		fastCore.handleWrite(sc);
+		verify(selectorH).changeInterestOps(any(SelectionKey.class));
+		FieldUtil.setValue(fastCore, "writeAttached", new AtomicBoolean(false));
+		fastCore.handleWrite(sc);
+        verify(selectorH, times(2)).changeInterestOps(any(SelectionKey.class));
 	}
 
 	/**
@@ -116,13 +127,47 @@ public class FastCoreTest {
 	public void testGetRemoteName() {
 		System.out.println(fastCore.getRemoteName());
 	}
+	
+
+    /**
+     * Test method for {@link org.apache.niolex.network.server.FastCore#handleRead()}.
+     * @throws IOException
+     */
+    @Test
+    public void testHandleReadFake() throws IOException {
+        // 1. Direct read, got nothing.
+        fastCore.handleRead();
+        verify(packetHandler, times(0)).handlePacket(any(PacketData.class), any(IPacketWriter.class));
+        
+        // 2. Read zero packet.
+        SocketChannel ch = mock(SocketChannel.class);
+        when(ch.read(any(ByteBuffer.class))).thenReturn(0);
+        FieldUtil.setValue(fastCore, "socketChannel", ch);
+        assertFalse(fastCore.handleRead());
+        
+        // 3. Read part of header.
+        when(ch.read(any(ByteBuffer.class))).thenAnswer(new Answer<Integer>(){
+
+            @Override
+            public Integer answer(InvocationOnMock invocation) throws Throwable {
+                ByteBuffer bf = (ByteBuffer)invocation.getArguments()[0];
+                bf.put((byte)1);
+                bf.put((byte)2);
+                bf.putShort((short)3);
+                bf.putInt(8);
+                return 8;
+            }});
+        
+        assertTrue(fastCore.handleRead());
+        verify(packetHandler, times(1)).handlePacket(any(PacketData.class), any(IPacketWriter.class));
+    }
 
 	/**
 	 * Test method for {@link org.apache.niolex.network.server.FastCore#handleRead()}.
 	 * @throws IOException
 	 */
 	@Test
-	public void testHandleRead() throws IOException {
+	public void testHandleReadClosed() throws IOException {
 		client.close();
 		fastCore.handleRead();
 		fastCore.handleRead();
@@ -154,6 +199,22 @@ public class FastCoreTest {
         client.close();
         fastCore.handleWrite();
         verify(packetHandler, times(1)).handleClose(fastCore);
+    }
+
+    private FastCore createFastCore(IPacketHandler hl) throws IOException {
+        SocketChannel ch = mock(SocketChannel.class);
+        Socket so = mock(Socket.class);
+        when(so.getRemoteSocketAddress()).thenReturn(new InetSocketAddress("localhost", 8888));
+        when(ch.socket()).thenReturn(so);
+        when(ch.isConnected()).thenReturn(true);
+        SelectionKey value = mock(SelectionKey.class);
+        FieldUtil.setValue(ch, "open", true);
+        FieldUtil.setValue(ch, "regLock", true);
+        FieldUtil.setValue(ch, "keyLock", true);
+        SelectorHolder sh = new SelectorHolder(Thread.currentThread(), mock(AbstractSelector.class));
+        FastCore f = new FastCore(hl, sh, ch);
+        FieldUtil.setValue(f, "selectionKey", value);
+        return f;
     }
 
     /**
@@ -226,13 +287,6 @@ public class FastCoreTest {
         Method m = MethodUtil.getMethod(FastCore.class, "doSendNewPacket");
         Boolean b = (Boolean) MethodUtil.invokeMethod(fc, m);
         assertFalse(b);
-    }
-
-    private FastCore createFastCore(IPacketHandler hl) throws IOException {
-        SocketChannel ch = new TSocketChannel();
-        ch.configureBlocking(false);
-        SelectorHolder sh = new SelectorHolder(Thread.currentThread(), mock(AbstractSelector.class));
-        return new FastCore(hl, sh, ch);
     }
 
     /**
