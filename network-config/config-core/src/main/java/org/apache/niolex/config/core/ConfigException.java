@@ -32,15 +32,15 @@ public class ConfigException extends RuntimeException {
 	private static final long serialVersionUID = -6865552546945138458L;
 
 	/**
-	 * @param message
+	 * @param message the exception message
 	 */
 	public ConfigException(String message) {
 		super(message);
 	}
 
 	/**
-	 * @param message
-	 * @param cause
+	 * @param message the exception message
+	 * @param cause the cause
 	 */
 	public ConfigException(String message, Throwable cause) {
 		super(message, cause);

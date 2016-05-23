@@ -46,7 +46,7 @@ public class MemoryStorage {
 	 *
 	 * This method is synchronized.
 	 *
-	 * @param config
+	 * @param config the config group
 	 * @return the changed item list if this config already exist.
 	 */
 	public List<ConfigItem> store(ConfigGroup config) {
@@ -61,8 +61,8 @@ public class MemoryStorage {
 	/**
 	 * Get group config by the specified group name.
 	 *
-	 * @param groupName
-	 * @return null if group not found.
+	 * @param groupName the group name
+	 * @return null if group not found
 	 */
 	public ConfigGroup get(String groupName) {
 		return mapStorage.get(groupName);
@@ -70,7 +70,8 @@ public class MemoryStorage {
 
 	/**
 	 * Get all the current stored group config(s).
-	 * @return all the current config groups.
+	 * 
+	 * @return all the current config groups
 	 */
 	public Collection<ConfigGroup> getAll() {
 		return mapStorage.values();
@@ -78,8 +79,9 @@ public class MemoryStorage {
 
 	/**
 	 * Get group name by group id.
-	 * @param groupId
-	 * @return null if group not found.
+	 * 
+	 * @param groupId the group ID
+	 * @return null if group not found
 	 */
 	public String findGroupName(int groupId) {
 		return nameStorage.get(groupId);
@@ -88,8 +90,8 @@ public class MemoryStorage {
 	/**
 	 * Update the config item in the specified group.
 	 *
-	 * @param groupName
-	 * @param item
+	 * @param groupName the group name
+	 * @param item the config item
 	 * @return true if the specified config item is replaced, false if not.
 	 */
 	public boolean updateConfigItem(String groupName, ConfigItem item) {

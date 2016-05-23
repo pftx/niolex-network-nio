@@ -54,7 +54,8 @@ public class SyncBean {
 
 	/**
 	 * Create an sync bean to sync this group.
-	 * @param group
+	 * 
+	 * @param group the config group
 	 */
 	public SyncBean(ConfigGroup group) {
 		super();

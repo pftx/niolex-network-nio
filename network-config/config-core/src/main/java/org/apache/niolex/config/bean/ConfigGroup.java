@@ -28,10 +28,10 @@ import java.util.concurrent.locks.ReentrantLock;
  * The config group bean.
  *
  * The data management in config framework is like this:
- *
+ * <pre>
  * ConfigGroup
- * 		=>	ConfigItem
- * 				=>	RealData
+ *     =&gt;    ConfigItem
+ *         =&gt;    RealData</pre>
  * We have only two levels management.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
@@ -62,7 +62,8 @@ public class ConfigGroup {
 
 	/**
 	 * Update the internal config item.
-	 * @param item
+	 * 
+	 * @param item the config item
 	 * @return true if the config item is replaced, false if this parameter is too old.
 	 */
 	public boolean updateConfigItem(ConfigItem item) {
@@ -80,8 +81,9 @@ public class ConfigGroup {
 	}
 
 	/**
-	 * Store the group config into this bean.
-	 * @param config
+	 * Replace the config item in this group by the group config in the specified parameter.
+	 * 
+	 * @param config the config group
 	 * @return the changed item list
 	 */
 	public List<ConfigItem> replaceConfig(ConfigGroup config) {

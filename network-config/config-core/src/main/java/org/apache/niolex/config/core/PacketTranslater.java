@@ -40,8 +40,9 @@ public class PacketTranslater {
 
 	/**
 	 * Translate SubscribeBean into PacketData
-	 * @param bean
-	 * @return packet
+	 * 
+	 * @param bean the subscribe bean
+	 * @return packet the packet
 	 */
 	public static final PacketData translate(SubscribeBean bean) {
 		try {
@@ -55,8 +56,9 @@ public class PacketTranslater {
 
 	/**
 	 * Translate PacketData into SubscribeBean
-	 * @param sc
-	 * @return bean
+	 * 
+	 * @param sc the packet data
+	 * @return bean the subscribe bean
 	 */
 	public static final SubscribeBean toSubscribeBean(PacketData sc) {
 		try {
@@ -69,8 +71,9 @@ public class PacketTranslater {
 
 	/**
 	 * Translate ConfigGroup into PacketData
-	 * @param conf
-	 * @return packet
+	 * 
+	 * @param conf the config group
+	 * @return packet the packet
 	 */
 	public static final PacketData translate(ConfigGroup conf) {
 		try {
@@ -83,8 +86,9 @@ public class PacketTranslater {
 
 	/**
 	 * Translate PacketData into ConfigGroup
-	 * @param sc
-	 * @return bean
+	 * 
+	 * @param sc the packet data
+	 * @return the config group bean
 	 */
 	public static final ConfigGroup toConfigGroup(PacketData sc) {
 		try {
@@ -97,8 +101,9 @@ public class PacketTranslater {
 
 	/**
 	 * Translate list of SyncBean into PacketData
-	 * @param list
-	 * @return packet
+	 * 
+	 * @param list the list of sync bean
+	 * @return packet the packet
 	 */
 	public static final PacketData translate(List<SyncBean> list) {
 		try {
@@ -112,7 +117,8 @@ public class PacketTranslater {
 
 	/**
 	 * Translate PacketData into SyncBean
-	 * @param sc
+	 * 
+	 * @param sc the packet data
 	 * @return the bean
 	 */
 	public static final List<SyncBean> toSyncBean(PacketData sc) {
@@ -126,8 +132,9 @@ public class PacketTranslater {
 
 	/**
 	 * Translate ConfigItem into PacketData
-	 * @param item
-	 * @return packet
+	 * 
+	 * @param item the config item
+	 * @return the packet data
 	 */
 	public static final PacketData translate(ConfigItem item) {
 		try {
@@ -140,8 +147,9 @@ public class PacketTranslater {
 
 	/**
 	 * Translate PacketData into ConfigItem
-	 * @param sc
-	 * @return bean
+	 * 
+	 * @param sc the packet data
+	 * @return the config item bean
 	 */
 	public static final ConfigItem toConfigItem(PacketData sc) {
 		try {
@@ -154,8 +162,9 @@ public class PacketTranslater {
 
 	/**
 	 * Translate UserInfo into PacketData
-	 * @param item
-	 * @return packet
+	 * 
+	 * @param item the user info bean
+	 * @return the packet
 	 */
 	public static final PacketData translate(UserInfo item) {
 		try {
@@ -168,8 +177,9 @@ public class PacketTranslater {
 
 	/**
 	 * Translate PacketData into UserInfo
-	 * @param sc
-	 * @return bean
+	 * 
+	 * @param sc the packet data
+	 * @return the user info bean
 	 */
 	public static final UserInfo toUserInfo(PacketData sc) {
 		try {

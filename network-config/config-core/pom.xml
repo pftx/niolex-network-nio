@@ -16,13 +16,24 @@
 	<url>http://maven.apache.org</url>
 
 	<dependencies>
+	    <dependency>
+            <groupId>org.apache.niolex</groupId>
+            <artifactId>commons-remote</artifactId>
+            <version>[0.1.0,2.0.0)</version>
+            <exclusions>
+            	<exclusion>
+            		<groupId>com.esotericsoftware</groupId>
+            		<artifactId>reflectasm</artifactId>
+            	</exclusion>
+            </exclusions>
+	    </dependency>
 		<dependency>
 			<groupId>org.apache.niolex</groupId>
 			<artifactId>network-core</artifactId>
 			<version>[0.3.1,2.0.0)</version>
 			<exclusions>
 				<exclusion>
-					<groupId>com.esotericsoftware.reflectasm</groupId>
+					<groupId>com.esotericsoftware</groupId>
 					<artifactId>reflectasm</artifactId>
 				</exclusion>
 				<exclusion>
@@ -30,7 +41,7 @@
 					<artifactId>jackson-smile</artifactId>
 				</exclusion>
 				<exclusion>
-					<groupId>com.esotericsoftware.kryo</groupId>
+					<groupId>com.esotericsoftware</groupId>
 					<artifactId>kryo</artifactId>
 				</exclusion>
 				<exclusion>
