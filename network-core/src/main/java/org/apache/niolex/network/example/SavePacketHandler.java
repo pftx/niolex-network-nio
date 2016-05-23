@@ -50,7 +50,8 @@ public class SavePacketHandler implements IPacketHandler {
 	 */
 	@Override
 	public void handlePacket(PacketData sc, IPacketWriter wt) {
-		collection.add(sc);
+	    if (collection != null)
+	        collection.add(sc);
 	}
 
 	/**

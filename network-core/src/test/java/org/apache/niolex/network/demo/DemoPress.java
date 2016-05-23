@@ -37,6 +37,8 @@ import org.apache.niolex.network.client.SocketClient;
 import org.apache.niolex.network.example.SavePacketHandler;
 
 /**
+ * Packet send to server, then echoed back.
+ * 
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
  * @since 2012-8-11
@@ -54,6 +56,11 @@ public class DemoPress {
 
 	/**
 	 * The main.
+	 * 
+	 * First, we open 10 clients to warm up server.
+	 * Then, we use THREAD_NUM threads to do real test.
+	 * At the same time, we shuffle some client to do request, to disturb server.
+	 * Finally, we print test result.
 	 *
 	 * @param args
 	 * @throws IOException
@@ -68,7 +75,8 @@ public class DemoPress {
 	    System.out.println("Thread number [" + THREAD_NUM + "], Buffer size [" +
 	            BUF_SIZE + "], Send packets [" + RUN_SIZE * THREAD_NUM + "], Shuffle ["
 	            + SHUFFLE_NUM + "].");
-	    // 1 test one run.
+	    
+	    // 1 test 10 run, warm up server.
 		for (int i = 0; i < 10; ++i) {
 			BaseClient cli = create();
 			LinkedList<PacketData> list = new LinkedList<PacketData>();
@@ -83,7 +91,8 @@ public class DemoPress {
 			}
 			cli.stop();
 		}
-		// 2 start threads.
+		
+		// 2 start #THREAD_NUM threads to do real test.
 		Thread[] ts = new Thread[THREAD_NUM];
 		Runner[] rn = new Runner[THREAD_NUM];
 		for (int i = 0; i < THREAD_NUM; ++i) {
@@ -92,7 +101,10 @@ public class DemoPress {
 			t.start();
 			ts[i] = t;
 		}
+		
 		STOP_WATCH.begin(true);
+		
+		// 3 shuffle some client to do request, to disturb server.
 		for (int i = 0; i < SHUFFLE_NUM; ++i) {
 			BaseClient cli = create();
 			LinkedList<PacketData> list = new LinkedList<PacketData>();
@@ -108,6 +120,7 @@ public class DemoPress {
 			cli.stop();
 			Thread.yield();
 		}
+		
 		printRecv();
 		for (int i = 0; i < THREAD_NUM; ++i) {
 			ts[i].join();
@@ -129,7 +142,7 @@ public class DemoPress {
 	public static final void printRecv() {
 	    int k = 0, lastK = 0;
 	    while ((k = RECV_CNT.get()) < RUN_SIZE * THREAD_NUM * 0.99) {
-	        System.out.println("\t\trcv -> " + (k - lastK));
+	        System.out.println("   [rcv] -> " + (k - lastK));
 	        lastK = k;
 	        ThreadUtil.sleep(1000);
 	    }
@@ -164,7 +177,6 @@ public class DemoPress {
                     RECV_CNT.incrementAndGet();
                     if (!equals2(sc, sendList.poll())) {
                         ERROR_CNT.inc();
-                        System.out.println("Out => " + 1);
                     }
                 }
 

@@ -22,6 +22,7 @@ import static org.apache.niolex.network.demo.DemoUtil.*;
 import java.io.IOException;
 
 import org.apache.niolex.network.example.EchoPacketHandler;
+import org.apache.niolex.network.example.SavePacketHandler;
 import org.apache.niolex.network.handler.DispatchPacketHandler;
 import org.apache.niolex.network.handler.SessionPacketHandler;
 import org.apache.niolex.network.handler.SummaryPacketHandler;
@@ -58,6 +59,7 @@ public class DemoServer {
         handler.addHandler((short)2, new EchoPacketHandler());
         handler.addHandler((short)3, new SummaryPacketHandler());
         handler.addHandler(4, 100, new SessionPacketHandler(new LastTalkFactory()));
+        handler.addHandler(101, 200, new SavePacketHandler(null));
         server.setPacketHandler(handler);
         server.start();
     }

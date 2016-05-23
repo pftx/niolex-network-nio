@@ -44,8 +44,8 @@ public class DemoUtil {
         if (args == null || args.length == 0) {
             HOST = "localhost";
             PORT = 8808;
-            TIMEOUT = 600000;
-            POOL_SIZE = 0;
+            TIMEOUT = 60000;
+            POOL_SIZE = 30;
             BUF_SIZE = 4096;
             LAST = -1;
             return;

@@ -22,7 +22,6 @@ import java.net.InetSocketAddress;
 import java.util.LinkedList;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.apache.niolex.commons.test.Counter;
 import org.apache.niolex.commons.test.MockUtil;
 import org.apache.niolex.commons.test.StopWatch;
 import org.apache.niolex.commons.test.StopWatch.Stop;
@@ -33,6 +32,8 @@ import org.apache.niolex.network.client.SocketClient;
 import org.apache.niolex.network.example.SavePacketHandler;
 
 /**
+ * Packet send to server, then discarded.
+ * 
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
  * @since 2012-8-11
@@ -40,13 +41,11 @@ import org.apache.niolex.network.example.SavePacketHandler;
 public class SendPress {
 
     static final StopWatch STOP_WATCH = new StopWatch(1);
-    static final Counter ERROR_CNT = new Counter();
     static final AtomicInteger RECV_CNT = new AtomicInteger();
 
     static int BUF_SIZE = 512;
 	static int RUN_SIZE = 10000;
 	static int THREAD_NUM = 5;
-	static int SHUFFLE_NUM = 50;
 
 	/**
 	 * The main.
@@ -60,10 +59,8 @@ public class SendPress {
 	    RUN_SIZE = DemoUtil.TIMEOUT;
 	    if (DemoUtil.POOL_SIZE != 0)
 	        THREAD_NUM = DemoUtil.POOL_SIZE;
-	    SHUFFLE_NUM = DemoUtil.LAST;
 	    System.out.println("Thread number [" + THREAD_NUM + "], Buffer size [" +
-	            BUF_SIZE + "], Send packets [" + RUN_SIZE * THREAD_NUM + "], Shuffle ["
-	            + SHUFFLE_NUM + "].");
+	            BUF_SIZE + "], Send packets [" + RUN_SIZE * THREAD_NUM + "].");
 	    // 1 test one run.
 		for (int i = 0; i < 10; ++i) {
 			BaseClient cli = create();
@@ -96,8 +93,7 @@ public class SendPress {
 		}
 		STOP_WATCH.done();
 		STOP_WATCH.print();
-		System.out.println("Done..... error = " + ERROR_CNT.cnt() + ", recv = " + RECV_CNT.get()
-		        + ", send = " + RUN_SIZE * THREAD_NUM);
+		System.out.println("Done..... , recv = " + RECV_CNT.get() + ", send = " + RUN_SIZE * THREAD_NUM);
 	}
 
 	public static SocketClient create() throws IOException {
@@ -135,7 +131,7 @@ public class SendPress {
 			int i = RUN_SIZE;
 			PacketData pac;
 			while (i-- > 0) {
-				pac = new PacketData(5, MockUtil.randByteArray(BUF_SIZE));
+				pac = new PacketData(101, MockUtil.randByteArray(BUF_SIZE));
 				Stop s = STOP_WATCH.start();
 				cli.handleWrite(pac);
 				s.stop();

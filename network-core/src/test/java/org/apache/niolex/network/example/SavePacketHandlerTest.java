@@ -64,6 +64,8 @@ public class SavePacketHandlerTest {
     @Test
     public void testHandleClose() {
         savePacketHandler.handleClose(null);
+        savePacketHandler = new SavePacketHandler(null);
+        savePacketHandler.handlePacket(null, null);
     }
 
 }
