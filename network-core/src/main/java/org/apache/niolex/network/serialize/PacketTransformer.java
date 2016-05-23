@@ -80,6 +80,8 @@ public class PacketTransformer {
 	/**
 	 * Translate PacketData to Object.
 	 *
+	 * @param <T> the data object class type
+	 *
 	 * @param sc the packet
 	 * @return the result
 	 * @throws IllegalStateException if we can not translate this packet

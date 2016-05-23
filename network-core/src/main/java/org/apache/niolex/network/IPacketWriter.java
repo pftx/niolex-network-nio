@@ -73,6 +73,8 @@ public interface IPacketWriter {
     /**
      * Get the attached data from this Writer, or null if nothing is stored.
      *
+     * @param <T> the attached object class type
+     * 
      * @param key the attachment key
      * @return the attached object
      */

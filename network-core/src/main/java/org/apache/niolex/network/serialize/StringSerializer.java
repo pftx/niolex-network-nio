@@ -33,7 +33,7 @@ public class StringSerializer extends BaseSerializer<String> {
 	/**
 	 * Create a StringSerializer for this code.
 	 *
-	 * @param code
+	 * @param code the packet code
 	 */
 	public StringSerializer(short code) {
 		super(code);

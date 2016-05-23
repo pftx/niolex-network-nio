@@ -40,7 +40,8 @@ public class DemoClient {
     /**
      * The Client Demo
      *
-     * @param args
+     * @param args the command line arguments
+     * @throws Exception when necessary
      */
     public static void main(String[] args) throws Exception {
         DemoUtil.parseArgs(args);

@@ -88,7 +88,7 @@ public abstract class BaseClient implements IClient {
     protected int connectTimeout = Config.SO_CONNECT_TIMEOUT;
 
     /**
-     * Socket send & receive buffer size.
+     * Socket send &amp; receive buffer size.
      */
     protected int socketBufferSize = Config.SO_BUFFER_SIZE;
 
@@ -118,6 +118,7 @@ public abstract class BaseClient implements IClient {
      * Parse Packet from the input stream. We will throw IOException if end of stream reached
      * before we finish one packet.
      *
+     * @return the read packet
      * @throws IOException if any I/O error occurs
      * @throws IllegalStateException If packet is too large
      */

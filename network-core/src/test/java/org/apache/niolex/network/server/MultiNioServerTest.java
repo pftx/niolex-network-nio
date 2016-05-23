@@ -21,10 +21,15 @@ import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
+import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.nio.channels.spi.AbstractSelector;
+import java.nio.channels.spi.SelectorProvider;
 import java.util.LinkedList;
 
 import org.apache.niolex.commons.concurrent.ThreadUtil;
+import org.apache.niolex.commons.reflect.FieldUtil;
+import org.apache.niolex.commons.test.Counter;
 import org.apache.niolex.commons.test.MockUtil;
 import org.apache.niolex.commons.util.Const;
 import org.apache.niolex.network.CoreRunner;
@@ -42,7 +47,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.stubbing.Answer;
 
 
 @RunWith(MockitoJUnitRunner.class)
@@ -94,6 +101,72 @@ public class MultiNioServerTest {
         assertEquals((byte)1, argument.getValue().getVersion());
         assertEquals(0, argument.getValue().getLength());
         assertEquals(0, argument.getValue().getData().length);
+	}
+	
+	@Test
+	public void testStartWithError() throws Exception {
+	    final SelectorProvider p = SelectorProvider.provider();
+	    SelectorProvider m = mock(SelectorProvider.class);
+	    when(m.openSocketChannel()).thenReturn(p.openSocketChannel());
+	    when(m.openServerSocketChannel()).thenReturn(p.openServerSocketChannel());
+	    
+	    final Counter c = new Counter();
+	    when(m.openSelector()).thenAnswer(new Answer<AbstractSelector>(){
+
+            @Override
+            public AbstractSelector answer(InvocationOnMock invocation) throws Throwable {
+                if (c.cnt() > 0) {
+                    throw new IOException("test.");
+                } else {
+                    c.inc();
+                    return p.openSelector();
+                }
+            }});
+	    
+	    FieldUtil.setValue(p, "provider", m);
+	    
+	    MultiNioServer mns = new MultiNioServer();
+	    mns.setPort(9091);
+	    
+	    assertFalse(mns.start());
+	    mns.stop();
+	    FieldUtil.setValue(p, "provider", p);
+	}
+	
+	@Test
+	public void testSelectWithError() throws Exception {
+	    final SelectorProvider p = SelectorProvider.provider();
+	    SelectorProvider m = mock(SelectorProvider.class);
+	    when(m.openSocketChannel()).thenReturn(p.openSocketChannel());
+	    when(m.openServerSocketChannel()).thenReturn(p.openServerSocketChannel());
+	    final Counter c = new Counter();
+	    when(m.openSelector()).thenAnswer(new Answer<AbstractSelector>(){
+	        @Override
+	        public AbstractSelector answer(InvocationOnMock invocation) throws Throwable {
+	            if (c.cnt() == 0) {
+	                c.inc();
+	                return p.openSelector();
+	            }
+	            
+	            AbstractSelector s = mock(AbstractSelector.class);
+	            when(s.select(anyLong())).thenThrow(new IOException("Hello."));
+	            return s;
+	        }});
+	    
+	    FieldUtil.setValue(p, "provider", m);
+	    
+	    MultiNioServer mns = new MultiNioServer();
+	    mns.setPort(9091);
+	    
+	    assertTrue(mns.start());
+	    int i = 10;
+	    while (i-- > 0) {
+	        ThreadUtil.sleepAtLeast(i);
+	        if (!mns.isListening) break;
+	    }
+	    assertFalse(mns.isListening);
+	    mns.stop();
+	    FieldUtil.setValue(p, "provider", p);
 	}
 
 	@Test

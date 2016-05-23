@@ -214,7 +214,61 @@ public class FastCoreTest {
         SelectorHolder sh = new SelectorHolder(Thread.currentThread(), mock(AbstractSelector.class));
         FastCore f = new FastCore(hl, sh, ch);
         FieldUtil.setValue(f, "selectionKey", value);
+        when(ch.write(any(ByteBuffer.class))).thenAnswer(new Answer<Integer>(){
+
+            @Override
+            public Integer answer(InvocationOnMock invocation) throws Throwable {
+                byte[] dst = new byte[7];
+                ByteBuffer bf = (ByteBuffer)invocation.getArguments()[0];
+                
+                if (bf.remaining() > 7) {
+                    bf.get(dst, 0, 7);
+                } else {
+                    bf.get(dst, 0, bf.remaining());
+                }
+                return 2;
+            }});
         return f;
+    }
+    
+    /**
+     * Test method for {@link org.apache.niolex.network.server.FastCore#handleWrite()}.
+     * @throws IOException
+     */
+    @Test
+    public void testHandleWriteWholePackage() throws IOException {
+        IPacketHandler hl = mock(IPacketHandler.class);
+        FastCore fc = createFastCore(hl);
+        fc.handleWrite(new PacketData(33, "Hello, write packet."));
+        // sendNewPacket -- whole packet.
+        assertFalse(fc.handleWrite());
+        assertFalse(fc.handleWrite());
+        assertFalse(fc.handleWrite());
+        assertTrue(fc.handleWrite());
+        assertFalse(fc.handleWrite());
+        assertFalse(fc.handleWrite());
+    }
+    
+    /**
+     * Test method for {@link org.apache.niolex.network.server.FastCore#handleWrite()}.
+     * @throws IOException
+     */
+    @Test
+    public void testHandleWriteLarge() throws IOException {
+        IPacketHandler hl = mock(IPacketHandler.class);
+        FastCore fc = createFastCore(hl);
+        fc.handleWrite(new PacketData(33, new byte[8188]));
+        // sendNewPacket -- header part.
+        assertFalse(fc.handleWrite());
+        assertTrue(fc.handleWrite());
+
+        // send body.
+        for (int i = 0; i < 1169; ++i) {
+            assertFalse(fc.handleWrite());
+        }
+        assertTrue(fc.handleWrite());
+        assertFalse(fc.handleWrite());
+        assertFalse(fc.handleWrite());
     }
 
     /**
@@ -222,7 +276,7 @@ public class FastCoreTest {
      * @throws IOException
      */
     @Test
-    public void testHandleWrite() throws IOException {
+    public void testHandleWriteBody() throws IOException {
         IPacketHandler hl = mock(IPacketHandler.class);
         FastCore fc = createFastCore(hl);
         FieldUtil.setValue(fc, "sendStatus", Status.BODY);

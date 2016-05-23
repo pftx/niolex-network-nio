@@ -30,6 +30,8 @@ public interface IServer {
 	 * Start the Server, bind to the Port.
 	 * Server need to start threads internally to run the main loop.
 	 * <b>This method need to return after this server is started.</b>
+	 * 
+	 * @return true if server started, false if failed to start server
 	 */
 	public boolean start();
 

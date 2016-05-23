@@ -56,9 +56,9 @@ public class FastCore extends BasePacketWriter {
     /**
      * Internal used in FastCore. Please ignore.
      * Status indicate the running status of read and write.
-     * NONE -> Not running
-     * HEADER -> Reading(Writing) header
-     * BODY -> Reading(Writing) body
+     * NONE -&gt; Not running
+     * HEADER -&gt; Reading(Writing) header
+     * BODY -&gt; Reading(Writing) body
      *
      * @author Xie, Jiyun
      *
@@ -126,6 +126,7 @@ public class FastCore extends BasePacketWriter {
      * @param packetHandler the packet handler
      * @param selector the socket selector
      * @param channel the socket channel
+     * @throws IOException if I/O related error occurred
      */
     public FastCore(IPacketHandler packetHandler, SelectorHolder selector,
     		SocketChannel channel) throws IOException {
@@ -206,8 +207,8 @@ public class FastCore extends BasePacketWriter {
      * If this method returns true, selector need to call this method again.
      * <pre>
      * Read status change summary:
-     * HEADER -> Need read header, means nothing is read by now
-     * BODY -> Header is read, need to read body now
+     * HEADER -&gt; Need read header, means nothing is read by now
+     * BODY -&gt; Header is read, need to read body now
      * </pre>
      * @return true if there are some more data needs to be read.
      */
@@ -265,9 +266,9 @@ public class FastCore extends BasePacketWriter {
      * Send packets to client when network is free.
      * <pre>
      * Status change summary:
-     * NONE -> Nothing is sending now
-     * HEADER -> Sending a packet, header now
-     * BODY -> Sending a packet body
+     * NONE -&gt; Nothing is sending now
+     * HEADER -&gt; Sending a packet, header now
+     * BODY -&gt; Sending a packet body
      * </pre>
      * @return true if there are some more free space to write to.
      */

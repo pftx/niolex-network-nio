@@ -31,10 +31,11 @@ import org.apache.niolex.network.server.MultiNioServer;
 /**
  * DemoServer, use MultiNioServer to start a simple server.
  * We do some different things for different codes:
- * 2 -> echo packet back.
- * 3 -> print the packet summary to log and send the summary back.
- * 4 -> create a session for each client and do last talk reply.
- *
+ * <pre>
+ * 2 -&gt; echo packet back.
+ * 3 -&gt; print the packet summary to log and send the summary back.
+ * 4 -&gt; create a session for each client and do last talk reply.
+ * </pre>
  * @author Xie, Jiyun
  *
  */
@@ -46,6 +47,7 @@ public class DemoServer {
      * The Server Demo, use it in command line.
      *
      * @param args the command line arguments
+     * @throws IOException when necessary
      */
     public static void main(String[] args) throws IOException {
         DemoUtil.parseArgs(args);

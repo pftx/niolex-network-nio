@@ -211,7 +211,7 @@ public class HeartBeatAdapter implements IPacketHandler, WriteEventListener, Run
     }
 
     /**
-	 * Return The heartBeatInterval
+	 * @return The heartBeatInterval
 	 */
 	public int getHeartBeatInterval() {
         return heartBeatInterval;

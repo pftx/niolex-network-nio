@@ -154,6 +154,8 @@ public class NioServer implements IServer, Runnable {
     /**
      * Process all the IO requests.
      * Handle accept, read, write. Please do not override this method.
+     * 
+     * @param selectionKey the selection key to be handled
      */
     protected final void handleKey(SelectionKey selectionKey) {
         try {
@@ -194,6 +196,7 @@ public class NioServer implements IServer, Runnable {
      * there own selector.
      *
      * @param client the client socket channel
+     * @throws IOException if I/O related error occurred
      */
     protected void registerClient(SocketChannel client) throws IOException {
         new FastCore(packetHandler, selectorHolder, client);
