@@ -18,7 +18,7 @@
 package org.apache.niolex.config.core;
 
 /**
- * The interface to store all the packet codes.
+ * The interface to store all the packet codes used in network-config project.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0

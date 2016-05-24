@@ -35,31 +35,37 @@ import org.apache.niolex.config.bean.ConfigGroup;
 public class MemoryStorage {
 
 	/**
-	 * The total storage.
+	 * The total internal storage.
+	 * The mapStorage maps config group name to config group instance.
+	 * The nameStorage maps config group ID to config group name.
 	 */
 	private final ConcurrentHashMap<String, ConfigGroup> mapStorage = new ConcurrentHashMap<String, ConfigGroup>();
 	private final ConcurrentHashMap<Integer, String> nameStorage = new ConcurrentHashMap<Integer, String>();
 
 	/**
-	 * Store the ConfigGroup into MemoryStorage.
-	 * If another ConfigGroup already exist, we will try to replace old config items.
+	 * Store the specified ConfigGroup into MemoryStorage.
+	 * If another ConfigGroup already exist, we will try to replace old config items
+	 * in that group with this config group.
 	 *
-	 * This method is synchronized.
+	 * This method can be used concurrently.
 	 *
 	 * @param config the config group
 	 * @return the changed item list if this config already exist.
 	 */
 	public List<ConfigItem> store(ConfigGroup config) {
 		ConfigGroup tmp = mapStorage.putIfAbsent(config.getGroupName(), config);
-		nameStorage.put(config.getGroupId(), config.getGroupName());
+		
+		// If tmp is not null, we already have this config group.
 		if (tmp != null) {
 			return tmp.replaceConfig(config);
+		} else {
+		    nameStorage.put(config.getGroupId(), config.getGroupName());		    
 		}
 		return null;
 	}
 
 	/**
-	 * Get group config by the specified group name.
+	 * Get the config group with the specified group name.
 	 *
 	 * @param groupName the group name
 	 * @return null if group not found
@@ -69,7 +75,7 @@ public class MemoryStorage {
 	}
 
 	/**
-	 * Get all the current stored group config(s).
+	 * Get all the current stored config group(s).
 	 * 
 	 * @return all the current config groups
 	 */
@@ -96,7 +102,9 @@ public class MemoryStorage {
 	 */
 	public boolean updateConfigItem(String groupName, ConfigItem item) {
 		ConfigGroup tmp = mapStorage.get(groupName);
+		
 		if (tmp == null) {
+		    // Config group not found.
 			return false;
 		} else {
 			return tmp.updateConfigItem(item);

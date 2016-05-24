@@ -46,7 +46,7 @@ public class SubscribeBean {
 	private String password;
 
 	/**
-	 * The group list this node interested.
+	 * The group list this node interested with.
 	 */
 	private Set<String> groupSet = Collections.synchronizedSet(new HashSet<String>());
 
@@ -70,10 +70,6 @@ public class SubscribeBean {
 
 	public Set<String> getGroupSet() {
 		return groupSet;
-	}
-
-	public void setGroupSet(Set<String> groupList) {
-		this.groupSet = groupList;
 	}
 
 	@Override

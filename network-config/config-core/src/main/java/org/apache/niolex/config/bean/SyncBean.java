@@ -41,7 +41,7 @@ public class SyncBean {
 	private String groupName;
 
 	/**
-	 * The group config data.
+	 * The group config data, maps from key to last update time.
 	 */
 	private Map<String, Long> groupData;
 

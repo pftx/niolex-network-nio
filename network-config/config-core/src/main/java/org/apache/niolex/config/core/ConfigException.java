@@ -27,11 +27,13 @@ package org.apache.niolex.config.core;
 public class ConfigException extends RuntimeException {
 
 	/**
-	 * Generated
+	 * Generated UID.
 	 */
 	private static final long serialVersionUID = -6865552546945138458L;
 
 	/**
+	 * Constructor extends from super class.
+	 * 
 	 * @param message the exception message
 	 */
 	public ConfigException(String message) {
@@ -39,6 +41,8 @@ public class ConfigException extends RuntimeException {
 	}
 
 	/**
+	 * Constructor extends from super class.
+	 * 
 	 * @param message the exception message
 	 * @param cause the cause
 	 */

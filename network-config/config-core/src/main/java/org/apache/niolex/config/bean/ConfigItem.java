@@ -18,7 +18,7 @@
 package org.apache.niolex.config.bean;
 
 /**
- * The configuration item.
+ * The configuration item. Store one configuration.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
