@@ -35,8 +35,10 @@ public class ConfigAdminMain {
 	private static final String USAGE = FileUtil.getCharacterFileContentFromClassPath("usage.txt", ConfigAdminMain.class,
 	        Config.SERVER_ENCODING);
 	/**
-	 * @param args
-	 * @throws Exception
+	 * The main function.
+	 * 
+	 * @param args command line arguments
+	 * @throws Exception if necessary
 	 */
 	public static void main(String[] args) throws Exception {
 		if (args.length != 3) {

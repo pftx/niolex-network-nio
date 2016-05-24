@@ -18,7 +18,7 @@
 package org.apache.niolex.config.admin;
 
 /**
- * The inteface for updater.
+ * The interface for updater.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0

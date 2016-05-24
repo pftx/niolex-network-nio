@@ -10,7 +10,6 @@
 	</parent>
 
 	<artifactId>config-admin</artifactId>
-	<version>0.2.0</version>
 	<packaging>jar</packaging>
 
 	<name>config-admin</name>
