@@ -17,7 +17,6 @@
  */
 package org.apache.niolex.config.client;
 
-import org.apache.niolex.config.event.ConfigListener;
 import org.junit.Test;
 
 /**

@@ -17,10 +17,10 @@
  */
 package org.apache.niolex.config.client;
 
-import org.apache.niolex.config.bean.ConfigItem;
+import org.apache.niolex.commons.event.Listener;
 import org.apache.niolex.config.bean.ConfigGroup;
+import org.apache.niolex.config.bean.ConfigItem;
 import org.apache.niolex.config.core.ConfigException;
-import org.apache.niolex.config.event.ConfigListener;
 
 /**
  * Configer是一个用来读取配置中心配置的工具类
@@ -36,7 +36,7 @@ import org.apache.niolex.config.event.ConfigListener;
 public class Configer extends ConfigClient {
 
 	/**
-	 * The internal group config storage.
+	 * The internal config group stores all the config items.
 	 */
     private final ConfigGroup config;
 
@@ -46,7 +46,6 @@ public class Configer extends ConfigClient {
      * @param groupName the group name of this config group.
      */
     public Configer(String groupName) {
-		super();
 		try {
 			this.config = getConfigGroup(groupName);
 		} catch (ConfigException e) {
@@ -54,6 +53,7 @@ public class Configer extends ConfigClient {
 		} catch (Exception e) {
 			throw new ConfigException("Failed to load group " + groupName, e);
 		}
+		
 		if (this.config == null) {
 			throw new ConfigException("Failed to load group " + groupName);
 		}
@@ -61,14 +61,12 @@ public class Configer extends ConfigClient {
 
 	/**
 	 * Add an event listener to watch the config with this key changes.
-	 * Attention! We can only manage one listener for one key.
 	 *
 	 * @param key the config item key
 	 * @param listener the listener
-	 * @return the old listener if there is any, null otherwise.
 	 */
-	public ConfigListener addListener(String key, ConfigListener listener) {
-		return registerEventHandler(config.getGroupName(), key, listener);
+	public void addListener(String key, Listener<ConfigItem> listener) {
+		registerEventHandler(config.getGroupName(), key, listener);
 	}
 
     /**
@@ -226,4 +224,5 @@ public class Configer extends ConfigClient {
     public boolean getBoolean(String key, boolean defaultValue) {
         return Boolean.parseBoolean(getProperty(key, Boolean.toString(defaultValue)));
     }
+    
 }
