@@ -87,7 +87,8 @@ public class AuthenServiceImpl implements AuthenService {
 
 	/**
 	 * Get user role from attached user info.
-	 * @param wt
+	 * 
+	 * @param wt the packet writer
 	 * @return null if not found.
 	 */
 	public String getUserRole(IPacketWriter wt) {

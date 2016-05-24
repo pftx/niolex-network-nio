@@ -132,6 +132,8 @@ public class ConfigServer {
 	/**
 	 * Start the Server, bind to the Port. Server need to start threads internally to run. This method need to return
 	 * after this server is started.
+	 * 
+	 * @return true if started, false if failed to start server
 	 */
 	public boolean start() {
 		if (heartBeatAdapter == null) {

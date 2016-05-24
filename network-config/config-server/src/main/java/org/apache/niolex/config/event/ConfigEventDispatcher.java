@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.niolex.commons.concurrent.ConcurrentUtil;
 import org.apache.niolex.config.bean.ConfigItem;
 import org.apache.niolex.config.core.CodeMap;
 import org.apache.niolex.config.core.PacketTranslater;
@@ -54,36 +55,35 @@ public class ConfigEventDispatcher {
 
 	/**
 	 * Add an event listener who care this event.
-	 * @param groupName
-	 * @param listener
+	 * 
+	 * @param groupName the config group name
+	 * @param listener the listener
 	 */
 	public void addListener(String groupName, IPacketWriter listener) {
-		ConcurrentHashMap<IPacketWriter, String> queue = clients.get(groupName);
-		if (queue == null) {
-			queue = new ConcurrentHashMap<IPacketWriter, String>();
-			ConcurrentHashMap<IPacketWriter, String> tmp = clients.putIfAbsent(groupName, queue);
-			if (tmp != null) {
-				queue = tmp;
-			}
+		ConcurrentHashMap<IPacketWriter, String> map = clients.get(groupName);
+		if (map == null) {
+		    map = ConcurrentUtil.initMap(clients, groupName, new ConcurrentHashMap<IPacketWriter, String>());
 		}
-		queue.put(listener, "");
+		map.put(listener, "");
 	}
 
 	/**
 	 * Remove the specified event listener.
-	 * @param groupName
-	 * @param listener
+	 * 
+	 * @param groupName the config group name
+	 * @param listener the listener
 	 */
 	public void removeListener(String groupName, IPacketWriter listener) {
-		ConcurrentHashMap<IPacketWriter, String> queue = clients.get(groupName);
-		if (queue != null) {
-			queue.remove(listener);
+		ConcurrentHashMap<IPacketWriter, String> map = clients.get(groupName);
+		if (map != null) {
+			map.remove(listener);
 		}
 	}
 
 	/**
 	 * Add other server under control, which is interested to all events.
-	 * @param listener
+	 * 
+	 * @param listener the listener
 	 */
 	public void addOtherServer(IPacketWriter listener) {
 		otherServers.add(listener);
@@ -91,7 +91,8 @@ public class ConfigEventDispatcher {
 
 	/**
 	 * Remove other server under control.
-	 * @param listener
+	 * 
+	 * @param listener the listener
 	 */
 	public void removeOtherServer(IPacketWriter listener) {
 		otherServers.remove(listener);
@@ -99,8 +100,9 @@ public class ConfigEventDispatcher {
 
 	/**
 	 * Fire the specified event to all the listeners registered to this dispatcher.
-	 * @param groupName
-	 * @param item
+	 * 
+	 * @param groupName the config group name
+	 * @param item the config item
 	 */
 	public void fireEvent(String groupName, ConfigItem item) {
 		PacketData data = PacketTranslater.translate(item);
@@ -116,8 +118,9 @@ public class ConfigEventDispatcher {
 
 	/**
 	 * Fire the specified event to all the listeners registered to this dispatcher.
-	 * @param groupName
-	 * @param item
+	 * 
+	 * @param groupName the config group name
+	 * @param item the config item
 	 */
 	public void fireClientEvent(String groupName, ConfigItem item) {
 		fireClientEvent(groupName, PacketTranslater.translate(item));
@@ -125,13 +128,14 @@ public class ConfigEventDispatcher {
 
 	/**
 	 * Fire the specified event to all the listeners registered to this dispatcher.
-	 * @param groupName
-	 * @param data
+	 * 
+	 * @param groupName the config group name
+	 * @param data the packet data
 	 */
 	public void fireClientEvent(String groupName, PacketData data) {
-		ConcurrentHashMap<IPacketWriter, String> queue = clients.get(groupName);
-		if (queue != null) {
-			for (IPacketWriter wt : queue.keySet()) {
+		ConcurrentHashMap<IPacketWriter, String> map = clients.get(groupName);
+		if (map != null) {
+			for (IPacketWriter wt : map.keySet()) {
 				wt.handleWrite(data);
 			}
 		}
@@ -139,7 +143,8 @@ public class ConfigEventDispatcher {
 
 	/**
 	 * Fire event to other servers to indicate that a new config group is added.
-	 * @param groupName
+	 * 
+	 * @param groupName the config group name
 	 */
 	public void fireAddEvent(String groupName) {
 		PacketData data = new PacketData(CodeMap.GROUP_ADD, groupName);

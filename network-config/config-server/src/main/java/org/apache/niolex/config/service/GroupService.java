@@ -34,8 +34,8 @@ public interface GroupService {
 	/**
 	 * Try to subscribe this group.
 	 *
-	 * @param groupName
-	 * @param wt
+	 * @param groupName the group name
+	 * @param wt the packet writer
 	 * @return true if success, false otherwise. Detailed information will be send to
 	 * <code>wt</code> directly.
 	 */
@@ -44,8 +44,8 @@ public interface GroupService {
 	/**
 	 * Try to synchronize client status with server central storage.
 	 *
-	 * @param bean
-	 * @param wt
+	 * @param bean the sync bean
+	 * @param wt the packet writer
 	 */
 	public void cliSyncGroup(SyncBean bean, IPacketWriter wt);
 
@@ -57,21 +57,21 @@ public interface GroupService {
 	/**
 	 * Update this diff packet from other server into memory storage.
 	 *
-	 * @param diff
+	 * @param diff the diff config item
 	 */
 	public void svrSendDiff(ConfigItem diff);
 
 	/**
 	 * Handle the group add request from other server.
 	 *
-	 * @param groupName
+	 * @param groupName the group name
 	 */
 	public void svrSendGroup(String groupName);
 
 	/**
 	 * Refresh this group data with DB, send changes to other server as well.
 	 *
-	 * @param groupName
+	 * @param groupName the group name
 	 * @return the detailed string about the status of refresh group
 	 */
 	public String adminRefreshGroup(String groupName);
@@ -79,7 +79,8 @@ public interface GroupService {
 	/**
 	 * Add a new config group with this name.
 	 *
-	 * @param groupName
+	 * @param groupName the group name
+	 * @param wt the packet writer
 	 * @return the detailed string about the status of add group
 	 */
 	public String addGroup(String groupName, IPacketWriter wt);
@@ -87,8 +88,8 @@ public interface GroupService {
 	/**
 	 * Add a new config item.
 	 *
-	 * @param item
-	 * @param wt
+	 * @param item the config item
+	 * @param wt the packet writer
 	 * @return the detailed string about the status of add config item
 	 */
 	public String addItem(ConfigItem item, IPacketWriter wt);
@@ -96,8 +97,8 @@ public interface GroupService {
 	/**
 	 * Update an existing config item.
 	 *
-	 * @param item
-	 * @param wt
+	 * @param item the config item
+	 * @param wt the packet writer
 	 * @return the detailed string about the status of update config item
 	 */
 	public String updateItem(ConfigItem item, IPacketWriter wt);

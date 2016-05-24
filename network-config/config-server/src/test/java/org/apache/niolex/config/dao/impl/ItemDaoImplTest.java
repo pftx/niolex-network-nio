@@ -26,25 +26,51 @@ import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.niolex.commons.test.AnnotationOrderedRunner;
+import org.apache.niolex.commons.test.AnnotationOrderedRunner.Order;
 import org.apache.niolex.commons.util.DateTimeUtil;
 import org.apache.niolex.config.bean.ConfigItem;
 import org.apache.niolex.config.core.Context;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /**
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
  * @since 2012-7-6
  */
+@RunWith(AnnotationOrderedRunner.class)
 public class ItemDaoImplTest {
 
 	private ItemDaoImpl dao = Context.CTX.getBean(ItemDaoImpl.class);
+
+    /**
+     * Test method for {@link org.apache.niolex.config.dao.impl.ItemDaoImpl#addConfig(org.apache.niolex.config.bean.ConfigItem)}.
+     */
+    @Test
+    @Order(1)
+    public void testAddConfig() {
+        ConfigItem item = new ConfigItem();
+        item.setGroupId(7);
+        item.setcUid(100);
+        item.setuUid(100);
+        String key = "unittest." + System.currentTimeMillis();
+        item.setKey(key);
+        item.setValue("This is the value from unit test.");
+        boolean b = dao.addConfig(item);
+        assertTrue(b);
+        b = dao.addConfig(item);
+        assertFalse(b);
+        item = dao.getConfig(7, key);
+        System.out.println("Insert time: " + item.getUpdateTime());
+    }
 
 	/**
 	 * Test method for {@link org.apache.niolex.config.dao.impl.ItemDaoImpl#loadAllConfigItems(long)}.
 	 * @throws ParseException
 	 */
 	@Test
+	@Order(3)
 	public void testLoadAllConfigItems() throws ParseException {
 		List<ConfigItem> list = dao.loadAllConfigItems(0);
 		int cgid = 1;
@@ -67,6 +93,7 @@ public class ItemDaoImplTest {
 	 * Test method for {@link org.apache.niolex.config.dao.impl.ItemDaoImpl#loadGroupItems(int)}.
 	 */
 	@Test
+	@Order(4)
 	public void testLoadGroupItems() {
 		List<ConfigItem> list = dao.loadGroupItems(1);
 		System.out.println("Item " + list);
@@ -78,6 +105,7 @@ public class ItemDaoImplTest {
 	 * @throws ParseException
 	 */
 	@Test
+	@Order(5)
 	public void testUpdateConfig() throws ParseException {
 		ConfigItem item = dao.loadGroupItems(1).get(0);
 		item.setValue("This is the value from unit test. " + System.currentTimeMillis());
@@ -92,27 +120,7 @@ public class ItemDaoImplTest {
 	 * Test method for {@link org.apache.niolex.config.dao.impl.ItemDaoImpl#addConfig(org.apache.niolex.config.bean.ConfigItem)}.
 	 */
 	@Test
-	public void testAddConfig() {
-		ConfigItem item = new ConfigItem();
-		item.setGroupId(7);
-		item.setcUid(100);
-		item.setuUid(100);
-		String key = "unittest." + System.currentTimeMillis();
-		item.setKey(key);
-		item.setValue("This is the value from unit test.");
-		boolean b = dao.addConfig(item);
-		assertTrue(b);
-		b = dao.addConfig(item);
-		assertFalse(b);
-		item = dao.getConfig(7, key);
-		System.out.println("Insert time: " + item.getUpdateTime());
-	}
-
-
-	/**
-	 * Test method for {@link org.apache.niolex.config.dao.impl.ItemDaoImpl#addConfig(org.apache.niolex.config.bean.ConfigItem)}.
-	 */
-	@Test
+	@Order(6)
 	public void testGetConfig() {
 		ConfigItem item = dao.getConfig(7, "demo");
 		assertNull(item);

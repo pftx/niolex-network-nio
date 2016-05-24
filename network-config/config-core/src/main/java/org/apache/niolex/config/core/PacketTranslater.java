@@ -42,7 +42,7 @@ public class PacketTranslater {
 	 * Translate SubscribeBean into PacketData
 	 * 
 	 * @param bean the subscribe bean
-	 * @return packet the packet
+	 * @return the packet
 	 */
 	public static final PacketData translate(SubscribeBean bean) {
 		try {
@@ -58,7 +58,7 @@ public class PacketTranslater {
 	 * Translate PacketData into SubscribeBean
 	 * 
 	 * @param sc the packet data
-	 * @return bean the subscribe bean
+	 * @return the subscribe bean
 	 */
 	public static final SubscribeBean toSubscribeBean(PacketData sc) {
 		try {
@@ -73,7 +73,7 @@ public class PacketTranslater {
 	 * Translate ConfigGroup into PacketData
 	 * 
 	 * @param conf the config group
-	 * @return packet the packet
+	 * @return the packet
 	 */
 	public static final PacketData translate(ConfigGroup conf) {
 		try {
@@ -103,7 +103,7 @@ public class PacketTranslater {
 	 * Translate list of SyncBean into PacketData
 	 * 
 	 * @param list the list of sync bean
-	 * @return packet the packet
+	 * @return the packet
 	 */
 	public static final PacketData translate(List<SyncBean> list) {
 		try {
@@ -119,7 +119,7 @@ public class PacketTranslater {
 	 * Translate PacketData into SyncBean
 	 * 
 	 * @param sc the packet data
-	 * @return the bean
+	 * @return the bean list
 	 */
 	public static final List<SyncBean> toSyncBean(PacketData sc) {
 		try {

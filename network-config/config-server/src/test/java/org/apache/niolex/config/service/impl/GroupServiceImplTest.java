@@ -117,52 +117,52 @@ public class GroupServiceImplTest {
 	}
 
 	/**
-		 * Test method for {@link org.apache.niolex.config.service.impl.GroupServiceImpl#svrSendDiff(org.apache.niolex.config.bean.ConfigItem)}.
-		 */
-		@Test
-		public void testSvrSendDiff() {
-			ConfigItem diff = new ConfigItem();
-			diff.setGroupId(2);
-			diff.setKey("demo.key");
-			diff.setValue("unit stset");
-			diff.setUpdateTime(System.currentTimeMillis());
-			sevice.svrSendDiff(diff);
-			ConfigGroup c = storage.get("configserver.test.demo");
-			ConfigItem item = c.getGroupData().get("demo.key");
-			assertEquals(item.getValue(), "unit stset");
-			item.setUpdateTime(1234L);
-		}
-
-		/**
-		 * Test method for {@link org.apache.niolex.config.service.impl.GroupServiceImpl#svrSendDiff(org.apache.niolex.config.bean.ConfigItem)}.
-		 */
-		@Test
-		public void testSvrSendDiffNeg2() {
-			ConfigItem diff = new ConfigItem();
-			diff.setGroupId(17);
-			diff.setKey("demo.key");
-			diff.setValue("unit stset");
-			diff.setUpdateTime(System.currentTimeMillis());
-			sevice.svrSendDiff(diff);
-			ConfigGroup c = storage.get("configserver.test.demo");
-			ConfigItem item = c.getGroupData().get("demo.key");
-			assertEquals(item.getValue(), "unit stset");
-			item.setUpdateTime(1234L);
-		}
+	 * Test method for {@link org.apache.niolex.config.service.impl.GroupServiceImpl#svrSendDiff(org.apache.niolex.config.bean.ConfigItem)}.
+	 */
+	@Test
+	public void testSvrSendDiff() {
+		ConfigItem diff = new ConfigItem();
+		diff.setGroupId(2);
+		diff.setKey("demo.key");
+		diff.setValue("unit stset");
+		diff.setUpdateTime(System.currentTimeMillis());
+		sevice.svrSendDiff(diff);
+		ConfigGroup c = storage.get("configserver.test.demo");
+		ConfigItem item = c.getGroupData().get("demo.key");
+		assertEquals(item.getValue(), "unit stset");
+		item.setUpdateTime(1234L);
+	}
 
 	/**
-		 * Test method for {@link org.apache.niolex.config.service.impl.GroupServiceImpl#svrSendDiff(org.apache.niolex.config.bean.ConfigItem)}.
-		 */
-		@Test
-		public void testSvrSendDiffNeg() {
-			ConfigItem diff = new ConfigItem();
-			diff.setGroupId(1);
-			diff.setKey("demo.key");
-			diff.setValue("unit 352352345");
-			sevice.svrSendDiff(diff);
-			ConfigGroup c = storage.get("configserver.test.demo");
-			assertNotSame(c.getGroupData().get("demo.key").getValue(), "unit 352352345");
-		}
+	 * Test method for {@link org.apache.niolex.config.service.impl.GroupServiceImpl#svrSendDiff(org.apache.niolex.config.bean.ConfigItem)}.
+	 */
+	@Test
+	public void testSvrSendDiffNeg2() {
+		ConfigItem diff = new ConfigItem();
+		diff.setGroupId(17);
+		diff.setKey("demo.key");
+		diff.setValue("unit stset");
+		diff.setUpdateTime(System.currentTimeMillis());
+		sevice.svrSendDiff(diff);
+		ConfigGroup c = storage.get("configserver.test.demo");
+		ConfigItem item = c.getGroupData().get("demo.key");
+		assertEquals(item.getValue(), "unit stset");
+		item.setUpdateTime(1234L);
+	}
+
+	/**
+	 * Test method for {@link org.apache.niolex.config.service.impl.GroupServiceImpl#svrSendDiff(org.apache.niolex.config.bean.ConfigItem)}.
+	 */
+	@Test
+	public void testSvrSendDiffNeg() {
+		ConfigItem diff = new ConfigItem();
+		diff.setGroupId(1);
+		diff.setKey("demo.key");
+		diff.setValue("unit 352352345");
+		sevice.svrSendDiff(diff);
+		ConfigGroup c = storage.get("configserver.test.demo");
+		assertNotSame(c.getGroupData().get("demo.key").getValue(), "unit 352352345");
+	}
 
 	/**
 	 * Test method for {@link org.apache.niolex.config.service.impl.GroupServiceImpl#loadGroup(java.lang.String)}.

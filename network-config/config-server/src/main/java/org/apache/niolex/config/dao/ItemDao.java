@@ -33,9 +33,10 @@ public interface ItemDao {
 
 	/**
 	 * Get all the config items from DB.
-	 * Notice! Only load items older than the specified time.
+	 * Notice! Only load items newer than the specified time.
 	 * The list must order by groupId.
 	 *
+	 * @param startTime the start time
 	 * @return the updated config items after the startTime
 	 */
 	public List<ConfigItem> loadAllConfigItems(long startTime);
@@ -43,7 +44,7 @@ public interface ItemDao {
 	/**
 	 * Load all the config items for this group.
 	 *
-	 * @param groupId
+	 * @param groupId the group ID
 	 * @return all the config items for this group
 	 */
 	public List<ConfigItem> loadGroupItems(int groupId);
@@ -52,7 +53,7 @@ public interface ItemDao {
 	 * Update this config.
 	 * We only update when groupId, key and updateTime are all the same.
 	 *
-	 * @param item
+	 * @param item the item to be updated
 	 * @return true if update success.
 	 */
 	public boolean updateConfig(ConfigItem item);
@@ -61,7 +62,7 @@ public interface ItemDao {
 	 * Add this config.
 	 * We only add this item when the groupId and key pair not exist.
 	 *
-	 * @param item
+	 * @param item the item to be added
 	 * @return true if added into DB.
 	 */
 	public boolean addConfig(ConfigItem item);
@@ -69,9 +70,10 @@ public interface ItemDao {
 	/**
 	 * Get the config item with this groupId and key.
 	 *
-	 * @param groupId
-	 * @param key
+	 * @param groupId the group ID
+	 * @param key the config item key
 	 * @return null if not found.
 	 */
 	public ConfigItem getConfig(int groupId, String key);
+	
 }

@@ -80,6 +80,21 @@ public class AuthenServiceImplTest {
 		boolean b = sevice.hasReadAuth(group, writer);
 		assertTrue(b);
 	}
+	
+	/**
+	 * Test method for {@link org.apache.niolex.config.service.impl.AuthenServiceImpl#hasReadAuth(org.apache.niolex.config.bean.ConfigGroup, org.apache.niolex.network.IPacketWriter)}.
+	 */
+	@Test
+	public void testHasReadAuthAdmin() {
+	    UserInfo info = new UserInfo();
+	    info.setUserId(6);
+	    info.setUserRole("ADMIN");
+	    writer.attachData(AttachKey.USER_INFO, info);
+	    ConfigGroup group = new ConfigGroup();
+	    group.setGroupId(1);
+	    boolean b = sevice.hasReadAuth(group, writer);
+	    assertTrue(b);
+	}
 
 	/**
 	 * Test method for {@link org.apache.niolex.config.service.impl.AuthenServiceImpl#hasReadAuth(org.apache.niolex.config.bean.ConfigGroup, org.apache.niolex.network.IPacketWriter)}.

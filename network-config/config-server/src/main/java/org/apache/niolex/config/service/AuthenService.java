@@ -35,15 +35,16 @@ public interface AuthenService {
 	 * Use the information in SubscribeBean to do authentication.
 	 * If success, store user info in IPacketWriter.
 	 *
-	 * @param bean
-	 * @param wt
+	 * @param bean the subscribe bean
+	 * @param wt the packet writer
 	 * @return true if success, false otherwise.
 	 */
 	public boolean authUser(SubscribeBean bean, IPacketWriter wt);
 
 	/**
 	 * Get the attached User Id of this client.
-	 * @param wt
+	 * 
+	 * @param wt the packet writer
 	 * @return -1 if not found.
 	 */
 	public int getUserId(IPacketWriter wt);
@@ -51,16 +52,18 @@ public interface AuthenService {
 	/**
 	 * Add a new user into DB.
 	 * Only Admin can add user with user role, Op can only add common user.
-	 * @param info
-	 * @param wt
+	 * 
+	 * @param info the user info to be added
+	 * @param wt the packet writer
 	 * @return the detailed message about the status of add user
 	 */
 	public String addUser(UserInfo info, IPacketWriter wt);
 
 	/**
 	 * Update a user role or password. Only Admin can update user role.
-	 * @param info
-	 * @param wt
+	 * 
+	 * @param info the user info to be updated
+	 * @param wt the packet writer
 	 * @return the detailed message about the status of update user
 	 */
 	public String updateUser(UserInfo info, IPacketWriter wt);
@@ -68,8 +71,8 @@ public interface AuthenService {
 	/**
 	 * Check whether this client has the right to read this group config.
 	 *
-	 * @param group
-	 * @param wt
+	 * @param group the config group
+	 * @param wt the packet writer
 	 * @return true if have read auth, false otherwise
 	 */
 	public boolean hasReadAuth(ConfigGroup group, IPacketWriter wt);
@@ -77,26 +80,27 @@ public interface AuthenService {
 	/**
 	 * Check whether this client has the right to add and change config.
 	 *
-	 * @param wt
+	 * @param wt the packet writer
 	 * @return true if have config auth, false otherwise
 	 */
 	public boolean hasConfigAuth(IPacketWriter wt);
 
-
 	/**
 	 * Add read authorization of this group to this user.
-	 * @param userName
-	 * @param groupName
-	 * @param wt
+	 * 
+	 * @param userName the user name
+	 * @param groupName the group name
+	 * @param wt the packet writer
 	 * @return the detailed message about the status of add read auth
 	 */
 	public String addReadAuth(String userName, String groupName, IPacketWriter wt);
 
 	/**
 	 * Remove read authorization of this group to this user.
-	 * @param userName
-	 * @param groupName
-	 * @param wt
+	 * 
+	 * @param userName the user name
+	 * @param groupName the group name
+	 * @param wt the packet writer
 	 * @return the detailed message about the status of remove read auth
 	 */
 	public String removeReadAuth(String userName, String groupName, IPacketWriter wt);

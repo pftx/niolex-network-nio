@@ -97,7 +97,8 @@ public class ReplicaServiceImpl implements ReplicaService {
 
 	/**
 	 * Try to connect to the other server infinitely.
-	 * @param client
+	 * 
+	 * @param client the packet client
 	 */
 	public void initConnection(PacketClient client) {
 		long sleepTime = 0;
@@ -121,7 +122,8 @@ public class ReplicaServiceImpl implements ReplicaService {
 
 	/**
 	 * Connected to other server, so we init heart beat and init server subscribe.
-	 * @param client
+	 * 
+	 * @param client the packet client
 	 */
 	public void connected(PacketClient client) {
 		client.handleWrite(new PacketData(Config.CODE_REGR_HBEAT));

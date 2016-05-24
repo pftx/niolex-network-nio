@@ -31,8 +31,8 @@ public interface AuthenDao {
 	/**
 	 * Authenticate user.
 	 *
-	 * @param username
-	 * @param digest
+	 * @param username the user name
+	 * @param digest the user password digest
 	 * @return userid if success, -1 otherwise.
 	 */
 	public UserInfo authUser(String username, String digest);
@@ -40,18 +40,19 @@ public interface AuthenDao {
 	/**
 	 * Add this user into DB.
 	 *
-	 * @param username
-	 * @param digest
-	 * @param role
+	 * @param username the user name
+	 * @param digest the user password digest
+	 * @param role the user role
 	 * @return true if success, false otherwise.
 	 */
 	public boolean addUser(String username, String digest, String role);
 
 	/**
-	 * Update this user information.
-	 * @param username
-	 * @param digest
-	 * @param role
+	 * Update this user's information.
+	 * 
+	 * @param username the user name
+	 * @param digest the user password digest
+	 * @param role the user role
 	 * @return true if success, false otherwise.
 	 */
 	public boolean updateUser(String username, String digest, String role);
@@ -59,31 +60,34 @@ public interface AuthenDao {
 	/**
 	 * Get user info by this user name.
 	 *
-	 * @param userName
+	 * @param userName the user name
 	 * @return the user information, null if not found.
 	 */
 	public UserInfo getUser(String userName);
 
 	/**
 	 * Check whether this user has the right to read the specified group config.
-	 * @param userid
-	 * @param groupId
+	 * 
+	 * @param userid the user ID
+	 * @param groupId the group ID
 	 * @return true if success, false otherwise.
 	 */
 	public boolean hasReadAuth(long userid, long groupId);
 
 	/**
-	 * Add the read authorize to this user.
-	 * @param userid
-	 * @param groupId
+	 * Add the read authorization to this user.
+	 * 
+	 * @param userid the user ID
+	 * @param groupId the group ID
 	 * @return true if success, false otherwise.
 	 */
 	public boolean addReadAuth(long userid, long groupId);
 
 	/**
-	 * Delete read authorize from this user.
-	 * @param userid
-	 * @param groupId
+	 * Delete read authorization from this user.
+	 * 
+	 * @param userid the user ID
+	 * @param groupId the group ID
 	 * @return true if success, false otherwise.
 	 */
 	public boolean delReadAuth(long userid, long groupId);

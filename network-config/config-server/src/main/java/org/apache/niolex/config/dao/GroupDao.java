@@ -33,7 +33,7 @@ public interface GroupDao {
 	/**
 	 * Add this group into DB.
 	 *
-	 * @param groupName
+	 * @param groupName the group name
 	 * @return true if added into DB.
 	 */
 	public boolean addGroup(String groupName);
@@ -42,19 +42,22 @@ public interface GroupDao {
 	 * Get all the config groups from DB.
 	 * Notice! Just groups, no config item.
 	 * The list must order by groupId.
-	 * @return
+	 * 
+	 * @return the config group list
 	 */
 	public List<ConfigGroup> loadAllGroups();
 
 	/**
 	 * Load the current DB time for mark laster update time.
-	 * @return
+	 * 
+	 * @return the current DB time
 	 */
 	public long loadDBTime();
 
 	/**
 	 * Load the group config with this group name.
-	 * @param groupName
+	 * 
+	 * @param groupName the group name
 	 * @return null if group not found.
 	 */
 	public ConfigGroup loadGroup(String groupName);

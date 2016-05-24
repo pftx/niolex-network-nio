@@ -37,8 +37,19 @@ CREATE TABLE IF NOT EXISTS `config_info` (
   KEY `updatetime` (`updatetime`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-INSERT INTO `user_info` VALUES (1,'su','c0b69acfd4a83d695385cee755275037a9b84467','ADMIN');
-INSERT INTO `user_info` VALUES (2,'node','47e109e43e482e50f87504263e8dd0073a810856','NODE');
-INSERT INTO `user_info` VALUES (3,'admin','a98911f6abcf4d8d52fb6ad5d1d517dad8b73024','OP');
-INSERT INTO `user_info` VALUES (4,'op','a98911f6abcf4d8d52fb6ad5d1d517dad8b73024','OP');
+INSERT INTO `user_info` VALUES (1,'su','e0cd517d1e61d0388d1a71e20a2347fa543a8dcb','ADMIN');
+INSERT INTO `user_info` VALUES (2,'node','557789600cf2ad6ae93cc0e6c230fecd053bb22a','NODE');
+INSERT INTO `user_info` VALUES (3,'admin','bd9bc3f780be96f03584da249b0439cc36151d0e','OP');
+INSERT INTO `user_info` VALUES (4,'op','bd9bc3f780be96f03584da249b0439cc36151d0e','OP');
+
+INSERT INTO `auth_info` VALUES (2,1);
+INSERT INTO `auth_info` VALUES (2,2);
+
+INSERT INTO `group_info` VALUES (1,'testme');
+INSERT INTO `group_info` VALUES (2,'configserver.test.demo');
+
+INSERT INTO `config_info` VALUES (1,'demo','hello, world!',2,2,'2016-05-20 16:30:49');
+INSERT INTO `config_info` VALUES (1,'demo.key','demo.value',2,2,'2016-05-21 16:30:49');
+INSERT INTO `config_info` VALUES (1,'line','(C) Copy Right @ All rights reserved.',2,2,'2016-05-22 16:30:49');
+INSERT INTO `config_info` VALUES (2,'demo.key','demo.value',2,2,'2012-05-21 16:30:49');
 
