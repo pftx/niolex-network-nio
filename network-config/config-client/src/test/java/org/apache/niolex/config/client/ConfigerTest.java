@@ -19,7 +19,6 @@ package org.apache.niolex.config.client;
 
 import static org.junit.Assert.assertEquals;
 
-import org.apache.niolex.config.event.ConfigListener;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -41,24 +40,6 @@ public class ConfigerTest {
 		Thread.sleep(1000);
 		s = conf.getString("demo.key");
 		System.out.println("New " + s);
-	}
-
-	/**
-	 * Test method for {@link org.apache.niolex.config.client.Configer#addListener(java.lang.String, org.apache.niolex.config.event.ConfigListener)}.
-	 * @throws InterruptedException
-	 */
-	@Test
-	public void testAddListener() throws InterruptedException {
-		Configer conf = new Configer("testme");
-		ConfigListener lister = new ConfigListener() {
-
-			@Override
-			public void configChanged(String value, long updateTime) {
-				System.out.println("value of key [demo] changed: " + value);
-
-			}};
-		conf.addListener("demo", lister);
-		Thread.sleep(1000);
 	}
 
 	/**

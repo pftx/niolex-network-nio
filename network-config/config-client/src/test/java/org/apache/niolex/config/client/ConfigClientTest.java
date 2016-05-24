@@ -17,6 +17,9 @@
  */
 package org.apache.niolex.config.client;
 
+import org.apache.niolex.commons.event.Event;
+import org.apache.niolex.commons.event.Listener;
+import org.apache.niolex.config.bean.ConfigItem;
 import org.junit.Test;
 
 /**
@@ -41,20 +44,21 @@ public class ConfigClientTest {
 	}
 
 	public static void main(String[] args) throws Throwable {
+	    Listener<ConfigItem> ls = new Listener<ConfigItem>() {
+	        @Override
+	        public void eventHappened(Event<ConfigItem> e) {
+	            ConfigItem i = e.getEventValue();
+	            System.out.println("value of key [" + i.getKey() + "] changed: " + i.getValue() + ", " + i.getUpdateTime());
+	        }
+	    };
 		// 获取配置组
 		Configer conf1 = new Configer("testme");
 		// 添加监听器
-		ConfigListener ls = new ConfigListener() {
-			@Override
-			public void configChanged(String value, long updateTime) {
-				System.out.println("value of key [demo] changed: " + value);
-
-			}
-		};
 		conf1.addListener("demo", ls);
 
 		Configer conf2 = new Configer("configserver.test.demo");
 		conf2.addListener("demo.key", ls);
+		
 		Thread.sleep(1000000);
 	}
 
