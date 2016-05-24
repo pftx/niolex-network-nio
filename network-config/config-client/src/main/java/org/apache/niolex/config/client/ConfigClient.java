@@ -160,7 +160,7 @@ public class ConfigClient {
     	
     	// Default to 1 hour.
     	REFRESH_INTERVAL = PROP.getLong("server.refresh.interval", 3600000);
-    	STORAGE_PATH = PROP.getProperty("local.storage.path", "/data/config-client/storage");
+    	STORAGE_PATH = PROP.getProperty("local.storage.path", "/home/lex/.config-client/storage");
     	DirUtil.mkdirsIfAbsent(STORAGE_PATH);
     	// Start to init connection in this main thread.
     	initConnection();

@@ -28,7 +28,6 @@ import org.apache.niolex.config.core.ConfigException;
  * 配置中心默认会读取classpath下的conf-client.properties配置文件进行自配置，用户可以通过
  * 系统变量-Dconfig.client.property.file=xxx.properties的形式改写配置文件位置。
  *
- * @category niolex-network-config -> 公共库 -> 配置处理
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
  */
