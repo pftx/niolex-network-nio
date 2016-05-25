@@ -68,6 +68,8 @@ public interface CodeMap {
 	short ADMIN_ADD_AUTH = 3008;
 	// Remove read authorize from user.
 	short ADMIN_REMOVE_AUTH = 3009;
+	// Query user information.
+	short ADMIN_QUERY_USER = 3010;
 
 	// The response to add config group request.
 	short RES_ADD_GROUP = 4001;
@@ -87,5 +89,7 @@ public interface CodeMap {
 	short RES_REMOVE_AUTH = 4008;
 	// The return of server subscribe.
 	short RES_SERVER_SUBS = 4009;
-
+    // The response to query user information.
+    short RES_QUERY_USER = 4010;
+    
 }

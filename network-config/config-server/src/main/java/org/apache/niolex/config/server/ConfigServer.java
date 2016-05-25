@@ -27,6 +27,7 @@ import org.apache.niolex.config.admin.AddAuthHandler;
 import org.apache.niolex.config.admin.AddConfigHandler;
 import org.apache.niolex.config.admin.AddGroupHandler;
 import org.apache.niolex.config.admin.AddUserHandler;
+import org.apache.niolex.config.admin.QueryUserHandler;
 import org.apache.niolex.config.admin.RefreshGroupHandler;
 import org.apache.niolex.config.admin.RemoveAuthHandler;
 import org.apache.niolex.config.admin.UpdateConfigHandler;
@@ -113,6 +114,8 @@ public class ConfigServer {
 	@Autowired
 	private AddUserHandler addUserHandler;
 	@Autowired
+	private QueryUserHandler queryUserHandler;
+	@Autowired
 	private UpdateUserHandler updateUserHandler;
 	@Autowired
 	private AddAuthHandler addAuthHandler;
@@ -153,6 +156,7 @@ public class ConfigServer {
 			handler.addHandler(CodeMap.ADMIN_UPDATE_USER, updateUserHandler);
 			handler.addHandler(CodeMap.ADMIN_ADD_AUTH, addAuthHandler);
 			handler.addHandler(CodeMap.ADMIN_REMOVE_AUTH, removeAuthHandler);
+			handler.addHandler(CodeMap.ADMIN_QUERY_USER, queryUserHandler);
 			// Requests from other servers.
 			handler.addHandler(CodeMap.SERVER_SUBS, serverSubscribeHandler);
 			// --------------- end of register --------------------------

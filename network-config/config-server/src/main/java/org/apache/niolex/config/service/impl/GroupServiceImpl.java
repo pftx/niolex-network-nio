@@ -349,7 +349,8 @@ public class GroupServiceImpl implements GroupService {
 		if (groupName == null) {
 			return "The group doesn't exist.";
 		}
-		if (service.hasConfigAuth(wt)) {
+		
+		if (service.hasUpdateAuth(item.getGroupId(), wt)) {
 			int userId = service.getUserId(wt);
 			item.setcUid(userId);
 			item.setuUid(userId);
@@ -377,7 +378,8 @@ public class GroupServiceImpl implements GroupService {
 		if (groupName == null) {
 			return "The group doesn't exist.";
 		}
-		if (service.hasConfigAuth(wt)) {
+		
+		if (service.hasUpdateAuth(item.getGroupId(), wt)) {
 			int userId = service.getUserId(wt);
 			ConfigItem newitem = storage.get(groupName).getGroupData().get(item.getKey());
 			if (newitem == null) {

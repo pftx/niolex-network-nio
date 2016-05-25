@@ -67,6 +67,15 @@ public interface AuthenService {
 	 * @return the detailed message about the status of update user
 	 */
 	public String updateUser(UserInfo info, IPacketWriter wt);
+	
+	/**
+	 * Query user information by user name.
+	 * 
+	 * @param userName the user name
+	 * @param wt the packet writer
+	 * @return the detailed user info
+	 */
+	public UserInfo queryUser(String userName, IPacketWriter wt);
 
 	/**
 	 * Check whether this client has the right to read this group config.
@@ -76,6 +85,15 @@ public interface AuthenService {
 	 * @return true if have read auth, false otherwise
 	 */
 	public boolean hasReadAuth(ConfigGroup group, IPacketWriter wt);
+	
+	/**
+	 * Check whether this client has the right to update the config item in this group.
+	 * 
+	 * @param groupId the group ID
+	 * @param wt the packet writer
+	 * @return true if has update auth, false otherwise
+	 */
+	public boolean hasUpdateAuth(int groupId, IPacketWriter wt);
 
 	/**
 	 * Check whether this client has the right to add and change config.
