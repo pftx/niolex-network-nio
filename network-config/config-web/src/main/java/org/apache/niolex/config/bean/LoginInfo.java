@@ -18,6 +18,7 @@
 package org.apache.niolex.config.bean;
 
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 /**
@@ -28,14 +29,17 @@ import javax.validation.constraints.Size;
  */
 public class LoginInfo {
     
-    @NotNull
+    @NotNull(message="用户名不能为空")
     @Size(min = 2, max = 25, message="用户名长度必须在2~25个字符之间")
     private String username;
     
-    @NotNull
+    @NotNull(message="密码不能为空")
     @Size(min = 6, max = 25, message="密码长度必须在6~25个字符之间")
     private String password;
-
+    
+    @Pattern(regexp = "(ADMIN)|(OP)|(NODE)|(USER)", message="用户角色必须从下拉列表中选取")
+    private String userrole;
+    
     /**
      * @return the username
      */
@@ -65,5 +69,13 @@ public class LoginInfo {
     public void setPassword(String password) {
         this.password = password;
     }
+
+	public String getUserrole() {
+		return userrole;
+	}
+
+	public void setUserrole(String userrole) {
+		this.userrole = userrole;
+	}
     
 }

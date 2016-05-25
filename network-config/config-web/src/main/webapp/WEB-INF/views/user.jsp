@@ -81,14 +81,21 @@
 		</div>
 		<!--Modal-->
 		<div class="container">
+			<div class="alert alert-info width9">
+				<button type="button" class="close" data-dismiss="alert">&times;</button>
+				<span id="goodMsg">欢迎访问用户中心！本页面具备管理用户和授权相关的所有功能。</span>
+			</div>
+			<div id="alertMessagePr" class="alert alert-error hide width9">
+				<strong id="alertMessage"></strong>
+			</div>
 			<div class="row">
 				<div class="span4 bs-docs-useradd">
-					<form class="form-horizontal">
+					<form id="addUserForm" class="form-horizontal">
 						<div class="control-group" style="margin-bottom: 5px;">
 							<label class="control-label" style="width: 60px;"
 								for="addUserName">用户名</label>
 							<div class="controls" style="margin-left: 80px;">
-								<input type="text" id="addUserName"
+								<input type="text" id="addUserName" name="username"
 									placeholder="Type User Name Here">
 							</div>
 						</div>
@@ -96,7 +103,7 @@
 							<label class="control-label" style="width: 60px;"
 								for="addPassword">密码</label>
 							<div class="controls" style="margin-left: 80px;">
-								<input type="password" id="addPassword"
+								<input type="password" id="addPassword" name="password"
 									placeholder="Type Password Here">
 							</div>
 						</div>
@@ -106,7 +113,7 @@
 								<div class="input-append">
 								<div class="btn-group">
 									<input class="input-medium" id="addUserRole" type="text"
-										placeholder="Type User Role Here">
+										 name="userrole" placeholder="Type User Role Here">
 									<button class="btn dropdown-toggle" data-toggle="dropdown">
 										<span class="caret"></span>
 									</button>

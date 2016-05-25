@@ -36,8 +36,8 @@ public class CenterConnector extends UpdaterClient {
     private String username;
     
     /**
-     * @param serverAddress
-     * @throws IOException
+     * @param serverAddress the server address to config server
+     * @throws IOException if I/O related error occurred
      */
     public CenterConnector(String serverAddress) throws IOException {
         super(serverAddress);
@@ -60,7 +60,7 @@ public class CenterConnector extends UpdaterClient {
     /**
      * Get the config group.
      * 
-     * @param groupName
+     * @param groupName the config group name
      * @return the group
      */
     public ConfigGroup getConfig(String groupName) {

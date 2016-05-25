@@ -17,14 +17,27 @@
  */
 package org.apache.niolex.config.ctrl;
 
-import javax.servlet.http.HttpServletRequest;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.ConstraintViolation;
+import javax.validation.Validator;
+
+import org.apache.niolex.config.bean.LoginInfo;
 import org.apache.niolex.config.service.CenterConnector;
 import org.apache.niolex.config.util.ConnectorUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
  *
@@ -34,6 +47,15 @@ import org.springframework.web.bind.annotation.RequestMethod;
 @Controller
 @RequestMapping(value="/user")
 public class UserController {
+	private static final Logger LOG = LoggerFactory.getLogger(UserController.class);
+    private static final String ERR = "访问配置中心出现错误,请尝试重新登录";
+	
+	private Validator validator;
+	
+    @Autowired
+    public UserController(Validator validator) {
+        this.validator = validator;
+    }
     
     @RequestMapping(method=RequestMethod.GET)
     public String get(Model model, HttpServletRequest req) {
@@ -42,4 +64,30 @@ public class UserController {
         return "user";
     }
 
+    @RequestMapping(value = "/add", method = RequestMethod.POST)
+    public @ResponseBody Map<String, ? extends Object> addUser(@ModelAttribute LoginInfo info,  
+            HttpServletRequest req) {
+    	Set<ConstraintViolation<LoginInfo>> failures = validator.validate(info);
+        if (!failures.isEmpty()) {
+            return Collections.singletonMap("msg", failures.iterator().next().getMessage());
+        } else {
+        	CenterConnector cc = ConnectorUtil.getConnector(req);
+            Map<String, Object> map = new HashMap<String, Object>();
+            
+            if (info.getUserrole() == null) {
+            	info.setUserrole("ADMIN");
+            }
+            
+            try {
+				String s = cc.addUser(info.getUsername(), info.getPassword(), info.getUserrole());
+				LOG.info("Add user [{}] status - {}.", info.getUsername(), s);
+				map.put("msg", s);
+			} catch (Exception e) {
+				LOG.error("Error occured when add user.", e);
+	            map.put("msg", ERR);
+			}
+        	return map;
+        }
+    }
+    
 }

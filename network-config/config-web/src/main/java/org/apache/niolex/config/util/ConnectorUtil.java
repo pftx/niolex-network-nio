@@ -33,7 +33,7 @@ public class ConnectorUtil {
     /**
      * Clear the connector in this session.
      * 
-     * @param sess
+     * @param sess the http session
      */
     public static final void clearConnector(HttpSession sess) {
         if (sess != null) {
@@ -47,7 +47,7 @@ public class ConnectorUtil {
     /**
      * Invalidate the current session.
      * 
-     * @param req
+     * @param req the http request
      */
     public static final void invalidateSession(HttpServletRequest req) {
         HttpSession sess = req.getSession(false);
@@ -59,7 +59,7 @@ public class ConnectorUtil {
     /**
      * Try to get the connector from session.
      * 
-     * @param req
+     * @param req the http request
      * @return the CenterConnector if found, null if not found
      */
     public static final CenterConnector getConnector(HttpServletRequest req) {

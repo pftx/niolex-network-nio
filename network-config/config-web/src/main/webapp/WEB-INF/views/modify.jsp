@@ -110,7 +110,7 @@
 		</div>
 		<div class="alert alert-info width9">
 			<button type="button" class="close" data-dismiss="alert">&times;</button>
-		<span id="goodMsg">输入配置组进行查询。如果需要修改配置，点击Select选择相应Key；如果需要添加，直接输入您的Key。</span>
+			<span id="goodMsg">输入配置组进行查询。如果需要修改配置，点击Select选择相应Key；如果需要添加，直接输入您的Key。</span>
 		</div>
 		<div class="main_body">
 			<div id="alertMessagePr" class="alert alert-error hide width9">

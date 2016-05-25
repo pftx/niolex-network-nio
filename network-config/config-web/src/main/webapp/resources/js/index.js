@@ -351,3 +351,54 @@ function handle_add_disable() {
 function add_user_role(role) {
 	$("#addUserRole").val(role);
 }
+
+function handle_add_user() {
+	var s = $('#addUserForm').serialize();
+	$.ajax({
+		type : "POST",
+		url : "user/add",
+		data : s
+	}).done(function(data) {
+		if (data.msg != null) {
+			if (data.msg == "Add User Success.") {
+				user_alert_annimation("用户添加成功，请继续。");
+				return;
+			} else {
+				$("#alertMessage").text(data.msg);
+			}
+		} else {
+			$("#alertMessage").text("服务器返回未知错误");
+		}
+		$("#alertMessagePr").removeClass("hide");
+	}).fail(function() {
+		$("#alertMessage").text("网络连接错误");
+		$("#alertMessagePr").removeClass("hide");
+	});
+}
+
+function user_alert_annimation(msg) {
+	$("#alertMessagePr").clearQueue();
+	$("#alertMessagePr").removeClass("hide");
+	$("#alertMessagePr").removeClass("alert-error");
+	$("#alertMessagePr").addClass("alert-success");
+	$("#alertMessage").text(msg);
+	$("#alertMessagePr").animate({
+		opacity : 0.2
+	}, 700).animate({
+		opacity : 1
+	}, 1000).animate({
+		opacity : 0.2
+	}, 700).animate({
+		opacity : 1
+	}, 1000).animate({
+		opacity : 0.2
+	}, 700).animate({
+		opacity : 1
+	}, 1000, function() {
+	    // Animation complete.
+		$("#alertMessagePr").addClass("hide");
+		$("#alertMessagePr").addClass("alert-error");
+		$("#alertMessagePr").removeClass("alert-success");
+	  }
+	);
+}

@@ -52,4 +52,11 @@ INSERT INTO `config_info` VALUES (1,'demo','hello, world!',2,2,'2016-05-20 16:30
 INSERT INTO `config_info` VALUES (1,'demo.key','demo.value',2,2,'2016-05-21 16:30:49');
 INSERT INTO `config_info` VALUES (1,'line','(C) Copy Right @ All rights reserved.',2,2,'2016-05-22 16:30:49');
 INSERT INTO `config_info` VALUES (2,'demo.key','demo.value',2,2,'2012-05-21 16:30:49');
+INSERT INTO `config_info` VALUES (2,'demo.str','我们最美丽的祖国啊',2,2,'2012-05-21 16:30:49');
+INSERT INTO `config_info` VALUES (2,'demo.long','123213123123',2,2,'2012-05-21 16:30:49');
+INSERT INTO `config_info` VALUES (2,'demo.int','12345',2,2,'2012-05-21 16:30:49');
+INSERT INTO `config_info` VALUES (2,'demo.boolean','true',2,2,'2012-05-21 16:30:49');
+INSERT INTO `config_info` VALUES (2,'demo.char','X',2,2,'2012-05-21 16:30:49');
+INSERT INTO `config_info` VALUES (2,'demo.double','3.1546829',2,2,'2012-05-21 16:30:49');
+
 
