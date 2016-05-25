@@ -39,6 +39,8 @@ public interface Updater {
 	public String getItem(String groupName, String key) throws Exception;
 
 	public String addUser(String username, String password, String userRole) throws Exception;
+	
+	public String getUser(String username) throws Exception;
 
 	public String changePassword(String username, String password) throws Exception;
 

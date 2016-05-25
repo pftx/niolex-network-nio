@@ -24,6 +24,8 @@ USAGE OF Config management Console
  USER RELATED COMMANDS
 	add user <username> <password> <role>
 			Add a new user
+	get user <username>
+			Get a user's role
 	update user <username> <password> <role>
 			Update an old user with new password and role
 	change password <username> <password>

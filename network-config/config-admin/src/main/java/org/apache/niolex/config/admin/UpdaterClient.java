@@ -221,7 +221,17 @@ public class UpdaterClient implements Updater, IPacketHandler {
 		return on.waitForResult(waitForTimeout);
 	}
 
-	/**
+	@Override
+    public String getUser(String username) throws Exception {
+	    WaitOn<String> on = waiter.init("getuser");
+	    // Send packet to remote server.
+        PacketData sub = new PacketData(CodeMap.ADMIN_QUERY_USER, StringUtil.strToUtf8Byte(username));
+        client.handleWrite(sub);
+        return on.waitForResult(waitForTimeout);
+    }
+
+
+    /**
 	 * Override super method
 	 * @see org.apache.niolex.config.admin.Updater#changePassword(java.lang.String, java.lang.String)
 	 */
@@ -287,6 +297,11 @@ public class UpdaterClient implements Updater, IPacketHandler {
 			String str = StringUtil.utf8ByteToStr(sc.getData());
 			waiter.release("adduser", str);
 			break;
+		case CodeMap.RES_QUERY_USER:
+		    // Notify anyone waiting for this.
+		    str = StringUtil.utf8ByteToStr(sc.getData());
+		    waiter.release("getuser", str);
+		    break;
 		case CodeMap.RES_UPDATE_USER:
 			// Notify anyone waiting for this.
 			str = StringUtil.utf8ByteToStr(sc.getData());

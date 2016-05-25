@@ -51,11 +51,12 @@ public class ConfigAdminMain {
 		    System.out.println("Authentication failure, config admin will stop now.");
 		    return;
 		}
+		final String userName = args[1];
 		final ConsoleReader reader = new ConsoleReader();
 		boolean isJline = reader.clearScreen();
 		if (isJline) {
 			reader.addCompleter(new StringsCompleter("help", "exit", "last", "add group",
-					"refresh group", "add item", "update item", "get item", "add user",
+					"refresh group", "add item", "update item", "get item", "add user", "get user",
 					"update user", "change password", "add auth", "remove auth"));
 			System.out.println("Welcome to Config management Console.");
 			System.out.println("JLine enabled, please use <tab> key to help you speed up.");
@@ -81,7 +82,10 @@ public class ConfigAdminMain {
 				lastCmds = cmds;
 			}
 			if (cmds.length < 3) {
-				if (line.equalsIgnoreCase("exit")) {
+			    if (line.startsWith("who")) {
+			        System.out.println("You are " + userName + "!");
+			        continue;
+			    } else if (line.equalsIgnoreCase("exit")) {
 					System.out.println("\nGood Bye.");
 					System.exit(0);
 				}
@@ -145,6 +149,20 @@ public class ConfigAdminMain {
 						continue;
 					}
 					System.out.println(updater.getItem(cmds[2], cmds[3]));
+				} else if (cmds[1].equalsIgnoreCase("user")) {
+                    // Update user.
+                    if (cmds.length != 3) {
+                        System.out.println("Invalid get user format.");
+                        continue;
+                    }
+                    String s = updater.getUser(cmds[2]);
+                    if (s.endsWith("null")) {
+                        s = "User not Found.";
+                    } else {
+                        String[] s2 = s.split(",");
+                        s = "User [" + s2[0] + "]'s role is: " + s2[1] + ".";
+                    }
+                    System.out.println(s);
 				} else {
 					System.out.println("Invalid command.");
 					continue;
