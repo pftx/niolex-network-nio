@@ -193,10 +193,14 @@
 									placeholder="Type Group Name Here">
 							</div>
 						</div>
+						<div id="authMessagePr" class="alert alert-error hide">
+						    <button type="button" class="close" onclick="auth_alert_hide()">&times;</button>
+							<strong id="authMessage"></strong>
+						</div>
 						<div class="control-group">
 							<div class="controls" style="margin-left: 80px;">
-								<button class="btn btn-success">添加授权</button>
-								<button class="btn btn-danger">取消授权</button>
+								<button class="btn btn-success" onClick="handle_auth_add()">添加授权</button>
+								<button class="btn btn-danger" onClick="handle_auth_remove()">取消授权</button>
 							</div>
 						</div>
 					</form>

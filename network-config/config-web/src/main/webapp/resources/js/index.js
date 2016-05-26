@@ -409,7 +409,6 @@ function user_alert_annimation(msg) {
 	);
 }
 
-
 function mod_user_role(role) {
 	$("#theUserRole").val(role);
 }
@@ -445,4 +444,51 @@ function user_modify_disable() {
 function user_modify_enable() {
 	$("#modifyUserPassword").removeAttr('disabled');
 	$("#modifyUserRole").removeAttr('disabled');
+}
+
+function handle_user_passwd() {
+	$("#queryUserMsg").text("还没有实现1。");
+}
+
+function handle_user_role() {
+	$("#queryUserMsg").text("还没有实现2。");
+}
+
+function handle_auth_add() {
+	auth_alert_annimation("还没有实现3。");
+}
+
+function handle_auth_remove() {
+	auth_alert_annimation("还没有实现4。");
+}
+
+function auth_alert_hide() {
+	$("#authMessagePr").addClass("hide");
+}
+
+function auth_alert_annimation(msg) {
+	$("#authMessagePr").clearQueue();
+	$("#authMessagePr").removeClass("hide");
+	$("#authMessagePr").removeClass("alert-error");
+	$("#authMessagePr").addClass("alert-success");
+	$("#authMessage").text(msg);
+	$("#authMessagePr").animate({
+		opacity : 0.2
+	}, 700).animate({
+		opacity : 1
+	}, 1000).animate({
+		opacity : 0.2
+	}, 700).animate({
+		opacity : 1
+	}, 1000).animate({
+		opacity : 0.2
+	}, 700).animate({
+		opacity : 1
+	}, 1000, function() {
+	    // Animation complete.
+		$("#authMessagePr").addClass("hide");
+		$("#authMessagePr").addClass("alert-error");
+		$("#authMessagePr").removeClass("alert-success");
+	  }
+	);
 }
