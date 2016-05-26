@@ -89,7 +89,7 @@
 					class="icon-check"></i> 确认
 				</a>
 				<a id="theAddBtn" class="btn btn-success" onClick="handle_add_group()" type="submit"
-					rel="tooltip" title="添加该配置组到配置中心" disabled> <i
+					rel="tooltip" title="添加该配置组到配置中心"> <i
 					class="icon-white icon-plus"></i> 添加
 				</a>
 			</div>
@@ -114,6 +114,7 @@
 	<script type="text/javascript">
 		$(document).ready(function() {
 			init_bind();
+			$("#theAddBtn").attr('disabled', 'true');
 		});
 	</script>
 </body>

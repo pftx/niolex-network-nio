@@ -363,6 +363,8 @@ function handle_add_user() {
 			if (data.msg == "Add User Success.") {
 				user_alert_annimation("用户添加成功，请继续。");
 				return;
+			} else if (data.msg == "User already exist.") {
+				$("#alertMessage").text("用户已经存在，请使用‘用户管理’模块进行维护。");
 			} else {
 				$("#alertMessage").text(data.msg);
 			}
@@ -374,6 +376,10 @@ function handle_add_user() {
 		$("#alertMessage").text("网络连接错误");
 		$("#alertMessagePr").removeClass("hide");
 	});
+}
+
+function user_alert_hide() {
+	$("#alertMessagePr").addClass("hide");
 }
 
 function user_alert_annimation(msg) {
@@ -401,4 +407,42 @@ function user_alert_annimation(msg) {
 		$("#alertMessagePr").removeClass("alert-success");
 	  }
 	);
+}
+
+
+function mod_user_role(role) {
+	$("#theUserRole").val(role);
+}
+
+function handle_user_query() {
+	$.ajax({
+		url : "user/" + encodeURIComponent($("#theUserName").attr("value"))
+	}).done(function(data) {
+		if (data.msg != null) {
+			if (data.msg == "SUCCESS") {
+				user_modify_enable();
+				$("#theUserRole").val(data.role);
+				$("#queryUserMsg").text("用户查询成功，请继续修改密码或角色。");
+				return;
+			} else {
+				$("#queryUserMsg").text(data.msg);
+			}
+		} else {
+			$("#queryUserMsg").text("服务器返回未知错误。");
+		}
+		user_modify_disable();
+	}).fail(function() {
+		$("#queryUserMsg").text("网络连接错误。");
+		user_modify_disable();
+	});
+}
+
+function user_modify_disable() {
+	$("#modifyUserPassword").attr('disabled', 'true');
+	$("#modifyUserRole").attr('disabled', 'true');
+}
+
+function user_modify_enable() {
+	$("#modifyUserPassword").removeAttr('disabled');
+	$("#modifyUserRole").removeAttr('disabled');
 }

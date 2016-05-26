@@ -1,3 +1,9 @@
+.main_query {
+	width: 940px;
+	margin-right: auto;
+	margin-left: auto;
+}
+
 .user-info {
 	padding: 9px 0 0 0;
 	color: #2d6987;

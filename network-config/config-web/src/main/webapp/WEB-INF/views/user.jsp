@@ -80,14 +80,7 @@
 			<!--Modal footer-->
 		</div>
 		<!--Modal-->
-		<div class="container">
-			<div class="alert alert-info width9">
-				<button type="button" class="close" data-dismiss="alert">&times;</button>
-				<span id="goodMsg">欢迎访问用户中心！本页面具备管理用户和授权相关的所有功能。</span>
-			</div>
-			<div id="alertMessagePr" class="alert alert-error hide width9">
-				<strong id="alertMessage"></strong>
-			</div>
+		<div class="main_query">
 			<div class="row">
 				<div class="span4 bs-docs-useradd">
 					<form id="addUserForm" class="form-horizontal">
@@ -127,6 +120,10 @@
 								</div>
 							</div>
 						</div>
+						<div id="alertMessagePr" class="alert alert-error hide">
+						    <button type="button" class="close" onclick="user_alert_hide()">&times;</button>
+							<strong id="alertMessage"></strong>
+						</div>
 						<div class="control-group" style="margin-bottom: 0px;">
 							<div class="controls" style="margin-left: 80px;">
 								<a id="theAddBtn" class="btn btn-success" onclick="handle_add_user()" type="submit"
@@ -137,6 +134,7 @@
 						</div>
 					</form>
 				</div>
+				
 				<div class="span4 bs-docs-usermg">
 					<div class="input-append">
 						<input class="input-large" id="theUserName" type="text"
@@ -150,7 +148,7 @@
 					<div class="input-append">
 						<input class="input-me" id="theUserPass" type="text"
 							name="theUserPass" placeholder="Type User Password Here">
-						<a class="btn btn-success" onClick="handle_user_query()"
+						<a class="btn btn-success" onClick="handle_user_passwd()" id="modifyUserPassword"
 							type="submit" rel="tooltip" title="修改该用户的密码"> <i
 							class="icon-white icon-fire"></i> 修改密码
 						</a>
@@ -163,13 +161,13 @@
 								<span class="caret"></span>
 							</button>
 							<ul class="dropdown-menu">
-								<li><a href="#">ADMIN</a></li>
-								<li><a href="#">OP</a></li>
-								<li><a href="#">USER</a></li>
-								<li><a href="#">NODE</a></li>
+								<li><a href="#" onclick="mod_user_role('ADMIN')">ADMIN</a></li>
+								<li><a href="#" onclick="mod_user_role('OP')">OP</a></li>
+								<li><a href="#" onclick="mod_user_role('USER')">USER</a></li>
+								<li><a href="#" onclick="mod_user_role('NODE')">NODE</a></li>
 							</ul>
 						</div>
-						<a class="btn btn-success" onClick="handle_user_query()"
+						<a class="btn btn-success" onClick="handle_user_role()" id="modifyUserRole"
 							type="submit" rel="tooltip" title="修改该用户的角色"> <i
 							class="icon-white icon-retweet"></i> 修改角色
 						</a>
@@ -204,6 +202,11 @@
 					</form>
 				</div>
 			</div>
+			
+			<div class="alert alert-info">
+				<button type="button" class="close" data-dismiss="alert">&times;</button>
+				<span id="goodMsg">欢迎访问用户中心！本页面具备管理用户和授权相关的所有功能。</span>
+			</div>
 		</div>
 	</div>
 	<!-- /container -->
@@ -215,6 +218,7 @@
 	<script type="text/javascript">
 		$(document).ready(function() {
 			init_bind();
+			user_modify_disable();
 		});
 	</script>
 </body>
