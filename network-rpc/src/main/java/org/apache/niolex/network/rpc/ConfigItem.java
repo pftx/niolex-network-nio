@@ -29,7 +29,7 @@ public class ConfigItem {
 	/**
 	 * The interface.
 	 */
-	private Class<?> interfaces;
+	private Class<?> interfaze;
 
 	/**
 	 * The implementation target.
@@ -46,21 +46,21 @@ public class ConfigItem {
 	/**
 	 * Create an item with specified parameters.
 	 *
-	 * @param interfaces the service interface
+	 * @param sinterface the service interface
 	 * @param target the service implementation
 	 */
-	public ConfigItem(Class<?> interfaces, Object target) {
+	public ConfigItem(Class<?> sinterface, Object target) {
 		super();
-		this.interfaces = interfaces;
+		this.interfaze = sinterface;
 		this.target = target;
 	}
 
 	public Class<?> getInterface() {
-		return interfaces;
+		return interfaze;
 	}
 
 	public void setInterface(Class<?> interfs) {
-		this.interfaces = interfs;
+		this.interfaze = interfs;
 	}
 
 	public Object getTarget() {

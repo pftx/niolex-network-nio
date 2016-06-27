@@ -57,6 +57,7 @@ public class SingleInvoker implements RemoteInvoker {
 	@Override
 	public PacketData invoke(PacketData packet, IClient client) {
 		this.res = null;
+		// SocketClient will handle read in this method.
 		client.handleWrite(packet);
 		return res;
 	}
