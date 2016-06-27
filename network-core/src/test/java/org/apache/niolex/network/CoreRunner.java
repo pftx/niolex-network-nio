@@ -20,7 +20,7 @@ package org.apache.niolex.network;
 import java.net.InetSocketAddress;
 
 import org.apache.niolex.network.adapter.FaultTolerateAdapter;
-import org.apache.niolex.network.example.EchoPacketHandler;
+import org.apache.niolex.network.demo.EchoPacketHandler;
 import org.apache.niolex.network.handler.DispatchPacketHandler;
 import org.apache.niolex.network.handler.SessionPacketHandler;
 import org.apache.niolex.network.handler.SummaryPacketHandler;

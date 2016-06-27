@@ -33,7 +33,7 @@ import org.apache.niolex.network.CoreRunner;
 import org.apache.niolex.network.IPacketHandler;
 import org.apache.niolex.network.IPacketWriter;
 import org.apache.niolex.network.PacketData;
-import org.apache.niolex.network.example.SavePacketHandler;
+import org.apache.niolex.network.demo.SavePacketHandler;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;

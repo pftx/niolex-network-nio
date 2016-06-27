@@ -29,7 +29,6 @@ import org.apache.niolex.network.PacketData;
 import org.apache.niolex.network.client.BaseClient;
 import org.apache.niolex.network.client.BlockingClient;
 import org.apache.niolex.network.client.SocketClient;
-import org.apache.niolex.network.example.SavePacketHandler;
 
 /**
  * Packet send to server, then discarded.

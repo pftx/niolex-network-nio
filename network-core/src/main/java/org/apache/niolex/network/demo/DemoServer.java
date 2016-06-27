@@ -21,8 +21,6 @@ import static org.apache.niolex.network.demo.DemoUtil.*;
 
 import java.io.IOException;
 
-import org.apache.niolex.network.example.EchoPacketHandler;
-import org.apache.niolex.network.example.SavePacketHandler;
 import org.apache.niolex.network.handler.DispatchPacketHandler;
 import org.apache.niolex.network.handler.SessionPacketHandler;
 import org.apache.niolex.network.handler.SummaryPacketHandler;

@@ -15,13 +15,14 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.niolex.network.example;
+package org.apache.niolex.network.demo;
 
 import static org.mockito.Mockito.*;
 
 import java.util.List;
 
 import org.apache.niolex.network.PacketData;
+import org.apache.niolex.network.demo.SavePacketHandler;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -47,7 +48,7 @@ public class SavePacketHandlerTest {
 
     /**
      * Test method for
-     * {@link org.apache.niolex.network.example.SavePacketHandler#handlePacket(PacketData, org.apache.niolex.network.IPacketWriter)}
+     * {@link org.apache.niolex.network.demo.SavePacketHandler#handlePacket(PacketData, org.apache.niolex.network.IPacketWriter)}
      * .
      */
     @Test
@@ -59,7 +60,7 @@ public class SavePacketHandlerTest {
 
     /**
      * Test method for
-     * {@link org.apache.niolex.network.example.SavePacketHandler#handleClose(org.apache.niolex.network.IPacketWriter)}.
+     * {@link org.apache.niolex.network.demo.SavePacketHandler#handleClose(org.apache.niolex.network.IPacketWriter)}.
      */
     @Test
     public void testHandleClose() {
