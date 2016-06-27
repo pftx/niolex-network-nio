@@ -58,14 +58,15 @@ public class RpcException extends RuntimeException {
         /**
          * Create a type with detailed explanation.
          *
-         * @param explanation
+         * @param explanation the detailed explanation
          */
         private Type(String explanation) {
             this.explanation = explanation;
         }
 
         /**
-         * Get the detailed explanation for error type.
+         * Get the detailed explanation for this error type.
+         * 
          * @return the detailed explanation
          */
         public String getExplanation() {

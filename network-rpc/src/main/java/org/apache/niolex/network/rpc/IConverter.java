@@ -60,7 +60,7 @@ public interface IConverter {
 
 	/**
 	 * Serialize returned object into byte array.
-	 * ret can not be null, we already checked.
+	 * {@code ret} can not be null, we already checked.
 	 *
 	 * @param ret the object to be returned
 	 * @return the serialized byte array

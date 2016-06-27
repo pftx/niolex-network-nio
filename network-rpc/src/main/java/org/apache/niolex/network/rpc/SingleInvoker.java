@@ -22,7 +22,7 @@ import org.apache.niolex.network.IPacketWriter;
 import org.apache.niolex.network.PacketData;
 
 /**
- * This invoker can only handle invoke serially.
+ * This invoker can only handle invoke sequentially.
  * Please use this invoker with SocketClient only.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>

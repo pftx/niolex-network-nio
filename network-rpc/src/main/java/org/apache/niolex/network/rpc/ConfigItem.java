@@ -46,8 +46,8 @@ public class ConfigItem {
 	/**
 	 * Create an item with specified parameters.
 	 *
-	 * @param interfaces
-	 * @param target
+	 * @param interfaces the service interface
+	 * @param target the service implementation
 	 */
 	public ConfigItem(Class<?> interfaces, Object target) {
 		super();

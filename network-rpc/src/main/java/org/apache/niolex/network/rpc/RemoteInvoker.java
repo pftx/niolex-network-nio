@@ -31,10 +31,10 @@ import org.apache.niolex.network.PacketData;
 public interface RemoteInvoker extends IPacketHandler {
 
 	/**
-	 * Invoke the write methods in the client, send packet data to server
+	 * Invoke the write methods on the specified client, send packet data to server
 	 * and wait for the response.
 	 *
-	 * @param packet the data need to send
+	 * @param packet the data need to be sent to server
 	 * @param client the client used to send this data
 	 * @return the packet returned from server
 	 */
