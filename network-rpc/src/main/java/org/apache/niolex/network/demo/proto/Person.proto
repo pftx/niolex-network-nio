@@ -1,0 +1,29 @@
+option java_package = "org.apache.niolex.network.demo.proto";
+option java_outer_classname = "PersonProtos";
+
+message Person {
+  required int32 id = 1;
+  required string name = 2;
+  optional string email = 3;
+  optional string desc = 4;
+  required Work work = 5;
+  repeated PhoneNumber phone = 6;
+  repeated Person subordinates = 7;
+}
+
+message Work {
+  required int32 reportTo = 1;
+  required string position = 2;
+  required int32 salary = 3;
+}
+
+message PhoneNumber {
+  required string number = 1;
+  optional PhoneType type = 2 [default = HOME];
+}
+
+enum PhoneType {
+  MOBILE = 0;
+  HOME = 1;
+  WORK = 2;
+}

@@ -21,8 +21,9 @@ import java.net.InetSocketAddress;
 
 import org.apache.niolex.network.client.PacketClient;
 import org.apache.niolex.network.demo.proto.PersonProtos.Person;
-import org.apache.niolex.network.demo.proto.PersonProtos.Person.PhoneNumber;
-import org.apache.niolex.network.demo.proto.PersonProtos.Person.PhoneType;
+import org.apache.niolex.network.demo.proto.PersonProtos.PhoneNumber;
+import org.apache.niolex.network.demo.proto.PersonProtos.PhoneType;
+import org.apache.niolex.network.demo.proto.PersonProtos.Work;
 import org.apache.niolex.network.rpc.PacketInvoker;
 import org.apache.niolex.network.rpc.RpcClient;
 import org.apache.niolex.network.rpc.conv.ProtobufConverter;
@@ -44,8 +45,9 @@ public class DemoProtoRpcClient {
 		final PersonService ser = client.getService(PersonService.class);
 
 		for (int i = 0; i < 5; ++i) {
+		    Work w = Work.newBuilder().setReportTo(3).setPosition("SSE").setSalary(16000).build();
 			PhoneNumber n = PhoneNumber.newBuilder().setNumber("123122311" + i).setType(PhoneType.MOBILE).build();
-			Person p = Person.newBuilder().setEmail("kjdfjkdf" + i + "@xxx.com").setId(45 + i)
+			Person p = Person.newBuilder().setEmail("kjdfjkdf" + i + "@xxx.com").setId(45 + i).setWork(w)
 					.setName("Niolex [" + i + "]").addPhone(n).build();
 			ser.addPerson(p, n);
 		}

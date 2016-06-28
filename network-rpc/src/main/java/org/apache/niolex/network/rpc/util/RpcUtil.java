@@ -111,10 +111,10 @@ public abstract class RpcUtil {
 	 * Generate Key from a short and two bytes.
 	 * The output value will be "abc" concatenation.
 	 *
-	 * @param a
-	 * @param b
-	 * @param c
-	 * @return the result
+	 * @param a the packet code
+	 * @param b the packet version
+	 * @param c the reserved field
+	 * @return the generated key
 	 */
 	public static final int generateKey(short a, byte b, byte c) {
 		int l = a << 16;
@@ -142,15 +142,13 @@ public abstract class RpcUtil {
      * @return the generated session ID
      */
     public static String genSessionId(int length) {
-        String tempId = "";
-        int curLen = 0;
-        while (curLen < length) {
-            tempId = tempId + Long.toHexString((long) (Math.random() * 1000000000000000L))
-                    + Long.toHexString(System.nanoTime());
-            curLen = tempId.length();
+        StringBuilder sb = new StringBuilder();
+        while (sb.length() < length) {
+            sb.append(Long.toHexString((long) (Math.random() * 1000000000000000L)));
+            sb.append(Long.toHexString(System.nanoTime()));
         }
 
-        return tempId.substring(0, length);
+        return sb.substring(0, length);
     }
 
     /**
@@ -165,14 +163,14 @@ public abstract class RpcUtil {
         InputStream inputStream = null;
 		try {
 			URL u = new URL(completeUrl);
-			URLConnection proxy = u.openConnection();
-			proxy.setConnectTimeout(connectTimeout);
-			proxy.setReadTimeout(readTimeout);
-			proxy.setDoInput(true);
-			proxy.setDoOutput(false);
-			proxy.connect();
-			inputStream = proxy.getInputStream();
-			int len = proxy.getContentLength();
+			URLConnection conn = u.openConnection();
+			conn.setConnectTimeout(connectTimeout);
+			conn.setReadTimeout(readTimeout);
+			conn.setDoInput(true);
+			conn.setDoOutput(false);
+			conn.connect();
+			inputStream = conn.getInputStream();
+			int len = conn.getContentLength();
 			if (len == -1) {
 			    len = StreamUtil.readData(inputStream, new byte[1024]);
 			}
@@ -180,7 +178,7 @@ public abstract class RpcUtil {
 				LOG.warn("Failed to connect to " + completeUrl + " : Server response too short.");
 				return false;
 			}
-			LOG.info("Server [" + completeUrl + "] status: " + proxy.getHeaderField(0));
+			LOG.info("Server [" + completeUrl + "] status: " + conn.getHeaderField(0));
 			return true;
 		} catch (IOException e) {
 			LOG.warn("Failed to connect to " + completeUrl + " : " + e.getMessage());

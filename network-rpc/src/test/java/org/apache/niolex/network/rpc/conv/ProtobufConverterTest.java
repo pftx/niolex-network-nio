@@ -17,17 +17,18 @@
  */
 package org.apache.niolex.network.rpc.conv;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import java.lang.reflect.Type;
 
 import org.apache.niolex.commons.seri.ProtobufUtil;
 import org.apache.niolex.commons.seri.SeriException;
 import org.apache.niolex.network.demo.proto.PersonProtos.Person;
-import org.apache.niolex.network.demo.proto.PersonProtos.Person.PhoneNumber;
-import org.apache.niolex.network.demo.proto.PersonProtos.Person.PhoneType;
-import org.apache.niolex.network.rpc.RpcException;
-import org.apache.niolex.network.rpc.conv.ProtobufConverter;
+import org.apache.niolex.network.demo.proto.PersonProtos.PhoneNumber;
+import org.apache.niolex.network.demo.proto.PersonProtos.PhoneType;
+import org.apache.niolex.network.demo.proto.PersonProtos.Work;
+import org.apache.niolex.network.demo.proto.PersonProtosUtil;
 import org.junit.Test;
 
 /**
@@ -38,6 +39,7 @@ import org.junit.Test;
 public class ProtobufConverterTest {
 
 	ProtobufConverter con = new ProtobufConverter();
+	Work w = PersonProtosUtil.generateWork(3, "SWE", 6000);
 
 	/**
 	 * Test method for {@link org.apache.niolex.network.rpc.conv.ProtobufConverter#prepareParams(byte[], java.lang.reflect.Type[])}.
@@ -49,7 +51,7 @@ public class ProtobufConverterTest {
 		PhoneNumber n = PhoneNumber.newBuilder().setNumber("123122311" + i).setType(PhoneType.HOME).build();
 		Person p = Person.newBuilder().setEmail("kjdfjkdf" + i + "@xxx.com").setId(45 + i)
 				.setName("Niolex [" + i + "]")
-				.addPhone(n)
+				.addPhone(n).setWork(w)
 				.build();
 		byte arr2[] = ProtobufUtil.seriMulti(new Object[] {n, p});
 		Object[] arr = con.prepareParams(arr2, new Type[] {PhoneNumber.class, Person.class});
@@ -61,7 +63,7 @@ public class ProtobufConverterTest {
 	public void testPrepareParams2() throws Exception {
 		int i = 2334;
 		Person p = Person.newBuilder().setEmail("kjdfjkdf" + i + "@xxx.com").setId(45 + i)
-				.setName("Niolex [" + i + "]")
+				.setName("Niolex [" + i + "]").setWork(w)
 				.addPhone(PhoneNumber.newBuilder().setNumber("123122311" + i).setType(PhoneType.HOME).build())
 				.build();
 		byte arr2[] = ProtobufUtil.seriMulti(new Object[] {p});
@@ -76,7 +78,7 @@ public class ProtobufConverterTest {
 	public void testSerializeParams() throws Exception {
 		int i = 1231;
 		Person p = Person.newBuilder().setEmail("kjdfjkdf" + i + "@xxx.com").setId(45 + i)
-				.setName("Niolex [" + i + "]")
+				.setName("Niolex [" + i + "]").setWork(w)
 				.addPhone(PhoneNumber.newBuilder().setNumber("123122311" + i).setType(PhoneType.WORK).build())
 				.build();
 		byte[] bs = con.serializeParams(new Object[] { p });
@@ -88,7 +90,7 @@ public class ProtobufConverterTest {
 	public void testSerializeInvalidParams() throws Exception {
 		int i = 1231;
 		Person p = Person.newBuilder().setEmail("kjdfjkdf" + i + "@xxx.com").setId(45 + i)
-				.setName("Niolex [" + i + "]")
+				.setName("Niolex [" + i + "]").setWork(w)
 				.addPhone(PhoneNumber.newBuilder().setNumber("123122311" + i).setType(PhoneType.MOBILE).build())
 				.build();
 		byte[] bs = con.serializeParams(new Object[] { p, "Nice" });
@@ -104,7 +106,7 @@ public class ProtobufConverterTest {
 	public void testPrepareReturn() throws Exception {
 		int i = 9834;
 		Person p = Person.newBuilder().setEmail("kjdfjkdf" + i + "@xxx.com").setId(45 + i)
-				.setName("Niolex [" + i + "]")
+				.setName("Niolex [" + i + "]").setWork(w)
 				.addPhone(PhoneNumber.newBuilder().setNumber("123122311" + i).setType(PhoneType.MOBILE).build())
 				.build();
 		byte[] bs = p.toByteArray();
@@ -120,14 +122,14 @@ public class ProtobufConverterTest {
 	public void testSerializeReturn() throws Exception {
 		int i = 66534;
 		Person p = Person.newBuilder().setEmail("kjdfjkdf" + i + "@xxx.com").setId(45 + i)
-				.setName("Niolex [" + i + "]")
+				.setName("Niolex [" + i + "]").setWork(w)
 				.addPhone(PhoneNumber.newBuilder().setNumber("123122311" + i).setType(PhoneType.MOBILE).build())
 				.build();
 		byte[] bb = con.serializeReturn(p);
 		assertNotNull(bb);
 	}
 
-	@Test(expected=RpcException.class)
+	@Test(expected=SeriException.class)
 	public void testHandleError() throws Exception {
 		byte[] bb = con.serializeReturn("This is not Protobuf");
 		assertNotNull(bb);

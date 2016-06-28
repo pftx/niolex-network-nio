@@ -18,8 +18,9 @@
 package org.apache.niolex.network.demo.proto;
 
 import org.apache.niolex.network.demo.proto.PersonProtos.Person;
-import org.apache.niolex.network.demo.proto.PersonProtos.Person.PhoneNumber;
-import org.apache.niolex.network.demo.proto.PersonProtos.Person.PhoneType;
+import org.apache.niolex.network.demo.proto.PersonProtos.PhoneNumber;
+import org.apache.niolex.network.demo.proto.PersonProtos.PhoneType;
+import org.apache.niolex.network.demo.proto.PersonProtos.Work;
 import org.junit.Test;
 
 /**
@@ -52,9 +53,10 @@ public class ProtoRpcServerTest {
 		PersonServiceImpl impl = new PersonServiceImpl();
 		int i = 982341;
 		PhoneNumber n = PhoneNumber.newBuilder().setNumber("123122311" + i).setType(PhoneType.HOME).build();
+		Work w = Work.newBuilder().setReportTo(3).setPosition("SSE").setSalary(16000).build();
 		Person p = Person.newBuilder().setEmail("kjdfjkdf" + i + "@xxx.com").setId(45 + i)
 				.setName("Niolex [" + i + "]")
-				.addPhone(n)
+				.addPhone(n).setWork(w)
 				.build();
 		impl.addPerson(p, n);
 		impl.getPerson(n);

@@ -17,11 +17,12 @@
  */
 package org.apache.niolex.network.demo.proto;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.niolex.network.demo.proto.PersonProtos.Person;
-import org.apache.niolex.network.demo.proto.PersonProtos.Person.PhoneNumber;
+import org.apache.niolex.network.demo.proto.PersonProtos.PhoneNumber;
 
 /**
  * Demo implementation.
@@ -31,7 +32,8 @@ import org.apache.niolex.network.demo.proto.PersonProtos.Person.PhoneNumber;
  */
 public class PersonServiceImpl implements PersonService {
 
-	private Map<PhoneNumber, Person> map = new ConcurrentHashMap<PhoneNumber, Person>();
+	private Map<PhoneNumber, Person> phoneMap = new ConcurrentHashMap<PhoneNumber, Person>();
+	private Map<Integer, Person> idMap = new ConcurrentHashMap<Integer, Person>();
 
 	/**
 	 * Override super method
@@ -39,7 +41,8 @@ public class PersonServiceImpl implements PersonService {
 	 */
 	@Override
 	public void addPerson(Person p, PhoneNumber number) {
-		map.put(number, p);
+		phoneMap.put(number, p);
+		idMap.put(p.getId(), p);
 		System.out.println("Persion with id " + p.getId() + " added, phone " + number);
 	}
 
@@ -49,7 +52,20 @@ public class PersonServiceImpl implements PersonService {
 	 */
 	@Override
 	public Person getPerson(PhoneNumber number) {
-		return map.get(number);
+		return phoneMap.get(number);
 	}
+
+    /**
+     * This is the override of super method.
+     * @see org.apache.niolex.network.demo.proto.PersonService#updatePerson(org.apache.niolex.network.demo.proto.PersonProtos.Person)
+     */
+    @Override
+    public Person updatePerson(Person p) {
+        List<PhoneNumber> phoneList = p.getPhoneList();
+        for (PhoneNumber num : phoneList) {
+            phoneMap.put(num, p);
+        }
+        return p;
+    }
 
 }

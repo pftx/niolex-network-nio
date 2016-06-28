@@ -22,9 +22,11 @@ import static org.junit.Assert.assertEquals;
 import org.apache.niolex.commons.seri.ProtobufUtil;
 import org.apache.niolex.commons.seri.SeriException;
 import org.apache.niolex.commons.test.MockUtil;
+import org.apache.niolex.network.demo.proto.PersonProtosUtil;
 import org.apache.niolex.network.demo.proto.PersonProtos.Person;
-import org.apache.niolex.network.demo.proto.PersonProtos.Person.PhoneNumber;
-import org.apache.niolex.network.demo.proto.PersonProtos.Person.PhoneType;
+import org.apache.niolex.network.demo.proto.PersonProtos.PhoneNumber;
+import org.apache.niolex.network.demo.proto.PersonProtos.PhoneType;
+import org.apache.niolex.network.demo.proto.PersonProtos.Work;
 import org.junit.Test;
 
 /**
@@ -33,6 +35,8 @@ import org.junit.Test;
  * @since 2012-6-5
  */
 public class ProtoUtilTest {
+    
+    Work w = PersonProtosUtil.generateWork(1, "SWEI", 12000);
 
 	/**
 	 * Test method for {@link org.apache.niolex.network.rpc.ProtobufUtil.ProtoUtil#parseOne(byte[], java.lang.reflect.Type)}.
@@ -59,7 +63,7 @@ public class ProtoUtilTest {
 	public void testParseOneByteArrayType3() {
 		int i = 2345;
 		Person p = Person.newBuilder().setEmail("kjdfjkdf" + i + "@xxx.com").setId(45 + i)
-				.setName("Niolex [" + i + "]")
+				.setName("Niolex [" + i + "]").setWork(w)
 				.addPhone(PhoneNumber.newBuilder().setNumber("123122311" + i).setType(PhoneType.MOBILE).build())
 				.build();
 		byte[] ret = p.toByteArray();
