@@ -40,7 +40,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The basic RpcClient, send and receive Rpc packets, do client stub here too.
+ * The basic RpcClient, send and receive Rpc packets, generate client RPC stubs here too.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0, Date: 2012-6-1
@@ -49,12 +49,12 @@ public class RpcClient implements IPacketHandler, InvocationHandler {
 	private static final Logger LOG = LoggerFactory.getLogger(RpcClient.class);
 
 	/**
-	 * Save the execution map.
+	 * Save the relationship between Java method and it's RPC method code.
 	 */
 	private final Map<Method, Short> executeMap = new HashMap<Method, Short>();
 
 	/**
-	 * The serial generator.
+	 * The serial ID generator.
 	 */
 	private final AtomicInteger auto = new AtomicInteger(-1);
 
@@ -64,7 +64,7 @@ public class RpcClient implements IPacketHandler, InvocationHandler {
 	private int sleepBetweenRetryTime = Config.RPC_SLEEP_BT_RETRY;
 
 	/**
-	 * Times to retry get connected.
+	 * The number of times to retry to get connected.
 	 */
 	private int connectRetryTimes = Config.RPC_CONNECT_RETRY_TIMES;
 
@@ -89,16 +89,16 @@ public class RpcClient implements IPacketHandler, InvocationHandler {
 	private volatile ConnStatus connStatus;
 
 	/**
-	 * Create a RpcClient with the specified client as the backed communication tool and
-	 * the invoker must match the specified client. The converter must match the converter
+	 * Create a RpcClient with the specified low level client as the backed communication tool and
+	 * the invoker must match the specified low level client. The converter must match the converter
 	 * at the server side.
 	 * <br>
-	 * The client will be managed internally, please use {@link #connect()} to connect
-	 * and leave the client for us to manage.
+	 * The client will be managed internally, please use this class's {@link #connect()} to connect
+	 * and leave the low level client for us to manage.
 	 *
-	 * @param client the backed communication tool
+	 * @param client the backed communication tool, low level client
 	 * @param invoker use this to send packets to server and wait for response
-	 * @param converter use this to serialize data
+	 * @param converter use this to serialize data to bytes and vice-versa
 	 */
 	public RpcClient(IClient client, RemoteInvoker invoker, IConverter converter) {
 		super();
@@ -140,10 +140,10 @@ public class RpcClient implements IPacketHandler, InvocationHandler {
 	}
 
 	/**
-	 * Get the Rpc Service Client Stub powered by this rpc client.
+	 * Get the Rpc Service Client Side Stub powered by this rpc client.
 	 *
-	 * @param c The interface you want to have stub.
-	 * @return the stub
+	 * @param c the interface you want to have stub with
+	 * @return the generated stub
 	 */
 	@SuppressWarnings("unchecked")
     public <T> T getService(Class<T> c) {
@@ -152,8 +152,25 @@ public class RpcClient implements IPacketHandler, InvocationHandler {
                 new Class[] {c}, this);
 	}
 
+    /**
+     * This method will parse all the configurations in the interface and generate the execute map.
+     * <br> We will call this method in {@link #getService(Class)} automatically. If you are not using
+     * that method, please call this method before use the interface yourself.
+     *
+     * @param interfs the interface
+     */
+    public void addInferface(Class<?> interfs) {
+        Method[] arr = interfs.getDeclaredMethods();
+        for (Method m : arr) {
+            if (m.isAnnotationPresent(RpcMethod.class)) {
+                RpcMethod rp = m.getAnnotation(RpcMethod.class);
+                executeMap.put(m, rp.value());
+            }
+        }
+    }
+    
 	/**
-	 * Check the client status before doing remote call and after response.
+	 * Check the client status before doing remote call and after got response.
 	 */
 	private void checkStatus() {
 		switch (connStatus) {
@@ -236,23 +253,6 @@ public class RpcClient implements IPacketHandler, InvocationHandler {
 	}
 
 	/**
-	 * This method will parse all the configurations in the interface and generate the execute map.
-	 * <br>
-	 * Please call this method before use the interface.
-	 *
-	 * @param interfs the interface
-	 */
-	public void addInferface(Class<?> interfs) {
-		Method[] arr = interfs.getDeclaredMethods();
-		for (Method m : arr) {
-			if (m.isAnnotationPresent(RpcMethod.class)) {
-				RpcMethod rp = m.getAnnotation(RpcMethod.class);
-				executeMap.put(m, rp.value());
-			}
-		}
-	}
-
-	/**
 	 * De-serialize returned byte array into objects.
 	 *
 	 * @param ret the returned byte array
@@ -332,7 +332,7 @@ public class RpcClient implements IPacketHandler, InvocationHandler {
 	 * Set the socket connect timeout.
 	 * This method must be called before {@link #connect()}
 	 *
-	 * @param timeout
+	 * @param timeout the connect timeout to set
 	 */
 	public void setConnectTimeout(int timeout) {
 	    this.client.setConnectTimeout(timeout);
@@ -347,18 +347,28 @@ public class RpcClient implements IPacketHandler, InvocationHandler {
 	public void setServerAddress(InetSocketAddress serverAddress) {
 	    client.setServerAddress(serverAddress);
 	}
+	
+	/**
+	 * Set the server Internet address this client want to connect
+	 * This method must be called before {@link #connect()}
+	 *
+	 * @param serverAddress the server address
+	 */
+	public void setServerAddress(String serverAddress) {
+	    client.setServerAddress(serverAddress);
+	}
 
 	/**
 	 * Get Connection Status of this rpc client.
 	 *
-	 * @return current status
+	 * @return current connection status
 	 */
 	public ConnStatus getConnStatus() {
 		return connStatus;
 	}
 
 	/**
-	 * Get Connection Status of this rpc client.
+	 * Whether the connection is valid.
 	 *
 	 * @return true if this RpcClient is valid and ready to work.
 	 */
@@ -380,7 +390,7 @@ public class RpcClient implements IPacketHandler, InvocationHandler {
 	 * Set the time in milliseconds that client with sleep between retry to connect
 	 * to server.
 	 *
-	 * @param sleepBetweenRetryTime
+	 * @param sleepBetweenRetryTime the time to set
 	 */
 	public void setSleepBetweenRetryTime(int sleepBetweenRetryTime) {
 		this.sleepBetweenRetryTime = sleepBetweenRetryTime;
@@ -398,7 +408,7 @@ public class RpcClient implements IPacketHandler, InvocationHandler {
     /**
 	 * Set retry times.
 	 *
-	 * @param connectRetryTimes
+	 * @param connectRetryTimes the connect retry times to set
 	 */
 	public void setConnectRetryTimes(int connectRetryTimes) {
 		this.connectRetryTimes = connectRetryTimes;

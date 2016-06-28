@@ -1,5 +1,5 @@
 /**
- * ProtoBufferConverter.java
+ * ProtobufConverter.java
  *
  * Copyright 2012 Niolex, Inc.
  *
@@ -19,9 +19,9 @@ package org.apache.niolex.network.rpc.conv;
 
 import java.lang.reflect.Type;
 
-import org.apache.niolex.commons.seri.ProtoUtil;
+import org.apache.niolex.commons.seri.ProtobufUtil;
+import org.apache.niolex.commons.seri.SeriUtil;
 import org.apache.niolex.network.rpc.IConverter;
-import org.apache.niolex.network.rpc.util.RpcUtil;
 
 /**
  * Using Google Protocol Buffer to serialize data.
@@ -29,7 +29,7 @@ import org.apache.niolex.network.rpc.util.RpcUtil;
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0, Date: 2012-11-7
  */
-public class ProtoBufferConverter implements IConverter {
+public class ProtobufConverter implements IConverter {
 
 	/**
 	 * Override super method
@@ -37,7 +37,7 @@ public class ProtoBufferConverter implements IConverter {
 	 */
 	@Override
 	public Object[] prepareParams(byte[] data, Type[] generic) throws Exception {
-		return ProtoUtil.parseMulti(data, RpcUtil.checkParams(generic));
+		return ProtobufUtil.parseMulti(data, SeriUtil.castJavaTypes(generic));
 	}
 
 	/**
@@ -46,17 +46,16 @@ public class ProtoBufferConverter implements IConverter {
 	 */
 	@Override
 	public byte[] serializeParams(Object[] args) throws Exception {
-		return ProtoUtil.seriMulti(args);
+		return ProtobufUtil.seriMulti(args);
 	}
 
 	/**
 	 * Override super method
 	 * @see org.apache.niolex.network.rpc.IConverter#prepareReturn(byte[], java.lang.reflect.Type)
 	 */
-	@SuppressWarnings("unchecked")
     @Override
 	public Object prepareReturn(byte[] ret, Type type) throws Exception {
-	    return ProtoUtil.parseOne(ret, (Class<Object>) type);
+	    return ProtobufUtil.parseOne(ret, SeriUtil.castJavaType(type));
 	}
 
 	/**
@@ -65,7 +64,7 @@ public class ProtoBufferConverter implements IConverter {
 	 */
 	@Override
 	public byte[] serializeReturn(Object ret) throws Exception {
-	    return ProtoUtil.seriOne(ret);
+	    return ProtobufUtil.seriOne(ret);
 	}
 
 }

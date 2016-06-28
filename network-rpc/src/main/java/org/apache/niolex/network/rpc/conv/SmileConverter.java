@@ -22,11 +22,11 @@ import java.io.ByteArrayOutputStream;
 import java.lang.reflect.Type;
 import java.util.List;
 
+import org.apache.niolex.commons.seri.SeriUtil;
 import org.apache.niolex.commons.seri.SmileUtil;
 import org.apache.niolex.commons.stream.SmileProxy;
 import org.apache.niolex.network.rpc.IConverter;
-import org.apache.niolex.network.rpc.util.RpcUtil;
-import org.apache.niolex.network.rpc.util.RpcUtil.TypeRe;
+import org.codehaus.jackson.type.TypeReference;
 
 /**
  * Using Smile / Jackson to serialize data.
@@ -42,8 +42,9 @@ public class SmileConverter implements IConverter {
      */
     @Override
     public Object[] prepareParams(byte[] data, Type[] generic) throws Exception {
-        List<TypeRe<?>> list = RpcUtil.decodeParams(generic);
+        List<TypeReference<Object>> list = SeriUtil.packJavaTypes(generic);
         Object[] ret = new Object[list.size()];
+        
         ByteArrayInputStream in = new ByteArrayInputStream(data);
         SmileProxy proxy = new SmileProxy(in);
         for (int i = 0; i < ret.length; ++i) {
@@ -71,7 +72,7 @@ public class SmileConverter implements IConverter {
      */
     @Override
     public Object prepareReturn(byte[] ret, Type type) throws Exception {
-        return SmileUtil.bin2Obj(ret, new TypeRe<Object>(type));
+        return SmileUtil.bin2Obj(ret, SeriUtil.packJavaType(type));
     }
 
     /**

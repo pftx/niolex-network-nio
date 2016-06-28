@@ -17,24 +17,18 @@
  */
 package org.apache.niolex.network.rpc.util;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Type;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.apache.niolex.commons.codec.Base64Util;
 import org.apache.niolex.commons.codec.StringUtil;
-import org.apache.niolex.commons.stream.JsonProxy;
 import org.apache.niolex.commons.stream.StreamUtil;
 import org.apache.niolex.commons.util.ThrowableUtil;
 import org.apache.niolex.network.PacketData;
 import org.apache.niolex.network.rpc.RpcException;
-import org.codehaus.jackson.type.TypeReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -96,76 +90,6 @@ public abstract class RpcUtil {
 
 		RpcException ex = new RpcException(strs[0], type, root);
 		return ex;
-	}
-
-	/**
-	 * This is the class to capture Java Type.
-	 * Use this with JacksonJson to return a type.
-	 *
-	 * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
-	 * @version 1.0.0, Date: 2012-7-24
-	 */
-	public static class TypeRe<T> extends TypeReference<T> {
-		// The real type
-		private Type type;
-
-		public TypeRe(Type type) {
-			super();
-			this.type = type;
-		}
-
-		@Override
-		public Type getType() {
-			return type;
-		}
-	}
-
-	/**
-	 * Decode parameters to JavaType.
-	 *
-	 * @param generic The generic Java type array
-	 * @return the decoded list
-	 */
-	public static final List<TypeRe<?>> decodeParams(Type[] generic) {
-		List<TypeRe<?>> list = new ArrayList<TypeRe<?>>(generic.length);
-		for (Type tp : generic) {
-			list.add(new TypeRe<Object>(tp));
-		}
-		return list;
-	}
-
-	/**
-	 * Check the generic array is in fact a class array.
-	 *
-	 * @param generic the generic type array
-	 * @return the checked class array
-	 * @throws ClassCaseException if any item in the generic array is not a class
-	 */
-    public static final Class<?>[] checkParams(Type[] generic) {
-        Class<?>[] array = new Class<?>[generic.length];
-        for (int i = 0; i < generic.length; ++i) {
-            array[i] = (Class<?>) generic[i];
-        }
-        return array;
-	}
-
-	/**
-	 * prepare parameters, read them from the data, as the type specified by the second parameter.
-	 *
-	 * @param data the parameters byte array
-	 * @param generic the generic Java type array
-	 * @return the decoded parameters
-	 * @throws IOException
-	 */
-	public static final Object[] parseJson(byte[] data, Type[] generic) throws IOException {
-		List<TypeRe<?>> list = decodeParams(generic);
-		Object[] ret = new Object[list.size()];
-		ByteArrayInputStream in = new ByteArrayInputStream(data);
-		JsonProxy proxy = new JsonProxy(in);
-		for (int i = 0; i < ret.length; ++i) {
-			ret[i] = proxy.readObject(list.get(i));
-		}
-		return ret;
 	}
 
 	/**

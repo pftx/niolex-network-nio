@@ -17,17 +17,16 @@
  */
 package org.apache.niolex.network.rpc.util;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
-import java.io.ByteArrayOutputStream;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Type;
-import java.util.Date;
 
 import org.apache.niolex.commons.codec.StringUtil;
-import org.apache.niolex.commons.compress.JacksonUtil;
-import org.apache.niolex.commons.test.Benchmark;
-import org.apache.niolex.commons.test.Benchmark.Bean;
 import org.apache.niolex.network.PacketData;
 import org.apache.niolex.network.rpc.RpcException;
 import org.junit.Test;
@@ -87,40 +86,6 @@ public class RpcUtilTest extends RpcUtil {
         System.out.println(ox.getCause());
         assertTrue(ox.getCause() instanceof ClassNotFoundException);
     }
-
-	/**
-	 * Test method for {@link org.apache.niolex.network.rpc.util.RpcUtil#parseJson(byte[], java.lang.reflect.Type[])}.
-	 */
-	@Test
-	public void testParseJson() throws Throwable {
-		Benchmark bench = Benchmark.makeBenchmark();
-		Bean q = new Bean(5, "Another", 523212, new Date(1338008328334L));
-		ByteArrayOutputStream bos = new ByteArrayOutputStream();
-		JacksonUtil.writeObj(bos, bench);
-		JacksonUtil.writeObj(bos, q);
-		byte[] bs = bos.toByteArray();
-		Object[] re = RpcUtil.parseJson(bs, new Type[] { Benchmark.class, Bean.class });
-		if (re[0] instanceof Benchmark) {
-			Benchmark copy = (Benchmark) re[0];
-			assertTrue(bench.equals(copy));
-		} else {
-			fail("Benchmark Not yet implemented");
-		}
-		if (re[1] instanceof Bean) {
-			Bean t = (Bean) re[1];
-			assertTrue(t.getId() != 0);
-			assertTrue(t.getBirth().getTime() == 1338008328334L);
-		} else {
-			fail("Bean Not yet implemented");
-		}
-	}
-
-	@Test
-	public void testParseJsonEmpty() throws Throwable {
-		byte[] bs = new byte[6];
-		Object[] re = RpcUtil.parseJson(bs, new Type[0]);
-		assertEquals(0, re.length);
-	}
 
 	/**
 	 * Test method for

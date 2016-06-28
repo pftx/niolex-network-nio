@@ -17,6 +17,7 @@
  */
 package org.apache.niolex.network.rpc.anno;
 
+import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -29,8 +30,9 @@ import java.lang.annotation.Target;
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0, $Date: 2012-6-1$
  */
-@Target(ElementType.METHOD)
+@Documented
 @Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.METHOD)
 public @interface RpcMethod {
 
 	/**

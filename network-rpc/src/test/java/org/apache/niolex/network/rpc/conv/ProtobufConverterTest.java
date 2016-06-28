@@ -21,13 +21,13 @@ import static org.junit.Assert.*;
 
 import java.lang.reflect.Type;
 
-import org.apache.niolex.commons.seri.ProtoUtil;
+import org.apache.niolex.commons.seri.ProtobufUtil;
 import org.apache.niolex.commons.seri.SeriException;
 import org.apache.niolex.network.demo.proto.PersonProtos.Person;
 import org.apache.niolex.network.demo.proto.PersonProtos.Person.PhoneNumber;
 import org.apache.niolex.network.demo.proto.PersonProtos.Person.PhoneType;
 import org.apache.niolex.network.rpc.RpcException;
-import org.apache.niolex.network.rpc.conv.ProtoBufferConverter;
+import org.apache.niolex.network.rpc.conv.ProtobufConverter;
 import org.junit.Test;
 
 /**
@@ -35,12 +35,12 @@ import org.junit.Test;
  * @version 1.0.0
  * @since 2012-11-8
  */
-public class ProtoBufferConverterTest {
+public class ProtobufConverterTest {
 
-	ProtoBufferConverter con = new ProtoBufferConverter();
+	ProtobufConverter con = new ProtobufConverter();
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.rpc.conv.ProtoBufferConverter#prepareParams(byte[], java.lang.reflect.Type[])}.
+	 * Test method for {@link org.apache.niolex.network.rpc.conv.ProtobufConverter#prepareParams(byte[], java.lang.reflect.Type[])}.
 	 * @throws Exception
 	 */
 	@Test
@@ -51,7 +51,7 @@ public class ProtoBufferConverterTest {
 				.setName("Niolex [" + i + "]")
 				.addPhone(n)
 				.build();
-		byte arr2[] = ProtoUtil.seriMulti(new Object[] {n, p});
+		byte arr2[] = ProtobufUtil.seriMulti(new Object[] {n, p});
 		Object[] arr = con.prepareParams(arr2, new Type[] {PhoneNumber.class, Person.class});
 		assertEquals(arr[0], n);
 		assertEquals(arr[1], p);
@@ -64,12 +64,12 @@ public class ProtoBufferConverterTest {
 				.setName("Niolex [" + i + "]")
 				.addPhone(PhoneNumber.newBuilder().setNumber("123122311" + i).setType(PhoneType.HOME).build())
 				.build();
-		byte arr2[] = ProtoUtil.seriMulti(new Object[] {p});
+		byte arr2[] = ProtobufUtil.seriMulti(new Object[] {p});
 		assertNotNull(con.prepareParams(arr2, new Type[] {Person.class}));
 	}
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.rpc.conv.ProtoBufferConverter#serializeParams(java.lang.Object[])}.
+	 * Test method for {@link org.apache.niolex.network.rpc.conv.ProtobufConverter#serializeParams(java.lang.Object[])}.
 	 * @throws Exception
 	 */
 	@Test
@@ -80,7 +80,7 @@ public class ProtoBufferConverterTest {
 				.addPhone(PhoneNumber.newBuilder().setNumber("123122311" + i).setType(PhoneType.WORK).build())
 				.build();
 		byte[] bs = con.serializeParams(new Object[] { p });
-		Person q = (Person) ProtoUtil.parseMulti(bs, new Class<?>[] { Person.class })[0];
+		Person q = (Person) ProtobufUtil.parseMulti(bs, new Class<?>[] { Person.class })[0];
 		assertEquals(p, q);
 	}
 
@@ -97,7 +97,7 @@ public class ProtoBufferConverterTest {
 	}
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.rpc.conv.ProtoBufferConverter#prepareReturn(byte[], java.lang.reflect.Type)}.
+	 * Test method for {@link org.apache.niolex.network.rpc.conv.ProtobufConverter#prepareReturn(byte[], java.lang.reflect.Type)}.
 	 * @throws Exception
 	 */
 	@Test
@@ -113,7 +113,7 @@ public class ProtoBufferConverterTest {
 	}
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.rpc.conv.ProtoBufferConverter#serializeReturn(java.lang.Object)}.
+	 * Test method for {@link org.apache.niolex.network.rpc.conv.ProtobufConverter#serializeReturn(java.lang.Object)}.
 	 * @throws Exception
 	 */
 	@Test

@@ -20,6 +20,7 @@ package org.apache.niolex.network.rpc.conv;
 import java.lang.reflect.Type;
 
 import org.apache.niolex.commons.seri.ProtoStuffUtil;
+import org.apache.niolex.commons.seri.SeriUtil;
 import org.apache.niolex.network.rpc.IConverter;
 
 /**
@@ -36,7 +37,7 @@ public class ProtoStuffConverter implements IConverter {
 	 */
 	@Override
 	public Object[] prepareParams(byte[] data, Type[] generic) throws Exception {
-		return ProtoStuffUtil.parseMulti(data, generic);
+		return ProtoStuffUtil.parseMulti(data, SeriUtil.castJavaTypes(generic));
 	}
 
 	/**
@@ -54,7 +55,7 @@ public class ProtoStuffConverter implements IConverter {
 	 */
 	@Override
 	public Object prepareReturn(byte[] ret, Type type) throws Exception {
-		return ProtoStuffUtil.parseOne(ret, type);
+		return ProtoStuffUtil.parseOne(ret, SeriUtil.castJavaType(type));
 	}
 
 	/**

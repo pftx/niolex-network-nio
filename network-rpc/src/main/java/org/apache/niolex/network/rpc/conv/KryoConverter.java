@@ -21,6 +21,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.lang.reflect.Type;
 
+import org.apache.niolex.commons.seri.SeriUtil;
 import org.apache.niolex.commons.stream.KryoInstream;
 import org.apache.niolex.commons.stream.KryoOutstream;
 import org.apache.niolex.network.rpc.IConverter;
@@ -37,14 +38,15 @@ public class KryoConverter implements IConverter {
      * This is the override of super method.
      * @see org.apache.niolex.network.rpc.IConverter#prepareParams(byte[], java.lang.reflect.Type[])
      */
-    @SuppressWarnings("unchecked")
     @Override
     public Object[] prepareParams(byte[] data, Type[] generic) throws Exception {
         ByteArrayInputStream in = new ByteArrayInputStream(data);
         KryoInstream kin = new KryoInstream(in);
         Object[] rr = new Object[generic.length];
+        Class<Object>[] crr = SeriUtil.castJavaTypes(generic);
+        
         for (int i = 0; i < generic.length; ++i) {
-            rr[i] = kin.readObject((Class<Object>) generic[i]);
+            rr[i] = kin.readObject(crr[i]);
         }
         return rr;
     }
@@ -67,12 +69,11 @@ public class KryoConverter implements IConverter {
      * This is the override of super method.
      * @see org.apache.niolex.network.rpc.IConverter#prepareReturn(byte[], java.lang.reflect.Type)
      */
-    @SuppressWarnings("unchecked")
     @Override
     public Object prepareReturn(byte[] ret, Type type) throws Exception {
         ByteArrayInputStream in = new ByteArrayInputStream(ret);
         KryoInstream kin = new KryoInstream(in);
-        return kin.readObject((Class<Object>) type);
+        return kin.readObject(SeriUtil.castJavaType(type));
     }
 
     /**

@@ -21,7 +21,7 @@ import java.io.IOException;
 
 import org.apache.niolex.network.rpc.ConfigItem;
 import org.apache.niolex.network.rpc.RpcPacketHandler;
-import org.apache.niolex.network.rpc.conv.ProtoBufferConverter;
+import org.apache.niolex.network.rpc.conv.ProtobufConverter;
 import org.apache.niolex.network.server.MultiNioServer;
 import org.apache.niolex.network.server.NioServer;
 
@@ -43,7 +43,7 @@ public class ProtoRpcServer {
         s.setPort(8808);
         RpcPacketHandler handler = new RpcPacketHandler();
         s.setPacketHandler(handler);
-        handler.setConverter(new ProtoBufferConverter());
+        handler.setConverter(new ProtobufConverter());
         ConfigItem[] confs = new ConfigItem[1];
         ConfigItem c = new ConfigItem();
         c.setInterface(PersonService.class);

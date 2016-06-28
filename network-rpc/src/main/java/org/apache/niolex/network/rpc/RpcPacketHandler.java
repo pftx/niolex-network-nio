@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Server side RPC packet handler.
- * We use and internal thread pool to invoke real methods on server side
+ * We use an internal thread pool to invoke real methods on server side
  * target, and use a queue size to track the server status.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
@@ -61,7 +61,7 @@ public class RpcPacketHandler implements IPacketHandler {
 
 
 	/**
-	 * Create an RpcPacketHandler with default pool size.
+	 * Create a RpcPacketHandler with the default pool size.
 	 */
 	public RpcPacketHandler() {
 		int threadsNumber = Runtime.getRuntime().availableProcessors() * 5;
@@ -70,7 +70,7 @@ public class RpcPacketHandler implements IPacketHandler {
 	}
 
 	/**
-	 * Create an RpcPacketHandler with the specified pool size.
+	 * Create a RpcPacketHandler with the specified pool size.
 	 *
 	 * @param threadsNumber the threads number of the execute pool
 	 */
@@ -81,7 +81,7 @@ public class RpcPacketHandler implements IPacketHandler {
 	}
 
 	/**
-	 * Create an RpcPacketHandler with the specified pool size & converter.
+	 * Create a RpcPacketHandler with the specified pool size & converter.
 	 *
 	 * @param threadsNumber the threads number of the execute pool
 	 * @param converter the packet converter
@@ -149,6 +149,7 @@ public class RpcPacketHandler implements IPacketHandler {
 			try {
 				RpcException rep = null;
 				Object[] args = null;
+				
 				try {
 				    Type[] generic = method.getGenericParameterTypes();
 				    if (generic.length > 0) {
@@ -160,6 +161,7 @@ public class RpcPacketHandler implements IPacketHandler {
 				    handleReturn(sc, wt, rep, 1);
 				    return;
 				}
+				
 				try {
 				    Object ret = method.invoke(host, args);
 				    handleReturn(sc, wt, ret, 0);

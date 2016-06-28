@@ -19,7 +19,7 @@ package org.apache.niolex.network.rpc.conv;
 
 import static org.junit.Assert.assertEquals;
 
-import org.apache.niolex.commons.seri.ProtoUtil;
+import org.apache.niolex.commons.seri.ProtobufUtil;
 import org.apache.niolex.commons.seri.SeriException;
 import org.apache.niolex.commons.test.MockUtil;
 import org.apache.niolex.network.demo.proto.PersonProtos.Person;
@@ -35,25 +35,25 @@ import org.junit.Test;
 public class ProtoUtilTest {
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.rpc.proto.ProtoUtil#parseOne(byte[], java.lang.reflect.Type)}.
+	 * Test method for {@link org.apache.niolex.network.rpc.ProtobufUtil.ProtoUtil#parseOne(byte[], java.lang.reflect.Type)}.
 	 */
 	@Test(expected = SeriException.class)
 	public void testParseOneByteArrayType() {
 		byte[] ret = MockUtil.randByteArray(12);
-		ProtoUtil.parseOne(ret, null);
+		ProtobufUtil.parseOne(ret, null);
 	}
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.rpc.proto.ProtoUtil#parseOne(byte[], java.lang.reflect.Type)}.
+	 * Test method for {@link org.apache.niolex.network.rpc.ProtobufUtil.ProtoUtil#parseOne(byte[], java.lang.reflect.Type)}.
 	 */
 	@Test(expected = SeriException.class)
 	public void testParseOneByteArrayType2() {
 		byte[] ret = MockUtil.randByteArray(12);
-		ProtoUtil.parseOne(ret, String.class);
+		ProtobufUtil.parseOne(ret, String.class);
 	}
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.rpc.proto.ProtoUtil#parseOne(byte[], java.lang.reflect.Type)}.
+	 * Test method for {@link org.apache.niolex.network.rpc.ProtobufUtil.ProtoUtil#parseOne(byte[], java.lang.reflect.Type)}.
 	 */
 	@Test
 	public void testParseOneByteArrayType3() {
@@ -63,7 +63,7 @@ public class ProtoUtilTest {
 				.addPhone(PhoneNumber.newBuilder().setNumber("123122311" + i).setType(PhoneType.MOBILE).build())
 				.build();
 		byte[] ret = p.toByteArray();
-		Person q = (Person) ProtoUtil.parseOne(ret, Person.class);
+		Person q = (Person) ProtobufUtil.parseOne(ret, Person.class);
 		assertEquals(p, q);
 	}
 
