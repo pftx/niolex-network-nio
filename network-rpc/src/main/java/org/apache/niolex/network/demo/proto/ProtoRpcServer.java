@@ -37,7 +37,9 @@ public class ProtoRpcServer {
 
     /**
      * The Server Demo
-     * @param args
+     * 
+     * @param args command line arguments
+     * @throws IOException if necessary
      */
     public static void main(String[] args) throws IOException {
         s.setPort(8808);

@@ -81,7 +81,7 @@ public class RpcPacketHandler implements IPacketHandler {
 	}
 
 	/**
-	 * Create a RpcPacketHandler with the specified pool size & converter.
+	 * Create a RpcPacketHandler with the specified pool size &amp; converter.
 	 *
 	 * @param threadsNumber the threads number of the execute pool
 	 * @param converter the packet converter

@@ -27,7 +27,7 @@ import java.lang.annotation.Target;
  * Configure the annotated interface with the group name.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
- * @version @version@, $Date: 2010-10-18$
+ * @version 0.1.0, $Date: 2010-10-18$
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)

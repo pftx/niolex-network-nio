@@ -30,7 +30,7 @@ package org.apache.niolex.network.cli;
  * {@link #getLogPrefix()}
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
- * @version @version@, $Date: 2011-7-12$
+ * @version 0.0.1, $Date: 2011-7-12$
  */
 public class LogContext {
 
@@ -51,7 +51,7 @@ public class LogContext {
     }
 
     /**
-     * Just return GID here for demo & unit test.
+     * Just return GID here for demo &amp; unit test.
      * <br>
      * Subclass need to override this method to provide their own implementation,
      * return the global log prefix for rpc framework. This framework will log with this prefix.

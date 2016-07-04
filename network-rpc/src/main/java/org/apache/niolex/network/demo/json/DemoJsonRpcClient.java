@@ -37,7 +37,8 @@ public class DemoJsonRpcClient {
 	/**
 	 * The Client Demo
 	 *
-	 * @param args
+	 * @param args command line arguments
+	 * @throws Exception if necessary
 	 */
 	public static void main(String[] args) throws Exception {
 		PacketClient c = new PacketClient(new InetSocketAddress("localhost", 8808));

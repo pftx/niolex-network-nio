@@ -142,6 +142,7 @@ public class RpcClient implements IPacketHandler, InvocationHandler {
 	/**
 	 * Get the Rpc Service Client Side Stub powered by this rpc client.
 	 *
+	 * @param <T> the interface type
 	 * @param c the interface you want to have stub with
 	 * @return the generated stub
 	 */
