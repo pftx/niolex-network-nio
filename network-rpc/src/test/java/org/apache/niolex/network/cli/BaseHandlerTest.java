@@ -27,6 +27,7 @@ import java.util.concurrent.TimeoutException;
 
 import org.apache.niolex.commons.reflect.MethodUtil;
 import org.apache.niolex.network.rpc.RpcException;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
@@ -35,6 +36,11 @@ import org.junit.Test;
  * @since 2014-1-3
  */
 public class BaseHandlerTest extends BaseHandler {
+    
+    @BeforeClass
+    public static void resetLogContext() {
+        LogContext.setInstance(new LogContext());
+    }
 
     @Test
     public void testLogInvoke() throws Exception {
