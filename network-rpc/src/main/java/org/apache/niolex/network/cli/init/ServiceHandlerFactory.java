@@ -46,7 +46,7 @@ public class ServiceHandlerFactory {
 	/**
 	 * Get builder for this service type.
 	 *
-	 * @param serviceType
+	 * @param serviceType the service type of the builder you want to get
 	 * @return the builder for this service type
 	 * @throws IllegalArgumentException if we can not find any builder for this service type
 	 */
@@ -57,4 +57,5 @@ public class ServiceHandlerFactory {
 		}
 		return builder;
 	}
+	
 }

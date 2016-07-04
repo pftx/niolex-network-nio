@@ -65,14 +65,4 @@ public class RpcConfiger extends BaseConfiger<RpcConfigBean> {
 		return new RpcConfigBean(groupName);
 	}
 
-	/**
-	 * Get the default config if there is any.
-	 *
-	 * @return the default config bean if group not exist, null otherwise
-	 */
-	@Override
-	public RpcConfigBean getConfig() {
-		return (RpcConfigBean)super.getConfig(BaseConfiger.DEFAULT);
-	}
-
 }

@@ -29,10 +29,10 @@ import org.apache.niolex.network.cli.conf.RpcConfigBean;
 public interface ServiceHandlerBuilder {
 
 	/**
-	 * Build the service handler instance according to the parameters.
+	 * Build the service handler instance according to the specified parameters.
 	 *
 	 * @param bean the config bean
-	 * @param completeUrl the complete server url
+	 * @param completeUrl the complete service url
 	 * @return the created service handler.
 	 * @throws Exception when error occurred
 	 */

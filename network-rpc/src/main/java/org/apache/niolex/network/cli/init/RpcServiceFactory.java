@@ -49,7 +49,7 @@ public class RpcServiceFactory {
 	 *
 	 * @param fileName the property file path
 	 * @return the created instance for this property file
-	 * @throws IOException
+	 * @throws IOException if I / O related error occurred
 	 */
 	public static final RpcServiceFactory getInstance(String fileName) throws IOException {
 	    return new RpcServiceFactory(fileName);
@@ -62,7 +62,7 @@ public class RpcServiceFactory {
 	 * Init this Factory with a property file.
 	 *
 	 * @param fileName the property file path
-	 * @throws IOException
+	 * @throws IOException if I / O related error occurred
 	 */
 	protected RpcServiceFactory(String fileName) throws IOException {
 		configer = new RpcConfiger(fileName);

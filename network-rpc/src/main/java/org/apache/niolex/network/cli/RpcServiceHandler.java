@@ -81,8 +81,7 @@ public class RpcServiceHandler implements IServiceHandler {
 	@Override
 	public void notReady(IOException ioe) {
 		nextWorkTime = System.currentTimeMillis() + errorBlockTime;
-		LOG.warn("Server [{}] is not ready, next work time - {}, error: {}.",
-		        serviceUrl, nextWorkTime, ioe.getMessage());
+		LOG.warn("Server [{}] is not ready, next work time - {}, error: {}.", serviceUrl, nextWorkTime, ioe.getMessage());
 	}
 
 	/**
