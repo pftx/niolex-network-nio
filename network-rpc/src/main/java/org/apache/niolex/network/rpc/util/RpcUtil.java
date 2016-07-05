@@ -17,20 +17,13 @@
  */
 package org.apache.niolex.network.rpc.util;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
-import java.net.URL;
-import java.net.URLConnection;
 
 import org.apache.niolex.commons.codec.Base64Util;
 import org.apache.niolex.commons.codec.StringUtil;
-import org.apache.niolex.commons.stream.StreamUtil;
 import org.apache.niolex.commons.util.ThrowableUtil;
 import org.apache.niolex.network.PacketData;
 import org.apache.niolex.network.rpc.RpcException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Common utils for Rpc.
@@ -39,7 +32,6 @@ import org.slf4j.LoggerFactory;
  * @version 1.0.0, Date: 2012-6-1
  */
 public abstract class RpcUtil {
-	private static final Logger LOG = LoggerFactory.getLogger(RpcUtil.class);
 
 	/**
 	 * The field separator to split the fields in rpc exception.
@@ -150,42 +142,5 @@ public abstract class RpcUtil {
 
         return sb.substring(0, length);
     }
-
-    /**
-     * Check the connectivity of this url according to the given timeout.
-     *
-     * @param completeUrl the complete url to server
-     * @param connectTimeout the socket connect timeout
-     * @param readTimeout the socket read timeout
-     * @return true if connected to server, false otherwise
-     */
-    public static boolean checkServerStatus(String completeUrl, int connectTimeout, int readTimeout) {
-        InputStream inputStream = null;
-		try {
-			URL u = new URL(completeUrl);
-			URLConnection conn = u.openConnection();
-			conn.setConnectTimeout(connectTimeout);
-			conn.setReadTimeout(readTimeout);
-			conn.setDoInput(true);
-			conn.setDoOutput(false);
-			conn.connect();
-			inputStream = conn.getInputStream();
-			int len = conn.getContentLength();
-			if (len == -1) {
-			    len = StreamUtil.readData(inputStream, new byte[1024]);
-			}
-			if (len < 2) {
-				LOG.warn("Failed to connect to " + completeUrl + " : Server response too short.");
-				return false;
-			}
-			LOG.info("Server [" + completeUrl + "] status: " + conn.getHeaderField(0));
-			return true;
-		} catch (IOException e) {
-			LOG.warn("Failed to connect to " + completeUrl + " : " + e.getMessage());
-			return false;
-		} finally {
-		    StreamUtil.closeStream(inputStream);
-		}
-	}
 
 }

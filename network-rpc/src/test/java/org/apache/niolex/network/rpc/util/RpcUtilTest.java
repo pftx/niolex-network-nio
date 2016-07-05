@@ -18,7 +18,6 @@
 package org.apache.niolex.network.rpc.util;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -243,46 +242,5 @@ public class RpcUtilTest extends RpcUtil {
 		assertEquals(145, q.length());
 		assertNotEquals(s, q);
 	}
-
-	/**
-	 * Test method for {@link org.apache.niolex.network.rpc.util.RpcUtil#checkServerStatus(java.lang.String, int, int)}
-	 * .
-	 */
-	@Test
-	public final void testCheckServerStatusLenMinus1() {
-		boolean b = RpcUtil.checkServerStatus("http://www.baidu.com", 4000, 4000);
-		assertTrue(b);
-	}
-
-	@Test
-	public final void testCheckServerStatusLessThan2() {
-	    String url = RpcUtilTest.class.getResource("onebyte.txt").toExternalForm();
-	    boolean d = RpcUtil.checkServerStatus(url, 4000, 4000);
-	    assertFalse(d);
-	}
-
-	@Test
-	public final void testCheckServerStatusEx404() {
-	    boolean e = RpcUtil.checkServerStatus("http://www.cs.zju.edu.cn/org/codes/404.html", 4000, 4000);
-	    assertFalse(e);
-	}
-
-	@Test
-    public final void testCheckServerStatusEx404Again() {
-		boolean c = RpcUtil.checkServerStatus("http://www.apache.org/tomcat.php", 4000, 4000);
-		assertFalse(c);
-    }
-
-    @Test
-	public final void testCheckServerStatusIOEx() {
-		boolean f = RpcUtil.checkServerStatus("http://www.facebook.com", 1000, 1000);
-		assertFalse(f);
-	}
-
-    @Test(expected=IllegalArgumentException.class)
-    public final void testCheckServerStatusNull() {
-        boolean f = RpcUtil.checkServerStatus("http://www.facebook.com", -1000, -1000);
-        assertFalse(f);
-    }
 
 }

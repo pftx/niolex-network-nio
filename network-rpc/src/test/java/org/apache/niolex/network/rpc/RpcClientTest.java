@@ -177,4 +177,16 @@ public class RpcClientTest {
         System.out.println("not yet implemented");
     }
 
+    @Test
+    public void testSetServerAddressString() throws Exception {
+        PacketClient pc = new PacketClient();
+        RpcClient rr = new RpcClient(pc, new PacketInvoker(), new JsonConverter());
+        rr.addInferface(RpcService.class);
+        rr.setServerAddress("localhost:9876");
+        assertFalse(rr.isValid());
+        assertEquals(ConnStatus.INNITIAL, rr.getConnStatus());
+        InetSocketAddress addr = new InetSocketAddress("localhost", 9876);
+        assertEquals(addr, pc.getServerAddress());
+    }
+
 }
