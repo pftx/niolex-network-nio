@@ -117,7 +117,7 @@ public class DemoProtoRpcClient {
 		// Null
 		n = createPhoneNumber("1231223oo88", PhoneType.WORK);
 		p = ser.getPerson(n);
-		Check.isTrue(p == null);
+		Check.isNull(p, "ser.getPerson(..) should return null");
 		
 		Runnable r = new Runnable() {
         	final int SIZE = 2212;
