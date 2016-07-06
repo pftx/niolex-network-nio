@@ -17,10 +17,15 @@
  */
 package org.apache.niolex.rpc.protocol;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.lang.reflect.Type;
+import java.util.List;
 
 import org.apache.niolex.commons.compress.JacksonUtil;
+import org.apache.niolex.commons.seri.SeriUtil;
+import org.apache.niolex.commons.stream.JsonProxy;
+import org.codehaus.jackson.type.TypeReference;
 
 /**
  * The Json Rpc Protocol. We implement both side protocol just in one class.
@@ -37,11 +42,11 @@ public class JsonProtocol implements IClientProtocol, IServerProtocol {
 	 */
 	@Override
 	public byte[] serializeParams(Object[] args) throws Exception {
-		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		for (Object o : args) {
-			JacksonUtil.writeObj(out, o);
-		}
-		return out.toByteArray();
+	    ByteArrayOutputStream out = new ByteArrayOutputStream();
+        for (Object o : args) {
+            JacksonUtil.writeObj(out, o);
+        }
+        return out.toByteArray();
 	}
 
 	/**
@@ -50,7 +55,7 @@ public class JsonProtocol implements IClientProtocol, IServerProtocol {
 	 */
 	@Override
 	public Object prepareReturn(byte[] ret, Type type) throws Exception {
-		return JacksonUtil.bin2Obj(ret, new JsonUtil.TypeRe<Object>(type));
+	    return JacksonUtil.bin2Obj(ret, SeriUtil.packJavaType(type));
 	}
 
 	/**
@@ -59,7 +64,15 @@ public class JsonProtocol implements IClientProtocol, IServerProtocol {
 	 */
 	@Override
 	public Object[] prepareParams(byte[] data, Type[] generic) throws Exception {
-		return JsonUtil.prepareParams(data, generic);
+	    List<TypeReference<Object>> list = SeriUtil.packJavaTypes(generic);
+        
+        Object[] ret = new Object[list.size()];
+        ByteArrayInputStream in = new ByteArrayInputStream(data);
+        JsonProxy proxy = new JsonProxy(in);
+        for (int i = 0; i < ret.length; ++i) {
+            ret[i] = proxy.readObject(list.get(i));
+        }
+        return ret;
 	}
 
 	/**

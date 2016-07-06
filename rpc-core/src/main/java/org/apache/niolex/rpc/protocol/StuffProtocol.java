@@ -20,6 +20,7 @@ package org.apache.niolex.rpc.protocol;
 import java.lang.reflect.Type;
 
 import org.apache.niolex.commons.seri.ProtoStuffUtil;
+import org.apache.niolex.commons.seri.SeriUtil;
 
 /**
  * Using god like man protostuff protocol to serialize data.
@@ -35,7 +36,7 @@ public class StuffProtocol implements IClientProtocol, IServerProtocol {
 	 */
 	@Override
 	public Object[] prepareParams(byte[] data, Type[] generic) throws Exception {
-		return ProtoStuffUtil.parseMulti(data, generic);
+	    return ProtoStuffUtil.parseMulti(data, SeriUtil.castJavaTypes(generic));
 	}
 
 	/**
@@ -62,7 +63,7 @@ public class StuffProtocol implements IClientProtocol, IServerProtocol {
 	 */
 	@Override
 	public Object prepareReturn(byte[] ret, Type type) throws Exception {
-		return ProtoStuffUtil.parseOne(ret, type);
+	    return ProtoStuffUtil.parseOne(ret, SeriUtil.castJavaType(type));
 	}
 
 }
