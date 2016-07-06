@@ -168,7 +168,7 @@ public class InitTreeTest {
         assertTrue(zkop.updateMetaData("lex-cli", "org.new", 2, "2nd", "skip update meta"));
         Map<String, String> metaData2 = zkop.getMetaData("lex-cli", "org.new", 2);
         assertEquals(2, metaData2.size());
-        String e = "{2nd=skip update meta, 1st=Mi UI}";
+        String e = "{1st=Mi UI, 2nd=skip update meta}";
         assertEquals(e, metaData2.toString());
     }
 

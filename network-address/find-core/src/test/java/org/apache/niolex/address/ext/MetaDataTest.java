@@ -66,7 +66,7 @@ public class MetaDataTest {
         byte[] origin = FileUtil.getBinaryFileContentFromClassPath("meta.txt", MetaDataTest.class);
         MetaData kd = MetaData.parse(origin);
         // ----
-        String s = "MetaData [propMap={IPS=,\t\t,1,2;3:127.0.0.1:127.0.0.2:, c=d, QUOTA=10\t\t,  100,3000, a=b}, beanMap={IPS=[, 1, 2, 3, 127.0.0.1, 127.0.0.2], QUOTA={secQ=10, minQ=100}}]";
+        String s = "MetaData [propMap={IPS=,\t\t,1,2;3:127.0.0.1:127.0.0.2:, QUOTA=10\t\t,  100,3000, a=b, c=d}, beanMap={IPS=[, 1, 2, 3, 127.0.0.1, 127.0.0.2], QUOTA={secQ=10, minQ=100}}]";
         assertEquals(s, kd.toString());
         Map<String, Object> map = kd.getBeanMap();
         assertEquals(map.size(), 2);

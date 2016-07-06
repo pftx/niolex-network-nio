@@ -19,10 +19,10 @@ package org.apache.niolex.address.ext;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.niolex.address.server.Producer;
@@ -34,7 +34,7 @@ import org.apache.niolex.zookeeper.core.ZKListener;
 /**
  * The Advanced Producer is for access the meta data from ZK.
  * <br>
- * The Path of MetaData: "/&lt;root>/services/&lt;service&gt;/clients/&lt;version&gt;/&lt;client-name&gt; ==&gt; [meta-key]:[meta-value]"
+ * The Path of MetaData: "/&lt;root&gt;/services/&lt;service&gt;/clients/&lt;version&gt;/&lt;client-name&gt; ==&gt; [meta-key]:[meta-value]"
  * <br><pre>
  * [How the MetaData stored]
  * In order to reduce the total number of watchers, We set a signature at the node
@@ -45,7 +45,7 @@ import org.apache.niolex.zookeeper.core.ZKListener;
  * change the signature too. So we can find out which client is modified by decode
  * the signature.
  * </pre>
- * 元数据的路径："/&lt;root>/services/&lt;service&gt;/clients/&lt;version&gt;/&lt;client-name&gt; ==&gt; [meta-key]:[meta-value]"
+ * 元数据的路径："/&lt;root&gt;/services/&lt;service&gt;/clients/&lt;version&gt;/&lt;client-name&gt; ==&gt; [meta-key]:[meta-value]"
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.5
@@ -117,8 +117,8 @@ public class AdvancedProducer extends Producer {
      * @param data the meta signature
      * @return the signature map
      */
-    public HashMap<String, String> parseMap(byte[] data) {
-        HashMap<String, String> map = new HashMap<String, String>();
+    public Map<String, String> parseMap(byte[] data) {
+        Map<String, String> map = new TreeMap<String, String>();
         String[] arr = StringUtil.utf8ByteToStr(data).split(" *\r*\n");
         for (String item : arr) {
             String[] kv = item.split(" *= *", 2);
@@ -153,7 +153,7 @@ public class AdvancedProducer extends Producer {
         private final String path;
         private final ConcurrentHashMap<String, MetaData> map;
         private byte[] before;
-        private HashMap<String, String> beforeMap;
+        private Map<String, String> beforeMap;
 
         /**
          * Create a DataWatcher.
@@ -189,7 +189,7 @@ public class AdvancedProducer extends Producer {
             if (Arrays.equals(before, after)) {
                 return;
             }
-            HashMap<String, String> afterMap = parseMap(after);
+            Map<String, String> afterMap = parseMap(after);
             for (Entry<String, String> entry : afterMap.entrySet()) {
                 String be = beforeMap.get(entry.getKey());
                 if (be == null || !be.equals(entry.getValue())) {

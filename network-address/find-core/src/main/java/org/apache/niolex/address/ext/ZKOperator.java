@@ -17,13 +17,29 @@
  */
 package org.apache.niolex.address.ext;
 
-import static org.apache.niolex.address.util.ACLUtil.*;
-import static org.apache.niolex.address.util.PathUtil.*;
+import static org.apache.niolex.address.util.ACLUtil.getAllRights;
+import static org.apache.niolex.address.util.ACLUtil.getCRDRights;
+import static org.apache.niolex.address.util.ACLUtil.getId;
+import static org.apache.niolex.address.util.ACLUtil.getReadRight;
+import static org.apache.niolex.address.util.ACLUtil.getUserName;
+import static org.apache.niolex.address.util.ACLUtil.mergeACL;
+import static org.apache.niolex.address.util.ACLUtil.removeId;
+import static org.apache.niolex.address.util.PathUtil.makeClientPath;
+import static org.apache.niolex.address.util.PathUtil.makeMeta2ClientPath;
+import static org.apache.niolex.address.util.PathUtil.makeMeta2NodePath;
+import static org.apache.niolex.address.util.PathUtil.makeMeta2VersionPath;
+import static org.apache.niolex.address.util.PathUtil.makeOpPath;
+import static org.apache.niolex.address.util.PathUtil.makeServerPath;
+import static org.apache.niolex.address.util.PathUtil.makeService2NodePath;
+import static org.apache.niolex.address.util.PathUtil.makeService2StatePath;
+import static org.apache.niolex.address.util.PathUtil.makeService2VersionPath;
+import static org.apache.niolex.address.util.PathUtil.makeServicePath;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import org.apache.niolex.zookeeper.core.ZKException;
 import org.apache.zookeeper.CreateMode;
@@ -38,18 +54,18 @@ import org.apache.zookeeper.data.Stat;
  * find storage.
  * <pre>
  * The whole find storage tree is like this:
- * /root =>
+ * /root =&gt;
  *      /operators store all the operators accounts
  *      /servers store all the servers accounts
  *      /clients store all the clients accounts
- *      /services store all the data of services =>
- *              /service-name =>
- *                      /versions store all the versions of this service =>
- *                              /version-number =>
- *                                      /state-label =>
+ *      /services store all the data of services =&gt;
+ *              /service-name =&gt;
+ *                      /versions store all the versions of this service =&gt;
+ *                              /version-number =&gt;
+ *                                      /state-label =&gt;
  *                                              /server-addresses
  *                      /clients store all the clients meta data of this service
- *                              /version-number =>
+ *                              /version-number =&gt;
  *                                      /client-name
  * This class is operating on this tree.
  * </pre>
@@ -832,8 +848,8 @@ public class ZKOperator extends AdvancedProducer {
             while (true) {
                 Stat stat = new Stat();
                 byte[] oldData = zk.getData(path, false, stat);
-                HashMap<String, String> map = oldData == null ?
-                        new HashMap<String, String>() : parseMap(oldData);
+                Map<String, String> map = oldData == null ?
+                        new TreeMap<String, String>() : parseMap(oldData);
                 String value = map.get(clientName);
                 if (value != null) {
                     try {

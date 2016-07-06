@@ -22,9 +22,9 @@ import org.apache.niolex.address.util.PathUtil.Path.Level;
 
 /**
  * The whole path of service is:
- * /<root>/services/<service>/versions/<version>/<state>/<node>
+ * /&lt;root&gt;/services/&lt;service&gt;/versions/&lt;version&gt;/&lt;state&gt;/&lt;node&gt;
  * The whole path of meta data is:
- * /<root>/services/<service>/clients/<version>/<client-name>
+ * /&lt;root&gt;/services/&lt;service&gt;/clients/&lt;version&gt;/&lt;client-name&gt;
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.5
@@ -40,7 +40,7 @@ public abstract class PathUtil {
     /**
      * Make the operator path.
      *
-     * @param root
+     * @param root the zookeeper root
      * @return the path
      */
     public static String makeOpPath(String root) {
@@ -50,7 +50,7 @@ public abstract class PathUtil {
     /**
      * Make the server path.
      *
-     * @param root
+     * @param root the zookeeper root
      * @return the path
      */
     public static String makeServerPath(String root) {
@@ -60,7 +60,7 @@ public abstract class PathUtil {
     /**
      * Make the client path.
      *
-     * @param root
+     * @param root the zookeeper root
      * @return the path
      */
     public static String makeClientPath(String root) {
@@ -70,7 +70,7 @@ public abstract class PathUtil {
     /**
      * Make the service path.
      *
-     * @param root
+     * @param root the zookeeper root
      * @return the path
      */
     public static String makeServicePath(String root) {
@@ -80,8 +80,8 @@ public abstract class PathUtil {
     /**
      * Make the operator path.
      *
-     * @param root
-     * @param opName
+     * @param root the zookeeper root
+     * @param opName the operator name
      * @return the path
      */
     public static String makeOpPath(String root, String opName) {
@@ -93,8 +93,8 @@ public abstract class PathUtil {
     /**
      * Make the server path.
      *
-     * @param root
-     * @param svrName
+     * @param root the zookeeper root
+     * @param svrName the server name
      * @return the path
      */
     public static String makeServerPath(String root, String svrName) {
@@ -106,8 +106,8 @@ public abstract class PathUtil {
     /**
      * Make the client path.
      *
-     * @param root
-     * @param cliName
+     * @param root the zookeeper root
+     * @param cliName the client name
      * @return the path
      */
     public static String makeClientPath(String root, String cliName) {
@@ -119,8 +119,8 @@ public abstract class PathUtil {
     /**
      * Make the service path.
      *
-     * @param root
-     * @param service
+     * @param root the zookeeper root
+     * @param service the service name
      * @return the path
      */
     public static String makeServicePath(String root, String service) {
@@ -132,8 +132,8 @@ public abstract class PathUtil {
     /**
      * Make the service to version path.
      *
-     * @param root
-     * @param service
+     * @param root the zookeeper root
+     * @param service the service name
      * @return the path
      */
     public static String makeService2VersionPath(String root, String service) {
@@ -145,9 +145,9 @@ public abstract class PathUtil {
     /**
      * Make the service to state path.
      *
-     * @param root
-     * @param service
-     * @param version
+     * @param root the zookeeper root
+     * @param service the service name
+     * @param version the service version
      * @return the path
      */
     public static String makeService2StatePath(String root, String service, int version) {
@@ -160,10 +160,10 @@ public abstract class PathUtil {
     /**
      * Make the service to state path.
      *
-     * @param root
-     * @param service
-     * @param version
-     * @param state
+     * @param root the zookeeper root
+     * @param service the service name
+     * @param version the service version
+     * @param state the state name
      * @return the path
      */
     public static String makeService2NodePath(String root, String service, int version, String state) {
@@ -176,8 +176,8 @@ public abstract class PathUtil {
     /**
      * Make the meta data to client path.
      *
-     * @param root
-     * @param service
+     * @param root the zookeeper root
+     * @param service the service name
      * @return the path
      */
     public static String makeMeta2ClientPath(String root, String service) {
@@ -190,9 +190,9 @@ public abstract class PathUtil {
     /**
      * Make the meta data to version path.
      *
-     * @param root
-     * @param service
-     * @param version
+     * @param root the zookeeper root
+     * @param service the service name
+     * @param version the service version
      * @return the path
      */
     public static String makeMeta2VersionPath(String root, String service, int version) {
@@ -205,10 +205,10 @@ public abstract class PathUtil {
     /**
      * Make the meta data to client node path.
      *
-     * @param root
-     * @param service
-     * @param version
-     * @param clientName
+     * @param root the zookeeper root
+     * @param service the service name
+     * @param version the service version
+     * @param clientName the client name
      * @return the path
      */
     public static String makeMeta2NodePath(String root, String service, int version, String clientName) {

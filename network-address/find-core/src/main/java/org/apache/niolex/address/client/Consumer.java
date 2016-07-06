@@ -32,7 +32,7 @@ import org.apache.niolex.zookeeper.core.ZKListener;
  * This is the main class clients used to get service address list.
  * Clients can also get all states and listen to states list changes.
  * <br>
- * The Path of One Service: "/&lt;root>/services/&lt;service&gt;/versions/&lt;version&gt;/&lt;state&gt;/&lt;node&gt;"
+ * The Path of One Service: "/&lt;root&gt;/services/&lt;service&gt;/versions/&lt;version&gt;/&lt;state&gt;/&lt;node&gt;"
  * <br><pre>
  * [The style of Version]
  * 1. Number
@@ -61,7 +61,7 @@ import org.apache.niolex.zookeeper.core.ZKListener;
  * 3. 数字-数字
  * 例如100-300，表示取服务器版本号在[100, 300)区间的最大的version。
  * 数字是半开半闭区间，即100是可用的版本，300是不可以的版本。
- * &gt;/pre>
+ * </pre>
  *
  * @author Xie, Jiyun
  *
@@ -74,7 +74,7 @@ public class Consumer extends ZKConnector {
     protected String root;
 
     /**
-     * The only constructor extends super class.
+     * The only constructor extends from super class.
      * 构造函数,继承自父类
      *
      * @param clusterAddress zookeeper集群的地址
@@ -222,7 +222,7 @@ public class Consumer extends ZKConnector {
         private MutableOne<List<String>> ret;
 
         /**
-         * @param ret
+         * @param ret the mutable one used to store list
          */
         public NodeWatcher(MutableOne<List<String>> ret) {
             super();

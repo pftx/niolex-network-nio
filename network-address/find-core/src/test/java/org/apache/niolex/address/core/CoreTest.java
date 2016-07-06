@@ -21,8 +21,12 @@ import java.io.IOException;
 
 import org.apache.niolex.address.client.Consumer;
 import org.apache.niolex.address.ext.AdvancedProducer;
+import org.apache.niolex.address.op.MetaMain;
 import org.apache.niolex.address.op.OPMain;
+import org.apache.niolex.address.op.ServerMain;
+import org.apache.niolex.address.op.StatesMain;
 import org.apache.niolex.address.server.Producer;
+import org.apache.niolex.commons.codec.StringUtil;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,6 +76,25 @@ public class CoreTest {
     @Test
     public void testLOG() {
         System.out.println("[IN] CoreTest");
+        System.out.println("For the first time run unit test, please run the main method.");
+    }
+    
+    public static void main(String[] args) throws Exception {
+        // Init the find tree.
+        OPMain.main(null);
+        OPMain.main(StringUtil.toArray("org.new"));
+        OPMain.main(new String[] {TEST_SERVICE});
+        
+        StatesMain.main(StringUtil.toArray("org.new"));
+        StatesMain.main(new String[] {TEST_SERVICE, "1"});
+        StatesMain.main(new String[] {TEST_SERVICE, "3"});
+        StatesMain.main(new String[] {TEST_SERVICE, "4"});
+        
+        ServerMain.main(StringUtil.toArray("/find/services/org.apache.niolex.address.Test/versions/1/B"));
+        ServerMain.main(StringUtil.toArray("/find/services/org.apache.niolex.address.Test/versions/3/C"));
+        
+        MetaMain.main(null);
+        MetaMain.main(StringUtil.toArray("/find/services/org.new"));
     }
 
 }

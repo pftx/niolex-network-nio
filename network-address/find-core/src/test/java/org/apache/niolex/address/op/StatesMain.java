@@ -23,7 +23,13 @@ public class StatesMain extends OPMain {
      */
     public static void main(String[] args) throws Exception {
         ZooKeeper zk = getZooKeeper();
-        String param = "/find/services/org.apache.niolex.address.Test/versions/3";
+        String service = "org.apache.niolex.address.Test";
+        String ver = "3";
+        if (args != null && args.length != 0) {
+            service = args[0];
+            if (args.length > 1) ver = args[1];
+        }
+        String param = "/find/services/" + service + "/versions/" + ver;
 
         List<ACL> list = getRead4Client();
         list.addAll(getAll4Op());

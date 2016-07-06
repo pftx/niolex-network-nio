@@ -68,7 +68,7 @@ public class ConsumerMain {
         String oldQ = "Q";
         while (i-- > 0) {
             MetaData meta = map.get("find-cli");
-            String newQ = meta.getPropMap().get("Q");
+            String newQ = meta.getPropMap().get("IPS");
             if (!newQ.equals(oldQ)) {
                 System.out.println("[M] New MetaData ==> " + newQ);
                 oldQ = newQ;

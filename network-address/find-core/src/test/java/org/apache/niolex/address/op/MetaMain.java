@@ -24,6 +24,9 @@ public class MetaMain extends OPMain {
     public static void main(String[] args) throws Exception {
         ZooKeeper zk = getZooKeeper();
         String param = "/find/services/org.apache.niolex.address.Test";
+        if (args != null && args.length != 0) {
+            param = args[0];
+        }
 
         List<ACL> list = getRead4Client();
         list.addAll(getAll4Op());

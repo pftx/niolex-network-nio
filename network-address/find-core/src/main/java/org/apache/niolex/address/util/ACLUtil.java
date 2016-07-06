@@ -42,8 +42,8 @@ public class ACLUtil {
     /**
      * Get the ACL signature.
      *
-     * @param name
-     * @param password
+     * @param name the user name
+     * @param password the password
      * @return the signature
      */
     public static String getSignature(String name, String password) {
@@ -53,8 +53,8 @@ public class ACLUtil {
     /**
      * Get the Zookeeper Id.
      *
-     * @param name
-     * @param password
+     * @param name the user name
+     * @param password the password
      * @return the Id
      */
     public static Id getId(String name, String password) {
@@ -62,7 +62,8 @@ public class ACLUtil {
     }
 
     /**
-     * Get the only Id from the specified ACL list
+     * Get the only Id from the specified ACL list.
+     * 
      * @param acl the ACL list
      * @return the only Id if found
      * @throws IllegalArgumentException if the specified ACL list is invalid
@@ -91,8 +92,8 @@ public class ACLUtil {
     /**
      * Get the full rights of this user.
      *
-     * @param name
-     * @param password
+     * @param name the user's name
+     * @param password the user's password
      * @return the ACL list
      */
     public static List<ACL> getAllRights(String name, String password) {
@@ -105,8 +106,8 @@ public class ACLUtil {
     /**
      * Get the create read delete rights of this user.
      *
-     * @param name
-     * @param password
+     * @param name the user's name
+     * @param password the user's password
      * @return the ACL list
      */
     public static List<ACL> getCRDRights(String name, String password) {
@@ -119,8 +120,8 @@ public class ACLUtil {
     /**
      * Get the create read delete rights of this user.
      *
-     * @param name
-     * @param list
+     * @param name the user's name
+     * @param list the original ACL list
      * @return the ACL list
      */
     public static List<ACL> getCRDRights(String name, List<ACL> list) {
@@ -139,8 +140,8 @@ public class ACLUtil {
     /**
      * Get the read right of this user.
      *
-     * @param name
-     * @param list
+     * @param name the user's name
+     * @param list the original ACL list
      * @return the ACL list
      */
     public static List<ACL> getReadRight(String name, List<ACL> list) {
@@ -159,8 +160,8 @@ public class ACLUtil {
     /**
      * Test whether this ID belongs to the specified user.
      *
-     * @param id
-     * @param name
+     * @param id the zookeeper Id
+     * @param name the user's name
      * @return true if belongs to, false otherwise
      */
     public static boolean belongsTo(Id id, String name) {

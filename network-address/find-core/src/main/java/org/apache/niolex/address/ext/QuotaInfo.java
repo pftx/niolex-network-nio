@@ -63,7 +63,7 @@ public class QuotaInfo {
     /**
      * Set the second quota
      *
-     * @param secondQuota
+     * @param secondQuota the second quota
      */
     public void setSecondQuota(int secondQuota) {
         this.secondQuota = secondQuota;
@@ -79,7 +79,7 @@ public class QuotaInfo {
     /**
      * Set the minute quota
      *
-     * @param minuteQuota
+     * @param minuteQuota the minute quota
      */
     public void setMinuteQuota(int minuteQuota) {
         this.minuteQuota = minuteQuota;

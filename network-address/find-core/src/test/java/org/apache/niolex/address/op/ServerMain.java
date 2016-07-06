@@ -28,6 +28,9 @@ public class ServerMain {
 
         zk.addAuthInfo("digest", (OPMain.SVR_NAME + ":" + OPMain.SVR_PASSWORD).getBytes());
         String param = "/find/services/org.apache.niolex.address.Test/versions/3/C";
+        if (args != null && args.length != 0) {
+            param = args[0];
+        }
 
         zk.create(param + "/10.1.2.3:8808", null, Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
         zk.create(param + "/10.1.2.4:8808", null, Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);

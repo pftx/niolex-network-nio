@@ -18,9 +18,9 @@
 package org.apache.niolex.address.ext;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import org.apache.niolex.commons.codec.StringUtil;
 
@@ -59,13 +59,13 @@ public class MetaData {
     /**
      * Store all the meta data here.
      */
-    private final Map<String, String> propMap = new HashMap<String, String>();
+    private final Map<String, String> propMap = new TreeMap<String, String>();
 
     /**
      * This map is for store java bean, for extra help. the {@link #propMap} will
      * have all the data.
      */
-    private final Map<String, Object> beanMap = new HashMap<String, Object>();
+    private final Map<String, Object> beanMap = new TreeMap<String, Object>();
 
     /**
      * Construct Beans when properties updated.
