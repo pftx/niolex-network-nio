@@ -37,9 +37,9 @@ public class OPToolService extends ZKOperator {
     /**
      * Invoke super constructor.
      *
-     * @param clusterAddress
-     * @param sessionTimeout
-     * @throws IOException
+     * @param clusterAddress the cluster address list
+     * @param sessionTimeout the session timeout
+     * @throws IOException if necessary
      */
     public OPToolService(String clusterAddress, int sessionTimeout) throws IOException {
         super(clusterAddress, sessionTimeout);

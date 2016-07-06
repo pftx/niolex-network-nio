@@ -87,8 +87,8 @@ public class ShellMain {
     /**
      * The entrance.
      *
-     * @param args
-     * @throws Exception
+     * @param args the command line arguments
+     * @throws Exception if necessary
      */
     public static void main(String args[]) throws Exception {
         ShellMain main = new ShellMain(args);

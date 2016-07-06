@@ -24,6 +24,7 @@ import java.lang.reflect.Proxy;
 import java.lang.reflect.Type;
 import java.net.SocketTimeoutException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.niolex.commons.codec.StringUtil;
@@ -214,8 +215,8 @@ public class RpcProxy implements InvocationHandler {
 	 * @param interfs
 	 */
 	public void addInferface(Class<?> interfs) {
-		Method[] arr = MethodUtil.getMethods(interfs);
-		for (Method m : arr) {
+		List<Method> list = MethodUtil.getAllMethodsIncludeInterfaces(interfs);
+		for (Method m : list) {
 			if (m.isAnnotationPresent(RpcMethod.class)) {
 				RpcMethod rp = m.getAnnotation(RpcMethod.class);
 				executeMap.put(m, rp.value());

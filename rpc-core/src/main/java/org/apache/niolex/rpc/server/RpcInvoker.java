@@ -20,6 +20,7 @@ package org.apache.niolex.rpc.server;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.niolex.commons.reflect.MethodUtil;
@@ -167,8 +168,8 @@ public class RpcInvoker implements Invoker {
 	 * @param target
 	 */
 	public void addRpcConfig(Class<?> interfaces, Object target) {
-	    Method[] arr = MethodUtil.getMethods(interfaces);
-        for (Method m : arr) {
+	    List<Method> list = MethodUtil.getAllMethodsIncludeInterfaces(interfaces);
+        for (Method m : list) {
             if (m.isAnnotationPresent(RpcMethod.class)) {
                 RpcMethod rp = m.getAnnotation(RpcMethod.class);
                 RpcExecuteItem rei = new RpcExecuteItem();

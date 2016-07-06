@@ -17,6 +17,8 @@
  */
 package org.apache.niolex.rpc.util;
 
+import java.lang.reflect.Type;
+
 import org.apache.niolex.commons.codec.StringUtil;
 import org.apache.niolex.rpc.RpcException;
 
@@ -77,4 +79,19 @@ public abstract class RpcUtil {
 		return ex;
 	}
 
+    /**
+     * Check the generic array is in fact a class array.
+     *
+     * @param generic the generic type array
+     * @return the checked class array
+     * @throws ClassCaseException if any item in the generic array is not a class
+     */
+    public static final Class<?>[] checkParams(Type[] generic) {
+        Class<?>[] array = new Class<?>[generic.length];
+        for (int i = 0; i < generic.length; ++i) {
+            array[i] = (Class<?>) generic[i];
+        }
+        return array;
+    }
+    
 }

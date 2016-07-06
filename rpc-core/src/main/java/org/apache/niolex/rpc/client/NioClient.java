@@ -30,6 +30,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.niolex.commons.concurrent.Blocker;
+import org.apache.niolex.commons.concurrent.BlockerException;
 import org.apache.niolex.commons.concurrent.WaitOn;
 import org.apache.niolex.network.Config;
 import org.apache.niolex.network.Packet;
@@ -234,7 +235,7 @@ public class NioClient extends BaseClient implements Runnable {
 	 */
 	public void closeChannel(ConnectionCore clientCore) {
 		validCnt.decrementAndGet();
-		Exception ex = new RpcException("Connection closed.", RpcException.Type.CONNECTION_LOST, null);
+		BlockerException ex = new BlockerException("Connection closed.");
 		blocker.release(clientCore, ex);
 	}
 
@@ -249,7 +250,7 @@ public class NioClient extends BaseClient implements Runnable {
 		sc.setSerial((short) 1);
 		ConnectionCore cli = connManager.take(connectTimeout);
 		if (cli != null) {
-			WaitOn<Packet> on = blocker.initWait(cli);
+			WaitOn<Packet> on = blocker.init(cli);
 			cli.prepareWrite(sc);
 			return on;
 		} else {

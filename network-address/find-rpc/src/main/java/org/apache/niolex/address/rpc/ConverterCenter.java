@@ -22,7 +22,7 @@ import java.util.Map;
 
 import org.apache.niolex.network.rpc.IConverter;
 import org.apache.niolex.network.rpc.conv.JsonConverter;
-import org.apache.niolex.network.rpc.conv.ProtoBufferConverter;
+import org.apache.niolex.network.rpc.conv.ProtobufConverter;
 import org.apache.niolex.network.rpc.conv.ProtoStuffConverter;
 
 /**
@@ -44,7 +44,7 @@ public class ConverterCenter {
      */
     static {
         builderMap.put("network/json", new JsonConverter());
-        builderMap.put("network/proto", new ProtoBufferConverter());
+        builderMap.put("network/proto", new ProtobufConverter());
         builderMap.put("network/stuff", new ProtoStuffConverter());
     }
 

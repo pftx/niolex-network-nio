@@ -19,7 +19,7 @@ package org.apache.niolex.rpc.protocol;
 
 import java.lang.reflect.Type;
 
-import org.apache.niolex.commons.seri.ProtoUtil;
+import org.apache.niolex.commons.seri.ProtobufUtil;
 import org.apache.niolex.rpc.RpcException;
 import org.apache.niolex.rpc.util.RpcUtil;
 
@@ -40,7 +40,7 @@ public class ProtobufProtocol implements IClientProtocol, IServerProtocol {
 	 */
 	@Override
 	public Object[] prepareParams(byte[] data, Type[] generic) throws Exception {
-		return ProtoUtil.parseMulti(data, generic);
+		return ProtobufUtil.parseMulti(data, RpcUtil.checkParams(generic));
 	}
 
 	/**
@@ -66,19 +66,20 @@ public class ProtobufProtocol implements IClientProtocol, IServerProtocol {
 	 */
 	@Override
 	public byte[] serializeParams(Object[] args) throws Exception {
-		return ProtoUtil.seriMulti(args);
+		return ProtobufUtil.seriMulti(args);
 	}
 
 	/**
 	 * Override super method
 	 * @see org.apache.niolex.rpc.protocol.IClientProtocol#prepareReturn(byte[], java.lang.reflect.Type)
 	 */
-	@Override
+	@SuppressWarnings("unchecked")
+    @Override
 	public Object prepareReturn(byte[] ret, Type type) throws Exception {
 		if (type.equals(RpcException.class)) {
 			return RpcUtil.parseRpcException(ret);
 		} else {
-			return ProtoUtil.parseOne(ret, type);
+			return ProtobufUtil.parseOne(ret, (Class<Object>) type);
 		}
 	}
 

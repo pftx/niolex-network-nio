@@ -37,8 +37,9 @@ public interface ICommand {
     /**
      * Process the command.
      *
+     * @param optool the operation tool
      * @param cmdOps the command options
-     * @throws Exception
+     * @throws Exception if necessary
      */
     void processCmd(OPToolService optool, List<String> cmdOps) throws Exception;
 
