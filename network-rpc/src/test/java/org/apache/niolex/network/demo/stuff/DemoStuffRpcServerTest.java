@@ -28,26 +28,26 @@ import org.junit.Test;
  * @version 1.0.0
  * @since 2012-9-4
  */
-public class StuffRpcServerTest {
+public class DemoStuffRpcServerTest {
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.demo.stuff.StuffRpcServer#main(java.lang.String[])}.
+	 * Test method for {@link org.apache.niolex.network.demo.stuff.DemoStuffRpcServer#main(java.lang.String[])}.
 	 * @throws IOException
 	 */
 	@Test
 	public void testMain() throws IOException {
 		new DemoStuffRpcClient();
-		StuffRpcServer.main(null);
+		DemoStuffRpcServer.main(null);
 		DemoStuffRpcClient.main(null);
-		StuffRpcServer.stop();
+		DemoStuffRpcServer.stop();
 	}
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.demo.stuff.StuffRpcServer#stop()}.
+	 * Test method for {@link org.apache.niolex.network.demo.stuff.DemoStuffRpcServer#stop()}.
 	 */
 	@Test
 	public void testStop() {
-		StuffRpcServer sr = new StuffRpcServer();
+		DemoStuffRpcServer sr = new DemoStuffRpcServer();
 		sr.toString();
 		RpcService abc = new RpcServiceImpl();
 		IntArray aa = new IntArray();

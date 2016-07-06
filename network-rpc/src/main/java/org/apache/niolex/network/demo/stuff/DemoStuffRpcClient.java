@@ -20,6 +20,7 @@ package org.apache.niolex.network.demo.stuff;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 
+import org.apache.niolex.commons.test.Check;
 import org.apache.niolex.network.client.PacketClient;
 import org.apache.niolex.network.rpc.PacketInvoker;
 import org.apache.niolex.network.rpc.RpcClient;
@@ -47,6 +48,16 @@ public class DemoStuffRpcClient {
 		args.arr = new int[] {3, 6, 8, 10};
 		int out = service.add(args);
 		System.out.println("Out => " + out + " == 27");
+		Check.eq(27, out, "service.add");
+		
+		StringArray arg = new StringArray();
+		arg.arr = new String[]{"Hi, ", "Lex!"};
+        int s = service.size(arg);
+        Check.eq(2, s, "service.size");
+        
+        String q = service.concat(arg);
+        Check.eq("Hi, Lex!", q, "service.concat");
+        
 		client.stop();
 	}
 

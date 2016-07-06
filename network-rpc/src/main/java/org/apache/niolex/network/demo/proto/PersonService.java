@@ -38,4 +38,7 @@ public interface PersonService {
 	@RpcMethod(22)
 	public Person updatePerson(Person p);
 
+	@RpcMethod(23)
+    public void clear();
+
 }

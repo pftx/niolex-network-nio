@@ -22,6 +22,7 @@ import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.niolex.commons.test.Check;
 import org.apache.niolex.network.client.SocketClient;
 import org.apache.niolex.network.rpc.RpcClient;
 import org.apache.niolex.network.rpc.SingleInvoker;
@@ -46,16 +47,20 @@ public class SocketJsonRpcClient {
 
         int k = ser.add(3, 4, 5, 6, 7, 8, 9);
         System.out.println("Out 42 => " + k);
+        assertt(42, k, "ser.add");
         List<String> args = new ArrayList<String>();
         args.add("3");
         args.add("3");
         args.add("3");
         k = ser.size(args);
         System.out.println("Out 3 => " + k);
+        assertt(3, k, "ser.size");
         k = ser.size(null);
         System.out.println("Out -1 => " + k);
+        assertt(-1, k, "ser.size");
         k = ser.add(3, 4, 5);
         System.out.println("Out 12 => " + k);
+        assertt(12, k, "ser.add");
 
         final int SIZE = 2212;
 
@@ -83,6 +88,7 @@ public class SocketJsonRpcClient {
         System.out.println("rps => " + (SIZE * 3000 / t) + ", Max " + maxin + ", Avg " + (t / (SIZE * 3)));
         System.out.println("Done..... " + err);
 
+        Check.eq(0, err, "Error count not zero.");
         client.stop();
     }
 

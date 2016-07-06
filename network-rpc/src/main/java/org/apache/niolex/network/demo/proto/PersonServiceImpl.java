@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.niolex.commons.bean.One;
 import org.apache.niolex.network.demo.proto.PersonProtos.Person;
 import org.apache.niolex.network.demo.proto.PersonProtos.PhoneNumber;
 
@@ -32,8 +33,16 @@ import org.apache.niolex.network.demo.proto.PersonProtos.PhoneNumber;
  */
 public class PersonServiceImpl implements PersonService {
 
-	private Map<PhoneNumber, Person> phoneMap = new ConcurrentHashMap<PhoneNumber, Person>();
-	private Map<Integer, Person> idMap = new ConcurrentHashMap<Integer, Person>();
+	private Map<PhoneNumber, One<Person>> phoneMap = new ConcurrentHashMap<PhoneNumber, One<Person>>();
+	private Map<Integer, One<Person>> idMap = new ConcurrentHashMap<Integer, One<Person>>();
+	
+	protected Person mergeSubordinates(Person source, Person target) {
+	    return Person.newBuilder(target).addAllSubordinates(source.getSubordinatesList()).build();
+	}
+	
+	protected Person addSubordinate(Person subo, Person target) {
+	    return Person.newBuilder(target).addSubordinates(subo).build();
+	}
 
 	/**
 	 * Override super method
@@ -41,8 +50,21 @@ public class PersonServiceImpl implements PersonService {
 	 */
 	@Override
 	public void addPerson(Person p, PhoneNumber number) {
-		phoneMap.put(number, p);
-		idMap.put(p.getId(), p);
+	    One<Person> handle = phoneMap.get(number);
+	    // 1. merge subordinates.
+	    if (handle != null) {
+	        handle.a = mergeSubordinates(handle.a, p);
+	    } else {
+	        handle = One.create(p);
+	    }
+		phoneMap.put(number, handle);
+		idMap.put(p.getId(), handle);
+		
+		// 2. add this into parent.
+		One<Person> parent = idMap.get(p.getWork().getReportTo());
+		if (parent != null) {
+		    parent.a = addSubordinate(p, parent.a);
+		}
 		System.out.println("Persion with id " + p.getId() + " added, phone " + number);
 	}
 
@@ -52,7 +74,8 @@ public class PersonServiceImpl implements PersonService {
 	 */
 	@Override
 	public Person getPerson(PhoneNumber number) {
-		return phoneMap.get(number);
+	    One<Person> handle = phoneMap.get(number);
+		return handle != null ? handle.a : null;
 	}
 
     /**
@@ -61,11 +84,28 @@ public class PersonServiceImpl implements PersonService {
      */
     @Override
     public Person updatePerson(Person p) {
+        One<Person> handle = idMap.get(p.getId());
+        if (handle != null) {
+            handle.a = mergeSubordinates(handle.a, p);
+        } else {
+            handle = One.create(p);
+        }
+        idMap.put(p.getId(), handle);
         List<PhoneNumber> phoneList = p.getPhoneList();
         for (PhoneNumber num : phoneList) {
-            phoneMap.put(num, p);
+            phoneMap.put(num, handle);
         }
         return p;
+    }
+
+    /**
+     * This is the override of super method.
+     * @see org.apache.niolex.network.demo.proto.PersonService#clear()
+     */
+    @Override
+    public void clear() {
+        phoneMap.clear();
+        idMap.clear();
     }
 
 }

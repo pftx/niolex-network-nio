@@ -39,7 +39,7 @@ public class RpcServiceTest {
 	 */
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		StuffRpcServer.main(new String[] {"1", "3"});
+		DemoStuffRpcServer.main(new String[] {"1", "3"});
 	}
 
 	/**
@@ -47,7 +47,7 @@ public class RpcServiceTest {
 	 */
 	@AfterClass
 	public static void tearDownAfterClass() throws Exception {
-		StuffRpcServer.stop();
+		DemoStuffRpcServer.stop();
 	}
 
 	/**

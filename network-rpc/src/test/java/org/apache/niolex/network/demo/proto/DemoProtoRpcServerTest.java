@@ -17,6 +17,8 @@
  */
 package org.apache.niolex.network.demo.proto;
 
+import static org.junit.Assert.*;
+
 import org.apache.niolex.network.demo.proto.PersonProtos.Person;
 import org.apache.niolex.network.demo.proto.PersonProtos.PhoneNumber;
 import org.apache.niolex.network.demo.proto.PersonProtos.PhoneType;
@@ -28,38 +30,50 @@ import org.junit.Test;
  * @version 1.0.0
  * @since 2012-6-5
  */
-public class ProtoRpcServerTest {
+public class DemoProtoRpcServerTest {
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.demo.proto.ProtoRpcServer#main(java.lang.String[])}.
+	 * Test method for {@link org.apache.niolex.network.demo.proto.DemoProtoRpcServer#main(java.lang.String[])}.
 	 * @throws Throwable
 	 */
 	@Test
 	public void testMain() throws Throwable {
-		ProtoRpcServer.main(null);
+		DemoProtoRpcServer.main(null);
 		DemoProtoRpcClient.main(null);
-		ProtoRpcServer.stop();
+		DemoProtoRpcServer.stop();
 	}
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.demo.proto.ProtoRpcServer#stop()}.
+	 * Test method for {@link org.apache.niolex.network.demo.proto.DemoProtoRpcServer#stop()}.
 	 */
 	@Test
 	public void testStop() {
-		ProtoRpcServer pr = new ProtoRpcServer();
+		DemoProtoRpcServer pr = new DemoProtoRpcServer();
 		pr.toString();
 		DemoProtoRpcClient qr = new DemoProtoRpcClient();
 		qr.toString();
 		PersonServiceImpl impl = new PersonServiceImpl();
 		int i = 982341;
 		PhoneNumber n = PhoneNumber.newBuilder().setNumber("123122311" + i).setType(PhoneType.HOME).build();
+		PhoneNumber m = PhoneNumber.newBuilder().setNumber("109302109" + i).setType(PhoneType.HOME).build();
 		Work w = Work.newBuilder().setReportTo(3).setPosition("SSE").setSalary(16000).build();
 		Person p = Person.newBuilder().setEmail("kjdfjkdf" + i + "@xxx.com").setId(45 + i)
 				.setName("Niolex [" + i + "]")
 				.addPhone(n).setWork(w)
 				.build();
+		Person q = Person.newBuilder().setEmail("oe;lda" + i + "@xxx.com").setId(45 + i)
+		        .setName("Niolex Inc. CEO")
+		        .addPhone(n).setWork(w)
+		        .build();
+		impl.updatePerson(q);
 		impl.addPerson(p, n);
-		impl.getPerson(n);
+		impl.updatePerson(q);
+		impl.addPerson(q, n);
+		Person r = impl.getPerson(n);
+		assertEquals(r, q);
+		Person s = impl.getPerson(m);
+		assertNull(s);
+		impl.updatePerson(p);
 	}
 
 }

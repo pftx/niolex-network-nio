@@ -1,5 +1,5 @@
 /**
- * ProtoRpcServer.java
+ * DemoStuffRpcServer.java
  *
  * Copyright 2012 Niolex, Inc.
  *
@@ -15,43 +15,48 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.niolex.network.demo.proto;
+package org.apache.niolex.network.demo.stuff;
 
 import java.io.IOException;
 
 import org.apache.niolex.network.rpc.ConfigItem;
 import org.apache.niolex.network.rpc.RpcPacketHandler;
-import org.apache.niolex.network.rpc.conv.ProtobufConverter;
+import org.apache.niolex.network.rpc.conv.ProtoStuffConverter;
 import org.apache.niolex.network.server.MultiNioServer;
-import org.apache.niolex.network.server.NioServer;
 
 /**
  * Demo server.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
- * @version 1.0.0, Date: 2012-6-5
+ * @version 1.0.0, Date: 2012-6-2
  */
-public class ProtoRpcServer {
+public class DemoStuffRpcServer {
 
-    private static NioServer s = new MultiNioServer();
+    private static MultiNioServer s = new MultiNioServer();
 
     /**
      * The Server Demo
-     * 
-     * @param args command line arguments
-     * @throws IOException if necessary
+     * @param args
      */
     public static void main(String[] args) throws IOException {
         s.setPort(8808);
-        RpcPacketHandler handler = new RpcPacketHandler();
+        RpcPacketHandler handler = null;
+        if (args != null && args.length != 0) {
+        	s.setThreadsNumber(Integer.parseInt(args[0]));
+        	handler = new RpcPacketHandler(Integer.parseInt(args[1]));
+        } else {
+        	handler = new RpcPacketHandler();
+        }
         s.setPacketHandler(handler);
-        handler.setConverter(new ProtobufConverter());
+        handler.setConverter(new ProtoStuffConverter());
+
         ConfigItem[] confs = new ConfigItem[1];
         ConfigItem c = new ConfigItem();
-        c.setInterface(PersonService.class);
-        c.setTarget(new PersonServiceImpl());
+        c.setInterface(RpcService.class);
+        c.setTarget(new RpcServiceImpl());
         confs[0] = c;
 		handler.setRpcConfigs(confs);
+
         s.start();
     }
 

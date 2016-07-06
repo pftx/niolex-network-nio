@@ -21,6 +21,7 @@ import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.niolex.commons.test.Check;
 import org.apache.niolex.network.client.PacketClient;
 import org.apache.niolex.network.rpc.PacketInvoker;
 import org.apache.niolex.network.rpc.RpcClient;
@@ -49,19 +50,24 @@ public class DemoJsonRpcClient {
 
 		int k = ser.add(3, 4, 5, 6, 7, 8, 9);
 		System.out.println("42 => " + k);
+		Check.eq(42, k, "ser.add");
 		List<String> list = new ArrayList<String>();
 		list.add("3");
 		list.add("3");
 		list.add("3");
 		k = ser.size(list);
 		System.out.println("3 => " + k);
+		Check.eq(3, k, "ser.size");
 		k = ser.size(null);
 		System.out.println("NULL => " + k);
+		Check.eq(-1, k, "ser.size");
 		k = ser.add(3, 4, 5);
 		System.out.println("12 => " + k);
+		Check.eq(12, k, "ser.add");
 
 		String s = ser.concat("Hello ", "Jiyun!");
 		System.out.println("Done..... " + s);
+		Check.isTrue(s.equals("Hello Jiyun!"));
 		client.stop();
 	}
 
