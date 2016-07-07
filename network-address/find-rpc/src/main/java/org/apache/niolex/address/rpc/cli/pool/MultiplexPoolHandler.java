@@ -58,7 +58,7 @@ public class MultiplexPoolHandler extends PoolHandler<RpcClientHandler> {
     /**
      * Save all the handlers here for multiplex.
      */
-    private final ArrayList<RpcClientHandler> backupHandlers;
+    private final List<RpcClientHandler> backupHandlers;
 
     /**
      * The max threads we can have to visit one client concurrently

@@ -37,7 +37,6 @@ import org.apache.niolex.network.rpc.RpcClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
  * The Rpc Simple Client Pool, Manage all the clients for one service under one state.
  *
