@@ -29,7 +29,7 @@ import org.apache.niolex.address.rpc.ConverterCenter;
 import org.apache.niolex.address.rpc.cli.BaseStub;
 import org.apache.niolex.address.rpc.cli.NodeInfo;
 import org.apache.niolex.commons.bean.MutableOne;
-import org.apache.niolex.network.cli.RpcClientHandler;
+import org.apache.niolex.network.cli.RpcClientAdapter;
 import org.apache.niolex.network.client.BlockingClient;
 import org.apache.niolex.network.rpc.IConverter;
 import org.apache.niolex.network.rpc.PacketInvoker;
@@ -98,7 +98,7 @@ public class SimplePool<T> extends BaseStub<T> {
         // Put them into ready set.
         readySet.addAll(addSet);
         // Save all the new clients.
-        ArrayList<RpcClientHandler> cliList = new ArrayList<RpcClientHandler>();
+        ArrayList<RpcClientAdapter> cliList = new ArrayList<RpcClientAdapter>();
         // Add the current new server.
         for (NodeInfo info : addSet) {
             buildClients(info);
@@ -165,7 +165,7 @@ public class SimplePool<T> extends BaseStub<T> {
             weightShare = 2;
         }
         // Build clients.
-        ArrayList<RpcClientHandler> cliList = new ArrayList<RpcClientHandler>();
+        ArrayList<RpcClientAdapter> cliList = new ArrayList<RpcClientAdapter>();
         for (NodeInfo info : readySet) {
             buildClients(info);
             cliList.addAll(MultiplexPoolHandler.translate(clientSet(info), info.toString()));

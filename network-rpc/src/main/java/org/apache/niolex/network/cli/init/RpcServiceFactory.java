@@ -55,7 +55,7 @@ public class RpcServiceFactory {
 	    return new RpcServiceFactory(fileName);
 	}
 
-	private Map<String, RetryHandler> handlers = new HashMap<String, RetryHandler>();
+	private Map<String, RetryHandler<IServiceHandler>> handlers = new HashMap<String, RetryHandler<IServiceHandler>>();
 	private RpcConfiger configer;
 
 	/**
@@ -69,7 +69,7 @@ public class RpcServiceFactory {
 		Map<String, RpcConfigBean> confs = configer.getConfigs();
 		for (Entry<String, RpcConfigBean> entry : confs.entrySet()) {
 			RpcConfigBean conf = entry.getValue();
-			RetryHandler handler = RpcInitUtil.buildProxy(conf);
+			RetryHandler<IServiceHandler> handler = RpcInitUtil.buildProxy(conf);
 			handlers.put(entry.getKey(), handler);
 			StringBuilder sb = new StringBuilder();
 			sb.append("\n===>Api server list for [" + entry.getKey() + "]:\n");
@@ -88,7 +88,7 @@ public class RpcServiceFactory {
 	 */
 	@SuppressWarnings("unchecked")
     public <T> T getService(String groupName, Class<T> c) {
-		RetryHandler rh = handlers.get(groupName);
+		RetryHandler<IServiceHandler> rh = handlers.get(groupName);
 	    if (rh == null)
 	        throw new IllegalArgumentException("Rpc server config not found for your interface!");
 	    /**

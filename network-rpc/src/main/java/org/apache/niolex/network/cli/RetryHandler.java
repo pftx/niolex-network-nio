@@ -36,29 +36,27 @@ import org.slf4j.LoggerFactory;
  * <br>
  * This class have an inner list of IServiceHandler, they are the representative of real
  * clients, for example, RpcClients. All the items in the list must be thread-safe, because
- * we will use it in multiple threads concurrently. For Every method call, we randomly pick
- * one IServiceHandler and invoke that method on it.
+ * we will use it in multiple threads concurrently. For each method call, we pick IServiceHandler
+ * in round-robin order and invoke that method on it.
  * <br>
- * If error occurred, we randomly pick the another handler and invoke that method again.
+ * If error occurred, we pick the next handler and invoke that method again.
  * We will do {@link IServiceHandler#isReady()} check before using a handler. Since we work
- * in a random order, we are very balanced. But if there are more than a half handlers were
- * broken, we may fail to find a working handler after we retry 2 times the number of
- * handlers. If that happened, we will throw RpcException with type NO_SERVER_READY. But
- * this kind of thing will rarely happen.
+ * in round-robin order, we are very balanced. But if all the handlers were broken, we will
+ * throw RpcException with type NO_SERVER_READY. If we retried retryTimes and all failed, we
+ * will throw RpcException with type ERROR_EXCEED_RETRY.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0, Date: 2012-5-27
  */
-public class RetryHandler extends BaseHandler implements InvocationHandler {
+public class RetryHandler<Service extends IServiceHandler> extends BaseHandler implements InvocationHandler {
 	private static final Logger LOG = LoggerFactory.getLogger(RetryHandler.class);
 
 	private final AtomicInteger idx = new AtomicInteger(0);
-	private final List<IServiceHandler> handlers;
+	private final List<Service> handlers;
 	private final int retryTimes;
 	private final int intervalBetweenRetry;
 	private final int handlerNum;
 	private final int maxValue;
-	private final int maxTry;
 
 	/**
 	 * The only one Constructor, initialize handlers. We shuffle handlers inside to make sure
@@ -72,9 +70,9 @@ public class RetryHandler extends BaseHandler implements InvocationHandler {
 	 * @param retryTimes number of times to retry when certain kinds of exceptions occurred
 	 * @param intervalBetweenRetry the milliseconds to sleep between retry
 	 */
-	public RetryHandler(List<IServiceHandler> handlers, int retryTimes, int intervalBetweenRetry) {
+	public RetryHandler(List<Service> handlers, int retryTimes, int intervalBetweenRetry) {
 		super();
-		this.handlers = new ArrayList<IServiceHandler>(handlers);
+		this.handlers = new ArrayList<Service>(handlers);
 		// This will make the handlers order different in every retry handler instance.
 		Collections.shuffle(this.handlers);
 		this.retryTimes = retryTimes;
@@ -83,8 +81,7 @@ public class RetryHandler extends BaseHandler implements InvocationHandler {
 		this.handlerNum = this.handlers.size();
 		Check.lt(0, handlerNum, "handlers must have at least one item.");
 		// We do not use the last 1000 iterations.
-		this.maxValue = (Integer.MAX_VALUE / handlerNum - 1000) * handlerNum;
-		this.maxTry = 2 * handlerNum;
+		this.maxValue = Integer.MAX_VALUE - 1000 * handlerNum;
 	}
 
 	@Override
@@ -97,7 +94,7 @@ public class RetryHandler extends BaseHandler implements InvocationHandler {
 		Throwable cause = null;
 		long handleStart = 0, handleEnd = intervalBetweenRetry;
 		int curTry = 0;
-		for (int anyTried = 0; curTry < retryTimes && anyTried < maxTry; ++anyTried) {
+		for (int anyTried = 0; curTry < retryTimes && anyTried < handlerNum; ++anyTried) {
 			// Try this.
 			handler = handlers.get(idx.getAndIncrement() % handlerNum);
 
@@ -143,7 +140,7 @@ public class RetryHandler extends BaseHandler implements InvocationHandler {
 	 *
 	 * @return the managed handler list
 	 */
-	public List<IServiceHandler> getHandlers() {
+	public List<Service> getHandlers() {
 		return handlers;
 	}
 

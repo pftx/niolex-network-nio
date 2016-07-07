@@ -43,7 +43,7 @@ public class RpcInitUtil {
 	 * @param conf the configuration bean
 	 * @return the built retry handler
 	 */
-	public static RetryHandler buildProxy(RpcConfigBean conf) {
+	public static RetryHandler<IServiceHandler> buildProxy(RpcConfigBean conf) {
 		LOG.info("Start to build rpc proxy: [serverList=" + Arrays.toString(conf.serverList) + ", serviceUrl="
 				+ conf.serviceUrl + ", header=" + conf.getHeader() + "]");
 		List<IServiceHandler> listHandlers = new ArrayList<IServiceHandler>();
@@ -63,7 +63,7 @@ public class RpcInitUtil {
 			throw new IllegalStateException("No rpc server is ready for service: " + conf.getGroupName());
 		}
 
-		return new RetryHandler(listHandlers, conf.rpcErrorRetryTimes, conf.rpcSleepBetweenRetry);
+		return new RetryHandler<IServiceHandler>(listHandlers, conf.rpcErrorRetryTimes, conf.rpcSleepBetweenRetry);
 	}
 
 }

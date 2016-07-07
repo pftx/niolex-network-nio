@@ -1,5 +1,5 @@
 /**
- * RpcPoolableHandler.java
+ * RpcClientAdapter.java
  *
  * Copyright 2012 Niolex, Inc.
  *
@@ -32,7 +32,7 @@ import org.apache.niolex.network.rpc.RpcClient;
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.3, Date: 2012-6-3
  */
-public class RpcClientHandler implements IServiceHandler {
+public class RpcClientAdapter implements IServiceHandler {
 
 	private final String serviceUrl;
 	private final RpcClient handler;
@@ -43,7 +43,7 @@ public class RpcClientHandler implements IServiceHandler {
 	 * @param serviceUrl the service url
 	 * @param handler the rpc client instance
 	 */
-	public RpcClientHandler(String serviceUrl, RpcClient handler) {
+	public RpcClientAdapter(String serviceUrl, RpcClient handler) {
 		super();
 		this.serviceUrl = serviceUrl;
 		this.handler = handler;

@@ -117,8 +117,9 @@ public class RpcServiceFactoryTest {
 
 	@Test
     public void testFakeHandler() throws Throwable {
-	    Map<String, RetryHandler> handlers = FieldUtil.getValue(rpcFactory, "handlers");
-	    RetryHandler h = mock(RetryHandler.class);
+	    Map<String, RetryHandler<IServiceHandler>> handlers = FieldUtil.getValue(rpcFactory, "handlers");
+	    @SuppressWarnings("unchecked")
+        RetryHandler<IServiceHandler> h = mock(RetryHandler.class);
 	    List<IServiceHandler> value = Lists.newArrayList();
 	    value.add(mock(IServiceHandler.class));
         when(h.getHandlers()).thenReturn(value);

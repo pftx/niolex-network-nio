@@ -63,7 +63,7 @@ public class RpcInitUtilTest extends RpcInitUtil {
 		when(factory.build(conf, "error")).thenThrow(new Exception("error from mock"));
 		ServiceHandlerFactory.registerBuilder("network/json", factory);
 
-		RetryHandler h = RpcInitUtil.buildProxy(conf);
+		RetryHandler<IServiceHandler> h = RpcInitUtil.buildProxy(conf);
 		Assert.assertEquals(1, h.getHandlers().size());
 	}
 

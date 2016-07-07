@@ -22,7 +22,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.apache.niolex.network.cli.PoolHandler;
-import org.apache.niolex.network.cli.RpcClientHandler;
+import org.apache.niolex.network.cli.RpcClientAdapter;
 import org.apache.niolex.network.rpc.RpcClient;
 
 /**
@@ -38,7 +38,7 @@ import org.apache.niolex.network.rpc.RpcClient;
  * @version 1.0.0
  * @since 2014-1-21
  */
-public class MultiplexPoolHandler extends PoolHandler<RpcClientHandler> {
+public class MultiplexPoolHandler extends PoolHandler<RpcClientAdapter> {
 
     /**
      * Translate the list of rpc clients into list of rpc client handlers.
@@ -47,10 +47,10 @@ public class MultiplexPoolHandler extends PoolHandler<RpcClientHandler> {
      * @param url the corresponding URL
      * @return the translated rpc client handlers list
      */
-    public static final List<RpcClientHandler> translate(Collection<RpcClient> col, String url) {
-        List<RpcClientHandler> list = new ArrayList<RpcClientHandler>();
+    public static final List<RpcClientAdapter> translate(Collection<RpcClient> col, String url) {
+        List<RpcClientAdapter> list = new ArrayList<RpcClientAdapter>();
         for (RpcClient cli : col) {
-            list.add(new RpcClientHandler(url, cli));
+            list.add(new RpcClientAdapter(url, cli));
         }
         return list;
     }
@@ -58,7 +58,7 @@ public class MultiplexPoolHandler extends PoolHandler<RpcClientHandler> {
     /**
      * Save all the handlers here for multiplex.
      */
-    private final List<RpcClientHandler> backupHandlers;
+    private final List<RpcClientAdapter> backupHandlers;
 
     /**
      * The max threads we can have to visit one client concurrently
@@ -74,9 +74,9 @@ public class MultiplexPoolHandler extends PoolHandler<RpcClientHandler> {
      * @param retryTimes the max retry times
      * @param maxMultiplex the max threads we can have to visit one client concurrently
      */
-    public MultiplexPoolHandler(Collection<RpcClientHandler> col, int retryTimes, int maxMultiplex) {
+    public MultiplexPoolHandler(Collection<RpcClientAdapter> col, int retryTimes, int maxMultiplex) {
         super(col, retryTimes);
-        this.backupHandlers = new ArrayList<RpcClientHandler>(col);
+        this.backupHandlers = new ArrayList<RpcClientAdapter>(col);
         this.maxMultiplex = maxMultiplex;
     }
 
@@ -85,8 +85,8 @@ public class MultiplexPoolHandler extends PoolHandler<RpcClientHandler> {
      * @see org.apache.niolex.network.cli.PoolHandler#take()
      */
     @Override
-    public RpcClientHandler take() {
-        RpcClientHandler core = super.take();
+    public RpcClientAdapter take() {
+        RpcClientAdapter core = super.take();
         if (core == null && currentMultiplex < maxMultiplex) {
             // We need more handlers.
             addMultiplex();
@@ -104,13 +104,13 @@ public class MultiplexPoolHandler extends PoolHandler<RpcClientHandler> {
         }
         ++currentMultiplex;
         for (int i = 0; i < backupHandlers.size(); ++i) {
-            RpcClientHandler h = backupHandlers.get(i);
+            RpcClientAdapter h = backupHandlers.get(i);
             if (isClosed(h.getHandler())) {
                 backupHandlers.remove(i);
                 --i;
                 continue;
             }
-            super.offer(new RpcClientHandler(h.getServiceUrl(), h.getHandler()));
+            super.offer(new RpcClientAdapter(h.getServiceUrl(), h.getHandler()));
         }
     }
 
@@ -119,7 +119,7 @@ public class MultiplexPoolHandler extends PoolHandler<RpcClientHandler> {
      * @see org.apache.niolex.network.cli.PoolHandler#repair(org.apache.niolex.network.cli.IServiceHandler)
      */
     @Override
-    protected void repair(RpcClientHandler core) {
+    protected void repair(RpcClientAdapter core) {
         if (!isClosed(core.getHandler()))
             super.repair(core);
     }
@@ -129,7 +129,7 @@ public class MultiplexPoolHandler extends PoolHandler<RpcClientHandler> {
      * @see org.apache.niolex.network.cli.PoolHandler#offer(org.apache.niolex.network.cli.IServiceHandler)
      */
     @Override
-    public void offer(RpcClientHandler core) {
+    public void offer(RpcClientAdapter core) {
         if (!isClosed(core.getHandler()))
             super.offer(core);
     }
@@ -155,14 +155,14 @@ public class MultiplexPoolHandler extends PoolHandler<RpcClientHandler> {
      *
      * @param cliList the new rpc client handler list
      */
-    public synchronized void addNew(List<RpcClientHandler> cliList) {
+    public synchronized void addNew(List<RpcClientAdapter> cliList) {
         // First, add all of them into the backup list.
         backupHandlers.addAll(cliList);
         // Then, add them into the working queue.
-        for (RpcClientHandler h : cliList) {
+        for (RpcClientAdapter h : cliList) {
             super.offer(h);
             for (int i = 1; i < currentMultiplex; ++i) {
-                super.offer(new RpcClientHandler(h.getServiceUrl(), h.getHandler()));
+                super.offer(new RpcClientAdapter(h.getServiceUrl(), h.getHandler()));
             }
         }
     }
@@ -173,7 +173,7 @@ public class MultiplexPoolHandler extends PoolHandler<RpcClientHandler> {
     public synchronized void destroy() {
         // Disable #addMultiplex
         currentMultiplex = maxMultiplex;
-        for (RpcClientHandler h : backupHandlers) {
+        for (RpcClientAdapter h : backupHandlers) {
             RpcClient client = h.getHandler();
             client.setConnectRetryTimes(0);
             client.stop();

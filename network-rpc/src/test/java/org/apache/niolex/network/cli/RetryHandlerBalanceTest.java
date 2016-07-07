@@ -44,7 +44,7 @@ import org.junit.Test;
  */
 public class RetryHandlerBalanceTest {
 
-    private RetryHandler a;
+    private RetryHandler<IServiceHandler> a;
 
     @Test
     public void testInvokeBlance() throws Throwable {
@@ -53,7 +53,7 @@ public class RetryHandlerBalanceTest {
         listHandlers.add(new RpcServiceHandler("6", new A("6"), 28, true));
         listHandlers.add(new RpcServiceHandler("7", new A("7"), 17, true));
         listHandlers.add(new RpcServiceHandler("8", new A("8"), 5000, true));
-        a = new RetryHandler(listHandlers, 3, 10);
+        a = new RetryHandler<IServiceHandler>(listHandlers, 3, 10);
         a.logDebug = false;
     	ConcurrentHashMap<String, AtomicInteger> m = new ConcurrentHashMap<String, AtomicInteger>();
     	Thread t[] = new Thread[5];
@@ -86,7 +86,7 @@ public class RetryHandlerBalanceTest {
         listHandlers.add(new RpcServiceHandler("6", new A("6"), 28, true));
         listHandlers.add(new RpcServiceHandler("7", new A("7"), 17, true));
         listHandlers.add(new RpcServiceHandler("8", new A("8"), 5000, false));
-        a = new RetryHandler(listHandlers, 3, 10);
+        a = new RetryHandler<IServiceHandler>(listHandlers, 3, 10);
         a.logDebug = false;
         Map<String, Integer> m = new HashMap<String, Integer>();
         for (int i = 0; i < 7500; ++i) {
@@ -110,7 +110,7 @@ public class RetryHandlerBalanceTest {
         listHandlers.add(new RpcServiceHandler("5", new B("5"), 100, true));
         listHandlers.add(new RpcServiceHandler("6", new C(), 100, true));
         listHandlers.add(new RpcServiceHandler("8", new A("8"), 5000, true));
-        a = new RetryHandler(listHandlers, 3, 10);
+        a = new RetryHandler<IServiceHandler>(listHandlers, 3, 10);
         a.logDebug = false;
         for (int i = 0; i < 300; ++i) {
             a.invoke(a, null, null);
@@ -123,7 +123,7 @@ public class RetryHandlerBalanceTest {
         listHandlers.add(new RpcServiceHandler("5", new C(), 1000, true));
         listHandlers.add(new RpcServiceHandler("6", new C(), 1000, true));
         listHandlers.add(new RpcServiceHandler("8", new D(), 1000, true));
-        RetryHandler a = new RetryHandler(listHandlers, 3, 10);
+        RetryHandler<IServiceHandler> a = new RetryHandler<IServiceHandler>(listHandlers, 3, 10);
         a.logDebug = false;
         int i = 0;
         for (; i < 30; ++i) {
@@ -144,7 +144,7 @@ public class RetryHandlerBalanceTest {
         listHandlers.add(new RpcServiceHandler("5", new B("5"), 100, false));
         listHandlers.add(new RpcServiceHandler("6", new B("6"), 100, false));
         listHandlers.add(new RpcServiceHandler("8", new A("8"), 5000, false));
-        RetryHandler a = new RetryHandler(listHandlers, 3, 10);
+        RetryHandler<IServiceHandler> a = new RetryHandler<IServiceHandler>(listHandlers, 3, 10);
         a.logDebug = false;
         try {
             String name = a.invoke(a, PoolHandlerTest.method, null).toString();

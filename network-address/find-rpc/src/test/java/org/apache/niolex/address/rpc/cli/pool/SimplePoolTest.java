@@ -34,7 +34,7 @@ import org.apache.niolex.address.rpc.cli.NodeInfo;
 import org.apache.niolex.commons.bean.MutableOne;
 import org.apache.niolex.commons.reflect.FieldUtil;
 import org.apache.niolex.network.IClient;
-import org.apache.niolex.network.cli.RpcClientHandler;
+import org.apache.niolex.network.cli.RpcClientAdapter;
 import org.apache.niolex.network.demo.json.DemoJsonRpcServer;
 import org.apache.niolex.network.rpc.RpcClient;
 import org.junit.AfterClass;
@@ -76,7 +76,7 @@ public class SimplePoolTest {
     public void setUp() throws Exception {
         pool = new TestPool(mutableOne);
         FieldUtil.setValue(pool, "isWorking", true);
-        ArrayList<RpcClientHandler> empty = new ArrayList<RpcClientHandler>();
+        ArrayList<RpcClientAdapter> empty = new ArrayList<RpcClientAdapter>();
         FieldUtil.setValue(pool, "poolHandler", new MultiplexPoolHandler(empty, 2, 2));
         readySet = FieldUtil.getValue(pool, "readySet");
     }
@@ -91,9 +91,9 @@ public class SimplePoolTest {
         mutableOne.updateData(data);
         assertEquals(2, readySet.size());
         // Check the backed queue
-        LinkedBlockingQueue<RpcClientHandler> readyQueue = FieldUtil.getValue(pool.poolHandler, "readyQueue");
+        LinkedBlockingQueue<RpcClientAdapter> readyQueue = FieldUtil.getValue(pool.poolHandler, "readyQueue");
         int delc = 0, addc = 0;
-        for (RpcClientHandler cli : readyQueue) {
+        for (RpcClientAdapter cli : readyQueue) {
             if (cli.getHandler().getConnectRetryTimes() == 0) ++delc;
             else ++addc;
         }
@@ -112,9 +112,9 @@ public class SimplePoolTest {
         mutableOne.updateData(makeAddress());
         assertEquals(2, readySet.size());
         // Check the backed queue
-        LinkedBlockingQueue<RpcClientHandler> readyQueue = FieldUtil.getValue(pool.poolHandler, "readyQueue");
+        LinkedBlockingQueue<RpcClientAdapter> readyQueue = FieldUtil.getValue(pool.poolHandler, "readyQueue");
         int delc = 0, addc = 0;
-        for (RpcClientHandler cli : readyQueue) {
+        for (RpcClientAdapter cli : readyQueue) {
             if (cli.getHandler().getConnectRetryTimes() == 0) ++delc;
             else ++addc;
         }

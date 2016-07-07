@@ -23,7 +23,7 @@ import java.net.URI;
 import org.apache.niolex.commons.bean.Pair;
 import org.apache.niolex.network.IClient;
 import org.apache.niolex.network.cli.IServiceHandler;
-import org.apache.niolex.network.cli.RpcClientHandler;
+import org.apache.niolex.network.cli.RpcClientAdapter;
 import org.apache.niolex.network.cli.conf.RpcConfigBean;
 import org.apache.niolex.network.cli.init.ServiceHandlerBuilder;
 import org.apache.niolex.network.client.BlockingClient;
@@ -96,7 +96,7 @@ public class JsonRpcBuilder implements ServiceHandlerBuilder {
 		// Try to connect now.
 		cli.connect();
 		// Ready to return.
-		return new RpcClientHandler(completeUrl, cli);
+		return new RpcClientAdapter(completeUrl, cli);
 	}
 
 }

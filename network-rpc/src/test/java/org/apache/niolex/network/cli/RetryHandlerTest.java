@@ -61,7 +61,7 @@ public class RetryHandlerTest {
 
 	private int retryTimes = 3;
 
-	private RetryHandler retryHandler;
+	private RetryHandler<IServiceHandler> retryHandler;
 
 	@Before
 	public void setUp() {
@@ -74,7 +74,7 @@ public class RetryHandlerTest {
 		when(handler3.getServiceUrl()).thenReturn("3abc");
 		when(handler1.toString()).thenReturn("abccba");
 		when(handler1.isReady()).thenReturn(true);
-		retryHandler = new RetryHandler(handlers, retryTimes, intervalBetweenRetry);
+		retryHandler = new RetryHandler<IServiceHandler>(handlers, retryTimes, intervalBetweenRetry);
 	}
 
 	/**
@@ -84,7 +84,7 @@ public class RetryHandlerTest {
 	@Test(expected=IllegalArgumentException.class)
 	public void testRetryHandlerInit() throws Throwable {
 	    List<IServiceHandler> list = Collections.emptyList();
-	    new RetryHandler(list, retryTimes, intervalBetweenRetry);
+	    new RetryHandler<IServiceHandler>(list, retryTimes, intervalBetweenRetry);
 	}
 
 	/**
@@ -148,7 +148,7 @@ public class RetryHandlerTest {
 	    list.add(new RpcServiceHandler("5", new C(), 1000, true));
 	    list.add(new RpcServiceHandler("5", new C(), 1000, true));
 	    list.add(new RpcServiceHandler("5", new C(), 1000, true));
-		retryHandler = new RetryHandler(list, 5, intervalBetweenRetry);
+		retryHandler = new RetryHandler<IServiceHandler>(list, 5, intervalBetweenRetry);
 		Method m = MethodUtil.getThisMethods(getClass()).get(0);
 		try {
 			retryHandler.invoke(handler1, m, null);
@@ -173,7 +173,7 @@ public class RetryHandlerTest {
 		handlers.add(handler2);
 		handlers.add(handler3);
 
-		retryHandler = new RetryHandler(handlers, 2, intervalBetweenRetry);
+		retryHandler = new RetryHandler<IServiceHandler>(handlers, 2, intervalBetweenRetry);
 		for (int i = 0; i < 8; ++i) {
 			try {
 				retryHandler.invoke(handler1, m, null);
@@ -197,7 +197,7 @@ public class RetryHandlerTest {
 		handlers.add(handler2);
 		handlers.add(handler3);
 
-		retryHandler = new RetryHandler(handlers, 2, intervalBetweenRetry);
+		retryHandler = new RetryHandler<IServiceHandler>(handlers, 2, intervalBetweenRetry);
 		for (int i = 0; i < 8; ++i) {
     		try {
     			retryHandler.invoke(handler1, m, null);
@@ -219,7 +219,7 @@ public class RetryHandlerTest {
 		when(handler2.invoke(handler1, m, null)).thenThrow(e);
 		when(handler3.invoke(handler1, m, null)).thenThrow(e);
 
-		retryHandler = new RetryHandler(handlers, 3, intervalBetweenRetry);
+		retryHandler = new RetryHandler<IServiceHandler>(handlers, 3, intervalBetweenRetry);
 		for (int i = 0; i < 4; ++i) {
 			try {
 				retryHandler.invoke(handler1, m, null);
