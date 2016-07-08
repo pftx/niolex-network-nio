@@ -21,8 +21,6 @@ import org.apache.niolex.address.rpc.RpcInterface;
 import org.apache.niolex.address.util.VersionUtil;
 import org.apache.niolex.commons.codec.StringUtil;
 import org.apache.niolex.commons.test.Check;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * RpcExpose bean, Application developer use this bean to expose their own
@@ -34,8 +32,6 @@ import org.slf4j.LoggerFactory;
  * @version 1.0.5, $Date: 2012-11-30$
  */
 public class RpcExpose {
-
-    public static final Logger LOG = LoggerFactory.getLogger(RpcServer.class);
     public static final String DFT_STATE = "default";
 
     /**
@@ -118,7 +114,7 @@ public class RpcExpose {
         }
         RpcInterface inter = interfaze.getAnnotation(RpcInterface.class);
         if (inter == null) {
-            LOG.error("There is no annotation [RpcInterface] on {}, we can not publish this service.", interfaze);
+            RpcServer.LOG.error("There is no annotation [RpcInterface] on {}, we can not publish this service.", interfaze);
             return false;
         }
         if (StringUtil.isBlank(serviceName)) {

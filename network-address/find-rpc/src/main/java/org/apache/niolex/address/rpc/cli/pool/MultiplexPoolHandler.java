@@ -41,11 +41,11 @@ import org.apache.niolex.network.rpc.RpcClient;
 public class MultiplexPoolHandler extends PoolHandler<RpcClientAdapter> {
 
     /**
-     * Translate the list of rpc clients into list of rpc client handlers.
+     * Translate the list of rpc clients into list of rpc client adapters.
      *
      * @param col the list of rpc clients
      * @param url the corresponding URL
-     * @return the translated rpc client handlers list
+     * @return the translated rpc client adapters list
      */
     public static final List<RpcClientAdapter> translate(Collection<RpcClient> col, String url) {
         List<RpcClientAdapter> list = new ArrayList<RpcClientAdapter>();
@@ -153,7 +153,7 @@ public class MultiplexPoolHandler extends PoolHandler<RpcClientAdapter> {
     /**
      * Add these new rpc client handlers into the ready queue.
      *
-     * @param cliList the new rpc client handler list
+     * @param cliList the new rpc client adapters list
      */
     public synchronized void addNew(List<RpcClientAdapter> cliList) {
         // First, add all of them into the backup list.

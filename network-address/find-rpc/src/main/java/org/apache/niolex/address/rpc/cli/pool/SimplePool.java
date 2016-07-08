@@ -73,7 +73,7 @@ public class SimplePool<T> extends BaseStub<T> {
      * Mark the deleted node as not retry, and remove them from ready set.
      * The deleted connections will be removed by {@link MultiplexPoolHandler}
      *
-     * @param delSet the nodes bean deleted
+     * @param delSet the nodes been deleted
      */
     @Override
     protected void markDeleted(HashSet<NodeInfo> delSet) {

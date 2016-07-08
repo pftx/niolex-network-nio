@@ -9,7 +9,7 @@
 	</parent>
 
 	<artifactId>find-rpc</artifactId>
-	<version>0.0.2-SNAPSHOT</version>
+	<version>1.0.0-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>find-rpc</name>
@@ -19,7 +19,7 @@
 		<dependency>
 			<groupId>org.apache.niolex</groupId>
 			<artifactId>find-core</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
+			<version>1.0.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.niolex</groupId>

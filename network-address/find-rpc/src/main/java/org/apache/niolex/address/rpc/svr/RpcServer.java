@@ -30,7 +30,6 @@ import org.apache.niolex.network.server.MultiNioServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
  * The RpcServer will proxy a MultiNioServer inside, and deal with server side
  * service object publish job. User can publish multiple services at the same time, but
@@ -258,7 +257,7 @@ public class RpcServer {
     }
 
     /**
-     * @param acceptTimeOut
+     * @param acceptTimeOut the server accept timeout
      * @see org.apache.niolex.network.server.NioServer#setAcceptTimeOut(int)
      */
     public void setAcceptTimeOut(int acceptTimeOut) {
@@ -274,7 +273,7 @@ public class RpcServer {
     }
 
     /**
-     * @param port
+     * @param port the server listening port
      * @see org.apache.niolex.network.server.NioServer#setPort(int)
      */
     public void setPort(int port) {
@@ -290,7 +289,7 @@ public class RpcServer {
     }
 
     /**
-     * @param threadsNumber
+     * @param threadsNumber the server selector threads number
      * @see org.apache.niolex.network.server.MultiNioServer#setThreadsNumber(int)
      */
     public void setSelectorThreadsNumber(int threadsNumber) {
