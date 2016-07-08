@@ -318,7 +318,7 @@ public abstract class PathUtil {
          * @version 1.0.0
          * @since 2013-12-17
          */
-        public static enum Level {
+        public enum Level {
             OTHER, ROOT, RO_SER, RO_OTHER, SERVICE,
             SER_VER, SER_CLI, SER_OTHER,
             SVERSION, CVERSION, CLIENT, STATE, NODE;
