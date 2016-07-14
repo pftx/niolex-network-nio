@@ -27,7 +27,6 @@ import org.apache.niolex.zookeeper.core.ZKConnector;
 import org.apache.niolex.zookeeper.core.ZKException;
 import org.apache.niolex.zookeeper.core.ZKListener;
 
-
 /**
  * This is the main class clients used to get service address list.
  * Clients can also get all states and listen to states list changes.

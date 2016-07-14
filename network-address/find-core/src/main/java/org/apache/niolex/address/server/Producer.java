@@ -106,7 +106,12 @@ public class Producer extends Consumer {
         path.append("/").append(address);
         LOG.info("Try to publish address: " + path);
 
-        return this.createNode(path.toString(), config, isTmp, isSequential);
+        if (isTmp) {
+            // For temporary node, we need to automatically create it when session expired.
+            return this.createTempNodeAutoRecover(path.toString(), config, isSequential);
+        } else {
+            return this.createNode(path.toString(), config, isTmp, isSequential);
+        }
     }
 
     /**

@@ -160,7 +160,7 @@ public class SimplePool<T> extends BaseStub<T> {
             for (NodeInfo info : readySet) {
                 totalWeight += info.getWeight();
             }
-            weightShare = totalWeight / poolSize;
+            weightShare = poolSize / totalWeight;
         } else {
             weightShare = 2;
         }
