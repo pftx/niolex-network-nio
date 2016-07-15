@@ -184,7 +184,7 @@ public class AdvancedProducer extends Producer {
          * @see org.apache.niolex.zookeeper.core.ZKListener#onDataChange(byte[])
          */
         @Override
-        public void onDataChange(byte[] after) {
+        public synchronized void onDataChange(byte[] after) {
             // Compare before with after.
             if (Arrays.equals(before, after)) {
                 return;
