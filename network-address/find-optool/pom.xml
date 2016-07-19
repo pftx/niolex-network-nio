@@ -4,9 +4,9 @@
 
 	<parent>
 		<groupId>org.apache.niolex</groupId>
-		<artifactId>niolex-parent</artifactId>
+		<artifactId>network-address</artifactId>
 		<version>1.0.0</version>
-		<relativePath />
+		<relativePath>../pom.xml</relativePath>
 	</parent>
 
 	<artifactId>find-optool</artifactId>
@@ -20,22 +20,22 @@
 		<dependency>
 			<groupId>org.apache.niolex</groupId>
 			<artifactId>find-core</artifactId>
-			<version>1.0.1-SNAPSHOT</version>
+			<version>${find.dev.ver}</version>
 		</dependency>
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
-			<version>[1.0.7,2.0.0)</version>
+			<version>${logback.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>jline</groupId>
 			<artifactId>jline</artifactId>
-			<version>2.11</version>
+			<version>${jline.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>4.11</version>
+			<version>${junit.version}</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
@@ -45,7 +45,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-assembly-plugin</artifactId>
-				<version>2.4</version>
+				<version>${maven.assembly.version}</version>
 				<configuration>
 					<descriptorRefs>
 						<descriptorRef>jar-with-dependencies</descriptorRef>

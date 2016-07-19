@@ -5,8 +5,8 @@
 	<parent>
 		<groupId>org.apache.niolex</groupId>
 		<artifactId>niolex-parent</artifactId>
-		<version>1.0.0</version>
-		<relativePath></relativePath>
+		<version>1.0.1</version>
+		<relativePath>../../utils/pom.xml</relativePath>
 	</parent>
 
 	<artifactId>network-address</artifactId>
@@ -17,8 +17,8 @@
 	<url>http://maven.apache.org</url>
 	
 	<properties>
-		<co.re.ver>1.0.0</co.re.ver>
-		<junit.ver>4.11</junit.ver>
+		<find.re.ver>1.0.0</find.re.ver>
+		<find.dev.ver>1.0.1-SNAPSHOT</find.dev.ver>
 	</properties>
 	
 	<modules>

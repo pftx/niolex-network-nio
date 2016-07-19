@@ -4,9 +4,9 @@
 
 	<parent>
 		<groupId>org.apache.niolex</groupId>
-		<artifactId>niolex-parent</artifactId>
+		<artifactId>network-address</artifactId>
 		<version>1.0.0</version>
-		<relativePath />
+		<relativePath>../pom.xml</relativePath>
 	</parent>
 
 	<artifactId>find-core</artifactId>
@@ -20,30 +20,24 @@
 		<dependency>
 			<groupId>org.apache.niolex</groupId>
 			<artifactId>commons-notify</artifactId>
-			<version>[1.0.2,2.0.0)</version>
+			<version>${commons.notify.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>[4.11,5.0)</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.perf4j</groupId>
-			<artifactId>perf4j</artifactId>
-			<version>0.9.16</version>
+			<version>${junit.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-all</artifactId>
-			<version>1.9.5</version>
+			<version>${mockito.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
-			<version>[1.0.7,2.0.0)</version>
+			<version>${logback.version}</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
