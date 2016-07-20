@@ -182,6 +182,7 @@ public class ShellMain {
                 System.out.print(getPrompt());
             }
         }
+        reader.close();
     }
 
     protected String getPrompt() {
