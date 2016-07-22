@@ -45,8 +45,20 @@ public class AddressUtil {
      * @throws UnknownHostException if local Internet address not found
      */
     public static final String generateAddress(RpcExpose ee, int port) throws UnknownHostException {
+        return generateAddress(ee, NetUtil.getLocalIP(), port);
+    }
+
+    /**
+     * Generate the string representation of server address.
+     *
+     * @param ee the RPC expose bean
+     * @param ip the local IP
+     * @param port the server port
+     * @return the string representation of server address
+     */
+    public static final String generateAddress(RpcExpose ee, String ip, int port) {
         StringBuilder sb = new StringBuilder();
-        sb.append(ee.getServiceType().replace('/', '^')).append("#").append(NetUtil.getLocalIP());
+        sb.append(ee.getServiceType().replace('/', '^')).append("#").append(ip);
         sb.append(":").append(port).append("#").append(ee.getWeight()).append("#");
         return sb.toString();
     }

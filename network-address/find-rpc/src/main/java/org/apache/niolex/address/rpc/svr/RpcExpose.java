@@ -72,7 +72,7 @@ public class RpcExpose {
     /**
      * Create a RpcExpose with the minimum parameter.
      *
-     * @param target the weight of this target
+     * @param target the invocation target
      */
     public RpcExpose(Object target) {
         super();
@@ -101,13 +101,14 @@ public class RpcExpose {
      * @return true if OK, false if failed to validate it
      */
     public boolean build() {
-        // Fix the interface if it's not set.
         Check.notNull(target, "target must not be null.");
+        
+        // Fix the interface if it's not set.
         if (interfaze == null) {
             interfaze = target.getClass().getInterfaces()[0];
         }
         if (StringUtil.isBlank(state)) {
-            state = RpcExpose.DFT_STATE;
+            state = DFT_STATE;
         }
         if (weight == 0) {
             weight = 1;

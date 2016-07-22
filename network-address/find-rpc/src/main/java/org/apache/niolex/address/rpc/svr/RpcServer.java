@@ -55,6 +55,12 @@ public class RpcServer {
     private String zkUserName;
     private String zkPassword;
     // ------------------------------------------------
+    
+
+    // ------------------------------------------------
+    // RPC parameters
+    private String rpcHostIp;
+    // ------------------------------------------------
 
     /**
      * Init ZK parameters from system properties.
@@ -67,6 +73,15 @@ public class RpcServer {
         zkSessionTimeout = SystemUtil.getSystemPropertyAsInt("zk.session.timeout", 6000);
         zkUserName = System.getProperty("zk.svr.username");
         zkPassword = System.getProperty("zk.svr.password");
+        // Init RPC parameters
+        rpcHostIp = System.getProperty("rpc.host.ip");
+        int port = SystemUtil.getSystemPropertyAsInt("rpc.host.port", 9066);
+        svr.setPort(port);
+        handlerThreadsNumber = SystemUtil.getSystemPropertyAsInt("rpc.handler.threadsnumber", 0);
+        int selectorThreadsNumber = SystemUtil.getSystemPropertyAsInt("rpc.selector.threadsnumber", 0);
+        if (selectorThreadsNumber != 0) {
+            svr.setThreadsNumber(selectorThreadsNumber);
+        }
     }
 
     /**
@@ -110,21 +125,29 @@ public class RpcServer {
             return false;
         }
         svr.setPacketHandler(handler);
-        if (svr.start()) {
-            // Publish everything to ZK
-            try {
-                zkProducer = new Producer(zkClusterAddress, zkSessionTimeout);
-                zkProducer.setRoot(zkEnvironment);
-                zkProducer.addAuthInfo(zkUserName, zkPassword);
-                for (RpcExpose ee : exposeList) {
-                    String address = AddressUtil.generateAddress(ee, getPort());
-                    zkProducer.publishService(ee.serviceName, ee.version, ee.state, address,
-                            null, true, true);
+        if (!svr.start()) {
+            return false;
+        }
+        
+        // Publish everything to ZK
+        try {
+            zkProducer = new Producer(zkClusterAddress, zkSessionTimeout);
+            zkProducer.setRoot(zkEnvironment);
+            zkProducer.addAuthInfo(zkUserName, zkPassword);
+            for (RpcExpose ee : exposeList) {
+                String address = null;
+                if (rpcHostIp != null) {
+                    address = AddressUtil.generateAddress(ee, rpcHostIp, getPort());
+                } else {
+                    address = AddressUtil.generateAddress(ee, getPort());
                 }
-                return true;
-            } catch (Exception e) {
-                LOG.error("Error occured when communicate with Find-core.", e);
+                
+                zkProducer.publishService(ee.serviceName, ee.version, ee.state, address,
+                        null, true, true);
             }
+            return true;
+        } catch (Exception e) {
+            LOG.error("Error occured when communicate with Find-core.", e);
         }
         return false;
     }
@@ -148,20 +171,6 @@ public class RpcServer {
      */
     public int getQueueSize() {
         return handler == null ? 0 : handler.getQueueSize();
-    }
-
-    /**
-     * @return the handlerThreadsNumber
-     */
-    public int getHandlerThreadsNumber() {
-        return handlerThreadsNumber;
-    }
-
-    /**
-     * @param handlerThreadsNumber the handlerThreadsNumber to set
-     */
-    public void setHandlerThreadsNumber(int handlerThreadsNumber) {
-        this.handlerThreadsNumber = handlerThreadsNumber;
     }
 
     /**
@@ -294,6 +303,20 @@ public class RpcServer {
      */
     public void setSelectorThreadsNumber(int threadsNumber) {
         svr.setThreadsNumber(threadsNumber);
+    }
+
+    /**
+     * @return the handlerThreadsNumber
+     */
+    public int getHandlerThreadsNumber() {
+        return handlerThreadsNumber;
+    }
+
+    /**
+     * @param handlerThreadsNumber the handlerThreadsNumber to set
+     */
+    public void setHandlerThreadsNumber(int handlerThreadsNumber) {
+        this.handlerThreadsNumber = handlerThreadsNumber;
     }
 
 }
