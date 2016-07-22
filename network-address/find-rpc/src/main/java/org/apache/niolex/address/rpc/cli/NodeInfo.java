@@ -18,10 +18,6 @@
 package org.apache.niolex.address.rpc.cli;
 
 import java.net.InetSocketAddress;
-import java.util.HashSet;
-import java.util.Set;
-
-import org.apache.niolex.network.rpc.RpcClient;
 
 /**
  * Store server address node information.
@@ -30,11 +26,6 @@ import org.apache.niolex.network.rpc.RpcClient;
  * @version 1.0.5, $Date: 2012-12-4$
  */
 public class NodeInfo {
-
-    /**
-     * Store all the clients using this node information.
-     */
-    protected final Set<RpcClient> clientSet = new HashSet<RpcClient>();
 
     /**
      * The data convert protocol.

@@ -33,7 +33,6 @@ import org.apache.niolex.commons.util.SystemUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
  * This class Wrap the ZK client detail and build Rpc client stub for Application user.
  * <br>
