@@ -17,7 +17,10 @@
  */
 package org.apache.niolex.network.client;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 
 import java.net.InetSocketAddress;
@@ -83,7 +86,7 @@ public class ClientManagerTest {
     /**
      * Test method for {@link org.apache.niolex.network.client.ClientManager#connect()}.
      */
-    @Test(expected=IllegalArgumentException.class)
+    @Test(expected = IllegalStateException.class)
     public void testConnectNoAddress() {
         PacketClient sc = new PacketClient();
         ClientManager cm = new ClientManager(sc);
@@ -121,7 +124,7 @@ public class ClientManagerTest {
     /**
      * Test method for {@link org.apache.niolex.network.client.ClientManager#retryConnect()}.
      */
-    @Test(expected=IllegalArgumentException.class)
+    @Test(expected = IllegalStateException.class)
     public void testRetryConnectNoAddress() {
         SocketClient sc = new SocketClient();
         ClientManager cm = new ClientManager(sc);
@@ -146,7 +149,7 @@ public class ClientManagerTest {
     /**
      * Test method for {@link org.apache.niolex.network.client.ClientManager#getConnStatus()}.
      */
-    @Test(expected=IllegalArgumentException.class)
+    @Test(expected = IllegalStateException.class)
     public void testGetConnStatus() {
         SocketClient sc = new SocketClient();
         ClientManager cm = new ClientManager(sc);
@@ -160,7 +163,7 @@ public class ClientManagerTest {
     /**
      * Test method for {@link org.apache.niolex.network.client.ClientManager#setSleepBetweenRetryTime(int)}.
      */
-    @Test(expected=IllegalArgumentException.class)
+    @Test(expected = IllegalStateException.class)
     public void testSetSleepBetweenRetryTime() {
         SocketClient sc = new SocketClient();
         ClientManager cm = new ClientManager(sc);
@@ -172,7 +175,7 @@ public class ClientManagerTest {
     /**
      * Test method for {@link org.apache.niolex.network.client.ClientManager#waitForConnected()}.
      */
-    @Test(expected=IllegalArgumentException.class)
+    @Test(expected = IllegalStateException.class)
     public void testWaitForConnected() {
         SocketClient sc = new SocketClient();
         ClientManager cm = new ClientManager(sc);

@@ -26,10 +26,12 @@ import org.apache.niolex.commons.concurrent.ConcurrentUtil;
 import org.apache.niolex.network.rpc.RpcClient;
 
 /**
- * The pool stores all the rpc clients by their Internet socket address.
+ * The pool stores all the rpc clients by their Internet socket address. We will not close connection actively,
+ * but leave it open with no retry times. No matter the connection is still OK or not, we will not use it if it's
+ * address is removed from zookeeper.
  * 
  * @author <a href="mailto:xiejiyun@foxmail.com">Xie, Jiyun</a>
- * @version 2.1.2
+ * @version 1.0.0
  * @since Jul 22, 2016
  */
 public class RpcClientPool {
@@ -72,10 +74,10 @@ public class RpcClientPool {
      * Remove the key value pair from the internal map by the specified Internet socket address.
      * 
      * @param key the specified Internet socket address
-     * @return the clients
+     * @return the clients or null if not found
      */
     public Set<RpcClient> removeClients(InetSocketAddress key) {
         return rpcClientPool.remove(key);
     }
-    
+
 }

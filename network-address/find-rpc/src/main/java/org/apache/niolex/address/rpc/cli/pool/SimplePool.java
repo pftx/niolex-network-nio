@@ -17,25 +17,17 @@
  */
 package org.apache.niolex.address.rpc.cli.pool;
 
-import java.io.IOException;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.niolex.address.rpc.ConverterCenter;
 import org.apache.niolex.address.rpc.cli.BaseStub;
 import org.apache.niolex.address.rpc.cli.NodeInfo;
 import org.apache.niolex.commons.bean.MutableOne;
 import org.apache.niolex.network.cli.RpcClientAdapter;
-import org.apache.niolex.network.client.BlockingClient;
-import org.apache.niolex.network.rpc.IConverter;
-import org.apache.niolex.network.rpc.PacketInvoker;
 import org.apache.niolex.network.rpc.RpcClient;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * The Rpc Simple Client Pool, Manage all the clients for one service under one state.
@@ -44,13 +36,11 @@ import org.slf4j.LoggerFactory;
  * @version 1.0.5, $Date: 2013-03-30$
  */
 public class SimplePool<T> extends BaseStub<T> {
-    private static final Logger LOG = LoggerFactory.getLogger(SimplePool.class);
 
     /**
      * The internal pool size, could not be changed after creation.
      */
     protected final int poolSize;
-    protected double weightShare;
 
     /**
      * The real pool handler.
@@ -70,17 +60,26 @@ public class SimplePool<T> extends BaseStub<T> {
     }
 
     /**
+     * This is the override of super method.
+     * @see org.apache.niolex.address.rpc.cli.BaseStub#fireChanges(java.util.Set, java.util.Set)
+     */
+    @Override
+    protected void fireChanges(Set<NodeInfo> delSet, Set<NodeInfo> addSet) {
+        markDeleted(delSet);
+        markNew(addSet);
+    }
+
+    /**
      * Mark the deleted node as not retry, and remove them from ready set.
      * The deleted connections will be removed by {@link MultiplexPoolHandler}
      *
      * @param delSet the nodes been deleted
      */
-    @Override
-    protected void markDeleted(HashSet<NodeInfo> delSet) {
+    protected void markDeleted(Set<NodeInfo> delSet) {
         // Remove them all from the ready set.
         readySet.removeAll(delSet);
         for (NodeInfo info : delSet) {
-            Set<RpcClient> clientSet = clientSet(info);
+            Set<RpcClient> clientSet = POOL.getClients(info.getAddress());
             for (RpcClient sc : clientSet) {
                 // We do not retry the deleted address.
                 sc.setConnectRetryTimes(0);
@@ -93,8 +92,7 @@ public class SimplePool<T> extends BaseStub<T> {
      *
      * @param addSet the nodes been added
      */
-    @Override
-    protected void markNew(HashSet<NodeInfo> addSet) {
+    protected void markNew(Set<NodeInfo> addSet) {
         // Put them into ready set.
         readySet.addAll(addSet);
         // Save all the new clients.
@@ -106,42 +104,6 @@ public class SimplePool<T> extends BaseStub<T> {
         }
         // Offer all the new clients.
         poolHandler.addNew(cliList);
-    }
-
-    /**
-     * Build all the clients for this server address.
-     *
-     * @param info the node info which contains server address
-     */
-    protected void buildClients(NodeInfo info) {
-        // omitting decimal fractions smaller than 0.5 and counting all others, including 0.5, as 1
-        final int curMax = (int) (info.getWeight() * weightShare + 0.5);
-        // Set converter
-        final IConverter converter = ConverterCenter.getConverter(info.getProtocol());
-        if (converter == null) {
-            LOG.error("The converter for service address [{}] type [{}] not found.", info.getAddress(), info.getProtocol());
-            return;
-        }
-        Set<RpcClient> clientSet = clientSet(info);
-        for (int i = 0; i < curMax; ++i) {
-            try {
-                // Let's create the connection here.
-                BlockingClient bk = new BlockingClient(info.getAddress());
-                // Create the Rpc.
-                PacketInvoker pk = new PacketInvoker();
-                pk.setRpcHandleTimeout(rpcTimeout);
-                RpcClient cli = new RpcClient(bk, pk, converter);
-                cli.setConnectTimeout(connectTimeout);
-                cli.setConnectRetryTimes(connectRetryTimes);
-                cli.setSleepBetweenRetryTime(connectSleepBetweenRetry);
-                cli.connect();
-                cli.addInferface(interfaze);
-                // Ready to add.
-                clientSet.add(cli);
-            } catch (IOException e) {
-                LOG.error("Error occured when create client for {}.", info, e);
-            }
-        }
     }
 
     /**

@@ -36,10 +36,10 @@ import org.slf4j.LoggerFactory;
 /**
  * This class Wrap the ZK client detail and build Rpc client stub for Application user.
  * <br>
- * There are two implementations here.
+ * There are two implementations here.<pre>
  * 1. The pool implementation: We use the pool handler as the internal structure.
  * 2. The stub implementation: We use the retry handler as the internal structure.
- *
+ * </pre>
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.5, $Date: 2012-11-30$
  */
@@ -111,6 +111,161 @@ public class RpcClientFactory {
     }
     
     //-------------------------------------------------------------------------
+    // STUB BUILDER
+    //-------------------------------------------------------------------------
+    
+    /**
+     * Create a new stub builder to create client side stub.
+     * 
+     * @param interfaze the stub interface
+     * @return the newly created builder
+     */
+    public <T> StubBuilder<T> newBuilder(Class<T> interfaze) {
+        return new StubBuilder<T>(interfaze);
+    }
+    
+    /**
+     * The stub builder class.
+     * 
+     * @author <a href="mailto:xiejiyun@foxmail.com">Xie, Jiyun</a>
+     * @version 2.1.2
+     * @since Jul 25, 2016
+     * @param <T> the stub type to be built
+     */
+    public class StubBuilder<T> {
+        
+        /**
+         * The service interface, client stub will proxy this interface.
+         */
+        private final Class<T> interfaze;
+        
+        /**
+         * The service name, used to get service address list.
+         */
+        private String serviceName;
+        
+        /**
+         * The service version.
+         */
+        private String version;
+        
+        /**
+         * The state of the service you want to have.
+         */
+        private String state;
+        
+        /**
+         * The client pool size. If only useful for poll stub.
+         */
+        private int poolSize;
+        
+        /**
+         * The Constructor.
+         * 
+         * @param interfaze the service interface
+         */
+        public StubBuilder(Class<T> interfaze) {
+            super();
+            this.interfaze = interfaze;
+        }
+        
+        /**
+         * Set the service name.
+         * 
+         * @param serviceName the service name
+         * @return this
+         */
+        public StubBuilder<T> serviceName(String serviceName) {
+            this.serviceName = serviceName;
+            return this;
+        }
+        
+        /**
+         * Set the service version.
+         * 
+         * @param version the service version
+         * @return this
+         */
+        public StubBuilder<T> version(String version) {
+            if (version.indexOf('.') > 0) {
+                this.version = "" + VersionUtil.encodeVersion(version);
+            } else {
+                this.version = version;
+            }
+            return this;
+        }
+        
+        /**
+         * Set the service state.
+         * 
+         * @param state the service state
+         * @return this
+         */
+        public StubBuilder<T> state(String state) {
+            this.state = state;
+            return this;
+        }
+        
+        /**
+         * Set the client pool size.
+         * 
+         * @param poolSize the client pool size
+         * @return this
+         */
+        public StubBuilder<T> poolSize(int poolSize) {
+            this.poolSize = poolSize;
+            return this;
+        }
+        
+        /**
+         * Check whether we are ready to build stub.
+         */
+        private void checkBuild() {
+            RpcInterface inter = interfaze.getAnnotation(RpcInterface.class);
+            Check.notNull(inter, "There is no annotation [RpcInterface] on " + interfaze.getName());
+            
+            // Make sure service name is ready and set.
+            if (serviceName == null) {
+                serviceName = inter.serviceName();
+            }
+            if (StringUtil.isBlank(serviceName)) {
+                serviceName = interfaze.getCanonicalName();
+            }
+            
+            // Make sure version is set.
+            if (version == null) {
+                version = "" + VersionUtil.encodeVersion(inter.version());
+            }
+            
+            // Make sure state is set.
+            if (state == null) {
+                state = RpcExpose.DFT_STATE;
+            }
+        }
+        
+        /**
+         * Build a client stub powered by connection pool.
+         * 
+         * @return the client stub
+         */
+        public BaseStub<T> buildPool() {
+            checkBuild();
+            return getPool(interfaze, serviceName, version, state, poolSize);
+        }
+        
+        /**
+         * Build a client stub powered by retry handler.
+         * 
+         * @return the client stub
+         */
+        public BaseStub<T> buildStub() {
+            checkBuild();
+            return getStub(interfaze, serviceName, version, state);
+        }
+        
+    }
+    
+    //-------------------------------------------------------------------------
     // POOL IMPLEMENTATION
     //-------------------------------------------------------------------------
     
@@ -124,74 +279,17 @@ public class RpcClientFactory {
      * @param poolSize the client pool size.
      * @return the client pool.
      */
-    public <T> BaseStub<T> getPool(Class<T> interfaze, String serviceName,
-            String version, String state, int poolSize) {
+    public <T> BaseStub<T> getPool(Class<T> interfaze, String serviceName, String version, String state, int poolSize) {
         MutableOne<List<String>> mutableOne = zkConsumer.getAddressList(serviceName, version, state);
         BaseStub<T> pool = new SimplePool<T>(poolSize, interfaze, mutableOne);
         // The pool is ready for use.
         return pool;
     }
-
-    /**
-     * Get the client pool for this service.
-     *
-     * @param interfaze the service interface.
-     * @param version the service version.
-     * @param state the state of the service you want to have.
-     * @param poolSize the client pool size.
-     * @return the client pool.
-     */
-    public <T> BaseStub<T> getPool(Class<T> interfaze, String version, String state, int poolSize) {
-        RpcInterface inter = interfaze.getAnnotation(RpcInterface.class);
-        Check.notNull(inter, "There is no annotation [RpcInterface] on " + interfaze.getName());
-        String serviceName = inter.serviceName();
-        if (StringUtil.isBlank(serviceName)) {
-            serviceName = interfaze.getCanonicalName();
-        }
-        return getPool(interfaze, serviceName, version, state, poolSize);
-    }
-
-    /**
-     * Get the client pool for this service.
-     *
-     * @param interfaze the service interface.
-     * @param state the state of the service you want to have.
-     * @param poolSize the client pool size.
-     * @return the client pool.
-     */
-    public <T> BaseStub<T> getPool(Class<T> interfaze, String state, int poolSize) {
-        RpcInterface inter = interfaze.getAnnotation(RpcInterface.class);
-        Check.notNull(inter, "There is no annotation [RpcInterface] on " + interfaze.getName());
-        return getPool(interfaze, "" + VersionUtil.encodeVersion(inter.version()), state, poolSize);
-    }
-
-    /**
-     * Get the client pool for this service.
-     *
-     * @param interfaze the service interface.
-     * @param poolSize the client pool size.
-     * @return the client pool.
-     */
-    public <T> BaseStub<T> getPool(Class<T> interfaze, int poolSize) {
-        RpcInterface inter = interfaze.getAnnotation(RpcInterface.class);
-        Check.notNull(inter, "There is no annotation [RpcInterface] on " + interfaze.getName());
-        return getPool(interfaze, "" + VersionUtil.encodeVersion(inter.version()), RpcExpose.DFT_STATE, poolSize);
-    }
-
-    /**
-     * Get the client pool for this service.
-     *
-     * @param interfaze the service interface.
-     * @return the client pool.
-     */
-    public <T> BaseStub<T> getPool(Class<T> interfaze) {
-        return getPool(interfaze, 0);
-    }
     
     //-------------------------------------------------------------------------
     // STUB IMPLEMENTATION
     //-------------------------------------------------------------------------
-
+    
     /**
      * Get the client stub for this service.
      *
@@ -199,70 +297,12 @@ public class RpcClientFactory {
      * @param serviceName the service name.
      * @param version the service version.
      * @param state the state of the service you want to have.
-     * @param poolSize the client pool size.
-     * @return the client pool.
+     * @return the client stub.
      */
-    public <T> BaseStub<T> getStub(Class<T> interfaze, String serviceName,
-            String version, String state, int poolSize) {
+    public <T> BaseStub<T> getStub(Class<T> interfaze, String serviceName, String version, String state) {
         MutableOne<List<String>> mutableOne = zkConsumer.getAddressList(serviceName, version, state);
         RetryStub<T> stub = new RetryStub<T>(interfaze, mutableOne);
         return stub;
-    }
-
-    /**
-     * Get the client pool for this service.
-     *
-     * @param interfaze the service interface.
-     * @param version the service version.
-     * @param state the state of the service you want to have.
-     * @param poolSize the client pool size.
-     * @return the client pool.
-     */
-    public <T> BaseStub<T> getStub(Class<T> interfaze, String version, String state, int poolSize) {
-        RpcInterface inter = interfaze.getAnnotation(RpcInterface.class);
-        Check.notNull(inter, "There is no annotation [RpcInterface] on " + interfaze.getName());
-        String serviceName = inter.serviceName();
-        if (StringUtil.isBlank(serviceName)) {
-            serviceName = interfaze.getCanonicalName();
-        }
-        return getStub(interfaze, serviceName, version, state, poolSize);
-    }
-
-    /**
-     * Get the client pool for this service.
-     *
-     * @param interfaze the service interface.
-     * @param state the state of the service you want to have.
-     * @param poolSize the client pool size.
-     * @return the client pool.
-     */
-    public <T> BaseStub<T> getStub(Class<T> interfaze, String state, int poolSize) {
-        RpcInterface inter = interfaze.getAnnotation(RpcInterface.class);
-        Check.notNull(inter, "There is no annotation [RpcInterface] on " + interfaze.getName());
-        return getStub(interfaze, "" + VersionUtil.encodeVersion(inter.version()), state, poolSize);
-    }
-
-    /**
-     * Get the client pool for this service.
-     *
-     * @param interfaze the service interface.
-     * @param poolSize the client pool size.
-     * @return the client pool.
-     */
-    public <T> BaseStub<T> getStub(Class<T> interfaze, int poolSize) {
-        RpcInterface inter = interfaze.getAnnotation(RpcInterface.class);
-        Check.notNull(inter, "There is no annotation [RpcInterface] on " + interfaze.getName());
-        return getStub(interfaze, "" + VersionUtil.encodeVersion(inter.version()), RpcExpose.DFT_STATE, poolSize);
-    }
-
-    /**
-     * Get the client pool for this service.
-     *
-     * @param interfaze the service interface.
-     * @return the client pool.
-     */
-    public <T> BaseStub<T> getStub(Class<T> interfaze) {
-        return getStub(interfaze, 0);
     }
     
     //-------------------------------------------------------------------------

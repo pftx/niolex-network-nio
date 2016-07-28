@@ -17,26 +17,37 @@
  */
 package org.apache.niolex.address.rpc.cli;
 
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import org.apache.niolex.address.rpc.AddressUtil;
+import org.apache.niolex.address.rpc.ConverterCenter;
 import org.apache.niolex.commons.bean.MutableOne;
+import org.apache.niolex.commons.test.Check;
 import org.apache.niolex.network.cli.Constants;
+import org.apache.niolex.network.client.BlockingClient;
+import org.apache.niolex.network.rpc.IConverter;
+import org.apache.niolex.network.rpc.PacketInvoker;
 import org.apache.niolex.network.rpc.RpcClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The base client side stub, handle the events sent from ZK server, deal with RPC server
  * add/remove events and generate client stub.
  * <br>
- * We manage all the server addresses here.
+ * We manage all the server addresses here. The {@link MutableOne} will invoke listeners in
+ * synchronized block, so we do not need to consider thread-safety.
  *
  * @author <a href="mailto:xiejiyun@foxmail.com">Xie, Jiyun</a>
  * @version 1.0.0
  * @since 2014-1-22
  */
 public abstract class BaseStub<T> implements MutableOne.DataChangeListener<List<String>> {
+    protected static final Logger LOG = LoggerFactory.getLogger(BaseStub.class);
+    protected static final RpcClientPool POOL = RpcClientPool.getPool();
 
     /**
      * The network connection parameters.
@@ -60,9 +71,14 @@ public abstract class BaseStub<T> implements MutableOne.DataChangeListener<List<
     protected T stub;
 
     /**
-     * The current stub status, true if it's ready to work
+     * The current stub status, true if it's ready to work.
      */
     protected boolean isWorking;
+
+    /**
+     * How many connections to create for each weight, default to 2.
+     */
+    protected double weightShare = 2;
 
     /**
      * Create a Base stub with this pool size and interface.
@@ -89,41 +105,94 @@ public abstract class BaseStub<T> implements MutableOne.DataChangeListener<List<
      * @see org.apache.niolex.commons.bean.MutableOne.DataChangeListener#onDataChange(java.lang.Object, java.lang.Object)
      */
     @Override
-    public void onDataChange(List<String> oldList, List<String> nodeList) {
-        if (nodeList == null) {
+    public void onDataChange(List<String> oldList, List<String> newList) {
+        if (newList == null) {
             return;
         }
-        HashSet<NodeInfo> infoSet = new HashSet<NodeInfo>();
+
+        HashSet<NodeInfo> newSet = new HashSet<NodeInfo>();
         HashSet<NodeInfo> delSet = new HashSet<NodeInfo>();
         HashSet<NodeInfo> addSet = new HashSet<NodeInfo>();
+
         // Parse config information.
-        for (String node : nodeList) {
+        for (String node : newList) {
             NodeInfo info = AddressUtil.parseAddress(node);
             if (info != null)
-                infoSet.add(info);
+                newSet.add(info);
         }
         // Check deleted items.
         for (NodeInfo info : readySet) {
-            if (!infoSet.contains(info)) {
+            if (!newSet.contains(info)) {
                 delSet.add(info);
             }
         }
         // Check added items.
-        for (NodeInfo info : infoSet) {
+        for (NodeInfo info : newSet) {
             if (!readySet.contains(info)) {
                 addSet.add(info);
             }
         }
+
         // Try to make the change by now.
         if (isWorking) {
-            if (!delSet.isEmpty())
-                markDeleted(delSet);
-            if (!addSet.isEmpty())
-                markNew(addSet);
+            fireChanges(delSet, addSet);
         } else {
             readySet.removeAll(delSet);
             readySet.addAll(addSet);
         }
+    }
+
+    /**
+     * Build all the clients for this server address.
+     *
+     * @param info the node info which contains server address
+     */
+    protected Set<RpcClient> buildClients(NodeInfo info) {
+        // omitting decimal fractions smaller than 0.5 and counting all others, including 0.5, as 1
+        final int curMax = (int) (info.getWeight() * weightShare + 0.5);
+        // Set converter
+        final IConverter converter = ConverterCenter.getConverter(info.getProtocol());
+        if (converter == null) {
+            LOG.error("The converter for service address [{}] type [{}] not found.", info.getAddress(), info.getProtocol());
+            return null;
+        }
+        Set<RpcClient> clientSet = POOL.getClients(info.getAddress());
+        int i = 0;
+        // Make all the old connections ready.
+        for (RpcClient rpcc : clientSet) {
+            rpcc.setConnectRetryTimes(connectRetryTimes);
+            rpcc.addInferface(interfaze);
+            if (!rpcc.isValid()) {
+                try {
+                    rpcc.connect();
+                } catch (IOException e) {
+                    LOG.error("Error occured when try to connect to {}.", info, e);
+                }
+            }
+        }
+
+        // Add more connections if necessary.
+        for (; i < curMax; ++i) {
+            try {
+                // Let's create the connection here.
+                BlockingClient bk = new BlockingClient(info.getAddress());
+                // Create the Rpc.
+                PacketInvoker pk = new PacketInvoker();
+                pk.setRpcHandleTimeout(rpcTimeout);
+                RpcClient cli = new RpcClient(bk, pk, converter);
+                cli.setConnectTimeout(connectTimeout);
+                cli.setConnectRetryTimes(connectRetryTimes);
+                cli.setSleepBetweenRetryTime(connectSleepBetweenRetry);
+                cli.connect();
+                cli.addInferface(interfaze);
+                // Ready to add.
+                clientSet.add(cli);
+            } catch (IOException e) {
+                LOG.error("Error occured when create client for {}.", info, e);
+            }
+        }
+
+        return clientSet;
     }
 
     /**
@@ -138,33 +207,18 @@ public abstract class BaseStub<T> implements MutableOne.DataChangeListener<List<
         return stub;
     }
 
-    /**
-     * The bridge method help subclass to retrieve client set from node info.
-     *
-     * @param info the node info
-     * @return the client set
-     */
-    protected Set<RpcClient> clientSet(NodeInfo info) {
-        return info.clientSet;
-    }
-
-    //-------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
     // ABSTRACT METHODS
-    //-------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
 
     /**
-     * Mark the deleted node as not retry, and move it from ready set into delete set.
-     *
-     * @param delSet the node info list waiting to be deleted
+     * If the stub is working, then we will call this method to notify subclass the
+     * changes of server lists.
+     * 
+     * @param delSet the node info list waiting to be deleted, subclass need to disconnect from these servers.
+     * @param addSet the node info list waiting to be added, subclass need to connect to these new servers.
      */
-    protected abstract void markDeleted(HashSet<NodeInfo> delSet);
-
-    /**
-     * Add new server addresses to this pool, subclass need to connect to these new servers.
-     *
-     * @param addSet the node info list waiting to be added
-     */
-    protected abstract void markNew(HashSet<NodeInfo> addSet);
+    protected abstract void fireChanges(Set<NodeInfo> delSet, Set<NodeInfo> addSet);
 
     /**
      * Build this client stub for use. This method can only be called once.
@@ -172,10 +226,9 @@ public abstract class BaseStub<T> implements MutableOne.DataChangeListener<List<
     public abstract BaseStub<T> build();
 
     /**
-     * Destroy this pool, disconnect all the connections.
+     * Destroy this pool.
      */
     public abstract void destroy();
-
 
     //-------------------------------------------------------------------------
     // GETTERS & SETTERS
@@ -206,6 +259,7 @@ public abstract class BaseStub<T> implements MutableOne.DataChangeListener<List<
      * @param connectRetryTimes the connectRetryTimes to set
      */
     public void setConnectRetryTimes(int connectRetryTimes) {
+        Check.lt(0, connectRetryTimes, "The connectRetryTimes must greater than 0.");
         this.connectRetryTimes = connectRetryTimes;
     }
 
@@ -234,6 +288,7 @@ public abstract class BaseStub<T> implements MutableOne.DataChangeListener<List<
      * @param rpcTimeout the rpcTimeout to set
      */
     public void setRpcTimeout(int rpcTimeout) {
+        Check.lt(1000, rpcTimeout, "The rpcTimeout must greater than 1000.");
         this.rpcTimeout = rpcTimeout;
     }
 
@@ -248,6 +303,7 @@ public abstract class BaseStub<T> implements MutableOne.DataChangeListener<List<
      * @param rpcErrorRetryTimes the rpcErrorRetryTimes to set
      */
     public void setRpcErrorRetryTimes(int rpcErrorRetryTimes) {
+        Check.lt(0, rpcErrorRetryTimes, "The rpcErrorRetryTimes must greater than 0.");
         this.rpcErrorRetryTimes = rpcErrorRetryTimes;
     }
 

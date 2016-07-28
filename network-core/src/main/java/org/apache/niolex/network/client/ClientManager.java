@@ -76,12 +76,12 @@ public class ClientManager {
     private volatile CountDownLatch connLatch;
 
     /**
-     * The server address list
+     * The server address list.
      */
     private List<InetSocketAddress> addressList;
 
     /**
-     * The current using server address index
+     * The current using server address index.
      */
     private int addressIndex;
 
@@ -111,7 +111,7 @@ public class ClientManager {
      */
     public boolean connect() {
         if (addressList == null || addressList.size() == 0) {
-            throw new IllegalArgumentException("Please set addressList first!");
+            throw new IllegalStateException("Please set addressList first!");
         }
         // If client already connected, we just return.
         if (client.isWorking()) {
@@ -135,7 +135,7 @@ public class ClientManager {
      */
     public boolean retryConnect() {
         if (addressList == null || addressList.size() == 0) {
-            throw new IllegalArgumentException("Please set addressList first!");
+            throw new IllegalStateException("Please set addressList first!");
         }
         // If client already connected, we just return.
         if (client.isWorking()) {
@@ -221,39 +221,6 @@ public class ClientManager {
     }
 
     /**
-     * Set the time in milliseconds that client with sleep between retry to connect
-     * to server.
-     *
-     * @param sleepBetweenRetryTime the sleep between retry time to set
-     */
-    public void setSleepBetweenRetryTime(int sleepBetweenRetryTime) {
-        this.sleepBetweenRetryTime = sleepBetweenRetryTime;
-    }
-
-    /**
-     * @return the current sleepBetweenRetryTime
-     */
-    public int getSleepBetweenRetryTime() {
-        return sleepBetweenRetryTime;
-    }
-
-    /**
-     * Set retry times.
-     *
-     * @param connectRetryTimes the connect retry times to set
-     */
-    public void setConnectRetryTimes(int connectRetryTimes) {
-        this.connectRetryTimes = connectRetryTimes;
-    }
-
-    /**
-     * @return the current connectRetryTimes
-     */
-    public int getConnectRetryTimes() {
-        return connectRetryTimes;
-    }
-
-    /**
      * Set the server address list.
      * We will shuffle it here in order to make it act more randomly.
      *
@@ -286,6 +253,39 @@ public class ClientManager {
      */
     public List<InetSocketAddress> getAddressList() {
         return addressList;
+    }
+
+    /**
+     * Set the time in milliseconds that client with sleep between retry to connect
+     * to server.
+     *
+     * @param sleepBetweenRetryTime the sleep between retry time to set
+     */
+    public void setSleepBetweenRetryTime(int sleepBetweenRetryTime) {
+        this.sleepBetweenRetryTime = sleepBetweenRetryTime;
+    }
+
+    /**
+     * @return the current sleepBetweenRetryTime
+     */
+    public int getSleepBetweenRetryTime() {
+        return sleepBetweenRetryTime;
+    }
+
+    /**
+     * Set retry times.
+     *
+     * @param connectRetryTimes the connect retry times to set
+     */
+    public void setConnectRetryTimes(int connectRetryTimes) {
+        this.connectRetryTimes = connectRetryTimes;
+    }
+
+    /**
+     * @return the current connectRetryTimes
+     */
+    public int getConnectRetryTimes() {
+        return connectRetryTimes;
     }
 
     /**
