@@ -133,7 +133,7 @@ public class ClientManager {
      *
      * @return true if connected, false otherwise
      */
-    public boolean retryConnect() {
+    public synchronized boolean retryConnect() {
         if (addressList == null || addressList.size() == 0) {
             throw new IllegalStateException("Please set addressList first!");
         }
