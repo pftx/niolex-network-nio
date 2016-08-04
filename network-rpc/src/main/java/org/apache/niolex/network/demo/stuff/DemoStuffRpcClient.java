@@ -22,8 +22,8 @@ import java.net.InetSocketAddress;
 
 import org.apache.niolex.commons.test.Check;
 import org.apache.niolex.network.client.PacketClient;
-import org.apache.niolex.network.rpc.PacketInvoker;
-import org.apache.niolex.network.rpc.RpcClient;
+import org.apache.niolex.network.rpc.cli.BaseInvoker;
+import org.apache.niolex.network.rpc.cli.BlockingStub;
 import org.apache.niolex.network.rpc.conv.ProtoStuffConverter;
 
 /**
@@ -39,9 +39,10 @@ public class DemoStuffRpcClient {
 	 * @throws IOException
 	 */
 	public static void main(String[] a) throws IOException {
-		PacketClient c = new PacketClient(new InetSocketAddress("localhost", 8808));
-		RpcClient client = new RpcClient(c, new PacketInvoker(), new ProtoStuffConverter());
-		client.connect();
+        PacketClient c = new PacketClient(new InetSocketAddress("localhost", 8808));
+        BaseInvoker invoker = new BaseInvoker(c);
+        invoker.connect();
+        BlockingStub client = new BlockingStub(invoker, new ProtoStuffConverter());
 
 		final RpcService service = client.getService(RpcService.class);
 		IntArray args = new IntArray();
@@ -58,7 +59,7 @@ public class DemoStuffRpcClient {
         String q = service.concat(arg);
         Check.eq("Hi, Lex!", q, "service.concat");
         
-		client.stop();
+        invoker.stop();
 	}
 
 }

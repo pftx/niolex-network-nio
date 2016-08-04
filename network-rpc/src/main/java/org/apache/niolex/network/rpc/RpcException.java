@@ -48,6 +48,7 @@ public class RpcException extends RuntimeException {
         ERROR_PARSE_RETURN("Error occured when client try to parse the value returned from server."),
         UNKNOWN("Unknown other error."),
         NO_SERVER_READY("No rpc server is ready for now."),
+        INTERRUPTED("Rpc thread been interrupted during waiting for response."),
         ERROR_EXCEED_RETRY("We retried the number of times according to config, but still error.");
 
         /**
@@ -88,7 +89,6 @@ public class RpcException extends RuntimeException {
 		super();
 	}
 
-
 	/**
 	 * Create a RpcException with a message, an exception type, and a throwable.
 	 *
@@ -105,7 +105,6 @@ public class RpcException extends RuntimeException {
     public String toString() {
         return "[" + type + "] " + super.toString();
     }
-
 
     /**
 	 * Get the Rpc exception Type

@@ -71,7 +71,8 @@ public abstract class BaseHandler {
     }
 
     /**
-     * Process the exception.
+     * Process the exception. If it's I/O exception, we invoke {@link IServiceHandler#notReady(IOException)}
+     * to notify handler.
      *
      * @param e the exception
      * @param handler the handler
@@ -91,7 +92,7 @@ public abstract class BaseHandler {
                     // For the others, we just throw.
                     throw re;
             }
-        } else if (e  instanceof IOException) {
+        } else if (e instanceof IOException) {
             handler.notReady((IOException)(e));
         } else if (e.getCause() == null) {
             throw e;

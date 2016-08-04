@@ -25,8 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Manage the Rpc Service Client Stub, i.e. {@link org.apache.niolex.network.rpc.RpcClient},
- * deal with error block functionality.
+ * Manage the Rpc Service Client Stub, deal with error block functionality internally.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0, Date: 2012-5-27
@@ -37,7 +36,7 @@ public class RpcServiceHandler implements IServiceHandler {
 	private final String serviceUrl;
 	private final InvocationHandler handler;
 	private final int errorBlockTime;
-	private long nextWorkTime = -1;
+    private volatile long nextWorkTime = -1;
 
 	public RpcServiceHandler(String serviceUrl, InvocationHandler handler, int errorBlockTime, boolean isReady) {
 		super();

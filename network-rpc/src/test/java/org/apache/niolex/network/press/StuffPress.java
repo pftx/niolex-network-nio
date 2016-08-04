@@ -25,12 +25,11 @@ import org.apache.niolex.commons.test.Counter;
 import org.apache.niolex.commons.test.MockUtil;
 import org.apache.niolex.commons.test.StopWatch;
 import org.apache.niolex.commons.test.StopWatch.Stop;
-import org.apache.niolex.network.client.SocketClient;
 import org.apache.niolex.network.demo.stuff.IntArray;
 import org.apache.niolex.network.demo.stuff.RpcService;
 import org.apache.niolex.network.demo.stuff.StringArray;
-import org.apache.niolex.network.rpc.RpcClient;
-import org.apache.niolex.network.rpc.SingleInvoker;
+import org.apache.niolex.network.rpc.cli.BlockingStub;
+import org.apache.niolex.network.rpc.cli.SingleInvoker;
 import org.apache.niolex.network.rpc.conv.ProtoStuffConverter;
 
 /**
@@ -60,7 +59,7 @@ public class StuffPress {
 			ADDR = args[3];
         }
 		for (int i = 0; i < 10; ++i) {
-			RpcClient cli = create();
+            BlockingStub cli = create();
 			RpcService service = cli.getService(RpcService.class);
 			Stop s = stopWatch.start();
 			IntArray aa = new IntArray();
@@ -75,7 +74,7 @@ public class StuffPress {
 		}
 		Thread[] ts = new Thread[THREAD_NUM];
 		for (int i = 0; i < THREAD_NUM; ++i) {
-			RpcClient cli = create();
+            BlockingStub cli = create();
 			Rpc r = new Rpc(cli, "Hello " + i, " world.");
 			Thread t = new Thread(r);
 			t.start();
@@ -83,7 +82,7 @@ public class StuffPress {
 		}
 		stopWatch.begin(true);
 		for (int i = 0; i < SHUFFLE_NUM; ++i) {
-			RpcClient cli = create();
+            BlockingStub cli = create();
 			RpcService service = cli.getService(RpcService.class);
 			Stop s = stopWatch.start();
 			StringArray sarr = new StringArray();
@@ -105,19 +104,19 @@ public class StuffPress {
 		System.out.println("Done..... error = " + ERROR_CNT.cnt());
 	}
 
-	public static RpcClient create() throws IOException {
-		SocketClient c = new SocketClient(new InetSocketAddress(ADDR, 8808));
-		RpcClient client = new RpcClient(c, new SingleInvoker(), new ProtoStuffConverter());
-		client.connect();
+    public static BlockingStub create() throws IOException {
+        SingleInvoker invo = new SingleInvoker(new InetSocketAddress(ADDR, 8808));
+        BlockingStub client = new BlockingStub(invo, new ProtoStuffConverter());
+        invo.connect();
 		return client;
 	}
 
 	public static class Rpc implements Runnable {
-		RpcClient cli;
+        BlockingStub cli;
 		RpcService service;
 		String a = "hello ", b = "world!";
 
-		public Rpc(RpcClient cli, String a, String b) {
+        public Rpc(BlockingStub cli, String a, String b) {
 			super();
 			this.cli = cli;
 			this.service = cli.getService(RpcService.class);

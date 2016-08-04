@@ -25,16 +25,16 @@ package org.apache.niolex.network.cli;
  * @since Jun 29, 2016
  */
 public class ThreadLocalLogContext extends LogContext {
-    
+
     private static final ThreadLocalLogContext INSTANCE = new ThreadLocalLogContext();
-    
+
     /**
      * Wire up this ThreadLocalLogContext into LogContext.
      */
     public static final void wireup() {
         LogContext.setInstance(INSTANCE);
     }
-    
+
     /**
      * Get the global instance of this ThreadLocalLogContext.
      * 
@@ -43,7 +43,7 @@ public class ThreadLocalLogContext extends LogContext {
     public static final ThreadLocalLogContext instance() {
         return INSTANCE;
     }
-    
+
     private final ThreadLocal<String> logPrefix = new ThreadLocal<String>();
     private final ThreadLocal<String> serviceUrl = new ThreadLocal<String>();
 
@@ -55,7 +55,7 @@ public class ThreadLocalLogContext extends LogContext {
     public void setLogPrefix(String logPrefixStr) {
         logPrefix.set(logPrefixStr);
     }
-    
+
     @Override
     protected String getLogPrefix() {
         return logPrefix.get();
@@ -65,7 +65,7 @@ public class ThreadLocalLogContext extends LogContext {
     protected void setServiceUrl(String serviceUrlStr) {
         serviceUrl.set(serviceUrlStr);
     }
-    
+
     /**
      * Get the service URL of this current thread.
      * 

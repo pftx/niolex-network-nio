@@ -25,8 +25,8 @@ import org.apache.niolex.network.demo.proto.PersonProtos.Person;
 import org.apache.niolex.network.demo.proto.PersonProtos.PhoneNumber;
 import org.apache.niolex.network.demo.proto.PersonProtos.PhoneType;
 import org.apache.niolex.network.demo.proto.PersonProtos.Work;
-import org.apache.niolex.network.rpc.PacketInvoker;
-import org.apache.niolex.network.rpc.RpcClient;
+import org.apache.niolex.network.rpc.cli.BaseInvoker;
+import org.apache.niolex.network.rpc.cli.BlockingStub;
 import org.apache.niolex.network.rpc.conv.ProtobufConverter;
 
 /**
@@ -64,8 +64,9 @@ public class DemoProtoRpcClient {
 
 	public static void main(String[] args) throws Exception {
 		PacketClient c = new PacketClient(new InetSocketAddress("localhost", 8808));
-		RpcClient client = new RpcClient(c, new PacketInvoker(), new ProtobufConverter());
-		client.connect();
+        BaseInvoker invoker = new BaseInvoker(c);
+        invoker.connect();
+        BlockingStub client = new BlockingStub(invoker, new ProtobufConverter());
 
 		final PersonService ser = client.getService(PersonService.class);
 		ser.clear();
@@ -164,7 +165,7 @@ public class DemoProtoRpcClient {
 		}
 
 		System.out.println("Done..... err count = " + err);
-		client.stop();
+        invoker.stop();
 	}
 
 	public static void assertt(boolean b, String c) {

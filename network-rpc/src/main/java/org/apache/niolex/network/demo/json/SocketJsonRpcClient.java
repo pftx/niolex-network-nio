@@ -23,9 +23,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.niolex.commons.test.Check;
-import org.apache.niolex.network.client.SocketClient;
-import org.apache.niolex.network.rpc.RpcClient;
-import org.apache.niolex.network.rpc.SingleInvoker;
+import org.apache.niolex.network.rpc.cli.BaseInvoker;
+import org.apache.niolex.network.rpc.cli.BlockingStub;
+import org.apache.niolex.network.rpc.cli.SingleInvoker;
 import org.apache.niolex.network.rpc.conv.JsonConverter;
 
 /**
@@ -39,9 +39,9 @@ public class SocketJsonRpcClient {
     private static int err = 0;
 
     public static void main(String[] arg2s) throws IOException, Throwable {
-        SocketClient c = new SocketClient(new InetSocketAddress("localhost", 8808));
-        RpcClient client = new RpcClient(c, new SingleInvoker(), new JsonConverter());
-        client.connect();
+        BaseInvoker invoker = new SingleInvoker(new InetSocketAddress("localhost", 8808));
+        invoker.connect();
+        BlockingStub client = new BlockingStub(invoker, new JsonConverter());
 
         final RpcService ser = client.getService(RpcService.class);
 
@@ -89,7 +89,7 @@ public class SocketJsonRpcClient {
         System.out.println("Done..... " + err);
 
         Check.eq(0, err, "Error count not zero.");
-        client.stop();
+        invoker.stop();
     }
 
     public static void assertt(int a, int b, String c) {

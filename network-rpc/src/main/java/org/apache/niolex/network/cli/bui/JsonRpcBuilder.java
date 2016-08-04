@@ -20,31 +20,28 @@ package org.apache.niolex.network.cli.bui;
 import java.net.InetSocketAddress;
 import java.net.URI;
 
-import org.apache.niolex.commons.bean.Pair;
-import org.apache.niolex.network.IClient;
 import org.apache.niolex.network.cli.IServiceHandler;
-import org.apache.niolex.network.cli.RpcClientAdapter;
 import org.apache.niolex.network.cli.conf.RpcConfigBean;
 import org.apache.niolex.network.cli.init.ServiceHandlerBuilder;
 import org.apache.niolex.network.client.BlockingClient;
 import org.apache.niolex.network.client.PacketClient;
-import org.apache.niolex.network.client.SocketClient;
-import org.apache.niolex.network.rpc.PacketInvoker;
-import org.apache.niolex.network.rpc.RemoteInvoker;
-import org.apache.niolex.network.rpc.RpcClient;
-import org.apache.niolex.network.rpc.SingleInvoker;
+import org.apache.niolex.network.rpc.cli.BaseInvoker;
+import org.apache.niolex.network.rpc.cli.BlockingStub;
+import org.apache.niolex.network.rpc.cli.SingleInvoker;
 import org.apache.niolex.network.rpc.conv.JsonConverter;
 
 /**
- * The Json Rpc client Builder, and also used as the base class for other builders.
+ * The Json Rpc Builder, and also used as the base class for other builders.
  * <br>
- * Create RpcClient deal with Json internally.
+ * Create BaseInvoker to deal with Json internally.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0, Date: 2012-6-4
  * @see #buildClient(RpcConfigBean, String)
  */
 public class JsonRpcBuilder implements ServiceHandlerBuilder {
+
+    public static final JsonConverter CONV = new JsonConverter();
 
     /**
      * Build the network connection client and remote invoker according to the configuration.
@@ -54,30 +51,31 @@ public class JsonRpcBuilder implements ServiceHandlerBuilder {
      * @return the built network connection client and remote invoker
      * @throws Exception if necessary
      */
-    protected Pair<IClient, RemoteInvoker> buildClient(RpcConfigBean bean, String completeUrl) throws Exception {
+    protected BaseInvoker buildClient(RpcConfigBean bean, String completeUrl) throws Exception {
         URI u = new URI(completeUrl);
         InetSocketAddress serverAddress = new InetSocketAddress(u.getHost(), u.getPort());
 
-        IClient client = null;
-        RemoteInvoker invoker = null;
+        BaseInvoker invoker = null;
         switch (bean.clientType.charAt(0)) {
             case 'P':
             case 'p':
-                client = new PacketClient(serverAddress);
-                invoker = new PacketInvoker();
+                invoker = new BaseInvoker(new PacketClient(serverAddress));
                 break;
             case 'S':
             case 's':
-                client = new SocketClient(serverAddress);
-                invoker = new SingleInvoker();
+                invoker = new SingleInvoker(serverAddress);
                 break;
             case 'B':
             default:
-                client = new BlockingClient(serverAddress);
-                invoker = new PacketInvoker();
+                invoker = new BaseInvoker(new BlockingClient(serverAddress));
         }
         invoker.setRpcHandleTimeout(bean.rpcTimeout);
-        return Pair.create(client, invoker);
+        invoker.setConnectTimeout(bean.connectTimeout);
+        invoker.setConnectRetryTimes(bean.connectRetryTimes);
+        invoker.setSleepBetweenRetryTime(bean.connectSleepBetweenRetry);
+
+
+        return invoker;
     }
 
 	/**
@@ -86,17 +84,12 @@ public class JsonRpcBuilder implements ServiceHandlerBuilder {
 	 */
 	@Override
 	public IServiceHandler build(RpcConfigBean bean, String completeUrl) throws Exception {
-	    Pair<IClient, RemoteInvoker> p = buildClient(bean, completeUrl);
+        BaseInvoker invoker = buildClient(bean, completeUrl);
+        // Try to connect now.
+        invoker.connect();
 
-		RpcClient cli = new RpcClient(p.a, p.b, new JsonConverter());
-		cli.setConnectTimeout(bean.connectTimeout);
-		cli.setConnectRetryTimes(bean.connectRetryTimes);
-		cli.setSleepBetweenRetryTime(bean.connectSleepBetweenRetry);
-
-		// Try to connect now.
-		cli.connect();
 		// Ready to return.
-		return new RpcClientAdapter(completeUrl, cli);
+        return new BlockingStub(invoker, CONV);
 	}
 
 }

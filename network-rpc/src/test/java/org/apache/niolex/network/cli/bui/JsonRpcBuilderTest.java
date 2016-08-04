@@ -17,22 +17,20 @@
  */
 package org.apache.niolex.network.cli.bui;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 
-import org.apache.niolex.commons.bean.Pair;
-import org.apache.niolex.network.IClient;
+import org.apache.niolex.commons.reflect.FieldUtil;
 import org.apache.niolex.network.cli.IServiceHandler;
 import org.apache.niolex.network.cli.conf.RpcConfigBean;
 import org.apache.niolex.network.client.BlockingClient;
 import org.apache.niolex.network.client.PacketClient;
 import org.apache.niolex.network.client.SocketClient;
 import org.apache.niolex.network.demo.json.DemoJsonRpcServer;
-import org.apache.niolex.network.rpc.PacketInvoker;
-import org.apache.niolex.network.rpc.RemoteInvoker;
-import org.apache.niolex.network.rpc.RpcClient;
-import org.apache.niolex.network.rpc.SingleInvoker;
+import org.apache.niolex.network.rpc.cli.BaseInvoker;
+import org.apache.niolex.network.rpc.cli.BlockingStub;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -60,35 +58,34 @@ public class JsonRpcBuilderTest {
 	    bean.clientType = "PacketClient";
 	    bean.rpcTimeout = 300;
         JsonRpcBuilder bui = new JsonRpcBuilder();
-        Pair<IClient,RemoteInvoker> pair = bui.buildClient(bean, "abc://localhost:8808/gogogo");
-        assertTrue(pair.a instanceof PacketClient);
-        assertTrue(pair.b instanceof PacketInvoker);
-        PacketInvoker pi = (PacketInvoker)pair.b;
+        BaseInvoker pi = bui.buildClient(bean, "abc://localhost:8808/gogogo");
         assertEquals(300, pi.getRpcHandleTimeout());
+        assertEquals("localhost/127.0.0.1:8808-0000", pi.getRemoteAddress());
+        assertTrue(FieldUtil.getValue(pi, "client") instanceof PacketClient);
 	}
 
 	@Test
 	public void testBuildClientB() throws Exception {
 	    RpcConfigBean bean = new RpcConfigBean("a");
 	    bean.clientType = "BlockingClient";
-	    bean.rpcTimeout = 300;
+        bean.rpcTimeout = 3002;
 	    JsonRpcBuilder bui = new JsonRpcBuilder();
-	    Pair<IClient,RemoteInvoker> pair = bui.buildClient(bean, "abc://localhost:8808/gogogo");
-	    assertTrue(pair.a instanceof BlockingClient);
-	    assertTrue(pair.b instanceof PacketInvoker);
-	    PacketInvoker pi = (PacketInvoker)pair.b;
-	    assertEquals(300, pi.getRpcHandleTimeout());
+        BaseInvoker pi = bui.buildClient(bean, "abc://localhost:8808/gogogo");
+        assertEquals(3002, pi.getRpcHandleTimeout());
+        assertEquals("localhost/127.0.0.1:8808-0000", pi.getRemoteAddress());
+        assertTrue(FieldUtil.getValue(pi, "client") instanceof BlockingClient);
 	}
 
 	@Test
 	public void testBuildClientS() throws Exception {
 	    RpcConfigBean bean = new RpcConfigBean("a");
 	    bean.clientType = "SocketClient";
-	    bean.rpcTimeout = 300;
+        bean.rpcTimeout = 3003;
 	    JsonRpcBuilder bui = new JsonRpcBuilder();
-	    Pair<IClient,RemoteInvoker> pair = bui.buildClient(bean, "abc://localhost:8808/gogogo");
-	    assertTrue(pair.a instanceof SocketClient);
-	    assertTrue(pair.b instanceof SingleInvoker);
+        BaseInvoker pi = bui.buildClient(bean, "abc://localhost:8808/gogogo");
+        assertEquals(30000, pi.getRpcHandleTimeout());
+        assertEquals("localhost/127.0.0.1:8808-0000", pi.getRemoteAddress());
+        assertTrue(FieldUtil.getValue(pi, "client") instanceof SocketClient);
 	}
 
 	/**
@@ -102,7 +99,7 @@ public class JsonRpcBuilderTest {
 		bean.connectTimeout = 5000;
 		bean.rpcTimeout = 100;
 		IServiceHandler cc = factory.build(bean, "abc://localhost:8808/gogogo");
-		((RpcClient)cc.getHandler()).stop();
+        ((BaseInvoker) ((BlockingStub) cc.getHandler()).getInvoker()).stop();
 	}
 
 	@Test
@@ -112,7 +109,7 @@ public class JsonRpcBuilderTest {
 		bean.connectTimeout = 345;
 		bean.rpcTimeout = 10000;
 		IServiceHandler cc = factory.build(bean, "abc://localhost:8808/gogogo");
-		((RpcClient)cc.getHandler()).stop();
+        ((BaseInvoker) ((BlockingStub) cc.getHandler()).getInvoker()).stop();
 	}
 
 }

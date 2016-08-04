@@ -21,7 +21,6 @@ import org.apache.niolex.commons.config.PropUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
  * All the default configurable properties value are configured here.
  * User can add a network-rpc.properties file to their classpath to change these values.
@@ -54,4 +53,5 @@ public abstract class Constants {
     public static final int CLIENT_RPC_INTERVAL_BT_RETRY = PropUtil.getInteger("rpcSleepBetweenRetry", 50);
 
     public static final String CLIENT_ENCODING = PropUtil.getProperty("Encoding", "utf-8");
+
 }

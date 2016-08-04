@@ -23,8 +23,8 @@ import java.util.List;
 
 import org.apache.niolex.commons.test.Check;
 import org.apache.niolex.network.client.PacketClient;
-import org.apache.niolex.network.rpc.PacketInvoker;
-import org.apache.niolex.network.rpc.RpcClient;
+import org.apache.niolex.network.rpc.cli.BaseInvoker;
+import org.apache.niolex.network.rpc.cli.BlockingStub;
 import org.apache.niolex.network.rpc.conv.JsonConverter;
 
 /**
@@ -43,8 +43,9 @@ public class DemoJsonRpcClient {
 	 */
 	public static void main(String[] args) throws Exception {
 		PacketClient c = new PacketClient(new InetSocketAddress("localhost", 8808));
-		RpcClient client = new RpcClient(c, new PacketInvoker(), new JsonConverter());
-		client.connect();
+        BaseInvoker invoker = new BaseInvoker(c);
+        invoker.connect();
+        BlockingStub client = new BlockingStub(invoker, new JsonConverter());
 
 		final RpcService ser = client.getService(RpcService.class);
 
@@ -68,7 +69,7 @@ public class DemoJsonRpcClient {
 		String s = ser.concat("Hello ", "Jiyun!");
 		System.out.println("Done..... " + s);
 		Check.isTrue(s.equals("Hello Jiyun!"));
-		client.stop();
+        invoker.stop();
 	}
 
 }

@@ -15,9 +15,11 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.niolex.network.rpc;
+package org.apache.niolex.network.demo.json;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -29,6 +31,10 @@ import org.apache.niolex.network.CoreRunner;
 import org.apache.niolex.network.client.PacketClient;
 import org.apache.niolex.network.demo.json.DemoJsonRpcServer;
 import org.apache.niolex.network.demo.json.RpcService;
+import org.apache.niolex.network.rpc.RpcException;
+import org.apache.niolex.network.rpc.cli.BaseInvoker;
+import org.apache.niolex.network.rpc.cli.BlockingStub;
+import org.apache.niolex.network.rpc.cli.RpcClientTest;
 import org.apache.niolex.network.rpc.conv.JsonConverter;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -41,21 +47,23 @@ import org.junit.Test;
  */
 public class JsonRpcClientTest {
 	private static RpcService ser;
-	private static RpcClient client;
+    private static BlockingStub client;
+    private static BaseInvoker invoker;
 
 	@BeforeClass
 	public static void up() throws IOException {
 		DemoJsonRpcServer.main(null);
 		PacketClient c = new PacketClient(new InetSocketAddress("localhost", 8808));
-        client = new RpcClient(c, new PacketInvoker(), new JsonConverter());
-        client.connect();
+        invoker = new BaseInvoker(c);
+        client = new BlockingStub(invoker, new JsonConverter());
+        invoker.connect();
 
         ser = client.getService(RpcService.class);
 	}
 
 	@AfterClass
 	public static void down() {
-		client.stop();
+        invoker.stop();
 		DemoJsonRpcServer.stop();
 	}
 	/**
@@ -65,13 +73,13 @@ public class JsonRpcClientTest {
 	public void testAddInferface() {
 		client.addInferface(getClass());
 		client.addInferface(RpcService.class);
-		client.setConnectTimeout(1234);
-		assertTrue(client.getConnStatus() == ConnStatus.CONNECTED);
+        invoker.setConnectTimeout(1234);
+        assertTrue(invoker.getConnStatus() == ConnStatus.CONNECTED);
 	}
 
 	@Test
     public void testIsValid() {
-	    assertTrue(client.isValid());
+        assertTrue(client.isReady());
 	}
 
 	/**
@@ -109,13 +117,13 @@ public class JsonRpcClientTest {
 	 */
 	@Test
 	public void testRetryConnect() throws Throwable {
-		client.setSleepBetweenRetryTime(200);
-		client.setConnectRetryTimes(4);
+        invoker.setSleepBetweenRetryTime(200);
+        invoker.setConnectRetryTimes(4);
 		DemoJsonRpcServer.stop();
 		Thread.sleep(CoreRunner.CO_SLEEP);
 		DemoJsonRpcServer.main(null);
 		Thread.sleep(10 * CoreRunner.CO_SLEEP);
-		assertTrue(client.getConnStatus() == ConnStatus.CONNECTED);
+        assertTrue(invoker.getConnStatus() == ConnStatus.CONNECTED);
 	}
 
 }

@@ -57,10 +57,10 @@ public class SocketClient extends BaseClient {
 	}
 
 	/**
-	 * Create a SocketClient with the Server Address
-	 * 
-	 * @param serverAddress the server address to connect to
-	 */
+     * Create a SocketClient with the specified server address.
+     * 
+     * @param serverAddress the server address to connect to
+     */
 	public SocketClient(InetSocketAddress serverAddress) {
 		super();
 		this.serverAddress = serverAddress;
