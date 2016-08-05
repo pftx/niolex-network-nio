@@ -30,7 +30,7 @@ import org.apache.niolex.network.client.PacketClient;
 import org.apache.niolex.network.client.SocketClient;
 import org.apache.niolex.network.demo.json.DemoJsonRpcServer;
 import org.apache.niolex.network.rpc.cli.BaseInvoker;
-import org.apache.niolex.network.rpc.cli.BlockingStub;
+import org.apache.niolex.network.rpc.cli.RpcStub;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -99,7 +99,7 @@ public class JsonRpcBuilderTest {
 		bean.connectTimeout = 5000;
 		bean.rpcTimeout = 100;
 		IServiceHandler cc = factory.build(bean, "abc://localhost:8808/gogogo");
-        ((BaseInvoker) ((BlockingStub) cc.getHandler()).getInvoker()).stop();
+        ((BaseInvoker) ((RpcStub) cc.getHandler()).getInvoker()).stop();
 	}
 
 	@Test
@@ -109,7 +109,7 @@ public class JsonRpcBuilderTest {
 		bean.connectTimeout = 345;
 		bean.rpcTimeout = 10000;
 		IServiceHandler cc = factory.build(bean, "abc://localhost:8808/gogogo");
-        ((BaseInvoker) ((BlockingStub) cc.getHandler()).getInvoker()).stop();
+        ((BaseInvoker) ((RpcStub) cc.getHandler()).getInvoker()).stop();
 	}
 
 }

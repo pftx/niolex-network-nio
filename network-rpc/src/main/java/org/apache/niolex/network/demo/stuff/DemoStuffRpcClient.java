@@ -23,7 +23,7 @@ import java.net.InetSocketAddress;
 import org.apache.niolex.commons.test.Check;
 import org.apache.niolex.network.client.PacketClient;
 import org.apache.niolex.network.rpc.cli.BaseInvoker;
-import org.apache.niolex.network.rpc.cli.BlockingStub;
+import org.apache.niolex.network.rpc.cli.RpcStub;
 import org.apache.niolex.network.rpc.conv.ProtoStuffConverter;
 
 /**
@@ -42,7 +42,7 @@ public class DemoStuffRpcClient {
         PacketClient c = new PacketClient(new InetSocketAddress("localhost", 8808));
         BaseInvoker invoker = new BaseInvoker(c);
         invoker.connect();
-        BlockingStub client = new BlockingStub(invoker, new ProtoStuffConverter());
+        RpcStub client = new RpcStub(invoker, new ProtoStuffConverter());
 
 		final RpcService service = client.getService(RpcService.class);
 		IntArray args = new IntArray();

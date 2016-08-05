@@ -31,7 +31,7 @@ import org.apache.niolex.commons.util.SystemUtil;
 import org.apache.niolex.network.client.PacketClient;
 import org.apache.niolex.network.demo.json.RpcService;
 import org.apache.niolex.network.rpc.cli.BaseInvoker;
-import org.apache.niolex.network.rpc.cli.BlockingStub;
+import org.apache.niolex.network.rpc.cli.RpcStub;
 import org.apache.niolex.network.rpc.conv.JsonConverter;
 
 /**
@@ -60,7 +60,7 @@ public class PacketRpcPress {
 			SHUFFLE_NUM = Integer.parseInt(args[2]);
 			ADDR = args[3];
         }
-        final BlockingStub cli = create();
+        final RpcStub cli = create();
 		for (int i = 0; i < 10; ++i) {
 			RpcService service = cli.getService(RpcService.class);
 			Stop s = stopWatch.start();
@@ -98,19 +98,19 @@ public class PacketRpcPress {
 		System.out.println("Done..... error = " + ERROR_CNT.cnt());
 	}
 
-    public static BlockingStub create() throws IOException {
+    public static RpcStub create() throws IOException {
 	    PacketClient c = new PacketClient(new InetSocketAddress(ADDR, 8808));
-        BlockingStub client = new BlockingStub(new BaseInvoker(c), new JsonConverter());
+        RpcStub client = new RpcStub(new BaseInvoker(c), new JsonConverter());
 		client.connect();
 		return client;
 	}
 
 	public static class Rpc implements Runnable {
-        BlockingStub cli;
+        RpcStub cli;
 		RpcService service;
 		String a = "hello ", b = "world!";
 
-        public Rpc(BlockingStub cli, String a, String b) {
+        public Rpc(RpcStub cli, String a, String b) {
 			super();
 			this.cli = cli;
 			this.service = cli.getService(RpcService.class);

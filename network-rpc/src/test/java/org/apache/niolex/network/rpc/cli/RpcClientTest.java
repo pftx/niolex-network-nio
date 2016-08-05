@@ -47,7 +47,7 @@ public class RpcClientTest {
 
 	/**
      * Test method for
-     * {@link org.apache.niolex.network.rpc.BlockingStub#invoke(java.lang.Object, java.lang.reflect.Method, java.lang.Object[])}
+     * {@link org.apache.niolex.network.rpc.RpcStub#invoke(java.lang.Object, java.lang.reflect.Method, java.lang.Object[])}
      * .
      * 
      * @throws Throwable
@@ -55,7 +55,7 @@ public class RpcClientTest {
 	@Test(expected = RpcException.class)
 	public void testInvokeNotConnected() throws Throwable {
         BaseInvoker pc = new BaseInvoker(new PacketClient());
-        BlockingStub rr = new BlockingStub(pc, new JsonConverter());
+        RpcStub rr = new RpcStub(pc, new JsonConverter());
 		rr.addInferface(RpcService.class);
         pc.setServerAddress(new InetSocketAddress("localhost", 8808));
         assertFalse(pc.isReady());
@@ -72,7 +72,7 @@ public class RpcClientTest {
 
 	/**
      * Test method for
-     * {@link org.apache.niolex.network.rpc.BlockingStub#invoke(java.lang.Object, java.lang.reflect.Method, java.lang.Object[])}
+     * {@link org.apache.niolex.network.rpc.RpcStub#invoke(java.lang.Object, java.lang.reflect.Method, java.lang.Object[])}
      * .
      * 
      * @throws Throwable
@@ -80,7 +80,7 @@ public class RpcClientTest {
 	@Test(expected = RpcException.class)
 	public void testInvokeTimeout() throws Throwable {
         BaseInvoker in = mock(BaseInvoker.class);
-        BlockingStub rr = new BlockingStub(in, new JsonConverter());
+        RpcStub rr = new RpcStub(in, new JsonConverter());
 	    rr.addInferface(RpcService.class);
 	    Method method = getFirstMethod(RpcService.class, "add");
 	    try {
@@ -93,7 +93,7 @@ public class RpcClientTest {
 
 	/**
      * Test method for
-     * {@link org.apache.niolex.network.rpc.BlockingStub#invoke(java.lang.Object, java.lang.reflect.Method, java.lang.Object[])}
+     * {@link org.apache.niolex.network.rpc.RpcStub#invoke(java.lang.Object, java.lang.reflect.Method, java.lang.Object[])}
      * .
      * 
      * @throws Throwable
@@ -101,7 +101,7 @@ public class RpcClientTest {
 	@Test(expected = RpcException.class)
 	public void testInvokeClosed() throws Throwable {
         BaseInvoker pc = new BaseInvoker(new PacketClient());
-        BlockingStub rr = new BlockingStub(pc, new JsonConverter());
+        RpcStub rr = new RpcStub(pc, new JsonConverter());
 		rr.addInferface(RpcService.class);
 		Method method = getFirstMethod(RpcService.class, "add");
 		try {

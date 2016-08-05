@@ -26,7 +26,7 @@ import org.apache.niolex.network.cli.init.ServiceHandlerBuilder;
 import org.apache.niolex.network.client.BlockingClient;
 import org.apache.niolex.network.client.PacketClient;
 import org.apache.niolex.network.rpc.cli.BaseInvoker;
-import org.apache.niolex.network.rpc.cli.BlockingStub;
+import org.apache.niolex.network.rpc.cli.RpcStub;
 import org.apache.niolex.network.rpc.cli.SingleInvoker;
 import org.apache.niolex.network.rpc.conv.JsonConverter;
 
@@ -89,7 +89,7 @@ public class JsonRpcBuilder implements ServiceHandlerBuilder {
         invoker.connect();
 
 		// Ready to return.
-        return new BlockingStub(invoker, CONV);
+        return new RpcStub(invoker, CONV);
 	}
 
 }

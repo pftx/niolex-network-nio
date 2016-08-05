@@ -22,7 +22,7 @@ import static org.junit.Assert.assertEquals;
 import java.io.IOException;
 
 import org.apache.niolex.network.press.StuffPress;
-import org.apache.niolex.network.rpc.cli.BlockingStub;
+import org.apache.niolex.network.rpc.cli.RpcStub;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -56,7 +56,7 @@ public class RpcServiceTest {
 	 */
 	@Test
 	public void testAdd() throws IOException {
-        BlockingStub scli = StuffPress.create();
+        RpcStub scli = StuffPress.create();
 		RpcService r = scli.getService(RpcService.class);
 		IntArray aa = new IntArray();
 		aa.arr = new int[] {3, 4, 5, 6, 7, 8, 9};
@@ -71,7 +71,7 @@ public class RpcServiceTest {
 	 */
 	@Test
 	public void testSize() throws IOException {
-        BlockingStub scli = StuffPress.create();
+        RpcStub scli = StuffPress.create();
 		RpcService r = scli.getService(RpcService.class);
 		StringArray sarr = new StringArray();
 		sarr.arr = new String[] {"Hello ", " world.", " God."};

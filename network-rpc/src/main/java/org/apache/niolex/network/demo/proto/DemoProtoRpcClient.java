@@ -26,7 +26,7 @@ import org.apache.niolex.network.demo.proto.PersonProtos.PhoneNumber;
 import org.apache.niolex.network.demo.proto.PersonProtos.PhoneType;
 import org.apache.niolex.network.demo.proto.PersonProtos.Work;
 import org.apache.niolex.network.rpc.cli.BaseInvoker;
-import org.apache.niolex.network.rpc.cli.BlockingStub;
+import org.apache.niolex.network.rpc.cli.RpcStub;
 import org.apache.niolex.network.rpc.conv.ProtobufConverter;
 
 /**
@@ -66,7 +66,7 @@ public class DemoProtoRpcClient {
 		PacketClient c = new PacketClient(new InetSocketAddress("localhost", 8808));
         BaseInvoker invoker = new BaseInvoker(c);
         invoker.connect();
-        BlockingStub client = new BlockingStub(invoker, new ProtobufConverter());
+        RpcStub client = new RpcStub(invoker, new ProtobufConverter());
 
 		final PersonService ser = client.getService(PersonService.class);
 		ser.clear();

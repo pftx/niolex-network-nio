@@ -33,7 +33,7 @@ import org.apache.niolex.network.demo.json.DemoJsonRpcServer;
 import org.apache.niolex.network.demo.json.RpcService;
 import org.apache.niolex.network.rpc.RpcException;
 import org.apache.niolex.network.rpc.cli.BaseInvoker;
-import org.apache.niolex.network.rpc.cli.BlockingStub;
+import org.apache.niolex.network.rpc.cli.RpcStub;
 import org.apache.niolex.network.rpc.cli.RpcClientTest;
 import org.apache.niolex.network.rpc.conv.JsonConverter;
 import org.junit.AfterClass;
@@ -47,7 +47,7 @@ import org.junit.Test;
  */
 public class JsonRpcClientTest {
 	private static RpcService ser;
-    private static BlockingStub client;
+    private static RpcStub client;
     private static BaseInvoker invoker;
 
 	@BeforeClass
@@ -55,7 +55,7 @@ public class JsonRpcClientTest {
 		DemoJsonRpcServer.main(null);
 		PacketClient c = new PacketClient(new InetSocketAddress("localhost", 8808));
         invoker = new BaseInvoker(c);
-        client = new BlockingStub(invoker, new JsonConverter());
+        client = new RpcStub(invoker, new JsonConverter());
         invoker.connect();
 
         ser = client.getService(RpcService.class);

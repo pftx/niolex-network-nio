@@ -31,7 +31,7 @@ import org.apache.niolex.network.cli.conf.RpcConfigBean;
 import org.apache.niolex.network.cli.conf.RpcConfiger;
 import org.apache.niolex.network.cli.handler.IServiceHandler;
 import org.apache.niolex.network.rpc.anno.RpcConfig;
-import org.apache.niolex.network.rpc.cli.BlockingStub;
+import org.apache.niolex.network.rpc.cli.RpcStub;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -98,8 +98,8 @@ public class RpcServiceFactory {
     	List<IServiceHandler> list = rh.getHandlers();
     	for (IServiceHandler is : list) {
     		InvocationHandler h = is.getHandler();
-            if (h instanceof BlockingStub) {
-                BlockingStub rpc = (BlockingStub) h;
+            if (h instanceof RpcStub) {
+                RpcStub rpc = (RpcStub) h;
     			rpc.addInferface(c);
     		}
     	}

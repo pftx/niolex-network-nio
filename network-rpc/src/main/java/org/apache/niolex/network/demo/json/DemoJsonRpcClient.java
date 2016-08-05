@@ -24,7 +24,7 @@ import java.util.List;
 import org.apache.niolex.commons.test.Check;
 import org.apache.niolex.network.client.PacketClient;
 import org.apache.niolex.network.rpc.cli.BaseInvoker;
-import org.apache.niolex.network.rpc.cli.BlockingStub;
+import org.apache.niolex.network.rpc.cli.RpcStub;
 import org.apache.niolex.network.rpc.conv.JsonConverter;
 
 /**
@@ -45,7 +45,7 @@ public class DemoJsonRpcClient {
 		PacketClient c = new PacketClient(new InetSocketAddress("localhost", 8808));
         BaseInvoker invoker = new BaseInvoker(c);
         invoker.connect();
-        BlockingStub client = new BlockingStub(invoker, new JsonConverter());
+        RpcStub client = new RpcStub(invoker, new JsonConverter());
 
 		final RpcService ser = client.getService(RpcService.class);
 
