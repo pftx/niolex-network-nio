@@ -21,7 +21,7 @@ import java.lang.reflect.Method;
 
 import org.apache.niolex.network.IPacketWriter;
 import org.apache.niolex.network.PacketData;
-import org.apache.niolex.network.rpc.RpcPacketHandler;
+import org.apache.niolex.network.rpc.svr.RpcPacketHandler;
 
 /**
  * The server side intercepter interface.

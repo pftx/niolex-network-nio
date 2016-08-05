@@ -15,7 +15,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.niolex.network.rpc;
+package org.apache.niolex.network.rpc.svr;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
@@ -29,7 +29,10 @@ import org.apache.niolex.network.IPacketWriter;
 import org.apache.niolex.network.PacketData;
 import org.apache.niolex.network.demo.json.RpcService;
 import org.apache.niolex.network.demo.json.RpcServiceImpl;
+import org.apache.niolex.network.rpc.IConverter;
+import org.apache.niolex.network.rpc.RpcException;
 import org.apache.niolex.network.rpc.conv.JsonConverter;
+import org.apache.niolex.network.rpc.svr.RpcPacketHandler;
 import org.apache.niolex.network.rpc.util.RpcUtil;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -43,7 +46,7 @@ public class RpcPacketHandlerTest {
 
 	/**
 	 * Test method for
-	 * {@link org.apache.niolex.network.rpc.RpcPacketHandler#handlePacket(org.apache.niolex.network.PacketData, org.apache.niolex.network.IPacketWriter)}
+	 * {@link org.apache.niolex.network.rpc.svr.RpcPacketHandler#handlePacket(org.apache.niolex.network.PacketData, org.apache.niolex.network.IPacketWriter)}
 	 * .
 	 */
 	@Test
@@ -73,7 +76,7 @@ public class RpcPacketHandlerTest {
 
 	/**
 	 * Test method for
-	 * {@link org.apache.niolex.network.rpc.RpcPacketHandler#handleClose(org.apache.niolex.network.IPacketWriter)}.
+	 * {@link org.apache.niolex.network.rpc.svr.RpcPacketHandler#handleClose(org.apache.niolex.network.IPacketWriter)}.
 	 */
 	@Test
 	public void setConfigs() {
@@ -89,7 +92,7 @@ public class RpcPacketHandlerTest {
 
 	/**
 	 * Test method for
-	 * {@link org.apache.niolex.network.rpc.RpcPacketHandler#handleClose(org.apache.niolex.network.IPacketWriter)}.
+	 * {@link org.apache.niolex.network.rpc.svr.RpcPacketHandler#handleClose(org.apache.niolex.network.IPacketWriter)}.
 	 */
 	@Test
 	public void testHandleClose() {

@@ -15,10 +15,11 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.niolex.network.rpc;
+package org.apache.niolex.network.rpc.svr;
 
 import static org.junit.Assert.*;
 
+import org.apache.niolex.network.rpc.svr.ConfigItem;
 import org.junit.Test;
 
 /**
@@ -29,7 +30,7 @@ import org.junit.Test;
 public class ConfigItemTest {
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.rpc.ConfigItem#ConfigItem()}.
+	 * Test method for {@link org.apache.niolex.network.rpc.svr.ConfigItem#ConfigItem()}.
 	 */
 	@Test
 	public void testConfigItem() {
@@ -39,7 +40,7 @@ public class ConfigItemTest {
 	}
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.rpc.ConfigItem#getInterface()}.
+	 * Test method for {@link org.apache.niolex.network.rpc.svr.ConfigItem#getInterface()}.
 	 */
 	@Test
 	public void testGetInterface() {
@@ -48,7 +49,7 @@ public class ConfigItemTest {
 	}
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.rpc.ConfigItem#getTarget()}.
+	 * Test method for {@link org.apache.niolex.network.rpc.svr.ConfigItem#getTarget()}.
 	 */
 	@Test
 	public void testGetTarget() {

@@ -81,7 +81,6 @@ public class RpcException extends RuntimeException {
 	 */
 	private Type type;
 
-
 	/**
 	 * Default constructor, used by Serial Tools.
 	 */

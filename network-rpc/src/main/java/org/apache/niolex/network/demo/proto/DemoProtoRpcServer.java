@@ -19,9 +19,9 @@ package org.apache.niolex.network.demo.proto;
 
 import java.io.IOException;
 
-import org.apache.niolex.network.rpc.ConfigItem;
-import org.apache.niolex.network.rpc.RpcPacketHandler;
 import org.apache.niolex.network.rpc.conv.ProtobufConverter;
+import org.apache.niolex.network.rpc.svr.ConfigItem;
+import org.apache.niolex.network.rpc.svr.RpcPacketHandler;
 import org.apache.niolex.network.server.MultiNioServer;
 import org.apache.niolex.network.server.NioServer;
 

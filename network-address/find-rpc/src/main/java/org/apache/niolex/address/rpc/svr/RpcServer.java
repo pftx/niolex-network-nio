@@ -23,9 +23,9 @@ import org.apache.niolex.address.rpc.AddressUtil;
 import org.apache.niolex.address.rpc.ConverterCenter;
 import org.apache.niolex.address.server.Producer;
 import org.apache.niolex.commons.util.SystemUtil;
-import org.apache.niolex.network.rpc.ConfigItem;
 import org.apache.niolex.network.rpc.IConverter;
-import org.apache.niolex.network.rpc.RpcPacketHandler;
+import org.apache.niolex.network.rpc.svr.ConfigItem;
+import org.apache.niolex.network.rpc.svr.RpcPacketHandler;
 import org.apache.niolex.network.server.MultiNioServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -167,7 +167,7 @@ public class RpcServer {
 
     /**
      * @return current handler queue size
-     * @see org.apache.niolex.network.rpc.RpcPacketHandler#getQueueSize()
+     * @see org.apache.niolex.network.rpc.svr.RpcPacketHandler#getQueueSize()
      */
     public int getQueueSize() {
         return handler == null ? 0 : handler.getQueueSize();

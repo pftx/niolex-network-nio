@@ -19,7 +19,7 @@ package org.apache.niolex.network.rpc.internal;
 
 import java.lang.reflect.Method;
 
-import org.apache.niolex.network.rpc.RpcPacketHandler;
+import org.apache.niolex.network.rpc.svr.RpcPacketHandler;
 
 /**
  * Rpc execute item, internal usage.

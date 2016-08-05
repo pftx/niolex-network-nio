@@ -30,8 +30,10 @@ import org.apache.niolex.network.cli.RetryHandler;
  * For any RPC framework, there will be a client side stub managing connections to the real
  * server, and transmit data between client and server. Application programmers will need to
  * wrap the real client stub by a wrapper class which implement this interface, and then use
- * {@link RetryHandler} and {@link PoolHandler} to manage multiple clients.
+ * {@link RetryHandler} or {@link PoolHandler} to manage multiple clients.
  *
+ * @see org.apache.niolex.network.cli.PoolHandler
+ * @see org.apache.niolex.network.cli.RetryHandler
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0, Date: 2012-6-3
  */

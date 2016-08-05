@@ -36,10 +36,17 @@ import java.lang.annotation.Target;
 public @interface RpcMethod {
 
 	/**
-	 * This code need to be unique cross one server.
-	 *
-	 * @return The code to map this method to.
-	 */
+     * This code need to be unique cross one server.
+     *
+     * @return the code to map this method to.
+     */
 	short value();
+
+    /**
+     * Whether this is a one way Rpc method.
+     * 
+     * @return false by default.
+     */
+    boolean oneWay() default false;
 
 }

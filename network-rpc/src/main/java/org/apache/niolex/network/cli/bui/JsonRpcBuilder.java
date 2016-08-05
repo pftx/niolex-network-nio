@@ -74,7 +74,6 @@ public class JsonRpcBuilder implements ServiceHandlerBuilder {
         invoker.setConnectRetryTimes(bean.connectRetryTimes);
         invoker.setSleepBetweenRetryTime(bean.connectSleepBetweenRetry);
 
-
         return invoker;
     }
 
