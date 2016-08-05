@@ -61,7 +61,6 @@ public class RpcPacketHandler implements IPacketHandler {
 	// The data translator.
 	private IConverter converter;
 
-
 	/**
 	 * Create a RpcPacketHandler with the default pool size.
 	 */
@@ -104,7 +103,7 @@ public class RpcPacketHandler implements IPacketHandler {
 		// Heart beat will be handled in FastCore, so we will not encounter it here.
 		RpcExecuteItem ei = executeMap.get(sc.getCode());
 		if (ei != null) {
-			RpcExecute re = new RpcExecute(ei.getTarget(), ei.getMethod(), sc, wt);
+            RpcExecute re = new RpcExecute(ei, sc, wt);
 			queueSize.incrementAndGet();
 			tPool.execute(re);
 		} else {
@@ -121,23 +120,20 @@ public class RpcPacketHandler implements IPacketHandler {
 	 * @version 1.0.0, Date: 2012-6-1
 	 */
 	private class RpcExecute implements Runnable {
-		private Object host;
-		private Method method;
-		private PacketData sc;
-		private IPacketWriter wt;
+        private final RpcExecuteItem rei;
+        private final PacketData sc;
+        private final IPacketWriter wt;
 
 		/**
-		 * The only constructor.
-		 *
-		 * @param host the host object for the method to be invoked
-		 * @param method the method to be invoked
-		 * @param sc the parameter packet
-		 * @param wt the result packet writer
-		 */
-		public RpcExecute(Object host, Method method, PacketData sc, IPacketWriter wt) {
+         * The only constructor.
+         *
+         * @param rei the method information to be invoked
+         * @param sc the parameter packet
+         * @param wt the result packet writer
+         */
+        public RpcExecute(RpcExecuteItem rei, PacketData sc, IPacketWriter wt) {
 			super();
-			this.host = host;
-			this.method = method;
+            this.rei = rei;
 			this.sc = sc;
 			this.wt = wt;
 		}
@@ -151,6 +147,7 @@ public class RpcPacketHandler implements IPacketHandler {
 			try {
 				RpcException rep = null;
 				Object[] args = null;
+                Method method = rei.getMethod();
 				
 				try {
 				    Type[] generic = method.getGenericParameterTypes();
@@ -158,22 +155,26 @@ public class RpcPacketHandler implements IPacketHandler {
 				        args = converter.prepareParams(sc.getData(), generic);
 				    }
 				} catch (Exception e1) {
-				    rep = new RpcException("Error occured when prepare params.",
-				            RpcException.Type.ERROR_PARSE_PARAMS, e1);
-				    handleReturn(sc, wt, rep, 1);
+                    if (!rei.isOneWay()) {
+                        rep = new RpcException("Error occured when prepare params.", RpcException.Type.ERROR_PARSE_PARAMS, e1);
+                        handleReturn(sc, wt, rep, 1);
+                    }
 				    return;
 				}
 				
 				try {
-				    Object ret = method.invoke(host, args);
-				    handleReturn(sc, wt, ret, 0);
+                    Object ret = method.invoke(rei.getTarget(), args);
+                    if (!rei.isOneWay()) {
+                        handleReturn(sc, wt, ret, 0);
+                    }
 				} catch (Exception e1) {
-				    rep = new RpcException("Error occured when invoke method.",
-				            RpcException.Type.ERROR_INVOKE, e1);
-				    handleReturn(sc, wt, rep, 1);
+                    if (!rei.isOneWay()) {
+                        rep = new RpcException("Error occured when invoke method.", RpcException.Type.ERROR_INVOKE, e1);
+                        handleReturn(sc, wt, rep, 1);
+                    }
 				}
 			} finally {
-				LOG.debug("Packet handled. key {}, queue size {}.", RpcUtil.generateKey(sc),
+                LOG.debug("Packet handled. key {}, queue size {}.", sc.descriptor(),
 						queueSize.decrementAndGet());
 			}
 		}
@@ -263,9 +264,7 @@ public class RpcPacketHandler implements IPacketHandler {
         for (Method m : methods) {
             if (m.isAnnotationPresent(RpcMethod.class)) {
                 RpcMethod rp = m.getAnnotation(RpcMethod.class);
-                RpcExecuteItem rei = new RpcExecuteItem();
-                rei.setMethod(m);
-                rei.setTarget(target);
+                RpcExecuteItem rei = new RpcExecuteItem(rp.value(), rp.oneWay(), m, target);
                 rei = executeMap.put(rp.value(), rei);
                 if (rei != null) {
                     LOG.warn("Duplicate configuration for code: {}, old method: {}, new method: {}.",

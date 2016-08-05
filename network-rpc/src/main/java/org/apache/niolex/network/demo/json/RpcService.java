@@ -42,4 +42,7 @@ public interface RpcService {
 	public String concat(String a, String b);
 
 	public void testMe();
+
+    @RpcMethod(value = 18, oneWay = true)
+    void tellYou(String s);
 }

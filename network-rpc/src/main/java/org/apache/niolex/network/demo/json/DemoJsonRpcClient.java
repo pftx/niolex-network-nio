@@ -28,7 +28,7 @@ import org.apache.niolex.network.rpc.cli.RpcStub;
 import org.apache.niolex.network.rpc.conv.JsonConverter;
 
 /**
- * Demo client
+ * Demo client using PacketClient and BaseInvoker.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0, Date: 2012-6-2
@@ -69,6 +69,8 @@ public class DemoJsonRpcClient {
 		String s = ser.concat("Hello ", "Jiyun!");
 		System.out.println("Done..... " + s);
 		Check.isTrue(s.equals("Hello Jiyun!"));
+
+        ser.tellYou("DemoJsonRpcClient done, we will stop.");
         invoker.stop();
 	}
 

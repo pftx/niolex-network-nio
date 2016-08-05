@@ -135,7 +135,7 @@ public class RpcStub implements IServiceHandler {
                 arr = converter.serializeParams(args);
             }
             // 2. Create PacketData
-            PacketData reqData = new PacketData(rei.getMethodCode(), arr);
+            PacketData reqData = new PacketData(rei.getCode(), arr);
             // 3. Generate serial number
             serialPacket(reqData);
 

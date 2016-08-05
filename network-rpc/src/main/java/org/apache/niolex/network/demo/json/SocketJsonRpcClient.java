@@ -88,6 +88,7 @@ public class SocketJsonRpcClient {
         System.out.println("rps => " + (SIZE * 3000 / t) + ", Max " + maxin + ", Avg " + (t / (SIZE * 3)));
         System.out.println("Done..... " + err);
 
+        ser.tellYou("SocketJsonRpcClient done, we will stop. Err CNT = " + err);
         Check.eq(0, err, "Error count not zero.");
         invoker.stop();
     }

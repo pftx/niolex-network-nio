@@ -27,16 +27,16 @@ import org.apache.niolex.network.rpc.anno.RpcMethod;
  */
 public interface RpcService {
 
-	@RpcMethod(14)
+    @RpcMethod(2)
 	public Integer add(IntArray args);
 
-	@RpcMethod(15)
+    @RpcMethod(3)
 	public Integer size(StringArray arg);
 
-	@RpcMethod(16)
+    @RpcMethod(4)
 	public String throwEx();
 
-	@RpcMethod(17)
+    @RpcMethod(5)
 	public String concat(StringArray arg);
 
 	public void testMe();

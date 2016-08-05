@@ -82,4 +82,14 @@ public class RpcServiceImpl implements RpcService {
 		System.out.println("TestMe called at " + DateTimeUtil.formatDate2DateTimeStr());
 	}
 
+    /**
+     * This is the override of super method.
+     * 
+     * @see org.apache.niolex.network.demo.json.RpcService#tellYou(java.lang.String)
+     */
+    @Override
+    public void tellYou(String s) {
+        System.out.println(DateTimeUtil.formatDate2DateTimeStr() + " X " + s);
+    }
+
 }

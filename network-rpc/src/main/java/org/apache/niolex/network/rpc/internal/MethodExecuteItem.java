@@ -18,27 +18,42 @@
 package org.apache.niolex.network.rpc.internal;
 
 /**
+ * Store method execution information.
+ * 
  * @author <a href="mailto:xiejiyun@foxmail.com">Xie, Jiyun</a>
  * @version 0.6.1
  * @since Aug 5, 2016
  */
 public class MethodExecuteItem {
 
-    private final short methodCode;
+    /**
+     * The Rpc code assigned to this method.
+     */
+    private final short code;
+
+    /**
+     * Whether this is a one way method.
+     */
     private final boolean isOneWay;
 
-    public MethodExecuteItem(short methodCode, boolean isOneWay) {
+    /**
+     * Create a new method execute item.
+     * 
+     * @param code the method execution code
+     * @param isOneWay whether it's a one way method
+     */
+    public MethodExecuteItem(short code, boolean isOneWay) {
         super();
-        this.methodCode = methodCode;
+        this.code = code;
         this.isOneWay = isOneWay;
-    }
-
-    public short getMethodCode() {
-        return methodCode;
     }
 
     public boolean isOneWay() {
         return isOneWay;
+    }
+
+    public short getCode() {
+        return code;
     }
 
 }

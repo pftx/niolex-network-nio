@@ -26,7 +26,7 @@ import org.apache.niolex.network.PacketData;
 import org.apache.niolex.network.rpc.RpcException;
 
 /**
- * Common utils for Rpc.
+ * Common utilities for Rpc.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0, Date: 2012-6-1
