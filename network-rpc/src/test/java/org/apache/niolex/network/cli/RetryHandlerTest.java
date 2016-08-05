@@ -30,6 +30,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.niolex.commons.reflect.FieldUtil;
 import org.apache.niolex.commons.reflect.MethodUtil;
+import org.apache.niolex.network.cli.handler.IServiceHandler;
+import org.apache.niolex.network.cli.handler.RpcServiceHandler;
 import org.apache.niolex.network.rpc.RpcException;
 import org.junit.Before;
 import org.junit.Test;

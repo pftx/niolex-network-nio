@@ -15,7 +15,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.niolex.network.cli;
+package org.apache.niolex.network.cli.handler;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
@@ -25,6 +25,8 @@ import java.util.List;
 
 import org.apache.niolex.commons.concurrent.ThreadUtil;
 import org.apache.niolex.commons.reflect.FieldUtil;
+import org.apache.niolex.network.cli.handler.IServiceHandler;
+import org.apache.niolex.network.cli.handler.RpcServiceHandler;
 import org.junit.Assert;
 import org.junit.Test;
 

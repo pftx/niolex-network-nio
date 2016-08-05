@@ -34,6 +34,7 @@ import org.apache.niolex.commons.reflect.ItemNotFoundException;
 import org.apache.niolex.commons.reflect.MethodUtil;
 import org.apache.niolex.commons.util.Runner;
 import org.apache.niolex.commons.util.SystemUtil;
+import org.apache.niolex.network.cli.handler.IServiceHandler;
 import org.apache.niolex.network.rpc.RpcException;
 import org.junit.Before;
 import org.junit.Test;

@@ -19,9 +19,9 @@ package org.apache.niolex.network.cli.init;
 
 import static org.mockito.Mockito.*;
 
-import org.apache.niolex.network.cli.IServiceHandler;
 import org.apache.niolex.network.cli.RetryHandler;
 import org.apache.niolex.network.cli.conf.RpcConfigBean;
+import org.apache.niolex.network.cli.handler.IServiceHandler;
 import org.apache.niolex.network.cli.init.ServiceHandlerBuilder;
 import org.apache.niolex.network.cli.init.ServiceHandlerFactory;
 import org.apache.niolex.network.cli.init.RpcInitUtil;

@@ -22,6 +22,7 @@ import static org.mockito.Mockito.*;
 
 import java.util.List;
 
+import org.apache.niolex.network.cli.handler.IServiceHandler;
 import org.junit.Test;
 
 import com.google.common.collect.Lists;

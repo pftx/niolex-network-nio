@@ -26,6 +26,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.niolex.commons.test.Check;
 import org.apache.niolex.commons.util.SystemUtil;
+import org.apache.niolex.network.cli.handler.IServiceHandler;
 import org.apache.niolex.network.rpc.RpcException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

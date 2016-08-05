@@ -15,10 +15,13 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.niolex.network.cli;
+package org.apache.niolex.network.cli.handler;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
+
+import org.apache.niolex.network.cli.PoolHandler;
+import org.apache.niolex.network.cli.RetryHandler;
 
 /**
  * The interface for {@link RetryHandler} and {@link PoolHandler} to use, this interface manage

@@ -15,7 +15,9 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.niolex.network.cli;
+package org.apache.niolex.network.cli.context;
+
+import org.apache.niolex.network.cli.LogContext;
 
 /**
  * Store the log context in thread local.

@@ -23,8 +23,8 @@ import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 
 import org.apache.niolex.commons.reflect.FieldUtil;
-import org.apache.niolex.network.cli.IServiceHandler;
 import org.apache.niolex.network.cli.conf.RpcConfigBean;
+import org.apache.niolex.network.cli.handler.IServiceHandler;
 import org.apache.niolex.network.client.BlockingClient;
 import org.apache.niolex.network.client.PacketClient;
 import org.apache.niolex.network.client.SocketClient;

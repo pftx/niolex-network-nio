@@ -17,8 +17,8 @@
  */
 package org.apache.niolex.network.cli.init;
 
-import org.apache.niolex.network.cli.IServiceHandler;
 import org.apache.niolex.network.cli.conf.RpcConfigBean;
+import org.apache.niolex.network.cli.handler.IServiceHandler;
 
 /**
  * Create the service handler from the complete connection Url and config bean.

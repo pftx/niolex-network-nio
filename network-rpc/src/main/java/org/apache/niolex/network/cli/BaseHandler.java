@@ -20,6 +20,7 @@ package org.apache.niolex.network.cli;
 import java.io.IOException;
 import java.lang.reflect.Method;
 
+import org.apache.niolex.network.cli.handler.IServiceHandler;
 import org.apache.niolex.network.rpc.RpcException;
 
 /**

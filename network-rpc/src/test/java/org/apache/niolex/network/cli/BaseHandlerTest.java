@@ -26,6 +26,7 @@ import java.lang.reflect.Method;
 import java.util.concurrent.TimeoutException;
 
 import org.apache.niolex.commons.reflect.MethodUtil;
+import org.apache.niolex.network.cli.handler.IServiceHandler;
 import org.apache.niolex.network.rpc.RpcException;
 import org.junit.BeforeClass;
 import org.junit.Test;
