@@ -24,7 +24,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.niolex.commons.concurrent.ConcurrentUtil;
 import org.apache.niolex.commons.util.Runner;
-import org.apache.niolex.network.cli.handler.A;
 import org.apache.niolex.network.cli.handler.RpcServiceHandler;
 import org.junit.Assert;
 import org.junit.Test;
@@ -40,14 +39,14 @@ public class PoolHandlerBalanceTest {
 
     public void setup1() throws Throwable {
         List<RpcServiceHandler> listHandlers = new ArrayList<RpcServiceHandler>();
-        listHandlers.add(new RpcServiceHandler("1", new A("1"), 20, true));
-        listHandlers.add(new RpcServiceHandler("2", new A("2"), 28, true));
-        listHandlers.add(new RpcServiceHandler("3", new A("3"), 17, true));
-        listHandlers.add(new RpcServiceHandler("4", new A("4"), 5000, true));
-        listHandlers.add(new RpcServiceHandler("5", new A("5"), 20, true));
-        listHandlers.add(new RpcServiceHandler("6", new A("6"), 28, true));
-        listHandlers.add(new RpcServiceHandler("7", new A("7"), 17, true));
-        listHandlers.add(new RpcServiceHandler("8", new A("8"), 5000, true));
+        listHandlers.add(new RpcServiceHandler("1", new TestHandler("1"), 20, true));
+        listHandlers.add(new RpcServiceHandler("2", new TestHandler("2"), 28, true));
+        listHandlers.add(new RpcServiceHandler("3", new TestHandler("3"), 17, true));
+        listHandlers.add(new RpcServiceHandler("4", new TestHandler("4"), 5000, true));
+        listHandlers.add(new RpcServiceHandler("5", new TestHandler("5"), 20, true));
+        listHandlers.add(new RpcServiceHandler("6", new TestHandler("6"), 28, true));
+        listHandlers.add(new RpcServiceHandler("7", new TestHandler("7"), 17, true));
+        listHandlers.add(new RpcServiceHandler("8", new TestHandler("8"), 5000, true));
         a = new PoolHandler<RpcServiceHandler>(listHandlers, 2);
         listHandlers.clear();
         a.logDebug = false;
@@ -55,16 +54,16 @@ public class PoolHandlerBalanceTest {
 
     public void setup2() throws Throwable {
         List<RpcServiceHandler> listHandlers = new ArrayList<RpcServiceHandler>();
-        listHandlers.add(new RpcServiceHandler("1", new A("1"), 20, true));
-        listHandlers.add(new RpcServiceHandler("2", new A("2"), 28, true));
-        listHandlers.add(new RpcServiceHandler("3", new A("3"), 17, true));
-        listHandlers.add(new RpcServiceHandler("4", new A("4"), 5000, true));
-        listHandlers.add(new RpcServiceHandler("5", new A("5"), 20, true));
-        listHandlers.add(new RpcServiceHandler("6", new A("6"), 28, true));
-        listHandlers.add(new RpcServiceHandler("7", new A("7"), 17, true));
-        listHandlers.add(new RpcServiceHandler("8", new A("8"), 5000, true));
-        listHandlers.add(new RpcServiceHandler("9", new A("9"), 10000, false));
-        listHandlers.add(new RpcServiceHandler("0", new A("0"), 10000, false));
+        listHandlers.add(new RpcServiceHandler("1", new TestHandler("1"), 20, true));
+        listHandlers.add(new RpcServiceHandler("2", new TestHandler("2"), 28, true));
+        listHandlers.add(new RpcServiceHandler("3", new TestHandler("3"), 17, true));
+        listHandlers.add(new RpcServiceHandler("4", new TestHandler("4"), 5000, true));
+        listHandlers.add(new RpcServiceHandler("5", new TestHandler("5"), 20, true));
+        listHandlers.add(new RpcServiceHandler("6", new TestHandler("6"), 28, true));
+        listHandlers.add(new RpcServiceHandler("7", new TestHandler("7"), 17, true));
+        listHandlers.add(new RpcServiceHandler("8", new TestHandler("8"), 5000, true));
+        listHandlers.add(new RpcServiceHandler("9", new TestHandler("9"), 10000, false));
+        listHandlers.add(new RpcServiceHandler("0", new TestHandler("0"), 10000, false));
         a = new PoolHandler<RpcServiceHandler>(listHandlers, 2);
         listHandlers.clear();
         a.logDebug = false;

@@ -22,6 +22,7 @@ import static org.mockito.Mockito.mock;
 import org.apache.niolex.commons.reflect.FieldUtil;
 import org.apache.niolex.network.IClient;
 import org.apache.niolex.network.PacketData;
+import org.apache.niolex.network.client.SocketClient;
 import org.junit.Test;
 
 /**
@@ -31,9 +32,6 @@ import org.junit.Test;
  */
 public class SingleInvokerTest {
 
-	/**
-	 * Test method for {@link org.apache.niolex.network.rpc.SingleInvoker#handlePacket(org.apache.niolex.network.PacketData, org.apache.niolex.network.IPacketWriter)}.
-	 */
 	@Test
 	public void testHandlePacket() {
         SingleInvoker ss = new SingleInvoker(null);
@@ -41,27 +39,20 @@ public class SingleInvokerTest {
 		ss.handlePacket(null, null);
 	}
 
-	/**
-	 * Test method for {@link org.apache.niolex.network.rpc.SingleInvoker#handleClose(org.apache.niolex.network.IPacketWriter)}.
-	 */
 	@Test
-	public void testHandleClose() {
+    public void testSendPacket() {
         SingleInvoker ss = new SingleInvoker(null);
-		ss.handleClose(null);
-        final IClient client = mock(IClient.class);
-        FieldUtil.setValue(ss, "client", client);
+        final IClient client = mock(SocketClient.class);
+        FieldUtil.setValue(ss, "sc", client);
         ss.sendPacket(null);
 	}
 
-	/**
-	 * Test method for {@link org.apache.niolex.network.rpc.SingleInvoker#invoke(org.apache.niolex.network.PacketData, org.apache.niolex.network.IClient)}.
-	 */
 	@Test
 	public void testInvoke() {
         SingleInvoker ss = new SingleInvoker(null);
 		final PacketData rc = new PacketData(56, new byte[76]);
-		final IClient client = mock(IClient.class);
-        FieldUtil.setValue(ss, "client", client);
+        final IClient client = mock(SocketClient.class);
+        FieldUtil.setValue(ss, "sc", client);
         ss.invoke(rc);
 	}
 

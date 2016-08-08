@@ -34,6 +34,11 @@ import org.apache.niolex.network.client.SocketClient;
 public class SingleInvoker extends BaseInvoker {
 
     /**
+     * The socket client we will use.
+     */
+    private SocketClient sc;
+
+    /**
      * Used to save the response from server.
      */
     private PacketData res;
@@ -45,6 +50,7 @@ public class SingleInvoker extends BaseInvoker {
      */
     public SingleInvoker(InetSocketAddress serverAddress) {
         super(new SocketClient(serverAddress));
+        sc = ((SocketClient) client);
     }
 
     /**
@@ -53,7 +59,9 @@ public class SingleInvoker extends BaseInvoker {
      */
     @Override
     public synchronized void sendPacket(PacketData packet) {
-        client.handleWrite(packet);
+        // Do not auto read.
+        sc.setAutoRead(false);
+        sc.handleWrite(packet);
     }
 
     /**
@@ -64,13 +72,14 @@ public class SingleInvoker extends BaseInvoker {
     public synchronized PacketData invoke(PacketData packet) {
         this.res = null;
         // SocketClient will handle read in this method.
-        client.handleWrite(packet);
+        sc.setAutoRead(true);
+        sc.handleWrite(packet);
         return res;
     }
 
     @Override
-    public void handlePacket(PacketData sc, IPacketWriter wt) {
-        this.res = sc;
+    public void handlePacket(PacketData data, IPacketWriter wt) {
+        this.res = data;
     }
 
     /**

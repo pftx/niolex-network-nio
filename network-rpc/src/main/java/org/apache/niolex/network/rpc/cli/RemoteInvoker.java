@@ -20,7 +20,6 @@ package org.apache.niolex.network.rpc.cli;
 import java.io.IOException;
 
 import org.apache.niolex.network.PacketData;
-import org.apache.niolex.network.rpc.RpcException;
 
 /**
  * This interface manages sending packets to RPC server using appropriate client,
@@ -60,8 +59,8 @@ public interface RemoteInvoker {
     PacketData invoke(PacketData packet);
 
     /**
-     * When send packet in blocking mode, the rpc blocking thread will throw {@link RpcException} with type
-     * {@link RpcException.Type.TIMEOUT} if the result is not ready after this specified time.
+     * When send packet in blocking mode, the rpc blocking thread will return null if the result is not ready after
+     * this specified time.
      *
      * @param rpcHandleTimeout the timeout to set to
      */

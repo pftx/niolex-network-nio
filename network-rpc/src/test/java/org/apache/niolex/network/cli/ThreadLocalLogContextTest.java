@@ -1,11 +1,10 @@
-package org.apache.niolex.network.cli.context;
+package org.apache.niolex.network.cli;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
 
 import org.apache.niolex.commons.util.Runner;
-import org.apache.niolex.network.cli.LogContext;
 import org.apache.niolex.network.cli.context.ThreadLocalLogContext;
 import org.junit.Before;
 import org.junit.Test;
@@ -25,7 +24,7 @@ public class ThreadLocalLogContextTest {
         context.setLogPrefix("GoUp!");
         assertEquals("GoUp!", LogContext.prefix());
         LogContext.serviceUrl("rtp://www.a.b.com");
-        assertEquals("rtp://www.a.b.com", context.getLogPrefix());
+        assertEquals("rtp://www.a.b.com", context.getServiceUrl());
     }
 
     @Test

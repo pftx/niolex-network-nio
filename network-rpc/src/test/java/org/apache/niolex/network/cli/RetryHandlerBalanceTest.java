@@ -31,7 +31,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.niolex.commons.concurrent.ConcurrentUtil;
 import org.apache.niolex.commons.util.Runner;
-import org.apache.niolex.network.cli.handler.A;
 import org.apache.niolex.network.cli.handler.IServiceHandler;
 import org.apache.niolex.network.cli.handler.RpcServiceHandler;
 import org.apache.niolex.network.rpc.RpcException;
@@ -52,10 +51,10 @@ public class RetryHandlerBalanceTest {
     @Test
     public void testInvokeBlance() throws Throwable {
         List<IServiceHandler> listHandlers = new ArrayList<IServiceHandler>();
-        listHandlers.add(new RpcServiceHandler("5", new A("5"), 20, true));
-        listHandlers.add(new RpcServiceHandler("6", new A("6"), 28, true));
-        listHandlers.add(new RpcServiceHandler("7", new A("7"), 17, true));
-        listHandlers.add(new RpcServiceHandler("8", new A("8"), 5000, true));
+        listHandlers.add(new RpcServiceHandler("5", new TestHandler("5"), 20, true));
+        listHandlers.add(new RpcServiceHandler("6", new TestHandler("6"), 28, true));
+        listHandlers.add(new RpcServiceHandler("7", new TestHandler("7"), 17, true));
+        listHandlers.add(new RpcServiceHandler("8", new TestHandler("8"), 5000, true));
         a = new RetryHandler<IServiceHandler>(listHandlers, 3, 10);
         a.logDebug = false;
     	ConcurrentHashMap<String, AtomicInteger> m = new ConcurrentHashMap<String, AtomicInteger>();
@@ -85,10 +84,10 @@ public class RetryHandlerBalanceTest {
     @Test
     public void testErrorBlance() throws Throwable {
         List<IServiceHandler> listHandlers = new ArrayList<IServiceHandler>();
-        listHandlers.add(new RpcServiceHandler("5", new A("5"), 20, true));
-        listHandlers.add(new RpcServiceHandler("6", new A("6"), 28, true));
-        listHandlers.add(new RpcServiceHandler("7", new A("7"), 17, true));
-        listHandlers.add(new RpcServiceHandler("8", new A("8"), 5000, false));
+        listHandlers.add(new RpcServiceHandler("5", new TestHandler("5"), 20, true));
+        listHandlers.add(new RpcServiceHandler("6", new TestHandler("6"), 28, true));
+        listHandlers.add(new RpcServiceHandler("7", new TestHandler("7"), 17, true));
+        listHandlers.add(new RpcServiceHandler("8", new TestHandler("8"), 5000, false));
         a = new RetryHandler<IServiceHandler>(listHandlers, 3, 10);
         a.logDebug = false;
         Map<String, Integer> m = new HashMap<String, Integer>();
@@ -112,7 +111,7 @@ public class RetryHandlerBalanceTest {
         List<IServiceHandler> listHandlers = new ArrayList<IServiceHandler>();
         listHandlers.add(new RpcServiceHandler("5", new B("5"), 100, true));
         listHandlers.add(new RpcServiceHandler("6", new C(), 100, true));
-        listHandlers.add(new RpcServiceHandler("8", new A("8"), 5000, true));
+        listHandlers.add(new RpcServiceHandler("8", new TestHandler("8"), 5000, true));
         a = new RetryHandler<IServiceHandler>(listHandlers, 3, 10);
         a.logDebug = false;
         for (int i = 0; i < 300; ++i) {
@@ -146,7 +145,7 @@ public class RetryHandlerBalanceTest {
     	List<IServiceHandler> listHandlers = new ArrayList<IServiceHandler>();
         listHandlers.add(new RpcServiceHandler("5", new B("5"), 100, false));
         listHandlers.add(new RpcServiceHandler("6", new B("6"), 100, false));
-        listHandlers.add(new RpcServiceHandler("8", new A("8"), 5000, false));
+        listHandlers.add(new RpcServiceHandler("8", new TestHandler("8"), 5000, false));
         RetryHandler<IServiceHandler> a = new RetryHandler<IServiceHandler>(listHandlers, 3, 10);
         a.logDebug = false;
         try {

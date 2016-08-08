@@ -25,7 +25,7 @@ public class RpcStubTest {
         RemoteInvoker invoker = mock(RemoteInvoker.class);
         RpcStub bs = new RpcStub(invoker, new JsonConverter());
 
-        bs.addInferface(BlockingStRpcStubTest       bs.addInferface(RpcService.class);
+        bs.addInferface(RpcService.class);
     }
 
     @Test(expected = RpcException.class)
@@ -33,7 +33,8 @@ public class RpcStubTest {
         RemoteInvoker invoker = mock(RemoteInvoker.class);
         RpcStub bs = new RpcStub(invoker, new JsonConverter());
 
-        bs.addInferface(BlockingStubTest.claRpcStubTesthod method = MethodUtil.getFirstMethod(getClass(), "testGetService");
+        bs.addInferface(getClass());
+        Method method = MethodUtil.getFirstMethod(getClass(), "testGetService");
         bs.invoke(null, method, null);
     }
 

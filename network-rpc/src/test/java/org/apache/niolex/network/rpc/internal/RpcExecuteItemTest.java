@@ -1,6 +1,7 @@
 package org.apache.niolex.network.rpc.internal;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.lang.reflect.Method;
 
@@ -11,17 +12,18 @@ public class RpcExecuteItemTest {
 
     @Test
     public void testGetMethod() throws Exception {
-        RpcExecuteItem i = new RpcExecuteItem();
         Method m = MethodUtil.getFirstMethod(this, "testGetMethod");
-        i.setMethod(m);
+        RpcExecuteItem i = new RpcExecuteItem((short) 3, true, m, this);
         assertEquals(m, i.getMethod());
+        assertEquals(this, i.getTarget());
+        assertTrue(i.isOneWay());
+        assertEquals(3, i.getCode());
     }
 
     @Test
     public void testGetTarget() throws Exception {
-        RpcExecuteItem i = new RpcExecuteItem();
         Exception e = new RuntimeException("not yet implemented");
-        i.setTarget(e);
+        RpcExecuteItem i = new RpcExecuteItem((short) 3, false, null, e);
         assertEquals(e, i.getTarget());
     }
 

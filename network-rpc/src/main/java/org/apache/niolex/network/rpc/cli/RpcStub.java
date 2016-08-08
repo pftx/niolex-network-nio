@@ -37,7 +37,7 @@ import org.apache.niolex.network.rpc.internal.MethodExecuteItem;
 import org.apache.niolex.network.rpc.util.RpcUtil;
 
 /**
- * Manage connection to server, generate client blocking stub to do RPC.
+ * Manage connection to server, generate client side stub to do RPC.
  * 
  * @author <a href="mailto:xiejiyun@foxmail.com">Xie, Jiyun</a>
  * @version 0.6.1
@@ -58,7 +58,7 @@ public class RpcStub implements IServiceHandler {
     /**
      * The serial ID generator.
      */
-    private final AtomicInteger auto = new AtomicInteger(-1);
+    private final AtomicInteger idGen = new AtomicInteger(-1);
 
     /**
      * The RPC invoker to do the real method invoke.
@@ -174,7 +174,7 @@ public class RpcStub implements IServiceHandler {
      * @param rc the request packet
      */
     private void serialPacket(PacketData rc) {
-        short seri = (short) (auto.addAndGet(2));
+        short seri = (short) (idGen.addAndGet(2));
         rc.setReserved((byte) seri);
         rc.setVersion((byte) (seri >> 8));
     }
