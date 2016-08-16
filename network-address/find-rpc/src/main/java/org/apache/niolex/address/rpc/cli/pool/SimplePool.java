@@ -26,8 +26,8 @@ import java.util.Set;
 import org.apache.niolex.address.rpc.cli.BaseStub;
 import org.apache.niolex.address.rpc.cli.NodeInfo;
 import org.apache.niolex.commons.bean.MutableOne;
-import org.apache.niolex.network.cli.RpcClientAdapter;
-import org.apache.niolex.network.rpc.RpcClient;
+import org.apache.niolex.network.rpc.cli.RpcStub;
+import org.apache.niolex.network.rpc.util.RpcUtil;
 
 /**
  * The Rpc Simple Client Pool, Manage all the clients for one service under one state.
@@ -79,10 +79,10 @@ public class SimplePool<T> extends BaseStub<T> {
         // Remove them all from the ready set.
         readySet.removeAll(delSet);
         for (NodeInfo info : delSet) {
-            Set<RpcClient> clientSet = POOL.getClients(info.getAddress());
-            for (RpcClient sc : clientSet) {
+            Set<RpcStub> clientSet = POOL.getClients(info.getAddress());
+            for (RpcStub stub : clientSet) {
                 // We do not retry the deleted address.
-                sc.setConnectRetryTimes(0);
+                RpcUtil.markAbandon(stub);
             }
         }
     }
@@ -96,11 +96,10 @@ public class SimplePool<T> extends BaseStub<T> {
         // Put them into ready set.
         readySet.addAll(addSet);
         // Save all the new clients.
-        ArrayList<RpcClientAdapter> cliList = new ArrayList<RpcClientAdapter>();
+        ArrayList<RpcStub> cliList = new ArrayList<RpcStub>();
         // Add the current new server.
         for (NodeInfo info : addSet) {
-            buildClients(info);
-            cliList.addAll(MultiplexPoolHandler.translate(clientSet(info), info.toString()));
+            cliList.addAll(buildClients(info));
         }
         // Offer all the new clients.
         poolHandler.addNew(cliList);
@@ -127,14 +126,13 @@ public class SimplePool<T> extends BaseStub<T> {
             weightShare = 2;
         }
         // Build clients.
-        ArrayList<RpcClientAdapter> cliList = new ArrayList<RpcClientAdapter>();
+        ArrayList<RpcStub> cliList = new ArrayList<RpcStub>();
         for (NodeInfo info : readySet) {
-            buildClients(info);
-            cliList.addAll(MultiplexPoolHandler.translate(clientSet(info), info.toString()));
+            cliList.addAll(buildClients(info));
         }
         // Rpc client is ready, let's create the pool handler.
         Collections.shuffle(cliList);
-        poolHandler = new MultiplexPoolHandler(cliList, rpcErrorRetryTimes, 10);
+        poolHandler = new MultiplexPoolHandler(cliList, rpcErrorRetryTimes, 100);
         // Pool creation done.
         stub = (T) Proxy.newProxyInstance(SimplePool.class.getClassLoader(),
                 new Class[] {interfaze}, poolHandler);

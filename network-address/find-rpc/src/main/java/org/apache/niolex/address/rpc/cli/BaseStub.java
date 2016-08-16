@@ -29,8 +29,9 @@ import org.apache.niolex.commons.test.Check;
 import org.apache.niolex.network.cli.Constants;
 import org.apache.niolex.network.client.BlockingClient;
 import org.apache.niolex.network.rpc.IConverter;
-import org.apache.niolex.network.rpc.PacketInvoker;
-import org.apache.niolex.network.rpc.RpcClient;
+import org.apache.niolex.network.rpc.cli.BaseInvoker;
+import org.apache.niolex.network.rpc.cli.RpcStub;
+import org.apache.niolex.network.rpc.util.RpcUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,6 +41,8 @@ import org.slf4j.LoggerFactory;
  * <br>
  * We manage all the server addresses here. The {@link MutableOne} will invoke listeners in
  * synchronized block, so we do not need to consider thread-safety.
+ * <br>
+ * We share connections by {@link RpcStubPool}.
  *
  * @author <a href="mailto:xiejiyun@foxmail.com">Xie, Jiyun</a>
  * @version 1.0.0
@@ -47,7 +50,7 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class BaseStub<T> implements MutableOne.DataChangeListener<List<String>> {
     protected static final Logger LOG = LoggerFactory.getLogger(BaseStub.class);
-    protected static final RpcClientPool POOL = RpcClientPool.getPool();
+    protected static final RpcStubPool POOL = RpcStubPool.getPool();
 
     /**
      * The network connection parameters.
@@ -147,7 +150,7 @@ public abstract class BaseStub<T> implements MutableOne.DataChangeListener<List<
      *
      * @param info the node info which contains server address
      */
-    protected Set<RpcClient> buildClients(NodeInfo info) {
+    protected Set<RpcStub> buildClients(NodeInfo info) {
         // omitting decimal fractions smaller than 0.5 and counting all others, including 0.5, as 1
         final int curMax = (int) (info.getWeight() * weightShare + 0.5);
         // Set converter
@@ -156,19 +159,20 @@ public abstract class BaseStub<T> implements MutableOne.DataChangeListener<List<
             LOG.error("The converter for service address [{}] type [{}] not found.", info.getAddress(), info.getProtocol());
             return null;
         }
-        Set<RpcClient> clientSet = POOL.getClients(info.getAddress());
+        Set<RpcStub> clientSet = POOL.getClients(info.getAddress());
         int i = 0;
         // Make all the old connections ready.
-        for (RpcClient rpcc : clientSet) {
-            rpcc.setConnectRetryTimes(connectRetryTimes);
+        for (RpcStub rpcc : clientSet) {
+            RpcUtil.setConnectRetryTimes(rpcc, connectRetryTimes);
             rpcc.addInferface(interfaze);
-            if (!rpcc.isValid()) {
+            if (!rpcc.isReady()) {
                 try {
                     rpcc.connect();
                 } catch (IOException e) {
                     LOG.error("Error occured when try to connect to {}.", info, e);
                 }
             }
+            ++i;
         }
 
         // Add more connections if necessary.
@@ -176,14 +180,15 @@ public abstract class BaseStub<T> implements MutableOne.DataChangeListener<List<
             try {
                 // Let's create the connection here.
                 BlockingClient bk = new BlockingClient(info.getAddress());
-                // Create the Rpc.
-                PacketInvoker pk = new PacketInvoker();
-                pk.setRpcHandleTimeout(rpcTimeout);
-                RpcClient cli = new RpcClient(bk, pk, converter);
-                cli.setConnectTimeout(connectTimeout);
-                cli.setConnectRetryTimes(connectRetryTimes);
-                cli.setSleepBetweenRetryTime(connectSleepBetweenRetry);
-                cli.connect();
+                // Create the invoker.
+                BaseInvoker bi = new BaseInvoker(bk);
+                bi.setConnectTimeout(connectTimeout);
+                bi.setConnectRetryTimes(connectRetryTimes);
+                bi.setSleepBetweenRetryTime(connectSleepBetweenRetry);
+                bi.setRpcHandleTimeout(rpcTimeout);
+                bi.connect();
+                // Create Rpc stub.
+                RpcStub cli = new RpcStub(bi, converter);
                 cli.addInferface(interfaze);
                 // Ready to add.
                 clientSet.add(cli);

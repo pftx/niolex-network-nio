@@ -17,8 +17,8 @@
  */
 package org.apache.niolex.address.rpc.cli.pool;
 
-import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.niolex.address.rpc.cli.BaseStub;
 import org.apache.niolex.address.rpc.cli.NodeInfo;
@@ -45,26 +45,6 @@ public class RetryStub<T> extends BaseStub<T> {
 
     /**
      * This is the override of super method.
-     * @see org.apache.niolex.address.rpc.cli.BaseStub#markDeleted(java.util.HashSet)
-     */
-    @Override
-    protected void markDeleted(HashSet<NodeInfo> delSet) {
-        // TODO Auto-generated method stub
-        
-    }
-
-    /**
-     * This is the override of super method.
-     * @see org.apache.niolex.address.rpc.cli.BaseStub#markNew(java.util.HashSet)
-     */
-    @Override
-    protected void markNew(HashSet<NodeInfo> addSet) {
-        // TODO Auto-generated method stub
-        
-    }
-
-    /**
-     * This is the override of super method.
      * @see org.apache.niolex.address.rpc.cli.BaseStub#build()
      */
     @Override
@@ -81,6 +61,17 @@ public class RetryStub<T> extends BaseStub<T> {
     public void destroy() {
         // TODO Auto-generated method stub
         
+    }
+
+    /**
+     * This is the override of super method.
+     * 
+     * @see org.apache.niolex.address.rpc.cli.BaseStub#fireChanges(java.util.Set, java.util.Set)
+     */
+    @Override
+    protected void fireChanges(Set<NodeInfo> delSet, Set<NodeInfo> addSet) {
+        // TODO Auto-generated method stub
+
     }
 
 }

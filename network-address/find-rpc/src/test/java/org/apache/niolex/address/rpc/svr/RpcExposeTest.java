@@ -18,9 +18,12 @@
 package org.apache.niolex.address.rpc.svr;
 
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.io.Serializable;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import org.apache.niolex.address.rpc.DemoService;
 import org.apache.niolex.address.rpc.RpcInterface;
@@ -32,6 +35,20 @@ import org.junit.Test;
  * @since 2014-1-24
  */
 public class RpcExposeTest {
+
+    @Test
+    public void testBasicQueueOp() throws Exception {
+        LinkedBlockingQueue<Integer> readyQueue = new LinkedBlockingQueue<Integer>();
+        Integer i = 838839;
+        readyQueue.offer(i);
+        readyQueue.offer(i);
+        readyQueue.offer(i);
+        assertEquals(3, readyQueue.size());
+        assertEquals(i, readyQueue.take());
+        assertEquals(2, readyQueue.size());
+        assertEquals(i, readyQueue.take());
+        assertEquals(1, readyQueue.size());
+    }
 
     @Test
     public void testRpcExposeObject() throws Exception {

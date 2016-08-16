@@ -17,8 +17,8 @@
  */
 package org.apache.niolex.address.rpc.cli;
 
-
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 import java.util.List;
 
@@ -84,7 +84,7 @@ public class RpcClientFactoryTest {
 
     @Test
     public void testRpcClientFactory() throws Exception {
-        BaseStub<DemoFace> poolInternal = factory.getPool(DemoFace.class);
+        BaseStub<DemoFace> poolInternal = factory.newBuilder(DemoFace.class).buildPool();
         BaseMock<DemoFace> pool = (BaseMock<DemoFace>)poolInternal;
         MutableOne<List<String>> one = pool.mutableOne;
         List<String> list = one.data();
@@ -94,7 +94,7 @@ public class RpcClientFactoryTest {
 
     @Test
     public void testRpcClientFactoryStringString() throws Exception {
-        BaseStub<DemoFace> poolInternal = factory.getPool(DemoFace.class, "A", 0);
+        BaseStub<DemoFace> poolInternal = factory.newBuilder(DemoFace.class).state("A").poolSize(0).buildPool();
         BaseMock<DemoFace> pool = (BaseMock<DemoFace>)poolInternal;
         MutableOne<List<String>> one = pool.mutableOne;
         List<String> list = one.data();
@@ -114,9 +114,7 @@ public class RpcClientFactoryTest {
     @Test
     public void testDisconnectFromZK() throws Exception {
         RpcServerMain.main(null);
-
         ClientPoolMain.main(new String[0]);
-
         RpcServerMain.stop();
     }
 

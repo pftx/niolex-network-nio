@@ -18,10 +18,7 @@
 package org.apache.niolex.address.rpc.cli;
 
 import org.apache.niolex.address.rpc.DemoService;
-import org.apache.niolex.address.rpc.cli.BaseStub;
-import org.apache.niolex.address.rpc.cli.RpcClientFactory;
 import org.apache.niolex.commons.util.SystemUtil;
-
 
 /**
  *
@@ -46,7 +43,7 @@ public class ClientPoolMain {
             System.exit(-1);
         }
         // 获得远程对象，这里有一个连接池，简单起见我们就直接获得对象了
-        BaseStub<DemoService> pool = factory.getPool(DemoService.class);
+        BaseStub<DemoService> pool = factory.newBuilder(DemoService.class).buildPool();
         DemoService demo = pool.build().getService();
         // 开始操作
         int c = demo.calc(3, 4, 5);

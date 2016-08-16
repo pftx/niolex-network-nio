@@ -22,8 +22,12 @@ import java.lang.reflect.InvocationTargetException;
 import org.apache.niolex.commons.codec.Base64Util;
 import org.apache.niolex.commons.codec.StringUtil;
 import org.apache.niolex.commons.util.ThrowableUtil;
+import org.apache.niolex.network.ConnStatus;
 import org.apache.niolex.network.PacketData;
 import org.apache.niolex.network.rpc.RpcException;
+import org.apache.niolex.network.rpc.cli.BaseInvoker;
+import org.apache.niolex.network.rpc.cli.RemoteInvoker;
+import org.apache.niolex.network.rpc.cli.RpcStub;
 
 /**
  * Common utilities for Rpc.
@@ -141,6 +145,63 @@ public abstract class RpcUtil {
         }
 
         return sb.substring(0, length);
+    }
+
+    /**
+     * Check whether the connection behind the specified Rpc stub is closed.
+     * 
+     * @param stub the rpc stub
+     * @return true if connection is closed, false otherwise
+     */
+    public static boolean connectionClosed(RpcStub stub) {
+        RemoteInvoker invoker = stub.getInvoker();
+        if (invoker instanceof BaseInvoker) {
+            BaseInvoker bi = (BaseInvoker) invoker;
+            return bi.getConnStatus() == ConnStatus.CLOSED;
+        }
+        return false;
+    }
+
+    /**
+     * Check whether this Rpc stub is ready for use by the next time.
+     *
+     * @param stub the rpc stub
+     * @return true if it's ready and not marked as abandon, false otherwise
+     */
+    public static boolean isInUse(RpcStub stub) {
+        RemoteInvoker invoker = stub.getInvoker();
+        if (invoker instanceof BaseInvoker) {
+            BaseInvoker bi = (BaseInvoker) invoker;
+            return bi.getConnectRetryTimes() > 0;
+        }
+        return true;
+    }
+
+    /**
+     * Mark this stub as abandon.
+     * 
+     * @param stub the rpc stub
+     */
+    public static void markAbandon(RpcStub stub) {
+        RemoteInvoker invoker = stub.getInvoker();
+        if (invoker instanceof BaseInvoker) {
+            BaseInvoker bi = (BaseInvoker) invoker;
+            bi.setConnectRetryTimes(0);
+        }
+    }
+
+    /**
+     * Set the connect retry times of the specified Rpc stub.
+     * 
+     * @param stub the rpc stub
+     * @param connectRetryTimes the new connect retry times to set
+     */
+    public static void setConnectRetryTimes(RpcStub stub, int connectRetryTimes) {
+        RemoteInvoker invoker = stub.getInvoker();
+        if (invoker instanceof BaseInvoker) {
+            BaseInvoker bi = (BaseInvoker) invoker;
+            bi.setConnectRetryTimes(connectRetryTimes);
+        }
     }
 
 }

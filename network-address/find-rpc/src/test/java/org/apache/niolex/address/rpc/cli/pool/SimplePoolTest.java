@@ -18,8 +18,9 @@
 package org.apache.niolex.address.rpc.cli.pool;
 
 
-import static org.apache.niolex.address.rpc.AddressUtilTest.*;
-import static org.junit.Assert.*;
+import static org.apache.niolex.address.rpc.AddressUtilTest.makeAddress;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
 import java.io.IOException;
@@ -31,12 +32,14 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import org.apache.niolex.address.rpc.DemoService;
 import org.apache.niolex.address.rpc.cli.NodeInfo;
+import org.apache.niolex.address.rpc.cli.RpcStubPool;
 import org.apache.niolex.commons.bean.MutableOne;
 import org.apache.niolex.commons.reflect.FieldUtil;
 import org.apache.niolex.network.IClient;
-import org.apache.niolex.network.cli.RpcClientAdapter;
 import org.apache.niolex.network.demo.json.DemoJsonRpcServer;
-import org.apache.niolex.network.rpc.RpcClient;
+import org.apache.niolex.network.rpc.cli.BaseInvoker;
+import org.apache.niolex.network.rpc.cli.RpcStub;
+import org.apache.niolex.network.rpc.util.RpcUtil;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -76,7 +79,7 @@ public class SimplePoolTest {
     public void setUp() throws Exception {
         pool = new TestPool(mutableOne);
         FieldUtil.setValue(pool, "isWorking", true);
-        ArrayList<RpcClientAdapter> empty = new ArrayList<RpcClientAdapter>();
+        ArrayList<RpcStub> empty = new ArrayList<RpcStub>();
         FieldUtil.setValue(pool, "poolHandler", new MultiplexPoolHandler(empty, 2, 2));
         readySet = FieldUtil.getValue(pool, "readySet");
     }
@@ -91,11 +94,13 @@ public class SimplePoolTest {
         mutableOne.updateData(data);
         assertEquals(2, readySet.size());
         // Check the backed queue
-        LinkedBlockingQueue<RpcClientAdapter> readyQueue = FieldUtil.getValue(pool.poolHandler, "readyQueue");
+        LinkedBlockingQueue<RpcStub> readyQueue = FieldUtil.getValue(pool.poolHandler, "readyQueue");
         int delc = 0, addc = 0;
-        for (RpcClientAdapter cli : readyQueue) {
-            if (cli.getHandler().getConnectRetryTimes() == 0) ++delc;
-            else ++addc;
+        for (RpcStub cli : readyQueue) {
+            if (RpcUtil.isInUse(cli))
+                ++addc;
+            else
+                ++delc;
         }
         assertEquals(5, addc);
         assertEquals(5, delc);
@@ -112,11 +117,13 @@ public class SimplePoolTest {
         mutableOne.updateData(makeAddress());
         assertEquals(2, readySet.size());
         // Check the backed queue
-        LinkedBlockingQueue<RpcClientAdapter> readyQueue = FieldUtil.getValue(pool.poolHandler, "readyQueue");
+        LinkedBlockingQueue<RpcStub> readyQueue = FieldUtil.getValue(pool.poolHandler, "readyQueue");
         int delc = 0, addc = 0;
-        for (RpcClientAdapter cli : readyQueue) {
-            if (cli.getHandler().getConnectRetryTimes() == 0) ++delc;
-            else ++addc;
+        for (RpcStub cli : readyQueue) {
+            if (RpcUtil.isInUse(cli))
+                ++addc;
+            else
+                ++delc;
         }
         assertEquals(5, addc);
         assertEquals(10, delc);
@@ -161,10 +168,10 @@ public class SimplePoolTest {
         info.setWeight(1);
         FieldUtil.setValue(pool, "weightShare", 0.6);
         pool.buildSuperClients(info);
-        Set<RpcClient> clientSet = FieldUtil.getValue(info, "clientSet");
+        Set<RpcStub> clientSet = RpcStubPool.getPool().getClients(info.getAddress());
         assertEquals(1, clientSet.size());
-        RpcClient cli = clientSet.iterator().next();
-        assertTrue(cli.isValid());
+        RpcStub cli = clientSet.iterator().next();
+        assertTrue(cli.isReady());
         cli.stop();
     }
 
@@ -177,7 +184,7 @@ public class SimplePoolTest {
         info.setWeight(1);
         FieldUtil.setValue(pool, "weightShare", 0.6);
         pool.buildSuperClients(info);
-        Set<RpcClient> clientSet = FieldUtil.getValue(info, "clientSet");
+        Set<RpcStub> clientSet = RpcStubPool.getPool().getClients(info.getAddress());
         assertEquals(0, clientSet.size());
     }
 
@@ -194,12 +201,13 @@ class TestPool extends SimplePool<DemoService> {
      * @see org.apache.niolex.address.rpc.cli.pool.SimplePool#buildClients(org.apache.niolex.address.rpc.cli.NodeInfo)
      */
     @Override
-    protected void buildClients(NodeInfo info) {
-        Set<RpcClient> clientSet = clientSet(info);
+    protected Set<RpcStub> buildClients(NodeInfo info) {
+        Set<RpcStub> clientSet = RpcStubPool.getPool().getClients(info.getAddress());
         final int curMax = info.getWeight();
         for (int i = 0; i < curMax; ++i) {
             clientSet.add(new MockClient());
         }
+        return clientSet;
     }
 
     protected void buildSuperClients(NodeInfo info) {
@@ -208,15 +216,16 @@ class TestPool extends SimplePool<DemoService> {
 
 }
 
-class MockClient extends RpcClient {
+class MockClient extends RpcStub {
 
     public MockClient() {
-        super(mock(IClient.class), null, null);
+        super(new BaseInvoker(mock(IClient.class)), null);
     }
 
     /**
      * This is the override of super method.
-     * @see org.apache.niolex.network.rpc.RpcClient#connect()
+     * 
+     * @see org.apache.niolex.network.rpc.RpcStub#connect()
      */
     @Override
     public void connect() throws IOException {
@@ -224,10 +233,11 @@ class MockClient extends RpcClient {
 
     /**
      * This is the override of super method.
-     * @see org.apache.niolex.network.rpc.RpcClient#isValid()
+     * 
+     * @see org.apache.niolex.network.rpc.RpcStub#isReady()
      */
     @Override
-    public boolean isValid() {
+    public boolean isReady() {
         return true;
     }
 

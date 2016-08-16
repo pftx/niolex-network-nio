@@ -17,18 +17,16 @@
  */
 package org.apache.niolex.address.rpc.cli;
 
+import static org.apache.niolex.address.rpc.AddressUtilTest.makeAddress;
+import static org.junit.Assert.assertEquals;
 
-import static org.apache.niolex.address.rpc.AddressUtilTest.*;
-import static org.junit.Assert.*;
-
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import org.apache.niolex.address.rpc.AddressUtil;
 import org.apache.niolex.commons.bean.MutableOne;
 import org.apache.niolex.network.demo.json.RpcService;
-import org.apache.niolex.network.rpc.RpcClient;
+import org.apache.niolex.network.rpc.cli.RpcStub;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -88,7 +86,7 @@ public class BaseStubTest {
     @Test
     public void testClientSet() throws Exception {
         NodeInfo info = AddressUtil.parseAddress("rpc#10.254.2.10:8090#3");
-        Set<RpcClient> set = stub.clientSet(info);
+        Set<RpcStub> set = RpcStubPool.getPool().getClients(info.getAddress());
         assertEquals(0, set.size());
         assertEquals("rpc://10.254.2.10:8090#3", info.toString());
     }
@@ -104,9 +102,11 @@ public class BaseStubTest {
         mutableOne.updateData(data);
         assertEquals(2, stub.readySet.size());
         assertEquals(0, stub.delCnt);
+        assertEquals(2, stub.newCnt);
         mutableOne.updateData(makeAddress());
         assertEquals(2, stub.readySet.size());
-        assertEquals(1, stub.delCnt);
+        assertEquals(2, stub.delCnt);
+        assertEquals(4, stub.newCnt);
     }
 
     @Test
@@ -117,10 +117,11 @@ public class BaseStubTest {
         stub.isWorking = true;
         mutableOne.updateData(data);
         assertEquals(0, stub.readySet.size());
+        assertEquals(2, stub.newCnt);
         data.addAll(makeAddress());
         mutableOne.updateData(data);
         assertEquals(0, stub.readySet.size());
-        assertEquals(2, stub.newCnt);
+        assertEquals(6, stub.newCnt);
     }
 
     @Test
@@ -216,20 +217,21 @@ class BaseMock<T> extends BaseStub<T> {
 
     /**
      * This is the override of super method.
-     * @see org.apache.niolex.address.rpc.cli.BaseStub#markDeleted(java.util.HashSet)
+     * 
+     * @see org.apache.niolex.address.rpc.cli.BaseStub#fireChanges(java.util.Set, java.util.Set)
      */
     @Override
-    protected void markDeleted(HashSet<NodeInfo> delSet) {
-        ++delCnt;
+    protected void fireChanges(Set<NodeInfo> delSet, Set<NodeInfo> addSet) {
+        markDeleted(delSet);
+        markNew(addSet);
     }
 
-    /**
-     * This is the override of super method.
-     * @see org.apache.niolex.address.rpc.cli.BaseStub#markNew(java.util.HashSet)
-     */
-    @Override
-    protected void markNew(HashSet<NodeInfo> addSet) {
-        ++newCnt;
+    protected void markDeleted(Set<NodeInfo> delSet) {
+        delCnt += delSet.size();
+    }
+
+    protected void markNew(Set<NodeInfo> addSet) {
+        newCnt += addSet.size();
     }
 
     /**
@@ -247,7 +249,6 @@ class BaseMock<T> extends BaseStub<T> {
      */
     @Override
     public void destroy() {
-
     }
 
 }

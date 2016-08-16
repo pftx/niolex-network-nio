@@ -1,5 +1,5 @@
 /**
- * RpcClientPool.java
+ * RpcStubPool.java
  *
  * Copyright 2016 the original author or authors.
  *
@@ -23,7 +23,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.niolex.commons.concurrent.ConcurrentUtil;
-import org.apache.niolex.network.rpc.RpcClient;
+import org.apache.niolex.network.rpc.cli.RpcStub;
 
 /**
  * The pool stores all the rpc clients by their Internet socket address. We will not close connection actively,
@@ -34,27 +34,26 @@ import org.apache.niolex.network.rpc.RpcClient;
  * @version 1.0.0
  * @since Jul 22, 2016
  */
-public class RpcClientPool {
+public class RpcStubPool {
     
     /**
      * The global singleton instance.
      */
-    private static final RpcClientPool INSTANCE = new RpcClientPool();
+    private static final RpcStubPool INSTANCE = new RpcStubPool();
     
     /**
      * Get the global singleton instance.
      * 
      * @return the global singleton instance
      */
-    public static final RpcClientPool getPool() {
+    public static final RpcStubPool getPool() {
         return INSTANCE;
     }
     
     /**
      * The internal concurrent hash map.
      */
-    private final ConcurrentHashMap<InetSocketAddress, Set<RpcClient>> rpcClientPool
-            = new ConcurrentHashMap<InetSocketAddress, Set<RpcClient>>();
+    private final ConcurrentHashMap<InetSocketAddress, Set<RpcStub>> rpcStubPool = new ConcurrentHashMap<InetSocketAddress, Set<RpcStub>>();
 
     /**
      * Get all the clients stored in one set by the specified Internet socket address.
@@ -62,10 +61,10 @@ public class RpcClientPool {
      * @param key the specified Internet socket address
      * @return the clients
      */
-    public Set<RpcClient> getClients(InetSocketAddress key) {
-        Set<RpcClient> set = rpcClientPool.get(key);
+    public Set<RpcStub> getClients(InetSocketAddress key) {
+        Set<RpcStub> set = rpcStubPool.get(key);
         if (set == null) {
-            set = ConcurrentUtil.initMap(rpcClientPool, key, new HashSet<RpcClient>());
+            set = ConcurrentUtil.initMap(rpcStubPool, key, new HashSet<RpcStub>());
         }
         return set;
     }
@@ -76,8 +75,8 @@ public class RpcClientPool {
      * @param key the specified Internet socket address
      * @return the clients or null if not found
      */
-    public Set<RpcClient> removeClients(InetSocketAddress key) {
-        return rpcClientPool.remove(key);
+    public Set<RpcStub> removeClients(InetSocketAddress key) {
+        return rpcStubPool.remove(key);
     }
 
 }
