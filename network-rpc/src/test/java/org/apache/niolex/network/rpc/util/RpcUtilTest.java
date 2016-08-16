@@ -18,16 +18,22 @@
 package org.apache.niolex.network.rpc.util;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 
 import java.lang.reflect.InvocationTargetException;
 
 import org.apache.niolex.commons.codec.StringUtil;
+import org.apache.niolex.network.IClient;
 import org.apache.niolex.network.PacketData;
 import org.apache.niolex.network.rpc.RpcException;
+import org.apache.niolex.network.rpc.cli.BaseInvoker;
+import org.apache.niolex.network.rpc.cli.RemoteInvoker;
+import org.apache.niolex.network.rpc.cli.RpcStub;
 import org.junit.Test;
 
 /**
@@ -242,5 +248,89 @@ public class RpcUtilTest extends RpcUtil {
 		assertEquals(145, q.length());
 		assertNotEquals(s, q);
 	}
+
+    @Test
+    public void testConnectionClosed() throws Exception {
+        BaseInvoker bi = new BaseInvoker(mock(IClient.class));
+        RpcStub stub = new RpcStub(bi, null);
+
+        assertFalse(connectionClosed(stub));
+        bi.stop();
+        assertTrue(connectionClosed(stub));
+    }
+
+    @Test
+    public void testConnectionClosedNotSupported() throws Exception {
+        RemoteInvoker bi = mock(RemoteInvoker.class);
+        RpcStub stub = new RpcStub(bi, null);
+
+        assertFalse(connectionClosed(stub));
+        bi.stop();
+        assertFalse(connectionClosed(stub));
+    }
+
+    @Test
+    public void testIsInUse() throws Exception {
+        BaseInvoker bi = new BaseInvoker(mock(IClient.class));
+        RpcStub stub = new RpcStub(bi, null);
+
+        assertTrue(isInUse(stub));
+        bi.setConnectRetryTimes(0);
+        assertFalse(isInUse(stub));
+    }
+
+    @Test
+    public void testIsInUseNotSupported() throws Exception {
+        RemoteInvoker bi = mock(RemoteInvoker.class);
+        RpcStub stub = new RpcStub(bi, null);
+
+        assertTrue(isInUse(stub));
+        bi.stop();
+        assertTrue(isInUse(stub));
+    }
+
+    @Test
+    public void testMarkAbandon() throws Exception {
+        BaseInvoker bi = new BaseInvoker(mock(IClient.class));
+        RpcStub stub = new RpcStub(bi, null);
+
+        assertTrue(isInUse(stub));
+        markAbandon(stub);
+        assertFalse(isInUse(stub));
+    }
+
+    @Test
+    public void testMarkAbandonNotSupported() throws Exception {
+        RemoteInvoker bi = mock(RemoteInvoker.class);
+        RpcStub stub = new RpcStub(bi, null);
+
+        assertTrue(isInUse(stub));
+        markAbandon(stub);
+        assertTrue(isInUse(stub));
+    }
+
+    @Test
+    public void testSetConnectRetryTimes() throws Exception {
+        BaseInvoker bi = new BaseInvoker(mock(IClient.class));
+        RpcStub stub = new RpcStub(bi, null);
+
+        assertTrue(isInUse(stub));
+        setConnectRetryTimes(stub, 0);
+        assertFalse(isInUse(stub));
+        setConnectRetryTimes(stub, 3);
+        assertTrue(isInUse(stub));
+    }
+
+    @Test
+    public void testSetConnectRetryTimesNotSupported() throws Exception {
+        RemoteInvoker bi = mock(RemoteInvoker.class);
+        RpcStub stub = new RpcStub(bi, null);
+
+        assertTrue(isInUse(stub));
+        setConnectRetryTimes(stub, 0);
+        assertTrue(isInUse(stub));
+        setConnectRetryTimes(stub, 3);
+        assertTrue(isInUse(stub));
+    }
 
 }

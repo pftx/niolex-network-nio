@@ -21,7 +21,6 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import org.apache.niolex.network.cli.LogContext;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -43,6 +42,7 @@ public class LogContextTest {
 
 	@BeforeClass
 	public static void test() {
+        LogContext.setInstance(new LogContext());
 		Assert.assertEquals("GID", LogContext.prefix());
 		LogContext.serviceUrl("hdhdhdj");
 	}
