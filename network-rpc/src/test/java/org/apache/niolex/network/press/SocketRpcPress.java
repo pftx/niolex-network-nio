@@ -30,7 +30,7 @@ import org.apache.niolex.commons.test.StopWatch.Stop;
 import org.apache.niolex.commons.util.SystemUtil;
 import org.apache.niolex.network.demo.json.RpcService;
 import org.apache.niolex.network.rpc.cli.RpcStub;
-import org.apache.niolex.network.rpc.cli.SingleInvoker;
+import org.apache.niolex.network.rpc.cli.SocketInvoker;
 import org.apache.niolex.network.rpc.conv.JsonConverter;
 
 /**
@@ -101,7 +101,7 @@ public class SocketRpcPress {
 	}
 
     public static RpcStub create() throws IOException {
-        RpcStub client = new RpcStub(new SingleInvoker(new InetSocketAddress(ADDR, 8808)), new JsonConverter());
+        RpcStub client = new RpcStub(new SocketInvoker(new InetSocketAddress(ADDR, 8808)), new JsonConverter());
 		client.connect();
 		return client;
 	}
