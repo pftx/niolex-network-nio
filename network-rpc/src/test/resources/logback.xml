@@ -58,6 +58,10 @@
 		<appender-ref ref="DBG" />
 	</logger>
 
+    <logger name="org.apache.niolex.network.rpc" level="DEBUG">
+		<appender-ref ref="DBG" />
+	</logger>
+
     <root level="INFO">
         <appender-ref ref="FILE" />
     </root>

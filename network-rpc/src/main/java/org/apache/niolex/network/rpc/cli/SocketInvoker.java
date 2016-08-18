@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.Iterator;
 import java.util.Map.Entry;
+import java.util.NoSuchElementException;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -38,6 +39,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * The socket invoker, we do not need any extra thread to read from or write to socket, we
+ * use the RPC thread to do this. This class is useful when there are too many socket connections
+ * to be managed in one JVM.
+ * 
  * @author <a href="mailto:xiejiyun@foxmail.com">Xie, Jiyun</a>
  * @version 0.6.1
  * @since Aug 16, 2016
@@ -48,7 +53,7 @@ public class SocketInvoker extends BaseClient implements RemoteInvoker, Runnable
     /**
      * Use this map to notify data to the corresponding thread.
      */
-    private final ConcurrentMap<Integer, ArrayBlockingQueue<PacketData>> notifyMap = new ConcurrentHashMap<Integer, ArrayBlockingQueue<PacketData>>();
+    private final ConcurrentMap<Integer, Notifier> notifyMap = new ConcurrentHashMap<Integer, Notifier>();
 
     /**
      * The thread who got this lock will read from socket.
@@ -73,12 +78,12 @@ public class SocketInvoker extends BaseClient implements RemoteInvoker, Runnable
     /**
      * The stop status of this client.
      */
-    protected volatile boolean isStoped = false;
+    protected volatile boolean isStoped = true;
 
     /**
      * The retry thread of this client.
      */
-    protected volatile Thread thread;
+    protected volatile Thread retryThread;
 
     /**
      * Create a SocketInvoker with the specified server address.
@@ -98,6 +103,7 @@ public class SocketInvoker extends BaseClient implements RemoteInvoker, Runnable
     public void connect() throws IOException {
         prepareSocket();
         this.isWorking = true;
+        this.isStoped = false;
         LOG.info("Socket invoker connected to address: {}.", serverAddress);
     }
 
@@ -109,12 +115,25 @@ public class SocketInvoker extends BaseClient implements RemoteInvoker, Runnable
     public void stop() {
         this.isWorking = false;
         this.isStoped = true;
+        releaseAll();
+
         // Closing this socket will also close the socket's InputStream and OutputStream.
         Exception e = safeClose();
         if (e != null) {
             LOG.error("Error occured when stop the socket invoker.", e);
         }
         LOG.info("Socket invoker stoped.");
+    }
+
+    /**
+     * Release all the threads from waiting and clean the notify map.
+     */
+    protected void releaseAll() {
+        for (Entry<Integer, Notifier> set : notifyMap.entrySet()) {
+            set.getValue().interrupt();
+        }
+        // Clean the notify map.
+        notifyMap.clear();
     }
 
     /**
@@ -134,38 +153,89 @@ public class SocketInvoker extends BaseClient implements RemoteInvoker, Runnable
     public PacketData invoke(PacketData packet) {
         // Set up the waiting information
         Integer key = RpcUtil.generateKey(packet);
-        ArrayBlockingQueue<PacketData> answer = new ArrayBlockingQueue<PacketData>(1);
-        notifyMap.put(key, answer);
+        Notifier notifier = new Notifier();
+        ArrayBlockingQueue<PacketData> answer = notifier.getAnswer();
+        notifyMap.put(key, notifier);
         handleWrite(packet);
 
+        PacketData result = null;
+        try {
+            result = waitForResult(answer, key);
+        } finally {
+            // Cleanup.
+            cleanAndNotify(result, key);
+        }
+        return result;
+    }
+
+    /**
+     * Notify another thread to take over this thread to read packet from socket.
+     * 
+     * @param needClear whether we need clear the key from notify map
+     * @param key the notify key used to clean from map
+     */
+    private void cleanAndNotify(Object result, Integer key) {
+        if (result == null) {
+            // Clean the notify map.
+            notifyMap.remove(key);
+        }
+
+        // Clean the interrupt flag.
+        Thread.interrupted();
+        notifyIt(notifyMap.entrySet().iterator());
+    }
+
+    /**
+     * Notify the first thread in the iterator.
+     * 
+     * @param iterator the notify map iterator
+     */
+    protected void notifyIt(Iterator<Entry<Integer, Notifier>> iterator) {
+        if (iterator.hasNext()) {
+            try {
+                iterator.next().getValue().interrupt();
+            } catch (NoSuchElementException e) {
+                LOG.info("No one to notify when I want to hand over read lock.");
+            }
+        }
+    }
+
+    /**
+     * Wait for the result from server, we will read from socket if necessary.
+     * 
+     * @param answer the blocking queue used to put answer
+     * @param key the packet key used to find the result
+     * @return the result
+     */
+    protected PacketData waitForResult(ArrayBlockingQueue<PacketData> answer, Integer key) {
         long start = System.currentTimeMillis();
+        PacketData result = null;
+
         while (true) {
-            PacketData result = null;
             long sleep = start + rpcHandleTimeout - System.currentTimeMillis();
-            if (sleep <= 0) {
-                // Timeout, we clean the map, return null.
-                notifyMap.remove(key);
+            // Case 1. Timeout or socket is broken.
+            if (sleep <= 0 || !isWorking) {
                 return null;
             }
 
-            if (!readLock.tryLock()) {
-                // Can not acquire the lock, some one is reading, we just wait for result.
+            if (readLock.tryLock()) {
+                try {
+                    // Case 2. We already got the answer.
+                    if ((result = answer.poll()) != null) {
+                        return result;
+                    }
+
+                    // Case 3. We try to read the answer.
+                    result = readFromSocket(key);
+                } finally {
+                    readLock.unlock();
+                }
+            } else {
+                // Case 4. Can not acquire the lock, some one is reading, we just wait for result.
                 try {
                     result = answer.poll(sleep, TimeUnit.MILLISECONDS);
                 } catch (InterruptedException e) {
                     // Ignore the exception.
-                }
-            } else {
-                try {
-                    result = readFromSocket(key);
-                } catch (RpcException e) {
-                    // Error occurred, clean the map, re-throw the exception.
-                    notifyMap.remove(key);
-                    throw e;
-                } finally {
-                    readLock.unlock();
-                    // Notify another thread to read.
-                    notifyAnotherThread();
                 }
             }
 
@@ -184,16 +254,18 @@ public class SocketInvoker extends BaseClient implements RemoteInvoker, Runnable
      * @param key the key used to match the response packet
      * @return the response packet
      */
-    private PacketData readFromSocket(Integer key) {
+    protected PacketData readFromSocket(Integer key) {
         while (true) {
             try {
                 PacketData resp = readPacket();
                 Integer respKey = RpcUtil.generateKey(resp);
 
                 // Notify the waiting thread, remove it from map for cleanup.
-                ArrayBlockingQueue<PacketData> queue = notifyMap.remove(respKey);
-                if (queue != null) {
-                    queue.offer(resp);
+                Notifier n = notifyMap.remove(respKey);
+                if (n != null) {
+                    n.answer.offer(resp);
+                } else {
+                    LOG.info("Packet with key {} don't have receiver.", respKey);
                 }
 
                 // Return if we found the one.
@@ -203,21 +275,6 @@ public class SocketInvoker extends BaseClient implements RemoteInvoker, Runnable
             } catch (IOException e) {
                 LOG.info("I / O exception occurred when read from socket. {}", e.toString());
                 checkStatus();
-            }
-        }
-    }
-
-    /**
-     * Notify another thread to take over this thread to read packet from socket.
-     */
-    private void notifyAnotherThread() {
-        Iterator<Entry<Integer, ArrayBlockingQueue<PacketData>>> iterator = notifyMap.entrySet().iterator();
-
-        if (iterator.hasNext()) {
-            try {
-                iterator.next().getValue().put(null);
-            } catch (InterruptedException e) {
-                // Ignore the exception.
             }
         }
     }
@@ -247,6 +304,7 @@ public class SocketInvoker extends BaseClient implements RemoteInvoker, Runnable
 
         if (!socket.isConnected()) {
             isWorking = false;
+            releaseAll();
             fireRetry();
             throw new RpcException("Client not connected.", RpcException.Type.NOT_CONNECTED, null);
         }
@@ -256,9 +314,9 @@ public class SocketInvoker extends BaseClient implements RemoteInvoker, Runnable
      * Fire the retry thread to connect to server if necessary.
      */
     protected synchronized void fireRetry() {
-        if (connectRetryTimes > 0 && thread == null) {
-            thread = new Thread(this, "SocketInvoker-retry");
-            thread.start();
+        if (connectRetryTimes > 0 && retryThread == null) {
+            retryThread = new Thread(this, "SocketInvoker-retry");
+            retryThread.start();
         }
     }
 
@@ -270,7 +328,7 @@ public class SocketInvoker extends BaseClient implements RemoteInvoker, Runnable
     @Override
     public void run() {
         retryConnect();
-        thread = null;
+        retryThread = null;
     }
 
     /**
@@ -368,4 +426,40 @@ public class SocketInvoker extends BaseClient implements RemoteInvoker, Runnable
         this.rpcHandleTimeout = rpcHandleTimeout;
     }
 
+    /**
+     * The class used by the notify map.
+     * 
+     * @author <a href="mailto:xiejiyun@foxmail.com">Xie, Jiyun</a>
+     * @version 0.6.1
+     * @since Aug 18, 2016
+     */
+    protected static final class Notifier {
+        private final ArrayBlockingQueue<PacketData> answer;
+        private final Thread thread;
+
+        /**
+         * Create a new notifier, we create a blocking queue inside and save the current thread.
+         */
+        public Notifier() {
+            answer = new ArrayBlockingQueue<PacketData>(1);
+            thread = Thread.currentThread();
+        }
+
+        /**
+         * Get the blocking queue used to store answer.
+         * 
+         * @return the answer queue
+         */
+        public ArrayBlockingQueue<PacketData> getAnswer() {
+            return answer;
+        }
+
+        /**
+         * Interrupt the thread waiting on the answer queue.
+         */
+        public void interrupt() {
+            thread.interrupt();
+        }
+
+    }
 }

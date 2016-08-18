@@ -17,7 +17,8 @@
  */
 package org.apache.niolex.network.demo;
 
-import static org.apache.niolex.network.demo.DemoUtil.*;
+import static org.apache.niolex.network.demo.DemoUtil.POOL_SIZE;
+import static org.apache.niolex.network.demo.DemoUtil.PORT;
 
 import java.io.IOException;
 
@@ -58,6 +59,7 @@ public class DemoServer {
         handler.addHandler((short)3, new SummaryPacketHandler());
         handler.addHandler(4, 100, new SessionPacketHandler(new LastTalkFactory()));
         handler.addHandler(101, 200, new SavePacketHandler(null));
+        handler.addHandler(303, 404, new EchoPacketHandler());
         server.setPacketHandler(handler);
         server.start();
     }
