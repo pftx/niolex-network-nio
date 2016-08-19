@@ -259,18 +259,18 @@ public class RpcServer {
 
     /**
      * @return the server accept timeout
-     * @see org.apache.niolex.network.server.NioServer#getAcceptTimeOut()
+     * @see org.apache.niolex.network.server.NioServer#getAcceptTimeout()
      */
-    public int getAcceptTimeOut() {
+    public int getAcceptTimeout() {
         return svr.getAcceptTimeout();
     }
 
     /**
-     * @param acceptTimeOut the server accept timeout
-     * @see org.apache.niolex.network.server.NioServer#setAcceptTimeOut(int)
+     * @param acceptTimeout the server accept timeout
+     * @see org.apache.niolex.network.server.NioServer#setAcceptTimeout(int)
      */
-    public void setAcceptTimeOut(int acceptTimeOut) {
-        svr.setAcceptTimeout(acceptTimeOut);
+    public void setAcceptTimeout(int acceptTimeout) {
+        svr.setAcceptTimeout(acceptTimeout);
     }
 
     /**

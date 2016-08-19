@@ -28,9 +28,7 @@ import org.apache.niolex.address.rpc.svr.RpcServerMain;
 import org.apache.niolex.commons.bean.MutableOne;
 import org.apache.niolex.commons.reflect.FieldUtil;
 import org.apache.niolex.network.rpc.anno.RpcMethod;
-import org.junit.After;
 import org.junit.AfterClass;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -68,20 +66,6 @@ public class RpcClientFactoryTest {
         factory.disconnectFromZK();
     }
 
-    /**
-     * @throws java.lang.Exception
-     */
-    @Before
-    public void setUp() throws Exception {
-    }
-
-    /**
-     * @throws java.lang.Exception
-     */
-    @After
-    public void tearDown() throws Exception {
-    }
-
     @Test
     public void testRpcClientFactory() throws Exception {
         BaseStub<DemoFace> poolInternal = factory.newBuilder(DemoFace.class).buildPool();
@@ -105,7 +89,7 @@ public class RpcClientFactoryTest {
     @Test
     public void testConnectToZK() throws Exception {
         RpcClientFactory factory = new RpcClientFactory("redis-client", "abcde");
-        factory.setZkClusterAddress("localhost_invalid:3344");
+        factory.setZkClusterAddress("oeoifj.ije.asi.com:3344");
         assertFalse(factory.connectToZK());
         factory.disconnectFromZK();
         factory.disconnectFromZK();
@@ -129,17 +113,9 @@ public class RpcClientFactoryTest {
     }
 
     @Test
-    public void testGetZkEnvironment() throws Exception {
-    }
-
-    @Test
     public void testSetZkEnvironment() throws Exception {
         factory.setZkEnvironment("ddvv");
         assertEquals("ddvv", factory.getZkEnvironment());
-    }
-
-    @Test
-    public void testGetZkSessionTimeout() throws Exception {
     }
 
     @Test
@@ -149,17 +125,9 @@ public class RpcClientFactoryTest {
     }
 
     @Test
-    public void testGetZkUserName() throws Exception {
-    }
-
-    @Test
     public void testSetZkUserName() throws Exception {
         factory.setZkUserName("lex-client");
         assertEquals("lex-client", factory.getZkUserName());
-    }
-
-    @Test
-    public void testGetZkPassword() throws Exception {
     }
 
     @Test
@@ -171,13 +139,6 @@ public class RpcClientFactoryTest {
 }
 
 class RpcClientFactoryMock extends RpcClientFactory {
-
-    /**
-     * Constructor
-     */
-    public RpcClientFactoryMock() {
-        super();
-    }
 
     /**
      * Constructor

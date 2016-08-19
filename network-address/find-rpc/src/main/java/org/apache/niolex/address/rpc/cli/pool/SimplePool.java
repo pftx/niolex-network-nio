@@ -123,7 +123,8 @@ public class SimplePool<T> extends BaseStub<T> {
 
     /**
      * Override super method
-     * @see org.apache.niolex.find.rpc.cli.Basestub#destroy()
+     * 
+     * @see org.apache.niolex.address.rpc.cli.BaseStub#destroy()
      */
     @Override
     public synchronized void destroy() {

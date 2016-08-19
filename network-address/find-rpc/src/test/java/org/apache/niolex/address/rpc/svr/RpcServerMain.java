@@ -21,8 +21,6 @@ import java.util.Collections;
 import java.util.List;
 
 import org.apache.niolex.address.rpc.DemoService;
-import org.apache.niolex.address.rpc.svr.RpcExpose;
-import org.apache.niolex.address.rpc.svr.RpcServer;
 
 
 /**
@@ -56,7 +54,7 @@ public class RpcServerMain {
         rpc = new RpcServer();
         rpc.setHandlerThreadsNumber(5);
         rpc.setSelectorThreadsNumber(2);
-        rpc.setAcceptTimeOut(10000);
+        rpc.setAcceptTimeout(10000);
         rpc.setPort(port);
         rpc.setExposeList(exposeList);
         if (!rpc.start()) {

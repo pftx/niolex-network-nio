@@ -149,6 +149,7 @@ public abstract class BaseStub<T> implements MutableOne.DataChangeListener<List<
      * Build all the clients for this server address.
      *
      * @param info the node info which contains server address
+     * @return the built clients
      */
     protected Set<RpcStub> buildClients(NodeInfo info) {
         // omitting decimal fractions smaller than 0.5 and counting all others, including 0.5, as 1
@@ -244,6 +245,8 @@ public abstract class BaseStub<T> implements MutableOne.DataChangeListener<List<
 
     /**
      * Build this client stub for use. This method can only be called once.
+     * 
+     * @return this
      */
     public abstract BaseStub<T> build();
 

@@ -38,18 +38,24 @@ public @interface RpcInterface {
     /**
      * Optionally specify <code>serviceType</code> of the current interface.
      * default to use application/json as the transcoding protocol.
+     * 
+     * @return the service type
      */
     String serviceType() default "network/json";
 
     /**
      * Optionally specify <code>serviceName</code> of the current interface.
      * default to the current interface name with package together.
+     * 
+     * @return the service name
      */
     String serviceName() default "";
 
     /**
      * Optionally specify <code>version</code> of the current interface.
      * default to 1.0.0.001
+     * 
+     * @return the service version
      */
     String version() default "1.0.0.001";
 

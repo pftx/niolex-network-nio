@@ -18,7 +18,8 @@
 package org.apache.niolex.address.rpc;
 
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,7 +50,7 @@ public class AddressUtilTest extends AddressUtil {
         RpcExpose ee = new RpcExpose(DemoService.class, "bsp", "abc", 3);
         ee.build();
         String s = generateAddress(ee, 10010);
-        System.out.println(s);
+        System.out.println(" xxx " + s);
         NodeInfo info = parseAddress(s);
         assertEquals("network/json", info.getProtocol());
     }

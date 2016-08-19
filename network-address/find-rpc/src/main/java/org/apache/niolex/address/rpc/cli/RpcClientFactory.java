@@ -117,6 +117,7 @@ public class RpcClientFactory {
     /**
      * Create a new stub builder to create client side stub.
      * 
+     * @param <T> the stub interface type
      * @param interfaze the stub interface
      * @return the newly created builder
      */
@@ -272,6 +273,7 @@ public class RpcClientFactory {
     /**
      * Get the client pool for this service.
      *
+     * @param <T> the service interface type
      * @param interfaze the service interface.
      * @param serviceName the service name.
      * @param version the service version.
@@ -293,6 +295,7 @@ public class RpcClientFactory {
     /**
      * Get the client stub for this service.
      *
+     * @param <T> the service interface type
      * @param interfaze the service interface.
      * @param serviceName the service name.
      * @param version the service version.

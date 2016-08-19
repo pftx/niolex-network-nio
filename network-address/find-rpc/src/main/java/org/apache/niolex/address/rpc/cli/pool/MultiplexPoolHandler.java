@@ -103,7 +103,8 @@ public class MultiplexPoolHandler extends PoolHandler<RpcStub> {
 
     /**
      * Override super method
-     * @see org.apache.niolex.network.cli.PoolHandler#repair(org.apache.niolex.network.cli.IServiceHandler)
+     * 
+     * @see org.apache.niolex.network.cli.PoolHandler#repair(org.apache.niolex.network.cli.handler.IServiceHandler)
      */
     @Override
     protected void repair(RpcStub core) {
@@ -113,7 +114,8 @@ public class MultiplexPoolHandler extends PoolHandler<RpcStub> {
 
     /**
      * Override super method
-     * @see org.apache.niolex.network.cli.PoolHandler#offer(org.apache.niolex.network.cli.IServiceHandler)
+     * 
+     * @see org.apache.niolex.network.cli.PoolHandler#offer(org.apache.niolex.network.cli.handler.IServiceHandler)
      */
     @Override
     public void offer(RpcStub core) {
