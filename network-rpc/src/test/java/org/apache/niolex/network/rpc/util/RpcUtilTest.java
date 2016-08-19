@@ -26,14 +26,17 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
 import java.lang.reflect.InvocationTargetException;
+import java.net.InetSocketAddress;
 
 import org.apache.niolex.commons.codec.StringUtil;
+import org.apache.niolex.commons.reflect.FieldUtil;
 import org.apache.niolex.network.IClient;
 import org.apache.niolex.network.PacketData;
 import org.apache.niolex.network.rpc.RpcException;
 import org.apache.niolex.network.rpc.cli.BaseInvoker;
 import org.apache.niolex.network.rpc.cli.RemoteInvoker;
 import org.apache.niolex.network.rpc.cli.RpcStub;
+import org.apache.niolex.network.rpc.cli.SocketInvoker;
 import org.junit.Test;
 
 /**
@@ -250,10 +253,21 @@ public class RpcUtilTest extends RpcUtil {
 	}
 
     @Test
-    public void testConnectionClosed() throws Exception {
+    public void testConnectionClosedBi() throws Exception {
         BaseInvoker bi = new BaseInvoker(mock(IClient.class));
         RpcStub stub = new RpcStub(bi, null);
 
+        assertFalse(connectionClosed(stub));
+        bi.stop();
+        assertTrue(connectionClosed(stub));
+    }
+
+    @Test
+    public void testConnectionClosedSi() throws Exception {
+        SocketInvoker bi = new SocketInvoker(mock(InetSocketAddress.class));
+        RpcStub stub = new RpcStub(bi, null);
+
+        FieldUtil.setValue(bi, "isStoped", false);
         assertFalse(connectionClosed(stub));
         bi.stop();
         assertTrue(connectionClosed(stub));
@@ -270,8 +284,18 @@ public class RpcUtilTest extends RpcUtil {
     }
 
     @Test
-    public void testIsInUse() throws Exception {
+    public void testIsInUseBi() throws Exception {
         BaseInvoker bi = new BaseInvoker(mock(IClient.class));
+        RpcStub stub = new RpcStub(bi, null);
+
+        assertTrue(isInUse(stub));
+        bi.setConnectRetryTimes(0);
+        assertFalse(isInUse(stub));
+    }
+
+    @Test
+    public void testIsInUseSi() throws Exception {
+        SocketInvoker bi = new SocketInvoker(mock(InetSocketAddress.class));
         RpcStub stub = new RpcStub(bi, null);
 
         assertTrue(isInUse(stub));
@@ -290,8 +314,18 @@ public class RpcUtilTest extends RpcUtil {
     }
 
     @Test
-    public void testMarkAbandon() throws Exception {
+    public void testMarkAbandonBi() throws Exception {
         BaseInvoker bi = new BaseInvoker(mock(IClient.class));
+        RpcStub stub = new RpcStub(bi, null);
+
+        assertTrue(isInUse(stub));
+        markAbandon(stub);
+        assertFalse(isInUse(stub));
+    }
+
+    @Test
+    public void testMarkAbandonSi() throws Exception {
+        SocketInvoker bi = new SocketInvoker(mock(InetSocketAddress.class));
         RpcStub stub = new RpcStub(bi, null);
 
         assertTrue(isInUse(stub));
@@ -310,8 +344,21 @@ public class RpcUtilTest extends RpcUtil {
     }
 
     @Test
-    public void testSetConnectRetryTimes() throws Exception {
+    public void testSetConnectRetryTimesBi() throws Exception {
         BaseInvoker bi = new BaseInvoker(mock(IClient.class));
+        RpcStub stub = new RpcStub(bi, null);
+
+        assertTrue(isInUse(stub));
+
+        setConnectRetryTimes(stub, 0);
+        assertFalse(isInUse(stub));
+        setConnectRetryTimes(stub, 3);
+        assertTrue(isInUse(stub));
+    }
+
+    @Test
+    public void testSetConnectRetryTimesSi() throws Exception {
+        SocketInvoker bi = new SocketInvoker(mock(InetSocketAddress.class));
         RpcStub stub = new RpcStub(bi, null);
 
         assertTrue(isInUse(stub));

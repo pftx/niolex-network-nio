@@ -26,21 +26,22 @@ import org.apache.niolex.commons.concurrent.ConcurrentUtil;
 import org.apache.niolex.network.rpc.cli.RpcStub;
 
 /**
- * The pool stores all the rpc clients by their Internet socket address. We will not close connection actively,
+ * The pool stores all the rpc stubs by their Internet socket address. We will not close connection actively,
  * but leave it open with no retry times. No matter the connection is still OK or not, we will not use it if it's
- * address is removed from zookeeper.
+ * address is removed from zookeeper.<br>
+ * This maybe some how considered as memory leak, but we don't think it's a big problem.
  * 
  * @author <a href="mailto:xiejiyun@foxmail.com">Xie, Jiyun</a>
  * @version 1.0.0
  * @since Jul 22, 2016
  */
 public class RpcStubPool {
-    
+
     /**
      * The global singleton instance.
      */
     private static final RpcStubPool INSTANCE = new RpcStubPool();
-    
+
     /**
      * Get the global singleton instance.
      * 
@@ -49,7 +50,7 @@ public class RpcStubPool {
     public static final RpcStubPool getPool() {
         return INSTANCE;
     }
-    
+
     /**
      * The internal concurrent hash map.
      */
@@ -68,7 +69,7 @@ public class RpcStubPool {
         }
         return set;
     }
-    
+
     /**
      * Remove the key value pair from the internal map by the specified Internet socket address.
      * 

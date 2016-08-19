@@ -28,6 +28,7 @@ import org.apache.niolex.network.rpc.RpcException;
 import org.apache.niolex.network.rpc.cli.BaseInvoker;
 import org.apache.niolex.network.rpc.cli.RemoteInvoker;
 import org.apache.niolex.network.rpc.cli.RpcStub;
+import org.apache.niolex.network.rpc.cli.SocketInvoker;
 
 /**
  * Common utilities for Rpc.
@@ -158,6 +159,9 @@ public abstract class RpcUtil {
         if (invoker instanceof BaseInvoker) {
             BaseInvoker bi = (BaseInvoker) invoker;
             return bi.getConnStatus() == ConnStatus.CLOSED;
+        } else if (invoker instanceof SocketInvoker) {
+            SocketInvoker si = (SocketInvoker) invoker;
+            return si.isStoped();
         }
         return false;
     }
@@ -173,6 +177,9 @@ public abstract class RpcUtil {
         if (invoker instanceof BaseInvoker) {
             BaseInvoker bi = (BaseInvoker) invoker;
             return bi.getConnectRetryTimes() > 0;
+        } else if (invoker instanceof SocketInvoker) {
+            SocketInvoker si = (SocketInvoker) invoker;
+            return si.getConnectRetryTimes() > 0;
         }
         return true;
     }
@@ -187,6 +194,9 @@ public abstract class RpcUtil {
         if (invoker instanceof BaseInvoker) {
             BaseInvoker bi = (BaseInvoker) invoker;
             bi.setConnectRetryTimes(0);
+        } else if (invoker instanceof SocketInvoker) {
+            SocketInvoker si = (SocketInvoker) invoker;
+            si.setConnectRetryTimes(0);
         }
     }
 
@@ -201,6 +211,9 @@ public abstract class RpcUtil {
         if (invoker instanceof BaseInvoker) {
             BaseInvoker bi = (BaseInvoker) invoker;
             bi.setConnectRetryTimes(connectRetryTimes);
+        } else if (invoker instanceof SocketInvoker) {
+            SocketInvoker si = (SocketInvoker) invoker;
+            si.setConnectRetryTimes(connectRetryTimes);
         }
     }
 

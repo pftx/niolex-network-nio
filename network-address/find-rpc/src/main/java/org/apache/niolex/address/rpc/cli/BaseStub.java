@@ -24,13 +24,13 @@ import java.util.Set;
 
 import org.apache.niolex.address.rpc.AddressUtil;
 import org.apache.niolex.address.rpc.ConverterCenter;
+import org.apache.niolex.address.rpc.cli.pool.MultiplexPoolHandler;
 import org.apache.niolex.commons.bean.MutableOne;
 import org.apache.niolex.commons.test.Check;
 import org.apache.niolex.network.cli.Constants;
-import org.apache.niolex.network.client.BlockingClient;
 import org.apache.niolex.network.rpc.IConverter;
-import org.apache.niolex.network.rpc.cli.BaseInvoker;
 import org.apache.niolex.network.rpc.cli.RpcStub;
+import org.apache.niolex.network.rpc.cli.SocketInvoker;
 import org.apache.niolex.network.rpc.util.RpcUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -93,9 +93,9 @@ public abstract class BaseStub<T> implements MutableOne.DataChangeListener<List<
         super();
         this.interfaze = interfaze;
         this.isWorking = false;
-        mutableOne.addListener(this);
         // Fire the first change.
         this.onDataChange(null, mutableOne.data());
+        mutableOne.addListener(this);
     }
 
     /**
@@ -178,14 +178,13 @@ public abstract class BaseStub<T> implements MutableOne.DataChangeListener<List<
         // Add more connections if necessary.
         for (; i < curMax; ++i) {
             try {
-                // Let's create the connection here.
-                BlockingClient bk = new BlockingClient(info.getAddress());
                 // Create the invoker.
-                BaseInvoker bi = new BaseInvoker(bk);
+                SocketInvoker bi = new SocketInvoker(info.getAddress());
                 bi.setConnectTimeout(connectTimeout);
                 bi.setConnectRetryTimes(connectRetryTimes);
                 bi.setSleepBetweenRetryTime(connectSleepBetweenRetry);
                 bi.setRpcHandleTimeout(rpcTimeout);
+                // Let's create the connection here.
                 bi.connect();
                 // Create Rpc stub.
                 RpcStub cli = new RpcStub(bi, converter);
@@ -198,6 +197,24 @@ public abstract class BaseStub<T> implements MutableOne.DataChangeListener<List<
         }
 
         return clientSet;
+    }
+
+    /**
+     * Mark the deleted node as not retry, and remove them from ready set.
+     * The deleted connections will be removed by {@link MultiplexPoolHandler}
+     *
+     * @param delSet the nodes been deleted
+     */
+    protected void markDeleted(Set<NodeInfo> delSet) {
+        // Remove them all from the ready set.
+        readySet.removeAll(delSet);
+        for (NodeInfo info : delSet) {
+            Set<RpcStub> clientSet = POOL.getClients(info.getAddress());
+            for (RpcStub stub : clientSet) {
+                // We do not retry the deleted address.
+                RpcUtil.markAbandon(stub);
+            }
+        }
     }
 
     /**

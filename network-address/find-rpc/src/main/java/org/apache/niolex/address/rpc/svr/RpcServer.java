@@ -319,4 +319,18 @@ public class RpcServer {
         this.handlerThreadsNumber = handlerThreadsNumber;
     }
 
+    /**
+     * @return the Rpc server host IP
+     */
+    public String getRpcHostIp() {
+        return rpcHostIp;
+    }
+
+    /**
+     * @param rpcHostIp the Rpc server host IP to set
+     */
+    public void setRpcHostIp(String rpcHostIp) {
+        this.rpcHostIp = rpcHostIp;
+    }
+
 }

@@ -56,12 +56,14 @@ public class SocketInvokerTest implements Runnable {
         si.connect();
         assertTrue(si.isWorking());
         assertFalse(si.isStoped);
+        assertFalse(si.isStoped());
         si.checkStatus();
 
         si.stop();
         assertFalse(si.isReady());
         assertFalse(si.isWorking());
         assertTrue(si.isStoped);
+        assertTrue(si.isStoped());
     }
 
     @Test(expected = RpcException.class)

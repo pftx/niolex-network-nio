@@ -370,6 +370,15 @@ public class SocketInvoker extends BaseClient implements RemoteInvoker, Runnable
     }
 
     /**
+     * Return whether this invoker is stopped or not.
+     * 
+     * @return true if this invoker was stopped, false otherwise
+     */
+    public boolean isStoped() {
+        return isStoped;
+    }
+
+    /**
      * Get the time in milliseconds that client with sleep between retry to connect
      * to server.
      *

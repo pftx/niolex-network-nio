@@ -109,11 +109,11 @@ public class RpcClientFactory {
             zkConsumer = null;
         }
     }
-    
+
     //-------------------------------------------------------------------------
     // STUB BUILDER
     //-------------------------------------------------------------------------
-    
+
     /**
      * Create a new stub builder to create client side stub.
      * 
@@ -123,7 +123,7 @@ public class RpcClientFactory {
     public <T> StubBuilder<T> newBuilder(Class<T> interfaze) {
         return new StubBuilder<T>(interfaze);
     }
-    
+
     /**
      * The stub builder class.
      * 

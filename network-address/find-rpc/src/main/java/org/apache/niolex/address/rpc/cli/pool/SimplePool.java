@@ -27,7 +27,6 @@ import org.apache.niolex.address.rpc.cli.BaseStub;
 import org.apache.niolex.address.rpc.cli.NodeInfo;
 import org.apache.niolex.commons.bean.MutableOne;
 import org.apache.niolex.network.rpc.cli.RpcStub;
-import org.apache.niolex.network.rpc.util.RpcUtil;
 
 /**
  * The Rpc Simple Client Pool, Manage all the clients for one service under one state.
@@ -67,24 +66,6 @@ public class SimplePool<T> extends BaseStub<T> {
     protected void fireChanges(Set<NodeInfo> delSet, Set<NodeInfo> addSet) {
         markDeleted(delSet);
         markNew(addSet);
-    }
-
-    /**
-     * Mark the deleted node as not retry, and remove them from ready set.
-     * The deleted connections will be removed by {@link MultiplexPoolHandler}
-     *
-     * @param delSet the nodes been deleted
-     */
-    protected void markDeleted(Set<NodeInfo> delSet) {
-        // Remove them all from the ready set.
-        readySet.removeAll(delSet);
-        for (NodeInfo info : delSet) {
-            Set<RpcStub> clientSet = POOL.getClients(info.getAddress());
-            for (RpcStub stub : clientSet) {
-                // We do not retry the deleted address.
-                RpcUtil.markAbandon(stub);
-            }
-        }
     }
 
     /**

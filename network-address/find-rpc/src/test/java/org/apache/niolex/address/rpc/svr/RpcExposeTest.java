@@ -113,8 +113,7 @@ public class RpcExposeTest {
     @Test
     public void testSetTarget() throws Exception {
         RpcExpose exp = new RpcExpose("bsp");
-        exp.setTarget(345);
-        assertEquals(new Integer(345), exp.getTarget());
+        assertEquals("bsp", exp.getTarget());
     }
 
     @Test

@@ -42,7 +42,7 @@ public class RpcExpose {
     /**
      * The target object to expose.
      */
-    protected Object target;
+    protected final Object target;
 
     /**
      * The object state.
@@ -154,14 +154,6 @@ public class RpcExpose {
      */
     public Object getTarget() {
         return target;
-    }
-
-    /**
-     * @param target
-     *            the target to set
-     */
-    public void setTarget(Object target) {
-        this.target = target;
     }
 
     /**

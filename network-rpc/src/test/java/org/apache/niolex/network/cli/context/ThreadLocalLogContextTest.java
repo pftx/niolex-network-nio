@@ -10,6 +10,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import org.apache.niolex.commons.concurrent.ThreadUtil;
 import org.junit.Test;
 
 import com.google.common.collect.Lists;
@@ -29,6 +30,7 @@ public class ThreadLocalLogContextTest {
         @Override
         public String call() throws Exception {
             tCon.setLogPrefix(Thread.currentThread().getName());
+            ThreadUtil.sleepAtLeast(10);
             return tCon.getLogPrefix();
         }
 

@@ -17,12 +17,21 @@
  */
 package org.apache.niolex.address.rpc.cli.pool;
 
+import static org.apache.niolex.network.rpc.util.RpcUtil.isInUse;
+import static org.apache.niolex.network.rpc.util.RpcUtil.markAbandon;
+
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
 import org.apache.niolex.address.rpc.cli.BaseStub;
 import org.apache.niolex.address.rpc.cli.NodeInfo;
 import org.apache.niolex.commons.bean.MutableOne;
+import org.apache.niolex.network.cli.RetryHandler;
+import org.apache.niolex.network.rpc.cli.RpcStub;
 
 /**
  * We use the retry handler to generate client stub.
@@ -33,24 +42,51 @@ import org.apache.niolex.commons.bean.MutableOne;
  */
 public class RetryStub<T> extends BaseStub<T> {
 
+    private final InvocationHandler proxyHander = new InvocationHandler() {
+
+        @Override
+        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+            return handler.invoke(proxy, method, args);
+        }
+        
+    };
+
+    private volatile RetryHandler<RpcStub> handler;
+
     /**
-     * Constructor
-     * @param interfaze
-     * @param mutableOne
+     * Create a RetryStub with this pool size and interface.
+     *
+     * @param interfaze the service interface.
+     * @param mutableOne the server address list of this service.
      */
     public RetryStub(Class<T> interfaze, MutableOne<List<String>> mutableOne) {
         super(interfaze, mutableOne);
-        // TODO Auto-generated constructor stub
     }
 
     /**
      * This is the override of super method.
      * @see org.apache.niolex.address.rpc.cli.BaseStub#build()
      */
+    @SuppressWarnings("unchecked")
     @Override
-    public BaseStub<T> build() {
-        // TODO Auto-generated method stub
-        return null;
+    public synchronized RetryStub<T> build() {
+        // Check duplicate call.
+        if (isWorking) {
+            return this;
+        }
+
+        // Build clients.
+        ArrayList<RpcStub> cliList = new ArrayList<RpcStub>();
+        for (NodeInfo info : readySet) {
+            cliList.addAll(buildClients(info));
+        }
+        // Rpc client is ready, let's create the pool handler.
+        handler = new RetryHandler<RpcStub>(cliList, rpcErrorRetryTimes, 15);
+
+        // Pool creation done.
+        stub = (T) Proxy.newProxyInstance(SimplePool.class.getClassLoader(), new Class[] { interfaze }, proxyHander);
+        isWorking = true;
+        return this;
     }
 
     /**
@@ -58,9 +94,14 @@ public class RetryStub<T> extends BaseStub<T> {
      * @see org.apache.niolex.address.rpc.cli.BaseStub#destroy()
      */
     @Override
-    public void destroy() {
-        // TODO Auto-generated method stub
-        
+    public synchronized void destroy() {
+        if (isWorking) {
+            for (RpcStub h : handler.getHandlers()) {
+                markAbandon(h);
+                h.stop();
+            }
+            isWorking = false;
+        }
     }
 
     /**
@@ -70,8 +111,33 @@ public class RetryStub<T> extends BaseStub<T> {
      */
     @Override
     protected void fireChanges(Set<NodeInfo> delSet, Set<NodeInfo> addSet) {
-        // TODO Auto-generated method stub
+        markDeleted(delSet);
+        markNew(addSet);
+    }
 
+    /**
+     * Connect to new servers, add add them into ready set.
+     *
+     * @param addSet the nodes been added
+     */
+    protected void markNew(Set<NodeInfo> addSet) {
+        // Put them into ready set.
+        readySet.addAll(addSet);
+        // Save all the new clients.
+        ArrayList<RpcStub> cliList = new ArrayList<RpcStub>();
+        // Add the current new server.
+        for (NodeInfo info : addSet) {
+            cliList.addAll(buildClients(info));
+        }
+        // Offer all the old clients.
+        for (RpcStub rpcc : handler.getHandlers()) {
+            if (isInUse(rpcc)) {
+                cliList.add(rpcc);
+            }
+        }
+
+        // Create new handler.
+        handler = new RetryHandler<RpcStub>(cliList, rpcErrorRetryTimes, 15);
     }
 
 }
