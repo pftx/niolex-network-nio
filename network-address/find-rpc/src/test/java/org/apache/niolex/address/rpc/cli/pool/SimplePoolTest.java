@@ -17,7 +17,6 @@
  */
 package org.apache.niolex.address.rpc.cli.pool;
 
-
 import static org.apache.niolex.address.rpc.AddressUtilTest.makeAddress;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;

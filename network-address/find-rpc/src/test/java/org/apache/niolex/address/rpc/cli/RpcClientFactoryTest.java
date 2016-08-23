@@ -24,6 +24,7 @@ import java.util.List;
 
 import org.apache.niolex.address.client.Consumer;
 import org.apache.niolex.address.rpc.RpcInterface;
+import org.apache.niolex.address.rpc.cli.RpcClientFactory.StubBuilder;
 import org.apache.niolex.address.rpc.svr.RpcServerMain;
 import org.apache.niolex.commons.bean.MutableOne;
 import org.apache.niolex.commons.reflect.FieldUtil;
@@ -46,12 +47,12 @@ public class RpcClientFactoryTest {
      */
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
-        // 配置环境变量
+        // configure ZK
         System.setProperty("zk.cluster.address", "localhost:9181");
         System.setProperty("zk.session.timeout", "30000");
         System.setProperty("zk.root", "find");
         factory = new RpcClientFactoryMock("redis-client", "abcde");
-        // 准备启动了
+        // Let's start!
         if (!factory.connectToZK()) {
             System.out.println("Failed to connect to ZK.");
             System.exit(-1);
@@ -99,6 +100,7 @@ public class RpcClientFactoryTest {
     public void testDisconnectFromZK() throws Exception {
         RpcServerMain.main(null);
         ClientPoolMain.main(new String[0]);
+        ClientRetryMain.main(new String[0]);
         RpcServerMain.stop();
     }
 
@@ -136,6 +138,14 @@ public class RpcClientFactoryTest {
         assertEquals("LoveIt.", factory.getZkPassword());
     }
 
+    @Test
+    public void testNewBuilder() throws Exception {
+        StubBuilder<DemoFace> builder = factory.newBuilder(DemoFace.class);
+
+        builder.serviceName("abc").version("3-100").version("1.0.3.304").state("default").poolSize(-3);
+        builder.buildStub();
+    }
+
 }
 
 class RpcClientFactoryMock extends RpcClientFactory {
@@ -157,6 +167,12 @@ class RpcClientFactoryMock extends RpcClientFactory {
     public <T> BaseMock<T> getPool(Class<T> interfaze, String serviceName, String version, String state, int poolSize) {
         Consumer zkConsumer = FieldUtil.getValue(this, "zkConsumer");
         MutableOne<List<String>> mutableOne = zkConsumer.getAddressList(serviceName, version, state);
+        return new BaseMock<T>(interfaze, mutableOne);
+    }
+
+    @Override
+    public <T> BaseStub<T> getStub(Class<T> interfaze, String serviceName, String version, String state) {
+        MutableOne<List<String>> mutableOne = new MutableOne<List<String>>();
         return new BaseMock<T>(interfaze, mutableOne);
     }
 

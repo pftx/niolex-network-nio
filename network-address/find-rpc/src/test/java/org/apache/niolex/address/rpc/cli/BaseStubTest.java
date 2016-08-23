@@ -19,15 +19,20 @@ package org.apache.niolex.address.rpc.cli;
 
 import static org.apache.niolex.address.rpc.AddressUtilTest.makeAddress;
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
 import org.apache.niolex.address.rpc.AddressUtil;
+import org.apache.niolex.address.rpc.ConverterCenter;
 import org.apache.niolex.commons.bean.MutableOne;
 import org.apache.niolex.network.demo.json.RpcService;
+import org.apache.niolex.network.rpc.IConverter;
 import org.apache.niolex.network.rpc.cli.RpcStub;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -47,13 +52,6 @@ public class BaseStubTest {
     @Before
     public void setUp() throws Exception {
         stub = new BaseMock<RpcService>(RpcService.class, mutableOne);
-    }
-
-    /**
-     * @throws java.lang.Exception
-     */
-    @After
-    public void tearDown() throws Exception {
     }
 
     @Test
@@ -197,6 +195,29 @@ public class BaseStubTest {
     public void testSetRpcErrorRetryTimes() throws Exception {
         stub.setRpcErrorRetryTimes(3050);
         assertEquals(3050, stub.getRpcErrorRetryTimes());
+    }
+
+    @Test
+    public void testBuildClients() throws Exception {
+        ConverterCenter.addConverter("rpc", mock(IConverter.class));
+        NodeInfo info = AddressUtil.parseAddress("rpc#10.254.2.10:8090#3");
+        // Mock all.
+        Set<RpcStub> clientSet = RpcStubPool.getPool().getClients(info.getAddress());
+
+        for (int i = 0; i < 10; ++i) {
+            RpcStub r = mock(RpcStub.class);
+            if (i == 3) {
+                when(r.isReady()).thenReturn(false, true);
+                doThrow(new IOException("mock it.")).when(r).connect();
+            } else if (i == 6) {
+                when(r.isReady()).thenReturn(false, true);
+            } else {
+                when(r.isReady()).thenReturn(true);
+            }
+            clientSet.add(r);
+        }
+
+        assertEquals(clientSet, stub.buildClients(info));
     }
 
 }

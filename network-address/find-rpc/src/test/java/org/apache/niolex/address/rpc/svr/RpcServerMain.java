@@ -22,9 +22,9 @@ import java.util.List;
 
 import org.apache.niolex.address.rpc.DemoService;
 
-
 /**
- *
+ * The Rpc Server usage demo.
+ * 
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.5
  * @since 2013-1-7

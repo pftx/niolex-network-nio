@@ -23,7 +23,6 @@ import org.apache.niolex.address.rpc.DemoService;
 import org.apache.niolex.commons.net.NetUtil;
 import org.apache.niolex.commons.util.DateTimeUtil;
 
-
 /**
  * Demo for test. Implementation.
  *
