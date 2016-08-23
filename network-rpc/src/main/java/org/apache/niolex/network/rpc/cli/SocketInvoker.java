@@ -20,7 +20,6 @@ package org.apache.niolex.network.rpc.cli;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.Iterator;
-import java.util.Map.Entry;
 import java.util.NoSuchElementException;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
@@ -31,6 +30,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.niolex.commons.util.SystemUtil;
 import org.apache.niolex.network.Config;
+import org.apache.niolex.network.ConnStatus;
 import org.apache.niolex.network.PacketData;
 import org.apache.niolex.network.client.BaseClient;
 import org.apache.niolex.network.rpc.RpcException;
@@ -76,9 +76,9 @@ public class SocketInvoker extends BaseClient implements RemoteInvoker, Runnable
     private int rpcHandleTimeout = Config.RPC_HANDLE_TIMEOUT;
 
     /**
-     * The stop status of this client.
+     * The connection status of this invoker.
      */
-    protected volatile boolean isStoped = true;
+    protected volatile ConnStatus connStatus = ConnStatus.INNITIAL;
 
     /**
      * The retry thread of this client.
@@ -103,7 +103,7 @@ public class SocketInvoker extends BaseClient implements RemoteInvoker, Runnable
     public void connect() throws IOException {
         prepareSocket();
         this.isWorking = true;
-        this.isStoped = false;
+        this.connStatus = ConnStatus.CONNECTED;
         LOG.info("Socket invoker connected to address: {}.", serverAddress);
     }
 
@@ -114,7 +114,7 @@ public class SocketInvoker extends BaseClient implements RemoteInvoker, Runnable
     @Override
     public void stop() {
         this.isWorking = false;
-        this.isStoped = true;
+        this.connStatus = ConnStatus.CLOSED;
         releaseAll();
 
         // Closing this socket will also close the socket's InputStream and OutputStream.
@@ -129,8 +129,8 @@ public class SocketInvoker extends BaseClient implements RemoteInvoker, Runnable
      * Release all the threads from waiting and clean the notify map.
      */
     protected void releaseAll() {
-        for (Entry<Integer, Notifier> set : notifyMap.entrySet()) {
-            set.getValue().interrupt();
+        for (Notifier n : notifyMap.values()) {
+            n.interrupt();
         }
         // Clean the notify map.
         notifyMap.clear();
@@ -182,7 +182,7 @@ public class SocketInvoker extends BaseClient implements RemoteInvoker, Runnable
 
         // Clean the interrupt flag.
         Thread.interrupted();
-        notifyIt(notifyMap.entrySet().iterator());
+        notifyIt(notifyMap.values().iterator());
     }
 
     /**
@@ -190,10 +190,10 @@ public class SocketInvoker extends BaseClient implements RemoteInvoker, Runnable
      * 
      * @param iterator the notify map iterator
      */
-    protected void notifyIt(Iterator<Entry<Integer, Notifier>> iterator) {
+    protected void notifyIt(Iterator<Notifier> iterator) {
         if (iterator.hasNext()) {
             try {
-                iterator.next().getValue().interrupt();
+                iterator.next().interrupt();
             } catch (NoSuchElementException e) {
                 LOG.info("No one to notify when I want to hand over read lock.");
             }
@@ -208,13 +208,13 @@ public class SocketInvoker extends BaseClient implements RemoteInvoker, Runnable
      * @return the result
      */
     protected PacketData waitForResult(ArrayBlockingQueue<PacketData> answer, Integer key) {
-        long start = System.currentTimeMillis();
+        long end = System.currentTimeMillis() + rpcHandleTimeout;
         PacketData result = null;
 
         while (true) {
-            long sleep = start + rpcHandleTimeout - System.currentTimeMillis();
+            long sleep = end - System.currentTimeMillis();
             // Case 1. Timeout or socket is broken.
-            if (sleep <= 0 || !isWorking) {
+            if (sleep <= 0 || connStatus != ConnStatus.CONNECTED) {
                 return null;
             }
 
@@ -255,8 +255,8 @@ public class SocketInvoker extends BaseClient implements RemoteInvoker, Runnable
      * @return the response packet
      */
     protected PacketData readFromSocket(Integer key) {
-        while (true) {
-            try {
+        try {
+            while (true) {
                 PacketData resp = readPacket();
                 Integer respKey = RpcUtil.generateKey(resp);
 
@@ -272,10 +272,9 @@ public class SocketInvoker extends BaseClient implements RemoteInvoker, Runnable
                 if (respKey.equals(key)) {
                     return resp;
                 }
-            } catch (IOException e) {
-                LOG.info("I / O exception occurred when read from socket. {}", e.toString());
-                checkStatus();
             }
+        } catch (IOException e) {
+            throw checkStatus(e);
         }
     }
 
@@ -289,25 +288,28 @@ public class SocketInvoker extends BaseClient implements RemoteInvoker, Runnable
         try {
             writePacket(sc);
         } catch (IOException e) {
-            checkStatus();
+            throw checkStatus(e);
         }
     }
 
     /**
-     * Check the connection status, throw exception if it's not valid. We will start a new thread to
-     * retry to connect to server if necessary.
+     * The socket is invalid, check the connection status. We will start a new thread to retry to connect to
+     * server if necessary.
+     * 
+     * @return the proper {@link RpcException}
      */
-    protected void checkStatus() {
-        if (isStoped) {
-            throw new RpcException("Client closed.", RpcException.Type.CONNECTION_CLOSED, null);
+    protected RpcException checkStatus(IOException e) {
+        if (connStatus == ConnStatus.CLOSED) {
+            return new RpcException("Client closed.", RpcException.Type.CONNECTION_CLOSED, e);
         }
 
-        if (!socket.isConnected()) {
-            isWorking = false;
+        if (connStatus == ConnStatus.CONNECTED) {
+            connStatus = ConnStatus.CONNECTING;
             releaseAll();
             fireRetry();
-            throw new RpcException("Client not connected.", RpcException.Type.NOT_CONNECTED, null);
         }
+
+        return new RpcException("Client not connected.", RpcException.Type.NOT_CONNECTED, e);
     }
 
     /**
@@ -327,7 +329,11 @@ public class SocketInvoker extends BaseClient implements RemoteInvoker, Runnable
      */
     @Override
     public void run() {
-        retryConnect();
+        if (!retryConnect()) {
+            LOG.error("We can not re-connect to server after retry times, invoker will stop.");
+            // Try to shutdown this invoker, inform all the threads.
+            stop();
+        }
         retryThread = null;
     }
 
@@ -342,7 +348,8 @@ public class SocketInvoker extends BaseClient implements RemoteInvoker, Runnable
             LOG.info("Base invoker try to reconnect to server round {} ...", i);
             try {
                 prepareSocket();
-                return isWorking = true;
+                connStatus = ConnStatus.CONNECTED;
+                return true;
             } catch (IOException e) {
                 // Not connected.
                 LOG.info("Try to re-connect to server failed. {}", e.toString());
@@ -366,7 +373,7 @@ public class SocketInvoker extends BaseClient implements RemoteInvoker, Runnable
      */
     @Override
     public boolean isReady() {
-        return isWorking;
+        return connStatus == ConnStatus.CONNECTED;
     }
 
     /**
@@ -375,7 +382,7 @@ public class SocketInvoker extends BaseClient implements RemoteInvoker, Runnable
      * @return true if this invoker was stopped, false otherwise
      */
     public boolean isStoped() {
-        return isStoped;
+        return connStatus == ConnStatus.CLOSED;
     }
 
     /**
@@ -436,7 +443,7 @@ public class SocketInvoker extends BaseClient implements RemoteInvoker, Runnable
     }
 
     /**
-     * The class used by the notify map.
+     * The class is used by the notify map.
      * 
      * @author <a href="mailto:xiejiyun@foxmail.com">Xie, Jiyun</a>
      * @version 0.6.1

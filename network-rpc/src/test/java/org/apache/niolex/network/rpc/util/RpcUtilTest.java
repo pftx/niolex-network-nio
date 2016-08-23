@@ -30,6 +30,7 @@ import java.net.InetSocketAddress;
 
 import org.apache.niolex.commons.codec.StringUtil;
 import org.apache.niolex.commons.reflect.FieldUtil;
+import org.apache.niolex.network.ConnStatus;
 import org.apache.niolex.network.IClient;
 import org.apache.niolex.network.PacketData;
 import org.apache.niolex.network.rpc.RpcException;
@@ -267,7 +268,7 @@ public class RpcUtilTest extends RpcUtil {
         SocketInvoker bi = new SocketInvoker(mock(InetSocketAddress.class));
         RpcStub stub = new RpcStub(bi, null);
 
-        FieldUtil.setValue(bi, "isStoped", false);
+        FieldUtil.setValue(bi, "connStatus", ConnStatus.CONNECTING);
         assertFalse(connectionClosed(stub));
         bi.stop();
         assertTrue(connectionClosed(stub));

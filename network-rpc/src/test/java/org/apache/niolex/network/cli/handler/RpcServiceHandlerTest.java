@@ -25,8 +25,6 @@ import java.util.List;
 
 import org.apache.niolex.commons.concurrent.ThreadUtil;
 import org.apache.niolex.commons.reflect.FieldUtil;
-import org.apache.niolex.network.cli.handler.IServiceHandler;
-import org.apache.niolex.network.cli.handler.RpcServiceHandler;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -40,7 +38,7 @@ public class RpcServiceHandlerTest {
 	protected static List<IServiceHandler> listHandlers = new ArrayList<IServiceHandler>();
 
 	static {
-		listHandlers.add(new RpcServiceHandler("5", new A("5"), 20, true));
+        listHandlers.add(new RpcServiceHandler("5", new A("5"), 40, true));
 		listHandlers.add(new RpcServiceHandler("6", new A("6"), 28, true));
 		listHandlers.add(new RpcServiceHandler("7", new A("7"), 17, true));
 		listHandlers.add(new RpcServiceHandler("8", new A("8"), 5000, true));

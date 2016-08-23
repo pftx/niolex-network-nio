@@ -55,7 +55,7 @@ public class ClientRetryMain {
             demo.tick(i);
         }
         System.out.println("服务器当前时间: " + demo.getTime());
-        if (args == null)
+        if (args == null || args.length == 0)
             SystemUtil.sleep(5000);
         for (int i = 0; i < 30; ++i) {
             demo.tick(i);

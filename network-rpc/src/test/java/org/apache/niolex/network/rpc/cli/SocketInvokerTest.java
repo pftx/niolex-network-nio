@@ -3,6 +3,7 @@ package org.apache.niolex.network.rpc.cli;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
@@ -21,13 +22,13 @@ import java.net.Socket;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.NoSuchElementException;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.niolex.commons.concurrent.ThreadUtil;
 import org.apache.niolex.commons.reflect.FieldUtil;
+import org.apache.niolex.network.ConnStatus;
 import org.apache.niolex.network.PacketData;
 import org.apache.niolex.network.demo.DemoServer;
 import org.apache.niolex.network.rpc.RpcException;
@@ -55,57 +56,48 @@ public class SocketInvokerTest implements Runnable {
     public void testSocketInvoker() throws Exception {
         si.connect();
         assertTrue(si.isWorking());
-        assertFalse(si.isStoped);
+        assertTrue(si.connStatus == ConnStatus.CONNECTED);
         assertFalse(si.isStoped());
-        si.checkStatus();
 
         si.stop();
         assertFalse(si.isReady());
         assertFalse(si.isWorking());
-        assertTrue(si.isStoped);
+        assertTrue(si.connStatus == ConnStatus.CLOSED);
         assertTrue(si.isStoped());
-    }
 
-    @Test(expected = RpcException.class)
-    public void testConnectClose() throws Exception {
-        si.isStoped = true;
-        try {
-            si.checkStatus();
-        } catch (RpcException e) {
-            assertEquals(RpcException.Type.CONNECTION_CLOSED, e.getType());
-            throw e;
-        }
-    }
-
-    @Test(expected = RpcException.class)
-    public void testConnectLoss() throws Exception {
-        si.setConnectRetryTimes(0);
-        si.isStoped = false;
-        FieldUtil.setValue(si, "socket", new Socket());
-        try {
-            si.checkStatus();
-        } catch (RpcException e) {
-            assertEquals(RpcException.Type.NOT_CONNECTED, e.getType());
-            throw e;
-        }
+        RpcException e = si.checkStatus(null);
+        assertEquals("Client closed.", e.getMessage());
+        assertEquals(RpcException.Type.CONNECTION_CLOSED, e.getType());
     }
 
     @Test
-    public void testCheckStatus() throws Exception {
+    public void testConnecting() throws Exception {
+        si.connStatus = ConnStatus.CONNECTING;
+        RpcException e = si.checkStatus(null);
+        assertEquals(RpcException.Type.NOT_CONNECTED, e.getType());
+    }
+
+    @Test
+    public void testConnectLoss() throws Exception {
+        si.setConnectRetryTimes(2);
+        si.connStatus = ConnStatus.CONNECTED;
+        Socket so = new Socket();
+        FieldUtil.setValue(si, "socket", so);
         si.setSleepBetweenRetryTime(1);
-        si.isStoped = false;
         assertFalse(si.isWorking());
+        RpcException e = si.checkStatus(null);
+        assertEquals(RpcException.Type.NOT_CONNECTED, e.getType());
         si.fireRetry();
         si.fireRetry();
         si.fireRetry();
         ThreadUtil.sleepAtLeast(50);
-        assertTrue(si.isWorking());
-        assertFalse(si.isStoped);
+        assertFalse(si.isWorking());
+        assertTrue(si.isReady());
+        assertNotEquals(so, FieldUtil.getValue(si, "socket"));
 
         si.stop();
         assertFalse(si.isReady());
         assertFalse(si.isWorking());
-        assertTrue(si.isStoped);
     }
 
     @Test
@@ -125,7 +117,7 @@ public class SocketInvokerTest implements Runnable {
             PacketData r = si.invoke(packet);
             assertArrayEquals(r.getData(), packet.getData());
         }
-        si.checkStatus();
+        assertEquals(ConnStatus.CONNECTED, si.connStatus);
         System.out.println(" XXX Connected To > " + si.getRemoteAddress());
         si.stop();
     }
@@ -142,7 +134,7 @@ public class SocketInvokerTest implements Runnable {
     @Test(expected = RpcException.class)
     public void testInvokeWithExceptionOut() throws Exception {
         si.setConnectRetryTimes(0);
-        si.isStoped = false;
+        si.connStatus = ConnStatus.CONNECTED;
         FieldUtil.setValue(si, "isWorking", true);
         Socket so = mock(Socket.class);
         when(so.isConnected()).thenReturn(false);
@@ -160,10 +152,10 @@ public class SocketInvokerTest implements Runnable {
     @Test(expected = RpcException.class)
     public void testHandleWrite() throws Exception {
         si.setConnectRetryTimes(0);
-        si.isStoped = false;
+        si.connStatus = ConnStatus.CONNECTING;
         FieldUtil.setValue(si, "socket", new Socket());
         OutputStream out = mock(OutputStream.class);
-        doThrow(new IOException("dd out")).when(out).write(any(byte[].class));
+        doThrow(new IOException("dd out err")).when(out).write(any(byte[].class));
         FieldUtil.setValue(si, "out", out);
         si.handleWrite(PacketData.getHeartBeatPacket());
     }
@@ -171,12 +163,11 @@ public class SocketInvokerTest implements Runnable {
     @Test
     public void testHandleWriteOK() throws Exception {
         si.setConnectRetryTimes(0);
-        si.isStoped = false;
+        si.connStatus = ConnStatus.CONNECTING;
         Socket so = mock(Socket.class);
         when(so.isConnected()).thenReturn(true);
         FieldUtil.setValue(si, "socket", so);
         OutputStream out = mock(OutputStream.class);
-        doThrow(new IOException("dd in")).when(out).write(any(byte[].class));
         FieldUtil.setValue(si, "out", out);
         si.handleWrite(PacketData.getHeartBeatPacket());
     }
@@ -243,7 +234,7 @@ public class SocketInvokerTest implements Runnable {
         }
 
         errMap.put(2, err);
-        si.checkStatus();
+        assertEquals(ConnStatus.CONNECTED, si.connStatus);
         System.out.println(" XXX Connected To > " + si.getRemoteAddress());
 
         for (int i = 0; i < threads; ++i) {
@@ -309,7 +300,7 @@ public class SocketInvokerTest implements Runnable {
     @Test
     public void testReadFromSocket() throws Exception {
         si.setConnectRetryTimes(0);
-        si.isStoped = false;
+        si.connStatus = ConnStatus.CONNECTING;
         Socket so = mock(Socket.class);
         when(so.isConnected()).thenReturn(true);
         FieldUtil.setValue(si, "socket", so);
@@ -348,7 +339,7 @@ public class SocketInvokerTest implements Runnable {
     @Test(expected = RpcException.class)
     public void testReadFromSocketErro() throws Exception {
         si.setConnectRetryTimes(0);
-        si.isStoped = false;
+        si.connStatus = ConnStatus.CONNECTING;
         Socket so = mock(Socket.class);
         when(so.isConnected()).thenReturn(true, false);
         FieldUtil.setValue(si, "socket", so);
@@ -362,12 +353,20 @@ public class SocketInvokerTest implements Runnable {
     @Test
     public void testCleanAndNotify() throws Exception {
         @SuppressWarnings("unchecked")
-        Iterator<Entry<Integer, Notifier>> iterator = mock(Iterator.class);
+        Iterator<Notifier> iterator = mock(Iterator.class);
 
         when(iterator.hasNext()).thenReturn(true);
         when(iterator.next()).thenThrow(new NoSuchElementException());
 
         si.notifyIt(iterator);
+    }
+
+    @Test
+    public void testInvalidAddr() throws Exception {
+        si.setServerAddress(new InetSocketAddress("localhost", 19858));
+        si.setConnectRetryTimes(0);
+        si.setSleepBetweenRetryTime(6);
+        si.run();
     }
 
 }
