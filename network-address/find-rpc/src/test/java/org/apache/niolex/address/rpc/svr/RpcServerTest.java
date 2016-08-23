@@ -183,6 +183,7 @@ public class RpcServerTest implements Serializable {
         assertEquals(3030, r.getAcceptTimeout());
 
         assertNull(r.getExposeList());
+        System.setProperty("rpc.host.ip", "127.0.1.2");
     }
 
 }

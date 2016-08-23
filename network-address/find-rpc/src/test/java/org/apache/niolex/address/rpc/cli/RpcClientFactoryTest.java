@@ -99,8 +99,8 @@ public class RpcClientFactoryTest {
     @Test
     public void testDisconnectFromZK() throws Exception {
         RpcServerMain.main(null);
-        ClientPoolMain.main(new String[0]);
-        ClientRetryMain.main(new String[0]);
+        ClientPoolMain.main(new String[1]);
+        ClientRetryMain.main(new String[1]);
         RpcServerMain.stop();
     }
 
