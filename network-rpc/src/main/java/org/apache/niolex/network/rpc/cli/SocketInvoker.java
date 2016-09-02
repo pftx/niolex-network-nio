@@ -296,6 +296,7 @@ public class SocketInvoker extends BaseClient implements RemoteInvoker, Runnable
      * The socket is invalid, check the connection status. We will start a new thread to retry to connect to
      * server if necessary.
      * 
+     * @param e the exception thrown from socket
      * @return the proper {@link RpcException}
      */
     protected RpcException checkStatus(IOException e) {
