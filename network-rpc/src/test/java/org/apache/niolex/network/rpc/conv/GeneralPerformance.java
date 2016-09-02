@@ -19,11 +19,12 @@ package org.apache.niolex.network.rpc.conv;
 
 import static org.junit.Assert.assertEquals;
 
+import org.apache.niolex.commons.bean.Pair;
 import org.apache.niolex.commons.test.MockUtil;
 import org.apache.niolex.commons.test.Performance;
-import org.apache.niolex.commons.bean.Pair;
 import org.apache.niolex.network.rpc.IConverter;
-import org.codehaus.jackson.type.TypeReference;
+
+import com.fasterxml.jackson.core.type.TypeReference;
 
 /**
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>

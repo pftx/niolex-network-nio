@@ -26,7 +26,6 @@ import org.apache.niolex.commons.compress.JacksonUtil;
 import org.apache.niolex.commons.seri.SeriUtil;
 import org.apache.niolex.commons.stream.JsonProxy;
 import org.apache.niolex.network.rpc.IConverter;
-import org.codehaus.jackson.type.TypeReference;
 
 /**
  * Using JSON / Jackson to serialize data.
@@ -43,7 +42,7 @@ public class JsonConverter implements IConverter {
      */
     @Override
     public Object[] prepareParams(byte[] data, Type[] generic) throws Exception {
-        List<TypeReference<Object>> list = SeriUtil.packJavaTypes(generic);
+        List<com.fasterxml.jackson.core.type.TypeReference<Object>> list = SeriUtil.packJavaTypes(generic);
         
         Object[] ret = new Object[list.size()];
         ByteArrayInputStream in = new ByteArrayInputStream(data);
@@ -64,6 +63,7 @@ public class JsonConverter implements IConverter {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         for (Object o : args) {
             JacksonUtil.writeObj(out, o);
+            out.write(' ');
         }
         return out.toByteArray();
     }

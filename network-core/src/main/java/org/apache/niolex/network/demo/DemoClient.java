@@ -17,7 +17,9 @@
  */
 package org.apache.niolex.network.demo;
 
-import static org.apache.niolex.network.demo.DemoUtil.*;
+import static org.apache.niolex.network.demo.DemoUtil.HOST;
+import static org.apache.niolex.network.demo.DemoUtil.PORT;
+import static org.apache.niolex.network.demo.DemoUtil.TIMEOUT;
 
 import java.io.InputStream;
 import java.net.InetSocketAddress;
@@ -79,6 +81,7 @@ public class DemoClient {
             c.handleWrite(pk);
         }
         Thread.sleep(100);
+        sc.close();
         c.stop();
     }
 

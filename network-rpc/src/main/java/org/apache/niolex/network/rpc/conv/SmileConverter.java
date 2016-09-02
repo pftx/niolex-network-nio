@@ -26,7 +26,8 @@ import org.apache.niolex.commons.seri.SeriUtil;
 import org.apache.niolex.commons.seri.SmileUtil;
 import org.apache.niolex.commons.stream.SmileProxy;
 import org.apache.niolex.network.rpc.IConverter;
-import org.codehaus.jackson.type.TypeReference;
+
+import com.fasterxml.jackson.core.type.TypeReference;
 
 /**
  * Using Smile / Jackson to serialize data.

@@ -106,7 +106,7 @@ public class JsonConverterTest {
 	 */
 	@Test
 	public void testPrepareParams() throws Exception {
-		byte[] abc = "\"ab\"1352344810125\"qqx\"443{\"a\":123,\"b\":\"c\"}".getBytes();
+        byte[] abc = "\"ab\" 1352344810125 \"qqx\" 443 {\"a\":123,\"b\":\"c\"}".getBytes();
 		Object[] r = con.prepareParams(abc, new Type[] {String.class, Date.class, String.class,
 				Integer.class, Bean.class});
 		System.out.println(Arrays.toString(r));
