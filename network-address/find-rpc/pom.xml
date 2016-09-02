@@ -26,25 +26,6 @@
             <groupId>org.apache.niolex</groupId>
             <artifactId>network-rpc</artifactId>
             <version>${network.rpc.version}</version>
-            <exclusions>
-                <exclusion>
-                    <artifactId>jackson-smile</artifactId>
-                    <groupId>org.codehaus.jackson</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>reflectasm</artifactId>
-                    <groupId>com.esotericsoftware.reflectasm</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>kryo</artifactId>
-                    <groupId>com.esotericsoftware.kryo</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.codehaus.jackson</groupId>
-            <artifactId>jackson-mapper-asl</artifactId>
-            <version>${jackson.version}</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
