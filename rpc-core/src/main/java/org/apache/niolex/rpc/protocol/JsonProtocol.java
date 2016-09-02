@@ -25,7 +25,8 @@ import java.util.List;
 import org.apache.niolex.commons.compress.JacksonUtil;
 import org.apache.niolex.commons.seri.SeriUtil;
 import org.apache.niolex.commons.stream.JsonProxy;
-import org.codehaus.jackson.type.TypeReference;
+
+import com.fasterxml.jackson.core.type.TypeReference;
 
 /**
  * The Json Rpc Protocol. We implement both side protocol just in one class.
@@ -45,6 +46,7 @@ public class JsonProtocol implements IClientProtocol, IServerProtocol {
 	    ByteArrayOutputStream out = new ByteArrayOutputStream();
         for (Object o : args) {
             JacksonUtil.writeObj(out, o);
+            out.write(' ');
         }
         return out.toByteArray();
 	}

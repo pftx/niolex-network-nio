@@ -27,7 +27,8 @@ import org.apache.niolex.config.bean.SubscribeBean;
 import org.apache.niolex.config.bean.SyncBean;
 import org.apache.niolex.config.bean.UserInfo;
 import org.apache.niolex.network.PacketData;
-import org.codehaus.jackson.type.TypeReference;
+
+import com.fasterxml.jackson.core.type.TypeReference;
 
 /**
  * Translate beans into packets and translate packets into beans.
