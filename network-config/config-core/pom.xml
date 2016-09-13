@@ -16,17 +16,17 @@
 	<url>http://maven.apache.org</url>
 
 	<dependencies>
-	    <dependency>
-            <groupId>org.apache.niolex</groupId>
-            <artifactId>commons-remote</artifactId>
-            <version>[0.1.0,2.0.0)</version>
-            <exclusions>
-            	<exclusion>
-            		<groupId>com.esotericsoftware</groupId>
-            		<artifactId>reflectasm</artifactId>
-            	</exclusion>
-            </exclusions>
-	    </dependency>
+		<dependency>
+			<groupId>org.apache.niolex</groupId>
+			<artifactId>commons-remote</artifactId>
+			<version>[0.1.0,2.0.0)</version>
+			<exclusions>
+				<exclusion>
+					<groupId>com.esotericsoftware</groupId>
+					<artifactId>reflectasm</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
 		<dependency>
 			<groupId>org.apache.niolex</groupId>
 			<artifactId>network-core</artifactId>
@@ -35,10 +35,6 @@
 				<exclusion>
 					<groupId>com.esotericsoftware</groupId>
 					<artifactId>reflectasm</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.codehaus.jackson</groupId>
-					<artifactId>jackson-smile</artifactId>
 				</exclusion>
 				<exclusion>
 					<groupId>com.esotericsoftware</groupId>
@@ -55,6 +51,10 @@
 				<exclusion>
 					<artifactId>protostuff-core</artifactId>
 					<groupId>com.dyuproject.protostuff</groupId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.fasterxml.jackson.dataformat</groupId>
+					<artifactId>jackson-dataformat-smile</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>
