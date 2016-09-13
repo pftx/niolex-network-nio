@@ -19,11 +19,11 @@ package org.apache.niolex.config.admin;
 
 import java.util.Scanner;
 
-import jline.console.ConsoleReader;
-import jline.console.completer.StringsCompleter;
-
 import org.apache.niolex.commons.file.FileUtil;
 import org.apache.niolex.network.Config;
+
+import jline.console.ConsoleReader;
+import jline.console.completer.StringsCompleter;
 
 /**
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
@@ -65,7 +65,8 @@ public class ConfigAdminMain {
 			System.out.println("JLine disabled, fall back to native console");
 		}
 		System.out.println("\nType help for usage.");
-		final Scanner scan = new Scanner(System.in);
+        @SuppressWarnings("resource")
+        final Scanner scan = new Scanner(System.in);
 		String[] lastCmds = new String[0];
 		while (true) {
 			String line = null;
