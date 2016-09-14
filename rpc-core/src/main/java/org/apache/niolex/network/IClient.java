@@ -21,7 +21,6 @@ import java.io.IOException;
 
 import org.apache.niolex.commons.concurrent.WaitOn;
 
-
 /**
  * The client interface.
  *
@@ -39,31 +38,31 @@ public interface IClient {
      * @since 2012-6-2
      */
     public static enum Status {
-        INNITIAL, CONNECTED, RETRYING, CLOSED
+        INNITIAL, CONNECTED, RETRYING, CLOSED;
     }
 
 	/**
-	 * Do real connect action, connect to server.
-	 * This method will return only after we get connected.
-	 *
-	 * @throws IOException
-	 */
+     * Do real connect action, connect to server.
+     * This method will return only after we get connected.
+     *
+     * @throws IOException if I / O related error occurred
+     */
 	public void connect() throws IOException;
 
 	/**
      * Asynchronously send the request to server.
      *
-     * @param sc
-     * @return the wait on object.
+     * @param sc the packet to be sent to server
+     * @return the wait on object to retrieve result
      */
     public WaitOn<Packet> asyncInvoke(Packet sc) throws IOException;
 
     /**
-     * Handle the Packet, and return result.
+     * Send the packet to server, and wait for result in blocking mode.
      *
-     * @param sc The Packet need to be send
-     * @return the Packet returned from server
-     * @throws IOException
+     * @param sc the packet to be sent to server
+     * @return the packet returned from server
+     * @throws IOException if I / O related error occurred
      */
     public Packet sendAndReceive(Packet sc) throws IOException;
 
@@ -80,18 +79,18 @@ public interface IClient {
     public Status getStatus();
 
 	/**
-	 * Test whether this client is working now
-	 *
-	 * @return true if working
-	 */
+     * Test whether this client is working now.
+     *
+     * @return true if working
+     */
 	public boolean isWorking();
 
 	/**
-	 * Set the underline socket connect timeout
-	 * This method must be called before connect()
-	 *
-	 * @param connectTimeout
-	 */
+     * Set the underline socket connect timeout
+     * This method must be called before connect()
+     *
+     * @param connectTimeout the socket connect timeout
+     */
 	public void setConnectTimeout(int connectTimeout);
 
 }

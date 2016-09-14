@@ -18,7 +18,7 @@
 	
 	<properties>
 		<co.re.ver>0.1.8</co.re.ver>
-		<junit.ver>4.11</junit.ver>
+		<co.dev.ver>0.2.0-SNAPSHOT</co.dev.ver>
 	</properties>
 	
 	<modules>
@@ -26,6 +26,7 @@
 		<module>config-client</module>
 		<module>config-admin</module>
 		<module>config-server</module>
+		<module>config-web</module>
 	</modules>
 
 </project>

@@ -37,9 +37,8 @@ import java.lang.annotation.Target;
 public @interface RpcMethod {
 
 	/**
-	 * the code to map this method to.
-	 * @return
-	 */
+     * @return the code to map this method to.
+     */
 	short value();
 
 }

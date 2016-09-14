@@ -38,18 +38,18 @@ public class RpcConfig {
 	private Object target;
 
 	/**
-	 * Create a blank RpcConfig
-	 */
+     * Create a blank RpcConfig.
+     */
 	public RpcConfig() {
 		super();
 	}
 
 	/**
-	 * Create a RpcConfig with these parameters
-	 *
-	 * @param interfaces
-	 * @param target
-	 */
+     * Create a RpcConfig with these parameters.
+     *
+     * @param interfaces the RPC service interface
+     * @param target the RPC service implementation
+     */
 	public RpcConfig(Class<?> interfaces, Object target) {
 		super();
 		this.interfaces = interfaces;

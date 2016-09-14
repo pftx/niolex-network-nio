@@ -17,7 +17,7 @@
  */
 package org.apache.niolex.rpc.protocol;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.lang.reflect.Type;
 import java.util.Arrays;
@@ -101,7 +101,7 @@ public class JsonProtocolTest {
 	 */
 	@Test
 	public void testPrepareParams() throws Exception {
-		byte[] abc = "\"ab\"1352344810125\"qqx\"443{\"a\":123,\"b\":\"c\"}".getBytes();
+        byte[] abc = "\"ab\" 1352344810125 \"qqx\" 443 {\"a\":123,\"b\":\"c\"}".getBytes();
 		Object[] r = con.prepareParams(abc, new Type[] {String.class, Date.class, String.class,
 				Integer.class, Bean.class});
 		System.out.println(Arrays.toString(r));
@@ -117,7 +117,7 @@ public class JsonProtocolTest {
 		byte[] abc = con.serializeParams(new Object[] {"ab", new Date(1361944310437l), "gcc", new Integer(443),
 				new Bean(653423, 'c')});
 		System.out.println(new String(abc));
-		assertEquals("\"ab\"1361944310437\"gcc\"443{\"a\":653423,\"b\":\"c\"}", new String(abc));
+        assertEquals("\"ab\" 1361944310437 \"gcc\" 443 {\"a\":653423,\"b\":\"c\"} ", new String(abc));
 	}
 
 	/**

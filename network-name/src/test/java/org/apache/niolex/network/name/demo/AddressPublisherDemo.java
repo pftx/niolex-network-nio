@@ -39,6 +39,7 @@ public class AddressPublisherDemo {
     public static void main(String[] args) throws Exception {
     	AddressPublisher c = new AddressPublisher("localhost:8181");
         c.pushlishService("network/name", "localhost:8181");
+        @SuppressWarnings("resource")
         Scanner sc = new Scanner(in);
         while (true) {
             System.out.print("Please enter a Packet code(-1 for exit): ");

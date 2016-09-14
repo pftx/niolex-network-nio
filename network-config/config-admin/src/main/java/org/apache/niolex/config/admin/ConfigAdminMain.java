@@ -52,7 +52,8 @@ public class ConfigAdminMain {
 		    return;
 		}
 		final String userName = args[1];
-		final ConsoleReader reader = new ConsoleReader();
+        @SuppressWarnings("resource")
+        final ConsoleReader reader = new ConsoleReader();
 		boolean isJline = reader.clearScreen();
 		if (isJline) {
 			reader.addCompleter(new StringsCompleter("help", "exit", "last", "add group",

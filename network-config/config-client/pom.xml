@@ -6,11 +6,13 @@
 		<groupId>org.apache.niolex</groupId>
 		<artifactId>network-config</artifactId>
 		<version>0.1.8</version>
-		<relativePath>../</relativePath>
+		<relativePath>../pom.xml</relativePath>
 	</parent>
 
 	<artifactId>config-client</artifactId>
+	<version>${co.dev.ver}</version>
 	<packaging>jar</packaging>
+	
 	<name>config-client</name>
 	<url>http://maven.apache.org</url>
 
@@ -18,24 +20,24 @@
 		<dependency>
 			<groupId>org.apache.niolex</groupId>
 			<artifactId>config-core</artifactId>
-			<version>${co.re.ver}</version>
+			<version>${co.dev.ver}</version>
 		</dependency>
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
-			<version>[1.0.3,2.0.0)</version>
+			<version>${logback.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>${junit.ver}</version>
+			<version>${junit.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-all</artifactId>
-			<version>1.9.5</version>
+			<version>${mockito.version}</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

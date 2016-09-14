@@ -288,19 +288,19 @@ public class NioServer implements IServer {
 
     /**
 	 * Override super method
-	 * @see org.apache.niolex.network.IServer#getAcceptTimeOut()
+	 * @see org.apache.niolex.network.IServer#getAcceptTimeout()
 	 */
     @Override
-	public int getAcceptTimeOut() {
+	public int getAcceptTimeout() {
         return acceptTimeOut;
     }
 
     /**
 	 * Override super method
-	 * @see org.apache.niolex.network.IServer#setAcceptTimeOut(int)
+	 * @see org.apache.niolex.network.IServer#setAcceptTimeut(int)
 	 */
     @Override
-	public void setAcceptTimeOut(int acceptTimeOut) {
+	public void setAcceptTimeut(int acceptTimeOut) {
         this.acceptTimeOut = acceptTimeOut;
     }
 

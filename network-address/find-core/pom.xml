@@ -10,7 +10,7 @@
 	</parent>
 
 	<artifactId>find-core</artifactId>
-	<version>1.0.1-SNAPSHOT</version>
+	<version>${find.dev.ver}</version>
 	<packaging>jar</packaging>
 
 	<name>find-core</name>

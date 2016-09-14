@@ -37,7 +37,7 @@ import org.apache.niolex.rpc.protocol.IClientProtocol;
 /**
  * The RpcProxy is the facade of client side.
  * It manipulate the IClient, send and receive Rpc packets.
- * Use getService to Get the Rpc Service Client Stub.
+ * Use {@link #getService(Class)} to Get the Rpc Service Client Stub.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
@@ -61,24 +61,23 @@ public class RpcProxy implements InvocationHandler {
 	private IClientProtocol clientProtocol;
 
 	/**
-	 * Create a RpcProxy with this IClient as the backed communication tool.
-	 * The Client will be managed internally, please use #RpcProxy.connect() and #RpcProxy.stop() to connect and stop.
-	 *
-	 * Constructor
-	 * @param client
-	 */
+     * Create a RpcProxy with this IClient as the backed communication tool.
+     * The Client will be managed internally, please use #RpcProxy.connect() and #RpcProxy.stop() to connect and stop.
+     *
+     * @param client the communication tool
+     */
 	public RpcProxy(IClient client) {
 		super();
 		this.client = client;
 	}
 
 	/**
-	 * Create a RpcProxy with this IClient as the backed communication tool,
-	 * the clientProtocol to do the serialization.
-	 *
-	 * @param client
-	 * @param clientProtocol
-	 */
+     * Create a RpcProxy with this IClient as the backed communication tool,
+     * the clientProtocol to do the serialization.
+     *
+     * @param client the communication tool
+     * @param clientProtocol the client side protocol
+     */
 	public RpcProxy(IClient client, IClientProtocol clientProtocol) {
 		super();
 		this.client = client;
@@ -86,16 +85,32 @@ public class RpcProxy implements InvocationHandler {
 	}
 
 	/**
-	 * Get the Rpc Service Client Stub.
-	 * @param c The interface you want to invoke.
-	 * @return
-	 */
+     * Get the Rpc Service Client Stub.
+     * 
+     * @param c The interface you want to invoke
+     * @return the generated client stub
+     */
 	@SuppressWarnings("unchecked")
     public <T> T getService(Class<T> c) {
 		this.addInferface(c);
 		return (T) Proxy.newProxyInstance(RpcProxy.class.getClassLoader(),
                 new Class[] {c}, this);
 	}
+
+    /**
+     * Set the Rpc Configurations, this method will parse all the configurations and generate execute map.
+     * 
+     * @param interfs the interface to be added
+     */
+    public void addInferface(Class<?> interfs) {
+        List<Method> list = MethodUtil.getAllMethodsIncludeInterfaces(interfs);
+        for (Method m : list) {
+            if (m.isAnnotationPresent(RpcMethod.class)) {
+                RpcMethod rp = m.getAnnotation(RpcMethod.class);
+                executeMap.put(m, rp.value());
+            }
+        }
+    }
 
 	/**
 	 * Check the client status before doing remote call.
@@ -112,9 +127,10 @@ public class RpcProxy implements InvocationHandler {
 	}
 
 	/**
-	 * This is the override of super method.
-	 * @see java.lang.reflect.InvocationHandler#invoke(java.lang.Object, java.lang.reflect.Method, java.lang.Object[])
-	 */
+     * This is the override of super method.
+     * 
+     * @see java.lang.reflect.InvocationHandler#invoke(java.lang.Object, java.lang.reflect.Method, java.lang.Object[])
+     */
 	@Override
 	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 		checkStatus();
@@ -169,11 +185,12 @@ public class RpcProxy implements InvocationHandler {
 
     /**
      * De-serialize returned byte array into objects.
-     * @param ret
-     * @param type
+     * 
+     * @param ret the returned bytes
+     * @param type the return type
      * @param isException false for returned objects, true for RpcException.
      * @return the result
-     * @throws Exception
+     * @throws Exception if necessary
      */
     protected Object prepareReturn(byte[] ret, Type type, boolean isException) throws Exception {
         if (isException) {
@@ -189,7 +206,8 @@ public class RpcProxy implements InvocationHandler {
 
     /**
      * Connect the backed communication Client, and set the internal status.
-     * @throws IOException
+     * 
+     * @throws IOException if I / O related error occurred
      */
     public void connect() throws IOException {
         this.client.connect();
@@ -203,32 +221,19 @@ public class RpcProxy implements InvocationHandler {
     }
 
 	/**
-	 * Set the socket connection timeout, please set before connect.
-	 * @param timeout
-	 */
+     * Set the socket connection timeout, please set before connect.
+     * 
+     * @param timeout the socket connect timeout
+     */
 	public void setConnectTimeout(int timeout) {
 		this.client.setConnectTimeout(timeout);
 	}
 
 	/**
-	 * Set the Rpc Configurations, this method will parse all the configurations and generate execute map.
-	 * @param interfs
-	 */
-	public void addInferface(Class<?> interfs) {
-		List<Method> list = MethodUtil.getAllMethodsIncludeInterfaces(interfs);
-		for (Method m : list) {
-			if (m.isAnnotationPresent(RpcMethod.class)) {
-				RpcMethod rp = m.getAnnotation(RpcMethod.class);
-				executeMap.put(m, rp.value());
-			}
-		}
-	}
-
-	/**
-	 * set the client protocol do manage bean serialization.
-	 *
-	 * @param clientProtocol
-	 */
+     * set the client protocol do manage bean serialization.
+     *
+     * @param clientProtocol the client side comunication protocol
+     */
 	public void setClientProtocol(IClientProtocol clientProtocol) {
 		this.clientProtocol = clientProtocol;
 	}

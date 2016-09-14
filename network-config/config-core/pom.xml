@@ -6,10 +6,11 @@
 		<groupId>org.apache.niolex</groupId>
 		<artifactId>network-config</artifactId>
 		<version>0.1.8</version>
-		<relativePath>../</relativePath>
+		<relativePath>../pom.xml</relativePath>
 	</parent>
 
 	<artifactId>config-core</artifactId>
+	<version>${co.dev.ver}</version>
 	<packaging>jar</packaging>
 
 	<name>config-core</name>
@@ -19,7 +20,7 @@
 		<dependency>
 			<groupId>org.apache.niolex</groupId>
 			<artifactId>commons-remote</artifactId>
-			<version>[2.0.0,3.0.0)</version>
+			<version>${commons.remote.version}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>com.esotericsoftware</groupId>
@@ -30,7 +31,7 @@
 		<dependency>
 			<groupId>org.apache.niolex</groupId>
 			<artifactId>network-core</artifactId>
-			<version>[0.3.1,2.0.0)</version>
+			<version>${network.core.version}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>com.esotericsoftware</groupId>
@@ -61,19 +62,19 @@
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
-			<version>[1.0.3,2.0.0)</version>
+			<version>${logback.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>${junit.ver}</version>
+			<version>${junit.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-all</artifactId>
-			<version>1.9.5</version>
+			<version>${mockito.version}</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

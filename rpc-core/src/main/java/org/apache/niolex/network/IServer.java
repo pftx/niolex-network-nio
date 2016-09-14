@@ -29,10 +29,10 @@ import org.apache.niolex.rpc.core.Invoker;
 public interface IServer {
 
 	/**
-	 * Start the Server, bind to the Port.
-	 * This method need to return after this server is started.
-	 * Server need to start threads internally to run.
-	 */
+     * Start the Server, bind to the specified Port.
+     * This method need to return after the server is started.
+     * Server need to start threads internally to run.
+     */
 	public boolean start();
 
 	/**
@@ -42,40 +42,42 @@ public interface IServer {
 	public void stop();
 
 	/**
-	 * The current listening port.
-	 * @return
-	 */
+     * @return the current listening port.
+     */
 	public int getPort();
 
 	/**
-	 * Set listen port.
-	 * This method must be called before start()
-	 * @param port
-	 */
+     * Set listen port.
+     * This method must be called before start()
+     * 
+     * @param port the server listen port
+     */
 	public void setPort(int port);
 
 	/**
-	 * @return get the current invoker
-	 */
+     * @return the current invoker
+     */
 	public Invoker getInvoker();
 
 	/**
-	 * Set the server side packet invoker
-	 * This method must be called before start()
-	 * @param invoker the invoker to set
-	 */
+     * Set the server side packet invoker.
+     * This method must be called before start()
+     * 
+     * @param invoker the invoker to set
+     */
 	public void setInvoker(Invoker invoker);
 
 	/**
-	 * @return the acceptTimeOut
-	 */
-	public int getAcceptTimeOut();
+     * @return the server socket accept timeout
+     */
+	public int getAcceptTimeout();
 
 	/**
-	 * Set the server accept timeout
-	 * This method must be called before start()
-	 * @param acceptTimeOut the acceptTimeOut to set
-	 */
-	public void setAcceptTimeOut(int acceptTimeOut);
+     * Set the server accept timeout.
+     * This method must be called before start()
+     * 
+     * @param acceptTimeout the server socket accept timeout to set
+     */
+	public void setAcceptTimeut(int acceptTimeout);
 
 }
