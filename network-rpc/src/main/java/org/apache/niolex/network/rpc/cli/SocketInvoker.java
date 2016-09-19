@@ -258,6 +258,10 @@ public class SocketInvoker extends BaseClient implements RemoteInvoker, Runnable
         try {
             while (true) {
                 PacketData resp = readPacket();
+                if (resp.getCode() == Config.CODE_HEART_BEAT) {
+                    // Let's ignore the heart beat packet here.
+                    continue;
+                }
                 Integer respKey = RpcUtil.generateKey(resp);
 
                 // Notify the waiting thread, remove it from map for cleanup.

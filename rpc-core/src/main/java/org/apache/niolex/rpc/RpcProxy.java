@@ -232,7 +232,7 @@ public class RpcProxy implements InvocationHandler {
 	/**
      * set the client protocol do manage bean serialization.
      *
-     * @param clientProtocol the client side comunication protocol
+     * @param clientProtocol the client side communication protocol
      */
 	public void setClientProtocol(IClientProtocol clientProtocol) {
 		this.clientProtocol = clientProtocol;

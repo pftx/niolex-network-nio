@@ -42,7 +42,7 @@ public class AddressPublisherDemo {
         @SuppressWarnings("resource")
         Scanner sc = new Scanner(in);
         while (true) {
-            System.out.print("Please enter a Packet code(-1 for exit): ");
+            System.out.print("Please enter the next code(-1 for exit): ");
             short code = sc.nextShort();
             if (code == -1) {
                 break;

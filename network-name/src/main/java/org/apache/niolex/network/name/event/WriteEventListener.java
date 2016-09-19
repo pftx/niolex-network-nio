@@ -23,6 +23,8 @@ import org.apache.niolex.network.IPacketWriter;
 import org.apache.niolex.network.PacketData;
 
 /**
+ * Wrap the name client into a write event listener.
+ * 
  * @author <a href="mailto:xiejiyun@foxmail.com">Xie, Jiyun</a>
  * @version 1.0.0
  * @since 2013-11-29
@@ -30,7 +32,7 @@ import org.apache.niolex.network.PacketData;
 public class WriteEventListener implements Listener<PacketData> {
 
     /**
-     * Attach the event listener.
+     * Attach the event listener by this key.
      */
     public static final String ATTACH_KEY = "SYS_HAND_EVENT_LISTN";
 
@@ -56,7 +58,7 @@ public class WriteEventListener implements Listener<PacketData> {
     /**
      * The private constructor. Please use the static method {@link #obtain(IPacketWriter)}.
      *
-     * @param writer
+     * @param writer the client
      */
     private WriteEventListener(IPacketWriter writer) {
         super();
@@ -65,7 +67,8 @@ public class WriteEventListener implements Listener<PacketData> {
 
     /**
      * This is the override of super method.
-     * @see org.apache.niolex.commons.event.EventUtil#eventHappened(Event)
+     * 
+     * @see org.apache.niolex.commons.event.Listener#eventHappened(Event)
      */
     @Override
     public void eventHappened(Event<PacketData> e) {

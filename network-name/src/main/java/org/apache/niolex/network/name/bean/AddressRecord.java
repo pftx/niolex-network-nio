@@ -20,7 +20,6 @@ package org.apache.niolex.network.name.bean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
  * The class to store the address record.
  *
@@ -45,19 +44,24 @@ public class AddressRecord {
 	private long lastTime;
 
 	public static enum Status {
-		OK, DISCONNECTED, DEL
+        OK, DISCONNECTED, DEL;
 	}
 
+    /**
+     * Create an address record by the specified address register bean.
+     * 
+     * @param bean the address register bean
+     */
 	public AddressRecord(AddressRegiBean bean) {
 		this(bean.getAddressKey(), bean.getAddressValue());
 	}
 
 	/**
-	 * The full constructor, initialize all fields.
-	 *
-	 * @param addressKey
-	 * @param addressValue
-	 */
+     * The full constructor, initialize all fields.
+     *
+     * @param addressKey the address key
+     * @param addressValue the address value
+     */
 	public AddressRecord(String addressKey, String addressValue) {
 		super();
 		this.addressKey = addressKey;

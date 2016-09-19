@@ -53,7 +53,7 @@ public class AddressPublisherTest {
 	public void testAddressPublisher() throws IOException {
 		AddressPublisher c = new AddressPublisher("localhost:8181");
 		c.pushlishService("network/name", "Not yet implemented");
-		assertEquals(1, c.size());
+		assertEquals(1, c.internalPacketSize());
 		c.stop();
 	}
 
@@ -65,7 +65,7 @@ public class AddressPublisherTest {
 		AddressPublisher pub = new AddressPublisher("localhost:8181");
 		pub.pushlishService("network/name", "needs heart beat.");
 		pub.setSleepBetweenRetryTime(20);
-		assertEquals(1, pub.size());
+		assertEquals(1, pub.internalPacketSize());
 		stopServer();
 		startServer();
 		Thread.sleep(500);

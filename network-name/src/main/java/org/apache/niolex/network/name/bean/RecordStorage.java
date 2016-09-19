@@ -48,7 +48,7 @@ public class RecordStorage extends Runme {
      * @since 2013-11-28
      */
     private class RecordContainer {
-        // The map to store all the records for one address key.
+        // The map to store all the records for one address key. the map key is the address value.
         private final ConcurrentHashMap<String, AddressRecord> recordMap =
                 new ConcurrentHashMap<String, AddressRecord>();
 
@@ -116,14 +116,14 @@ public class RecordStorage extends Runme {
     }
 
 	/**
-	 * The total storage, it's just a concurrent hash map.
-	 */
+     * The total storage, it's just a concurrent hash map. The map key is the address key.
+     */
 	private final ConcurrentHashMap<String, RecordContainer> mapStorage = new ConcurrentHashMap<String, RecordContainer>();
 
-	// 当服务过期后发布实现的分发器
+    // The dispatcher used to dispatch events of server disconnected.
 	private final Dispatcher dispatcher;
 
-	// 当服务断线后需要保留的时间
+    // The time interval to keep disconnected server in the address list.
 	private int deleteTime;
 
 	/**
@@ -169,11 +169,11 @@ public class RecordStorage extends Runme {
 	}
 
 	/**
-	 * Get all the addresses by this address key.
-	 *
-	 * @param addressKey the address key
-	 * @return the address list
-	 */
+     * Get all the addresses by this address key.
+     *
+     * @param addressKey the address key
+     * @return the address list, return an empty list if no address found
+     */
 	public List<String> getAddress(String addressKey) {
 	    RecordContainer container = mapStorage.get(addressKey);
         if (container != null) {

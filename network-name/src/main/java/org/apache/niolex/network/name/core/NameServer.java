@@ -71,7 +71,6 @@ public class NameServer implements IPacketHandler {
 
 	private final HeartBeatAdapter ada;
 
-
 	/**
 	 * Create a name server.
 	 *
@@ -85,9 +84,11 @@ public class NameServer implements IPacketHandler {
 	}
 
 	/**
-	 * Start the Server, bind to the Port. Server need to start threads internally to run.
-	 * This method need to return after this server is started.
-	 */
+     * Start the Server, bind to the Port. Server need to start threads internally to run.
+     * This method need to return after this server is started.
+     * 
+     * @return true if server started, false otherwise
+     */
 	public boolean start() {
 		if (server.start()) {
 			ada.start();
@@ -113,25 +114,26 @@ public class NameServer implements IPacketHandler {
 	@Override
 	public void handlePacket(PacketData sc, IPacketWriter wt) {
 		switch (sc.getCode()) {
-			// 获取服务地址信息
+            // Want to obtain server address list.
 			case Config.CODE_NAME_OBTAIN:
 				String addressKey = transformer.getDataObject(sc);
-				// 监听后续地址的变化
+                // Add listener for further changes of server address list.
 				dispatcher.addListener(addressKey, WriteEventListener.obtain(wt));
-				// 将AddressKey附加到IPacketWriter里面，供后续使用
+                // Attach the address key to the client.
 				attachData(wt, addressKey);
-				// Return list
+                // Prepare the return list
 				List<String> list = storage.getAddress(addressKey);
+                // Add the address key as the last string.
 				list.add(addressKey);
 				PacketData rc = transformer.getPacketData(Config.CODE_NAME_DATA, list);
 				wt.handleWrite(rc);
 				LOG.info("Client {} try to subscribe address {}.", wt.getRemoteName(), addressKey);
 				break;
-			// 发布服务地址信息
+            // Publish new server address.
 			case Config.CODE_NAME_PUBLISH:
 				AddressRegiBean bean = transformer.getDataObject(sc);
 				AddressRecord rec = storage.store(bean);
-				// 将AddressRecord附加到IPacketWriter里面，供后续使用
+                // Attach the address record to the client.
 				attachData(wt, rec);
 				//Fire event
 				PacketData sent = transformer.getPacketData(Config.CODE_NAME_DIFF, rec);
@@ -171,7 +173,7 @@ public class NameServer implements IPacketHandler {
 	public void handleClose(IPacketWriter wt) {
 		List<AddressRecord> recList = wt.getAttached(Config.ATTACH_KEY_REGIST_ADDR);
 		if (recList != null) {
-			// 将服务地址标记为已断线
+            // If this client published any address, mark it as disconnected.
 			for (AddressRecord rec : recList) {
 				rec.setStatus(Status.DISCONNECTED);
 			}
@@ -180,7 +182,7 @@ public class NameServer implements IPacketHandler {
 		List<String> addrList = wt.getAttached(Config.ATTACH_KEY_OBTAIN_ADDR);
 		if (addrList != null) {
 		    WriteEventListener tmp = WriteEventListener.obtain(wt);
-			// 将监听器移除掉
+            // If this client has any listener, remove it from the dispatcher.
 			for (String addressKey : addrList) {
 				dispatcher.removeListener(addressKey, tmp);
 			}

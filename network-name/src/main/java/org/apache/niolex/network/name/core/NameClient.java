@@ -17,7 +17,6 @@
  */
 package org.apache.niolex.network.name.core;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -58,14 +57,12 @@ public class NameClient implements IPacketHandler {
 	 */
 	protected final PacketTransformer transformer = Context.getTransformer();
 
-
 	/**
-	 * Create a new name client and connect it to the server address.
-	 *
-	 * @param serverAddress the server address
-	 * @throws IOException
-	 */
-	public NameClient(String serverAddress) throws IOException {
+     * Create a new name client and connect it to the server address.
+     *
+     * @param serverAddress the server address
+     */
+    public NameClient(String serverAddress) {
 		super();
 		clientManager.setAddressList(serverAddress);
 		clientManager.setPacketHandler(this);
@@ -84,6 +81,7 @@ public class NameClient implements IPacketHandler {
         try {
             return clientManager.waitForConnected();
         } catch (Exception e) {
+            LOG.error("Failed to connect to name server.", e);
             return false;
         }
     }
@@ -94,17 +92,18 @@ public class NameClient implements IPacketHandler {
 	 */
 	@Override
 	public void handlePacket(PacketData sc, IPacketWriter wt) {
-		// Dispatch package
+        // Dispatch package according to packet code.
 		switch(sc.getCode()) {
-			// 发布服务地址信息全量
+            // Server published address list.
 			case Config.CODE_NAME_DATA:
 				List<String> list = transformer.getDataObject(sc);
+                // Let sub classes to deal with it.
 				handleRefresh(list);
 				break;
-			// 发布服务地址信息增量
+            // Server published new address record.
 			case Config.CODE_NAME_DIFF:
 				AddressRecord bean = transformer.getDataObject(sc);
-				// 由子类去处理增量
+                // Let sub classes to deal with it.
 				handleDiff(bean);
 				break;
 			default:
@@ -121,15 +120,17 @@ public class NameClient implements IPacketHandler {
 	}
 
 	/**
-	 * 由子类去处理增量，这里什么都不做
-	 * @param bean
-	 */
+     * The new address record published. Let sub class to deal with it.
+     * 
+     * @param bean the address record
+     */
 	protected void handleDiff(AddressRecord bean) {}
 
 	/**
-	 * 由子类去处理全量返回的地址列表，这里什么都不做
-	 * @param list
-	 */
+     * Refresh the address list. Let sub class to deal with it.
+     * 
+     * @param list the address list
+     */
 	protected void handleRefresh(List<String> list) {}
 
 	/**
@@ -141,7 +142,7 @@ public class NameClient implements IPacketHandler {
 		// We will retry to connect in this method.
 		if (!clientManager.retryConnect()) {
 			LOG.error("Exception occured when try to re-connect to server.");
-			// Try to shutdown this Client, inform all the threads.
+            // TODO: Try to shutdown this Client, inform all the threads.
 		} else {
 			clientManager.handleWrite(new PacketData(Config.CODE_REGR_HBEAT));
 			reconnected();
@@ -184,7 +185,7 @@ public class NameClient implements IPacketHandler {
 	/**
 	 * @return the internal packet list size
 	 */
-    public int size() {
+    public int internalPacketSize() {
         return internalPacketList.size();
     }
 

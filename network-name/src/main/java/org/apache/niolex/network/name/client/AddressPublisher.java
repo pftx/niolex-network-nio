@@ -40,21 +40,21 @@ import org.apache.niolex.network.name.core.NameClient;
 public class AddressPublisher extends NameClient {
 
 	/**
-	 * The constructor.
-	 *
-	 * @param serverAddress
-	 * @throws IOException
-	 */
+     * The constructor.
+     *
+     * @param serverAddress the name server address
+     * @throws IOException if I / O related error occurred
+     */
 	public AddressPublisher(String serverAddress) throws IOException {
 		super(serverAddress);
 	}
 
 	/**
-	 * Publish this service to name server.
-	 *
-	 * @param addressKey
-	 * @param addressValue
-	 */
+     * Publish this service to name server.
+     *
+     * @param addressKey the service key
+     * @param addressValue the service address
+     */
 	public void pushlishService(String addressKey, String addressValue) {
 		AddressRegiBean regi = new AddressRegiBean(addressKey, addressValue);
 		PacketData data = transformer.getPacketData(Config.CODE_NAME_PUBLISH, regi);

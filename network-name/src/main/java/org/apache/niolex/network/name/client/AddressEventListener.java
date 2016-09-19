@@ -29,21 +29,24 @@ import java.util.List;
 public interface AddressEventListener {
 
 	/**
-	 * A new working server added into name server.
-	 * @param addressValue
-	 */
+     * A new working server added into name server.
+     * 
+     * @param addressValue the new address value
+     */
 	public void addressAdd(String addressValue);
 
 	/**
-	 * A server disconnected from name server.
-	 * @param addressValue
-	 */
+     * A server disconnected from name server.
+     * 
+     * @param addressValue the disconnected address value
+     */
 	public void addressRemove(String addressValue);
 
 	/**
-	 * This means a total refresh of current address list.
-	 * @param addressList
-	 */
+     * This means a total refresh of current address list.
+     * 
+     * @param addressList the new address list used to refresh the current one
+     */
 	public void addressRefresh(List<String> addressList);
 
 }

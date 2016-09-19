@@ -22,6 +22,8 @@ import org.apache.niolex.network.Config;
 import org.apache.niolex.network.serialize.BaseSerializer;
 
 /**
+ * The class to serialize address register bean.
+ * 
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
  * @since 2012-6-27
@@ -29,9 +31,10 @@ import org.apache.niolex.network.serialize.BaseSerializer;
 public class AddressRegiSerializer extends BaseSerializer<AddressRegiBean> {
 
 	/**
-	 * Create this AddressRegiSerializer with the given code.
-	 * @param code
-	 */
+     * Create this AddressRegiSerializer with the given code.
+     * 
+     * @param code the packet code
+     */
 	public AddressRegiSerializer(short code) {
 		super(code);
 	}

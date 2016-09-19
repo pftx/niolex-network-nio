@@ -38,11 +38,11 @@ public class AddressRegiBean {
 	}
 
 	/**
-	 * The full constructor. Initialize all fields.
-	 *
-	 * @param addressKey
-	 * @param addressValue
-	 */
+     * The full constructor. Initialize all fields.
+     *
+     * @param addressKey the address key
+     * @param addressValue the address value
+     */
 	public AddressRegiBean(String addressKey, String addressValue) {
 		super();
 		this.addressKey = addressKey;

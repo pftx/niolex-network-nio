@@ -23,13 +23,14 @@ import java.util.List;
 
 import org.apache.niolex.commons.concurrent.Blocker;
 import org.apache.niolex.commons.concurrent.WaitOn;
+import org.apache.niolex.commons.test.Check;
 import org.apache.niolex.network.Config;
 import org.apache.niolex.network.PacketData;
 import org.apache.niolex.network.name.bean.AddressRecord;
 import org.apache.niolex.network.name.core.NameClient;
 
 /**
- * Subscribe to name server to listen address change.
+ * Subscribe to name server to listen to address changes.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
@@ -38,8 +39,8 @@ import org.apache.niolex.network.name.core.NameClient;
 public class AddressSubscriber extends NameClient {
 
 	/**
-	 * The service address dispatcher proxy.
-	 */
+     * The service address listener map.
+     */
 	private final HashMap<String, AddressEventListener> map = new HashMap<String, AddressEventListener>();
 
 	/**
@@ -52,13 +53,12 @@ public class AddressSubscriber extends NameClient {
 	 */
 	private int rpcHandleTimeout = Config.RPC_HANDLE_TIMEOUT;
 
-
 	/**
-	 * Construct a subscriber by a server address.
-	 *
-	 * @param serverAddress the name server address
-	 * @throws IOException
-	 */
+     * Construct a subscriber by a server address.
+     *
+     * @param serverAddress the name server address
+     * @throws IOException if I / O related error occurred
+     */
 	public AddressSubscriber(String serverAddress) throws IOException {
 		super(serverAddress);
 	}
@@ -90,11 +90,13 @@ public class AddressSubscriber extends NameClient {
 	 */
 	@Override
 	protected void handleRefresh(List<String> list) {
+        // The last string in the address list is not an address, but the address key.
 		int last = list.size() - 1;
 		if (last > -1) {
 			String addressKey = list.get(last);
 			list = list.subList(0, last);
 			if (!waiter.release(addressKey, list)) {
+                // If no one is waiting for this list, then it's server want to refresh all clients.
 				AddressEventListener li = map.get(addressKey);
 				if (li != null) {
 					li.addressRefresh(list);
@@ -112,6 +114,7 @@ public class AddressSubscriber extends NameClient {
 	 * @throws NameServiceException if any exception occurred.
 	 */
 	public List<String> getServiceAddrList(String serviceKey, AddressEventListener listener) {
+        Check.notNull(listener, "The listener should not be null.");
 		// We can listen changes from now on.
 		map.put(serviceKey, listener);
 		// Register this subscriber.

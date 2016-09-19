@@ -32,16 +32,20 @@ public class NameServiceException extends RuntimeException {
 	private static final long serialVersionUID = -6865552546945138458L;
 
 	/**
-	 * @param message
-	 */
+     * Constructor.
+     * 
+     * @param message the exception message
+     */
 	public NameServiceException(String message) {
 		super(message);
 	}
 
 	/**
-	 * @param message
-	 * @param cause
-	 */
+     * Constructor.
+     * 
+     * @param message the exception message
+     * @param cause the exception cause
+     */
 	public NameServiceException(String message, Throwable cause) {
 		super(message, cause);
 	}

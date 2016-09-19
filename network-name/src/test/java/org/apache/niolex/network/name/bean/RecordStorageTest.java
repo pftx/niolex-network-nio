@@ -17,14 +17,17 @@
  */
 package org.apache.niolex.network.name.bean;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 
+import java.util.Collections;
 import java.util.List;
 
-import org.apache.niolex.commons.event.Event;
 import org.apache.niolex.commons.event.Dispatcher;
+import org.apache.niolex.commons.event.Event;
 import org.apache.niolex.network.name.bean.AddressRecord.Status;
 import org.junit.Test;
 
@@ -56,7 +59,8 @@ public class RecordStorageTest {
 		ls = rs.getAddress("network/name");
 		System.out.println(ls);
 		assertEquals(2, ls.size());
-		assertEquals("[local/8006, local/8004]", ls.toString());
+        Collections.sort(ls);
+        assertEquals("[local/8004, local/8006]", ls.toString());
 	}
 
     /**

@@ -35,9 +35,10 @@ import org.apache.niolex.network.serialize.BaseSerializer;
 public class AddressListSerializer extends BaseSerializer<List<String>> {
 
 	/**
-	 * Create this AddressListSerializer with the given code.
-	 * @param code
-	 */
+     * Create this AddressListSerializer with the given code.
+     * 
+     * @param code the packet code
+     */
 	public AddressListSerializer(short code) {
 		super(code);
 	}

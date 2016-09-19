@@ -23,6 +23,8 @@ import org.apache.niolex.network.name.bean.AddressRecord.Status;
 import org.apache.niolex.network.serialize.BaseSerializer;
 
 /**
+ * The class to serialize address record.
+ * 
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
  * @since 2012-6-26
@@ -30,9 +32,10 @@ import org.apache.niolex.network.serialize.BaseSerializer;
 public class AddressRecordSerializer extends BaseSerializer<AddressRecord> {
 
 	/**
-	 * Create this AddressRecordSerializer with the given code.
-	 * @param code
-	 */
+     * Create this AddressRecordSerializer with the given code.
+     * 
+     * @param code the packet code
+     */
 	public AddressRecordSerializer(short code) {
 		super(code);
 	}
