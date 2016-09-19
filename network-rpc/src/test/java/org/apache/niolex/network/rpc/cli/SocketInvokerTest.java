@@ -322,6 +322,32 @@ public class SocketInvokerTest implements Runnable {
         assertArrayEquals(rc.getData(), sc.getData());
     }
 
+    @Test
+    public void testReadFromSocketHb() throws Exception {
+        si.setConnectRetryTimes(0);
+        si.connStatus = ConnStatus.CONNECTING;
+        Socket so = mock(Socket.class);
+        when(so.isConnected()).thenReturn(true);
+        FieldUtil.setValue(si, "socket", so);
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        FieldUtil.setValue(si, "out", out);
+        si.handleWrite(PacketData.getHeartBeatPacket());
+
+        PacketData sc = new PacketData(23, "This is random.");
+        for (int i = 0; i < 66; ++i) {
+            sc.setReserved((byte) (i));
+            si.handleWrite(sc);
+        }
+        int key = RpcUtil.generateKey(sc);
+
+        InputStream in = new ByteArrayInputStream(out.toByteArray());
+        FieldUtil.setValue(si, "in", in);
+
+        PacketData rc = si.readFromSocket(key);
+        assertArrayEquals(rc.getData(), sc.getData());
+    }
+
     @Test(expected = NullPointerException.class)
     public void testReadFromSocketErr() throws Exception {
         si.readFromSocket(33);
