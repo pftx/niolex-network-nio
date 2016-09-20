@@ -77,35 +77,38 @@ public class SocketClient extends BaseClient {
 
     /**
      * Crate a SocketClient without any server address
-     * Call setter to set serverAddress before connect
+     * Call setter to set serverAddress before connect.
      */
 	public SocketClient() {
 		super();
 	}
 
 	/**
-	 * Create a SocketClient with this Server Address
-	 * @param serverAddress
-	 */
+     * Create a SocketClient with this Server Address.
+     * 
+     * @param serverAddress the server address
+     */
 	public SocketClient(InetSocketAddress serverAddress) {
 		super();
 		this.serverAddress = serverAddress;
 	}
 
 	/**
-	 * Create a SocketClient with this Server Address
-	 * @param host the server host name
-	 * @param port the server port
-	 */
+     * Create a SocketClient with this Server Address.
+     * 
+     * @param host the server host name
+     * @param port the server port
+     */
 	public SocketClient(String host, int port) {
 	    super();
 	    this.serverAddress = new InetSocketAddress(host, port);
 	}
 
 	/**
-	 * Generate serial number
-	 * @param rc
-	 */
+     * Generate serial number.
+     * 
+     * @param rc the packet
+     */
 	private void serialPacket(Packet rc) {
 	    short seri = ++serialNumber;
 	    if (seri == Short.MAX_VALUE) {

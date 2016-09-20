@@ -53,7 +53,6 @@ public interface Config {
 	 */
 	int SERVER_CACHE_TOLERATE_PACKETS_SIZE = 5;
 
-
 	/**
 	 * Server socket accept timeout, set it too large will cause server no responding to stop command.
 	 */

@@ -57,7 +57,7 @@ public class MultiAddressClient extends BaseClient {
      * IP:PORT/CONNECTION_NUMBER;IP:PORT/CONNECTION_NUMBER ...
      * Multiple address separated by ";"
      *
-     * @param serverAddress the multiple server addresses.
+     * @param serverAddress the multiple server addresses
      */
     public MultiAddressClient(String serverAddress) {
         super();

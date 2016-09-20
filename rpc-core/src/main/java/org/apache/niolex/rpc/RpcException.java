@@ -51,6 +51,7 @@ public class RpcException extends RuntimeException {
      * Create a RpcException with a message, a type, and a throwable.
      *
      * @param message the exception message
+     * @param type the exception type
      * @param cause the cause of this exception
      */
 	public RpcException(String message, Type type, Throwable cause) {
