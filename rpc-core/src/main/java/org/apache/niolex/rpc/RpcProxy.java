@@ -87,6 +87,7 @@ public class RpcProxy implements InvocationHandler {
 	/**
      * Get the Rpc Service Client Stub.
      * 
+     * @param <T> the interface type
      * @param c The interface you want to invoke
      * @return the generated client stub
      */

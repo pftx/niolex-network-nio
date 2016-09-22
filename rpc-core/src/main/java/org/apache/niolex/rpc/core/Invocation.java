@@ -38,19 +38,17 @@ public class Invocation implements Runnable {
 	private Packet parameter;
 
 	/**
-	 * The Constructor.
-	 *
-	 * @param rpcCore
-	 * @param invoker
-	 */
+     * The Constructor.
+     *
+     * @param rpcCore the RPC core
+     * @param invoker the RPC invoker
+     */
 	public Invocation(RpcCore rpcCore, Invoker invoker) {
 		super();
 		this.rpcCore = rpcCore;
 		this.invoker = invoker;
 		this.parameter = rpcCore.readFinished();
 	}
-
-
 
 	/**
 	 * Get the packet from rpc core, Invoke the invoker, and Write the result to rpc core.
@@ -69,11 +67,10 @@ public class Invocation implements Runnable {
 	}
 
 	/**
-	 * Prepare an error to write to client.
-	 *
-	 * @param e
-	 * @param pc
-	 */
+     * Prepare an error to write to client.
+     *
+     * @param e the error message
+     */
 	public void prepareError(String e) {
 		Packet ret = new Packet(Config.CODE_RPC_ERROR, StringUtil.strToUtf8Byte(e));
 		ret.setSerial(parameter.getSerial());
@@ -83,10 +80,10 @@ public class Invocation implements Runnable {
 
 
 	/**
-	 * Prepare an error to write to client.
-	 *
-	 * @param e
-	 */
+     * Prepare an error to write to client.
+     *
+     * @param e the exception
+     */
 	public void prepareError(Exception e) {
 		String s;
 		if (e instanceof RejectedExecutionException) {

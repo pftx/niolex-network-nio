@@ -21,8 +21,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.niolex.commons.test.Benchmark;
-import org.apache.niolex.rpc.client.NioClient;
 import org.apache.niolex.rpc.RpcProxy;
+import org.apache.niolex.rpc.client.nio.NioClient;
 import org.apache.niolex.rpc.core.CoreTest;
 import org.apache.niolex.rpc.protocol.JsonProtocol;
 import org.junit.Assert;

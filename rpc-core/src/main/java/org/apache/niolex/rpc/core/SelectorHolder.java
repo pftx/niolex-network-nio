@@ -52,10 +52,11 @@ public class SelectorHolder {
 
 
 	/**
-	 * The Constructor, must set selector thread and selector itself.
-	 * @param selectorThread
-	 * @param selector
-	 */
+     * The Constructor, must set selector thread and selector itself.
+     * 
+     * @param selectorThread the thread running selector
+     * @param selector the selector
+     */
 	public SelectorHolder(Thread selectorThread, Selector selector) {
 		super();
 		this.thread = selectorThread;
@@ -63,11 +64,12 @@ public class SelectorHolder {
 	}
 
 	/**
-	 * #RpcCore & #ConnectionCore use this method to register the wish to change interest operations.
-	 * This method will decide make the change now or wait for the next wakeup.
-	 *
-	 * @param selectionKey
-	 */
+     * #RpcCore &amp; #ConnectionCore use this method to register the wish to change interest operations.
+     * This method will decide make the change now or wait for the next wakeup.
+     *
+     * @param selectionKey the selection to be changed
+     * @param ops the new interest set
+     */
 	public void changeInterestOps(SelectionKey selectionKey, int ops) {
 		if (thread == Thread.currentThread()) {
 			selectionKey.interestOps(ops);
@@ -105,11 +107,11 @@ public class SelectorHolder {
 		}
 	}
 
-
 	/**
 	 * @return  The selector this holder is managing.
 	 */
 	public Selector getSelector() {
 		return selector;
 	}
+
 }

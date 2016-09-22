@@ -40,7 +40,7 @@ public class StuffRpcServer {
             s.setSelectorsNumber(Integer.parseInt(args[0]));
             s.setInvokersNumber(Integer.parseInt(args[1]));
         }
-        s.setPort(8808);
+        s.setPort(9808);
         RpcInvoker handler = new RpcInvoker(new StuffProtocol());
         s.setInvoker(handler);
 		handler.exportObject(new RpcServiceImpl());

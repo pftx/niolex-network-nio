@@ -17,6 +17,7 @@
  */
 package org.apache.niolex.rpc.protocol;
 
+import java.io.IOException;
 import java.lang.reflect.Type;
 
 import org.apache.niolex.commons.seri.ProtoStuffUtil;
@@ -35,7 +36,7 @@ public class StuffProtocol implements IClientProtocol, IServerProtocol {
 	 * @see org.apache.niolex.rpc.protocol.IServerProtocol#prepareParams(byte[], java.lang.reflect.Type[])
 	 */
 	@Override
-	public Object[] prepareParams(byte[] data, Type[] generic) throws Exception {
+    public Object[] prepareParams(byte[] data, Type[] generic) throws IOException {
 	    return ProtoStuffUtil.parseMulti(data, SeriUtil.castJavaTypes(generic));
 	}
 
@@ -44,7 +45,7 @@ public class StuffProtocol implements IClientProtocol, IServerProtocol {
 	 * @see org.apache.niolex.rpc.protocol.IServerProtocol#serializeReturn(java.lang.Object)
 	 */
 	@Override
-	public byte[] serializeReturn(Object ret) throws Exception {
+    public byte[] serializeReturn(Object ret) throws IOException {
 		return ProtoStuffUtil.seriOne(ret);
 	}
 
@@ -53,7 +54,7 @@ public class StuffProtocol implements IClientProtocol, IServerProtocol {
 	 * @see org.apache.niolex.rpc.protocol.IClientProtocol#serializeParams(java.lang.Object[])
 	 */
 	@Override
-	public byte[] serializeParams(Object[] args) throws Exception {
+    public byte[] serializeParams(Object[] args) throws IOException {
 		return ProtoStuffUtil.seriMulti(args);
 	}
 
@@ -62,7 +63,7 @@ public class StuffProtocol implements IClientProtocol, IServerProtocol {
 	 * @see org.apache.niolex.rpc.protocol.IClientProtocol#prepareReturn(byte[], java.lang.reflect.Type)
 	 */
 	@Override
-	public Object prepareReturn(byte[] ret, Type type) throws Exception {
+    public Object prepareReturn(byte[] ret, Type type) throws IOException {
 	    return ProtoStuffUtil.parseOne(ret, SeriUtil.castJavaType(type));
 	}
 

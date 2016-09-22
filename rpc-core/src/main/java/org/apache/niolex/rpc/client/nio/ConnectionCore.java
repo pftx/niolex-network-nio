@@ -35,6 +35,10 @@ import org.slf4j.LoggerFactory;
  * This is definitely the core of the whole non blocking network client.
  * This class handle network problem and reading, writing.
  * After data is ready, encapsulate it into Packet.
+ * <br>
+ * The connection core is working in semi-duplex mode, it will not read and write at the
+ * same time. The whole status flow is:
+ * SEND_HEADER -&gt; SEND_BODY -&gt; RECEVE_HEADER -&gt; RECEVE_BODY
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
@@ -51,16 +55,15 @@ public class ConnectionCore {
     /**
      * Internal used in ConnectionCore. Please ignore.
      * Status indicate the current running status of read and write.
-     * RECEVE_HEADER -> Waiting to Read header from Remote
-     * SEND_HEADER -> Waiting to Write header into Socket Channel
-     * RECEVE_BODY -> Reading body
-     * SEND_BODY -> Writing body
+     * RECEVE_HEADER -&gt; Waiting to Read header from Remote
+     * SEND_HEADER -&gt; Waiting to Write header into Socket Channel
+     * RECEVE_BODY -&gt; Reading body
+     * SEND_BODY -&gt; Writing body
      *
      * @author Xie, Jiyun
-     *
      */
     public static enum Status {
-        RECEVE_HEADER, RECEVE_BODY, SEND_HEADER, SEND_BODY
+        RECEVE_HEADER, RECEVE_BODY, SEND_HEADER, SEND_BODY;
     }
 
     /**
@@ -76,7 +79,7 @@ public class ConnectionCore {
     /**
      * The socket container hold all the sockets, including this one.
      */
-    private final ConnectionManager connManager;
+    private final ConnectionHolder connHolder;
 
     /**
      * The socket selection key of this channel.
@@ -93,37 +96,39 @@ public class ConnectionCore {
      */
     private String remoteName;
 
-    /*数据缓冲区*/
-    private Status status;
+    /**
+     * The Data buffer.
+     */
     private ByteBuffer byteBuffer;
+    private Status status;
     private Packet packet;
 
     /**
      * Constructor of ConnectionCore, manage a SocketChannel inside.
      *
-     * @param selector
-     * @param client
-     * @param connManager
-     * @throws IOException
+     * @param selector the selector holder
+     * @param channel the client side socket channel
+     * @param connHolder the connection core manager
+     * @throws IOException if I / O related error occurred
      */
-    public ConnectionCore(SelectorHolder selector, SocketChannel client, ConnectionManager connManager) throws IOException {
+    public ConnectionCore(SelectorHolder selector, SocketChannel channel, ConnectionHolder connHolder) throws IOException {
 		super();
 		this.selectorHolder = selector;
-		this.socketChannel = client;
-		this.connManager = connManager;
-		this.selectionKey = client.register(selector.getSelector(), SelectionKey.OP_CONNECT, this);
+		this.socketChannel = channel;
+        this.connHolder = connHolder;
+		this.selectionKey = channel.register(selector.getSelector(), SelectionKey.OP_CONNECT, this);
     }
 
     /**
      * handle client connected request. We will do a log and mark this client ready.
-     * @throws IOException
      */
     public void handleConnect() {
     	try {
 	    	socketChannel.finishConnect();
 	    	selectionKey.interestOps(0);
-	    	connManager.ready(this);
+	    	connHolder.ready(this);
     	} catch (Exception e) {
+            LOG.error("Failed to mark socket channel as connected.", e);
     		handleClose();
     		return;
     	}
@@ -137,7 +142,31 @@ public class ConnectionCore {
     }
 
     /**
+     * Prepare to write this packet, attache this channel to write. This is the start of the
+     * whole workflow.
+     * 
+     * @param pc the packet to be written to socket
+     */
+    public void prepareWrite(Packet pc) {
+        packet = pc;
+        if (pc.getLength() + 8 <= MAX_BUFFER_SIZE) {
+            status = Status.SEND_BODY;
+            byteBuffer = ByteBuffer.allocate(8 + pc.getLength());
+            PacketUtil.putHeader(packet, byteBuffer);
+            byteBuffer.put(pc.getData());
+        } else {
+            status = Status.SEND_HEADER;
+            byteBuffer = getHeadBuffer();
+            PacketUtil.putHeader(packet, byteBuffer);
+        }
+        // Make buffer ready for write to server.
+        byteBuffer.flip();
+        selectorHolder.changeInterestOps(selectionKey, SelectionKey.OP_WRITE);
+    }
+
+    /**
      * Clean the head buffer and return it.
+     * 
      * @return the head buffer
      */
     private ByteBuffer getHeadBuffer() {
@@ -146,34 +175,15 @@ public class ConnectionCore {
     }
 
     /**
-     * Prepare to write this packet, attache this channel to write.
-     * @param pc
-     */
-    public void prepareWrite(Packet pc) {
-    	packet = pc;
-    	if (pc.getLength() + 8 <= MAX_BUFFER_SIZE) {
-    		status = Status.SEND_BODY;
-    		byteBuffer = ByteBuffer.allocate(8 + pc.getLength());
-    		PacketUtil.putHeader(packet, byteBuffer);
-    		byteBuffer.put(pc.getData());
-    	} else {
-    		status = Status.SEND_HEADER;
-    		byteBuffer = getHeadBuffer();
-    		PacketUtil.putHeader(packet, byteBuffer);
-    	}
-    	// Make buffer ready for write to server.
-    	byteBuffer.flip();
-    	selectorHolder.changeInterestOps(selectionKey, SelectionKey.OP_WRITE);
-    }
-
-    /**
      * Handle write request. called by NIO selector.
      * Send packets to server.
      *
      * Status change summary:
-     * SEND_HEADER -> Sending a packet, header now
-     * SEND_BODY -> Sending a packet body
-     *
+     * 
+     * <pre>
+     * SEND_HEADER -&gt; Sending a packet, header now
+     * SEND_BODY -&gt; Sending a packet body
+     * </pre>
      */
     public void handleWrite() {
         try {
@@ -211,10 +221,13 @@ public class ConnectionCore {
      * handle read request. called by NIO selector.
      *
      * Read status change summary:
-     * RECEVE_HEADER -> Need read header, means nothing is read by now
-     * RECEVE_BODY -> Header is read, need to read body now
+     * 
+     * <pre>
+     * RECEVE_HEADER -&gt; Need read header, means nothing is read by now
+     * RECEVE_BODY -&gt; Header is read, need to read body now.
+     * </pre>
      *
-     *@return true if read finished.
+     * @return true if read finished
      */
     public boolean handleRead() {
         try {
@@ -246,7 +259,7 @@ public class ConnectionCore {
     /**
      * Read packet finished, we will detach this channel from read.
      *
-     * @param blocker use this to release the result.
+     * @param blocker use this to release the result
      */
     public void readFinished(Blocker<Packet> blocker) {
     	LOG.debug("Packet received. desc {}, length {}.", packet.descriptor(), packet.getLength());
@@ -258,7 +271,7 @@ public class ConnectionCore {
     	blocker.release(this, packet);
     	// Return this resource to the pool.
     	selectionKey.interestOps(0);
-    	connManager.ready(this);
+    	connHolder.ready(this);
     }
 
     /**
@@ -291,7 +304,8 @@ public class ConnectionCore {
         } catch (IOException e) {
             LOG.info("Failed to close client connection: {}", e.getMessage());
         } finally {
-        	connManager.close(this);
+        	connHolder.close(this);
         }
     }
+
 }

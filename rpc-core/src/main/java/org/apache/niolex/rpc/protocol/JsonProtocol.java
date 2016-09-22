@@ -19,6 +19,7 @@ package org.apache.niolex.rpc.protocol;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.List;
 
@@ -42,7 +43,7 @@ public class JsonProtocol implements IClientProtocol, IServerProtocol {
 	 * @see org.apache.niolex.rpc.protocol.IClientProtocol#serializeParams(java.lang.Object[])
 	 */
 	@Override
-	public byte[] serializeParams(Object[] args) throws Exception {
+    public byte[] serializeParams(Object[] args) throws IOException {
 	    ByteArrayOutputStream out = new ByteArrayOutputStream();
         for (Object o : args) {
             JacksonUtil.writeObj(out, o);
@@ -56,7 +57,7 @@ public class JsonProtocol implements IClientProtocol, IServerProtocol {
 	 * @see org.apache.niolex.rpc.protocol.IClientProtocol#prepareReturn(byte[], java.lang.reflect.Type)
 	 */
 	@Override
-	public Object prepareReturn(byte[] ret, Type type) throws Exception {
+    public Object prepareReturn(byte[] ret, Type type) throws IOException {
 	    return JacksonUtil.bin2Obj(ret, SeriUtil.packJavaType(type));
 	}
 
@@ -65,7 +66,7 @@ public class JsonProtocol implements IClientProtocol, IServerProtocol {
 	 * @see org.apache.niolex.rpc.protocol.IServerProtocol#prepareParams(byte[], java.lang.reflect.Type[])
 	 */
 	@Override
-	public Object[] prepareParams(byte[] data, Type[] generic) throws Exception {
+    public Object[] prepareParams(byte[] data, Type[] generic) throws IOException {
 	    List<TypeReference<Object>> list = SeriUtil.packJavaTypes(generic);
         
         Object[] ret = new Object[list.size()];
@@ -82,7 +83,7 @@ public class JsonProtocol implements IClientProtocol, IServerProtocol {
 	 * @see org.apache.niolex.rpc.protocol.IServerProtocol#serializeReturn(java.lang.Object)
 	 */
 	@Override
-	public byte[] serializeReturn(Object ret) throws Exception {
+    public byte[] serializeReturn(Object ret) throws IOException {
 		return JacksonUtil.obj2bin(ret);
 	}
 

@@ -28,6 +28,7 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.Set;
 
+import org.apache.niolex.commons.util.SystemUtil;
 import org.apache.niolex.network.Config;
 import org.apache.niolex.network.IServer;
 import org.apache.niolex.rpc.core.Invocation;
@@ -130,7 +131,7 @@ public class NioServer implements IServer {
 			            stop();
 					}
                 }
-        	});
+            }, "NioServer-MainSelector");
         	selectorHolder = new SelectorHolder(mainThread, mainSelector);
         	mainThread.start();
         } catch (Exception e) {
@@ -142,7 +143,8 @@ public class NioServer implements IServer {
     /**
      * This method will never return after this server stop or IOException.
      * Call stop() to shutdown this server.
-     * @throws IOException
+     * 
+     * @throws IOException if I / O related error occurred
      */
     private void listenMain() throws IOException {
         while (isListening) {
@@ -159,13 +161,15 @@ public class NioServer implements IServer {
     }
 
     /**
-     * #handleKey(SelectionKey) use This method to register the newly created SocketChannel to a worker selector.
-     * This method will use the main selector to register READ operation.
+     * {@link #handleKey(SelectionKey)} use This method to register the newly created SocketChannel to a worker
+     * selector. This method will use the main selector to register READ operation.
      *
      * Any Sub class can override this method to change the default behavior.
      * Sub class can override this method to use there own selector.
      * The default client handler will just process in the main thread.
-     * @param client
+     * 
+     * @param client the newly accepted client socket channel
+     * @throws IOException if I / O related error occurred
      */
     protected void registerClient(SocketChannel client) throws IOException {
     	new RpcCore(selectorHolder, client);
@@ -174,6 +178,9 @@ public class NioServer implements IServer {
     /**
      * Process all the IO requests.
      * Handle accept, read, write. Please do not override this method.
+     * 
+     * @param selectionKey the selection key to be handled
+     * @throws IOException if I / O related error occurred
      */
     protected void handleKey(SelectionKey selectionKey) throws IOException {
         SocketChannel client = null;
@@ -194,7 +201,7 @@ public class NioServer implements IServer {
             RpcCore fastCore = (RpcCore) selectionKey.attachment();
             if (selectionKey.isValid() && selectionKey.isReadable()) {
             	if (fastCore.handleRead()) {
-            		// Read packet finished, we need to invoke packet handler
+                    // Read packet finished, we need to invoke packet handler.
             		Invocation invoc = new Invocation(fastCore, invoker);
             		submitInvocation(invoc);
             	}
@@ -215,7 +222,7 @@ public class NioServer implements IServer {
      * This method will just invoke it in the current thread.
      * Any Sub class can override this method to change the default behavior.
      *
-     * @param invoc the one need to be run.
+     * @param invoc the one need to be run
      */
     protected void submitInvocation(Invocation invoc) {
     	invoc.run();
@@ -236,9 +243,7 @@ public class NioServer implements IServer {
             ss.socket().close();
             ss.close();
             for (SelectionKey skey : mainSelector.keys()) {
-            	try {
-            		skey.channel().close();
-            	} catch (Exception e) {}
+                SystemUtil.close(skey.channel());
             }
             mainSelector.wakeup();
             mainThread.join();
@@ -248,7 +253,6 @@ public class NioServer implements IServer {
             LOG.error("Failed to stop server main thread.", e);
         }
     }
-
 
     /**
 	 * Override super method
@@ -278,9 +282,10 @@ public class NioServer implements IServer {
     }
 
     /**
-	 * Override super method
-	 * @see org.apache.niolex.network.IServer#setInvoker(org.apache.niolex.network.Invoker)
-	 */
+     * Override super method
+     * 
+     * @see org.apache.niolex.network.IServer#setInvoker(org.apache.niolex.rpc.core.Invoker)
+     */
     @Override
 	public void setInvoker(Invoker invoker) {
         this.invoker = invoker;

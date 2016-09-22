@@ -26,12 +26,12 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.apache.niolex.commons.util.SystemUtil;
 import org.apache.niolex.rpc.core.Invocation;
 import org.apache.niolex.rpc.core.RpcCore;
 import org.apache.niolex.rpc.core.SelectorHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 
 /**
  * The MultiNioServer reads and writes Packet in multiple threads.
@@ -43,18 +43,17 @@ import org.slf4j.LoggerFactory;
 public class MultiNioServer extends NioServer {
 	private static final Logger LOG = LoggerFactory.getLogger(MultiNioServer.class);
 
-	// The Selector Thread pool size
+    // The Selector Thread pool size.
     private int selectorsNumber;
     // The selectors thread pool.
     private ThreadGroup sPool;
-    // The Invoker Thread pool size
+    // The Invoker Thread pool size.
     private int invokersNumber;
     // The invokers thread pool.
     private ExecutorService iPool;
-    // The current round robin selector index
+    // The current round robin selector index.
     private int currentIdx = 0;
     private RunnableSelector[] selectors;
-
 
     /**
      * Create a MultiNioServer with default threads number.
@@ -75,8 +74,9 @@ public class MultiNioServer extends NioServer {
 
     /**
      * Create a MultiNioServer with your specified threads number.
-     * @param selectorsNumber
-     * @param invokersNumber
+     * 
+     * @param selectorsNumber the selectors threads number
+     * @param invokersNumber the invokers threads number
      */
 	public MultiNioServer(int selectorsNumber, int invokersNumber) {
 		super();
@@ -174,10 +174,11 @@ public class MultiNioServer extends NioServer {
 	}
 
 	/**
-	 * Set the internal selectors pool threads number.
-	 * You need to set this before call the start method, or it will be useless.
-	 * @param selectorsNumber
-	 */
+     * Set the internal selectors pool threads number.
+     * You need to set this before call the start method, or it will be useless.
+     * 
+     * @param selectorsNumber the selectors threads number
+     */
 	public void setSelectorsNumber(int selectorsNumber) {
 		this.selectorsNumber = selectorsNumber;
 	}
@@ -190,11 +191,11 @@ public class MultiNioServer extends NioServer {
 	}
 
 	/**
-	 * Set the internal invokers pool threads number.
-	 * You need to set this before call the start method, or it will be useless.
-	 *
-	 * @param invokersNumber
-	 */
+     * Set the internal invokers pool threads number.
+     * You need to set this before call the start method, or it will be useless.
+     *
+     * @param invokersNumber the invokers threads number
+     */
 	public void setInvokersNumber(int invokersNumber) {
 		this.invokersNumber = invokersNumber;
 	}
@@ -217,10 +218,11 @@ public class MultiNioServer extends NioServer {
 		private Thread thread;
 
 		/**
-		 * The Constructor, create a new thread with this thread group and run.
-		 * @param tPool
-		 * @throws IOException
-		 */
+         * The Constructor, create a new thread with this thread group and run.
+         * 
+         * @param tPool the thread group used to manage the selector's thread
+         * @throws IOException if I / O related error occurred
+         */
 		public RunnableSelector(ThreadGroup tPool) throws IOException {
 			super();
 			this.selector = Selector.open();
@@ -230,10 +232,10 @@ public class MultiNioServer extends NioServer {
 		}
 
 		/**
-		 * Register this client to this selector.
-		 *
-		 * @param client
-		 */
+         * Register this client to this selector.
+         *
+         * @param client the socket channel
+         */
 		public void registerClient(SocketChannel client) {
 			synchronized (clientQueue) {
 				clientQueue.add(client);
@@ -242,15 +244,15 @@ public class MultiNioServer extends NioServer {
 		}
 
 		/**
-		 * Close the internal selector and wait for the thread to shutdown.
-		 * @throws IOException
-		 * @throws InterruptedException
-		 */
+         * Close the internal selector and wait for the thread to shutdown.
+         * 
+         * @throws IOException if I / O related error occurred
+         * @throws InterruptedException the current thread been interrupted when waiting for the selector's thread to be
+         *             closed
+         */
 		public void close() throws IOException, InterruptedException {
 			for (SelectionKey skey : selector.keys()) {
-            	try {
-            		skey.channel().close();
-            	} catch (Exception e) {}
+                SystemUtil.close(skey.channel());
             }
 			selector.wakeup();
 			thread.join();
@@ -282,9 +284,10 @@ public class MultiNioServer extends NioServer {
 		}
 
 		/**
-		 * Add all the clients into this selector now.
-		 * @throws IOException
-		 */
+         * Add all the clients into this selector now.
+         * 
+         * @throws IOException if I / O related error occurred
+         */
 		public void addClients() throws IOException {
 			// Check the status, if there is any clients need to attach.
 			if (!clientQueue.isEmpty()) {

@@ -54,6 +54,7 @@ public interface IClient {
      *
      * @param sc the packet to be sent to server
      * @return the wait on object to retrieve result
+     * @throws IOException if I / O related error occurred
      */
     public WaitOn<Packet> asyncInvoke(Packet sc) throws IOException;
 

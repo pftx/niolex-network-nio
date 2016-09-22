@@ -24,7 +24,6 @@ import org.apache.niolex.rpc.protocol.JsonProtocol;
 import org.apache.niolex.rpc.server.MultiNioServer;
 import org.apache.niolex.rpc.server.RpcInvoker;
 
-
 /**
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0

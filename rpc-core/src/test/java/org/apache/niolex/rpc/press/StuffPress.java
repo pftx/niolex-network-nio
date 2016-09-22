@@ -25,8 +25,8 @@ import org.apache.niolex.commons.test.MockUtil;
 import org.apache.niolex.commons.test.StopWatch;
 import org.apache.niolex.commons.test.StopWatch.Stop;
 import org.apache.niolex.commons.util.SystemUtil;
-import org.apache.niolex.rpc.client.SocketClient;
 import org.apache.niolex.rpc.RpcProxy;
+import org.apache.niolex.rpc.client.SocketClient;
 import org.apache.niolex.rpc.demo.RpcService;
 import org.apache.niolex.rpc.demo.RpcService.IntArray;
 import org.apache.niolex.rpc.protocol.StuffProtocol;
@@ -104,7 +104,7 @@ public class StuffPress {
 	}
 
 	public static RpcProxy create() throws IOException {
-		SocketClient c = new SocketClient(new InetSocketAddress(ADDR, 8808));
+        SocketClient c = new SocketClient(new InetSocketAddress(ADDR, 9808));
 		RpcProxy client = new RpcProxy(c, new StuffProtocol());
 		client.connect();
 		return client;

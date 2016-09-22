@@ -19,18 +19,17 @@ package org.apache.niolex.rpc.core;
 
 import org.apache.niolex.network.Packet;
 
-
 /**
  * The Packet Invoker Interface.
+ * 
  * @author Xie, Jiyun
- *
  */
 public interface Invoker {
 
     /**
      * Handle the Packet, and return result.
      *
-     * @param sc The Packet need to be Handled
+     * @param sc the packet need to be Handled
      * @return the result
      */
     public Packet process(Packet sc);

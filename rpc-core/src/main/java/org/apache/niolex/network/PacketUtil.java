@@ -31,6 +31,8 @@ public class PacketUtil {
 
 	/**
      * Invoke the default constructor to create a new packet.
+     * 
+     * @return the created packet
      */
 	public static final Packet newInstance() {
 		return new Packet();
@@ -40,6 +42,7 @@ public class PacketUtil {
      * Create a packet with only packet code.
      *
      * @param code the packet code
+     * @return the created packet
      */
 	public static final Packet newInstance(int code) {
 		return new Packet((short) code);
@@ -50,6 +53,7 @@ public class PacketUtil {
      *
      * @param code the packet code
      * @param data the packet data, encoded with UTF8
+     * @return the created packet
      */
 	public static final Packet newInstance(int code, String data) {
 		return new Packet((short) code, StringUtil.strToUtf8Byte(data));
@@ -60,6 +64,7 @@ public class PacketUtil {
      *
      * @param code the packet code
      * @param data the packet data
+     * @return the created packet
      */
 	public static final Packet newInstance(int code, byte[] data) {
 		return new Packet((short) code, data);

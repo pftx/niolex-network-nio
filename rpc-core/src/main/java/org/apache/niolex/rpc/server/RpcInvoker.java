@@ -62,9 +62,10 @@ public class RpcInvoker implements Invoker {
 	}
 
 	/**
-	 * Create a RpcInvoker with this specified protocol.
-	 * @param serverProtocol
-	 */
+     * Create a RpcInvoker with this specified protocol.
+     * 
+     * @param serverProtocol the server protocol
+     */
 	public RpcInvoker(IServerProtocol serverProtocol) {
 		super();
 		this.serverProtocol = serverProtocol;
@@ -143,10 +144,11 @@ public class RpcInvoker implements Invoker {
 	}
 
 	/**
-	 * Set the Rpc Configs, this method will parse all the configurations and generate the execute map.
-	 * This method can be called multi-times. System will collect all the configurations.
-	 * @param confs
-	 */
+     * Set the Rpc Configs, this method will parse all the configurations and generate the execute map.
+     * This method can be called multi-times. System will collect all the configurations.
+     * 
+     * @param confs the configure array
+     */
 	public void setRpcConfigs(RpcConfig[] confs) {
 		for (RpcConfig conf : confs) {
 		    setRpcConfig(conf);
@@ -154,19 +156,20 @@ public class RpcInvoker implements Invoker {
 	}
 
 	/**
-	 * Set one rpc config. This method can be called multi-times. System will collect all the configurations.
-	 * @param conf
-	 */
+     * Set one rpc config. This method can be called multi-times. System will collect all the configurations.
+     * 
+     * @param conf the RPC config
+     */
 	public void setRpcConfig(RpcConfig conf) {
 	    addRpcConfig(conf.getInterface(), conf.getTarget());
 	}
 
 	/**
      * Add one rpc config. This method can be called multi-times. System will collect all the configurations.
-	 *
-	 * @param interfaces
-	 * @param target
-	 */
+     *
+     * @param interfaces the interface
+     * @param target the target
+     */
 	public void addRpcConfig(Class<?> interfaces, Object target) {
 	    List<Method> list = MethodUtil.getAllMethodsIncludeInterfaces(interfaces);
         for (Method m : list) {
@@ -184,17 +187,19 @@ public class RpcInvoker implements Invoker {
 	}
 
 	/**
-	 * Export this object for remote access. The first interface will be used to export Rpc config.
-	 * @param exportObj
-	 */
+     * Export this object for remote access. The first interface will be used to export Rpc config.
+     * 
+     * @param exportObj the object to be exported
+     */
 	public void exportObject(Object exportObj) {
 	    addRpcConfig(exportObj.getClass().getInterfaces()[0], exportObj);
 	}
 
 	/**
-	 * Set the server side serialization protocol.
-	 * @param serverProtocol
-	 */
+     * Set the server side serialization protocol.
+     * 
+     * @param serverProtocol the server protocol
+     */
 	public void setServerProtocol(IServerProtocol serverProtocol) {
 		this.serverProtocol = serverProtocol;
 	}

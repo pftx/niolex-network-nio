@@ -17,6 +17,7 @@
  */
 package org.apache.niolex.rpc.protocol;
 
+import java.io.IOException;
 import java.lang.reflect.Type;
 
 /**
@@ -31,20 +32,22 @@ import java.lang.reflect.Type;
 public interface IClientProtocol {
 
 	/**
-	 * Serialize arguments objects into byte array.
-	 * @param args
-	 * @return the result
-	 * @throws Exception
-	 */
-	public byte[] serializeParams(Object[] args) throws Exception;
+     * Serialize arguments objects into byte array.
+     * 
+     * @param args the parameters
+     * @return the bytes array
+     * @throws IOException if I / O related error occurred
+     */
+    public byte[] serializeParams(Object[] args) throws IOException;
 
 	/**
-	 * De-serialize returned byte array into objects.
-	 * @param ret
-	 * @param type
-	 * @return the result
-	 * @throws Exception
-	 */
-	public Object prepareReturn(byte[] ret, Type type) throws Exception;
+     * De-serialize returned byte array into objects.
+     * 
+     * @param ret the returned byte array
+     * @param type the return type
+     * @return the result
+     * @throws IOException if I / O related error occurred
+     */
+    public Object prepareReturn(byte[] ret, Type type) throws IOException;
 
 }

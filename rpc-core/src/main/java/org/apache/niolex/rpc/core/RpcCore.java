@@ -31,7 +31,10 @@ import org.slf4j.LoggerFactory;
 /**
  * This is the Rpc core of server packet processing component.
  * This is definitely the core of the whole network server.
- * There is a {@link #ConnectionCore} class to handle client side network.
+ * There is a {@link org.apache.niolex.rpc.client.nio.ConnectionCore} class to handle client side network.
+ * <br>
+ * The RPC core is working in half duplex mode, it will not read and write
+ * at the same time.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
@@ -48,16 +51,16 @@ public class RpcCore {
     /**
      * Internal used in RpcCore. Please ignore.
      * Status indicate the running status of read and write.
-     * RECEVE_HEADER -> Waiting to Read header from Remote
-     * SEND_HEADER -> Waiting to Write header into Socket Channel
-     * RECEVE_BODY -> Reading body
-     * SEND_BODY -> Writing body
+     * RECEVE_HEADER -&gt; Waiting to Read header from Remote
+     * SEND_HEADER -&gt; Waiting to Write header into Socket Channel
+     * RECEVE_BODY -&gt; Reading body
+     * SEND_BODY -&gt; Writing body
      *
      * @author Xie, Jiyun
      *
      */
     public static enum Status {
-        RECEVE_HEADER, RECEVE_BODY, SEND_HEADER, SEND_BODY
+        RECEVE_HEADER, RECEVE_BODY, SEND_HEADER, SEND_BODY;
     }
 
     /**
@@ -85,7 +88,6 @@ public class RpcCore {
      */
     private String remoteName;
 
-    /*数据缓冲区*/
     private Status status;
     private ByteBuffer byteBuffer;
     private Packet packet;
@@ -93,8 +95,9 @@ public class RpcCore {
     /**
      * Constructor of RpcCore, manage a SocketChannel inside.
      *
-     * @param selector
-     * @param client
+     * @param selector the selector holder
+     * @param client the socket channel
+     * @throws IOException if I / O related error occurred
      */
     public RpcCore(SelectorHolder selector, SocketChannel client) throws IOException {
 		super();
@@ -114,15 +117,17 @@ public class RpcCore {
         LOG.info(sb.toString());
     }
 
-
     /**
      * handle read request. called by NIO selector.
      *
      * Read status change summary:
-     * RECEVE_HEADER -> Need read header, means nothing is read by now
-     * RECEVE_BODY -> Header is read, need to read body now
-     *
-     *@return true if read finished.
+     * 
+     * <pre>
+     * RECEVE_HEADER -&gt; Need read header, means nothing is read by now
+     * RECEVE_BODY -&gt; Header is read, need to read body now
+     * </pre>
+     * 
+     * @return true if read finished
      */
     public boolean handleRead() {
         try {
@@ -153,6 +158,8 @@ public class RpcCore {
 
     /**
      * Read packet finished, we will detach this channel from read.
+     * 
+     * @return the read packet
      */
     public Packet readFinished() {
     	LOG.debug("Packet received. desc {}, size {}.", packet.descriptor(), packet.getLength());
@@ -162,7 +169,8 @@ public class RpcCore {
 
     /**
      * Prepare to write this packet, attache this channel to write.
-     * @param pc
+     * 
+     * @param pc the packet to be written to client
      */
     public void prepareWrite(Packet pc) {
     	packet = pc;
@@ -187,9 +195,11 @@ public class RpcCore {
      * Send packets to client.
      *
      * Status change summary:
-     * SEND_HEADER -> Sending a packet, header now
-     * SEND_BODY -> Sending a packet body
-     *
+     * 
+     * <pre>
+     * SEND_HEADER -&gt; Sending a packet, header now
+     * SEND_BODY -&gt; Sending a packet body
+     * </pre>
      */
     public void handleWrite() {
         try {
@@ -247,4 +257,5 @@ public class RpcCore {
             LOG.info("Failed to close client socket: {}", e.getMessage());
         }
     }
+
 }

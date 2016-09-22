@@ -32,6 +32,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.niolex.commons.concurrent.Blocker;
 import org.apache.niolex.commons.concurrent.BlockerException;
 import org.apache.niolex.commons.concurrent.WaitOn;
+import org.apache.niolex.commons.util.SystemUtil;
 import org.apache.niolex.network.Config;
 import org.apache.niolex.network.Packet;
 import org.apache.niolex.rpc.RpcException;
@@ -42,7 +43,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * The non blocking client.
- * This client maintains a number of connections by the ConnectionManager class.
+ * This client maintains a number of connections by the ConnectionHolder class.
  * So it's concurrent enabled.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
@@ -74,7 +75,7 @@ public class NioClient extends BaseClient implements Runnable {
 
     /**
      * Socket connect timeout. There is no connect timeout in Non-Blocking,
-     * so we use this timeout for take connection from {@link ConnectionManager}
+     * so we use this timeout for take connection from {@link ConnectionHolder}
      */
     protected int connectTimeout = Config.SO_CONNECT_TIMEOUT;
 
@@ -86,22 +87,22 @@ public class NioClient extends BaseClient implements Runnable {
 	/**
 	 * The client selector.
 	 */
-	private Selector selector;
+    private final Selector selector;
 
 	/**
 	 * The selector thread.
 	 */
-	private Thread thread;
+    private final Thread selectorThread;
 
 	/**
 	 * The selector holder.
 	 */
-	private SelectorHolder selectorHolder;
+    private final SelectorHolder selectorHolder;
 
 	/**
 	 * The NIO socket channel container hold all the socket channels.
 	 */
-	private final ConnectionManager connManager;
+	private final ConnectionHolder connManager;
 
 	/**
 	 * The configured server address array.
@@ -114,20 +115,74 @@ public class NioClient extends BaseClient implements Runnable {
 	private int addressIdx = 0;
 
 	/**
-	 * The only Constructor, create an empty instance.
-	 * <p>
-	 * Please call {@link #setServerAddress(String)} and then
-	 * call {@link #connect()} to make this instance ready.
-	 * <p>
-	 * @throws IOException
-	 */
+     * The only Constructor, create an empty instance.
+     * <p>
+     * Please call {@link #setServerAddress(String)} and then
+     * call {@link #connect()} to make this instance ready.
+     * <p>
+     * 
+     * @throws IOException if I / O related error occurred
+     */
 	public NioClient() throws IOException {
 		super();
 		this.selector = Selector.open();
-		this.thread = new Thread(this);
-		selectorHolder = new SelectorHolder(thread, selector);
-		connManager = new ConnectionManager(this);
+		this.selectorThread = new Thread(this);
+        this.selectorHolder = new SelectorHolder(selectorThread, selector);
+        this.connManager = new ConnectionHolder(this);
 	}
+
+    /**
+     * This is the override of super method.
+     * 
+     * @see org.apache.niolex.network.IClient#connect()
+     */
+    @Override
+    public void connect() throws IOException {
+        this.isWorking = true;
+        connManager.needReady(connectionNumber / 2 + 1);
+        addClientChannels();
+        selectorThread.start();
+        try {
+            connManager.waitReady();
+        } catch (InterruptedException e) {
+            LOG.warn("The nio client been interrupted when wait for connections to be ready.");
+        }
+        this.connStatus = Status.CONNECTED;
+    }
+
+    /**
+     * Add more client channels if the manager is not full.
+     */
+    public void addClientChannels() {
+        while (validCnt.get() < connectionNumber) {
+            int k = validCnt.incrementAndGet();
+            if (k <= connectionNumber) {
+                addNewClientChannel();
+            } else {
+                validCnt.decrementAndGet();
+            }
+        }
+    }
+
+    /**
+     * Add a new client channel.
+     */
+    public void addNewClientChannel() {
+        SocketAddress remote = serverAddresses[addressIdx];
+        addressIdx = (addressIdx + 1) % serverAddresses.length;
+        try {
+            SocketChannel ch = SocketChannel.open();
+            ch.configureBlocking(false);
+            ch.socket().setTcpNoDelay(true);
+            ch.socket().setSoLinger(false, 0);
+            ch.connect(remote);
+            // Connection attached to channel, channel registered to selector.
+            new ConnectionCore(selectorHolder, ch, connManager);
+        } catch (IOException e) {
+            validCnt.decrementAndGet();
+            LOG.error("Failed to create channel to address: {}", remote, e);
+        }
+    }
 
 	/**
 	 * Run the selector, the main method.
@@ -159,6 +214,9 @@ public class NioClient extends BaseClient implements Runnable {
 	/**
      * Process all the IO requests.
      * Handle connect, read, write. Please do not override this method.
+     * 
+     * @param selectionKey the selection key
+     * @throws IOException if I / O related error occurred
      */
     protected void handleKey(SelectionKey selectionKey) throws IOException {
         try {
@@ -182,58 +240,10 @@ public class NioClient extends BaseClient implements Runnable {
     }
 
 	/**
-	 * This is the override of super method.
-	 * @see org.apache.niolex.network.IClient#connect()
-	 */
-	@Override
-	public void connect() throws IOException {
-		this.isWorking = true;
-		connManager.needReady(connectionNumber / 2 + 1);
-		addClientChannels();
-		thread.start();
-		try {
-			connManager.waitReady();
-		} catch (InterruptedException e) {}
-		this.connStatus = Status.CONNECTED;
-	}
-
-	/**
-	 * Add more client channels if the manager is not full.
-	 */
-	public void addClientChannels() {
-		while (validCnt.get() < connectionNumber) {
-			int k = validCnt.incrementAndGet();
-			if (k <= connectionNumber) {
-				addNewClientChannel();
-			} else {
-			    validCnt.decrementAndGet();
-			}
-		}
-	}
-
-	/**
-	 * Add a new client channel.
-	 */
-	public void addNewClientChannel() {
-		SocketAddress remote = serverAddresses[addressIdx];
-		addressIdx = (addressIdx + 1) % serverAddresses.length;
-		try {
-			SocketChannel ch = SocketChannel.open();
-			ch.configureBlocking(false);
-			ch.socket().setTcpNoDelay(true);
-			ch.socket().setSoLinger(false, 0);
-			ch.connect(remote);
-			new ConnectionCore(selectorHolder, ch, connManager);
-		} catch (IOException e) {
-			validCnt.decrementAndGet();
-			LOG.error("Failed to create channel to address: {}", remote, e);
-		}
-	}
-
-	/**
-	 * A channel is invalid and closed here.
-	 * @param clientCore
-	 */
+     * A channel is invalid and closed here.
+     * 
+     * @param clientCore the specified client connection
+     */
 	public void closeChannel(ConnectionCore clientCore) {
 		validCnt.decrementAndGet();
 		BlockerException ex = new BlockerException("Connection closed.");
@@ -241,11 +251,11 @@ public class NioClient extends BaseClient implements Runnable {
 	}
 
 	/**
-	 * Async invoke of remote call.
-	 *
-	 * @param sc
-	 * @return the wait on object.
-	 */
+     * Asynchronously invoke of remote call.
+     *
+     * @param sc the packet to be sent to server
+     * @return the wait on object
+     */
 	@Override
 	public WaitOn<Packet> asyncInvoke(Packet sc) {
 		sc.setSerial((short) 1);
@@ -273,7 +283,7 @@ public class NioClient extends BaseClient implements Runnable {
 		} catch (InterruptedException e) {
 		    throw new RpcException("Rpc timeout.", RpcException.Type.TIMEOUT, e);
 		} catch (Exception e) {
-			throw new RpcException("Error get result.", RpcException.Type.ERROR_INVOKE, e);
+            throw new RpcException("Error occurred when get result.", RpcException.Type.ERROR_INVOKE, e);
 		}
 	}
 
@@ -286,13 +296,11 @@ public class NioClient extends BaseClient implements Runnable {
 		this.isWorking = false;
 		this.connStatus = Status.CLOSED;
 		for (SelectionKey skey : new HashSet<SelectionKey>(selector.keys())) {
-        	try {
-        		skey.channel().close();
-        	} catch (Exception e) {}
+            SystemUtil.close(skey.channel());
         }
 		selector.wakeup();
 		try {
-			thread.join();
+			selectorThread.join();
 			selector.close();
     		LOG.info("NioClient stoped.");
     	} catch(Exception e) {
@@ -319,28 +327,31 @@ public class NioClient extends BaseClient implements Runnable {
 	}
 
 	/**
-	 * Connection number is the total number of connections this client will create and manage.
-	 * @param connectionNumber
-	 */
+     * Connection number is the total number of connections this client will create and manage.
+     * 
+     * @param connectionNumber the total number of connections
+     */
 	public void setConnectionNumber(int connectionNumber) {
 		this.connectionNumber = connectionNumber;
 	}
 
 	/**
-	 * The rpc invoke timeout in millisecond.
-	 * @param rpcHandleTimeout
-	 */
+     * The rpc invoke timeout in millisecond.
+     * 
+     * @param rpcHandleTimeout the rpc invoke timeout
+     */
 	public void setRpcHandleTimeout(int rpcHandleTimeout) {
 		this.rpcHandleTimeout = rpcHandleTimeout;
 	}
 
 	/**
-	 * Set the remote Rpc server address, with the format of ip:port,ip:port
-	 * You can specify multiple ip addresses.
-	 *
-	 * And Parse address from string into SocketAddress format.
-	 * @param serverAddress
-	 */
+     * Set the remote Rpc server address, with the format of ip:port,ip:port
+     * You can specify multiple IP addresses.
+     * <br>
+     * And Parse address from string into SocketAddress format.
+     * 
+     * @param str the RPC server addresses
+     */
 	public void setServerAddress(String str) {
 		String[] ss = str.split(" *[,;] *");
 		SocketAddress[] ass = new SocketAddress[ss.length];
@@ -352,7 +363,7 @@ public class NioClient extends BaseClient implements Runnable {
 		}
 		serverAddresses = ass;
 		if (connectionNumber == 0) {
-			connectionNumber = ass.length;
+            connectionNumber = ass.length * 2;
 		}
 	}
 

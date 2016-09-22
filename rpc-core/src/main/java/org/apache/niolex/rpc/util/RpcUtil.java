@@ -17,13 +17,11 @@
  */
 package org.apache.niolex.rpc.util;
 
-import java.lang.reflect.Type;
-
 import org.apache.niolex.commons.codec.StringUtil;
 import org.apache.niolex.rpc.RpcException;
 
 /**
- * Common utils for Rpc.
+ * Common utilities for Rpc.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
@@ -37,13 +35,13 @@ public abstract class RpcUtil {
 	private static final String SEP_RPCEX = "#~@&";
 
 	/**
-	 * Serialize the rpc exception into byte array.
-	 * This is for those protocol which needs static code change to do
-	 * object serialization.
-	 *
-	 * @param ex
-	 * @return
-	 */
+     * Serialize the rpc exception into byte array.
+     * This is for those protocol which needs static code change to do
+     * object serialization.
+     *
+     * @param ex the RPC exception to be serialized
+     * @return the serialized bytes
+     */
 	public static final byte[] serializeRpcException(RpcException ex) {
 	    StringBuilder sb = new StringBuilder();
         sb.append(ex.getMessage()).append(SEP_RPCEX).append(ex.getType()).append(SEP_RPCEX);
@@ -66,11 +64,11 @@ public abstract class RpcUtil {
 	}
 
 	/**
-	 * Parse the rpc exception from this byte array.
-	 *
-	 * @param data
-	 * @return
-	 */
+     * Parse the rpc exception from this byte array.
+     *
+     * @param data the serialized bytes
+     * @return the RPC exception
+     */
 	public static final RpcException parseRpcException(byte[] data) {
 		String[] strs = StringUtil.utf8ByteToStr(data).split(SEP_RPCEX);
 		RpcException.Type type = RpcException.Type.valueOf(strs[1]);
@@ -78,20 +76,5 @@ public abstract class RpcUtil {
 				new Throwable(strs[2]));
 		return ex;
 	}
-
-    /**
-     * Check the generic array is in fact a class array.
-     *
-     * @param generic the generic type array
-     * @return the checked class array
-     * @throws ClassCaseException if any item in the generic array is not a class
-     */
-    public static final Class<?>[] checkParams(Type[] generic) {
-        Class<?>[] array = new Class<?>[generic.length];
-        for (int i = 0; i < generic.length; ++i) {
-            array[i] = (Class<?>) generic[i];
-        }
-        return array;
-    }
     
 }

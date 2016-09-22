@@ -33,7 +33,7 @@ import org.apache.niolex.rpc.RpcException;
  * <p>
  * Server address need to be the following format:
  * IP:PORT/CONNECTION_NUMBER;IP:PORT/CONNECTION_NUMBER
- * i.e. -> 10.1.2.3:8090/10;10.1.2.4:8090/8
+ * i.e. -&gt; 10.1.2.3:8090/10;10.1.2.4:8090/8
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.5
@@ -131,7 +131,8 @@ public class MultiAddressClient extends BaseClient {
 
     /**
      * Set the sleep time between retry, default to 1 second.
-     * @param sleepBetweenRetryTime
+     * 
+     * @param sleepBetweenRetryTime the sleep time between retry
      */
     public void setSleepBetweenRetryTime(int sleepBetweenRetryTime) {
         for (SocketClient cli : clientList) {
@@ -141,7 +142,8 @@ public class MultiAddressClient extends BaseClient {
 
     /**
      * Set the number of times to retry we connection lost from server.
-     * @param connectRetryTimes
+     * 
+     * @param connectRetryTimes the number of times to retry
      */
     public void setConnectRetryTimes(int connectRetryTimes) {
         for (SocketClient cli : clientList) {

@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
 /**
  * The blocking implementation of IClient. This client can only be used in one
  * thread. If you want to reuse client in multithreading, use
- * {@link NioClient} or {@link MultiAddressClient}
+ * {@link org.apache.niolex.rpc.client.nio.NioClient} or {@link MultiAddressClient}
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
@@ -168,9 +168,11 @@ public class SocketClient extends BaseClient {
 	}
 
 	/**
-	 * Read a packet from server.
-	 * @throws IOException
-	 */
+     * Read a packet from server.
+     * 
+     * @return the read packet
+     * @throws IOException if I / O related error occurred
+     */
 	public Packet handleRead() throws IOException {
 		Packet readPacket = new Packet();
 		while (true) {
@@ -239,12 +241,12 @@ public class SocketClient extends BaseClient {
     }
 
 	/**
-	 * Set the server Internet address this client want to connect
-	 * This method must be called before connect(), or the client
-	 * will still connect to the old address.
-	 *
-	 * @param serverAddress
-	 */
+     * Set the server Internet address this client want to connect
+     * This method must be called before connect(), or the client
+     * will still connect to the old address.
+     *
+     * @param serverAddress the server address
+     */
 	public void setServerAddress(InetSocketAddress serverAddress) {
 		this.serverAddress = serverAddress;
 	}
@@ -259,7 +261,8 @@ public class SocketClient extends BaseClient {
 
     /**
      * Set the sleep time between retry, default to 1 second.
-     * @param sleepBetweenRetryTime
+     * 
+     * @param sleepBetweenRetryTime the sleep time
      */
     public void setSleepBetweenRetryTime(int sleepBetweenRetryTime) {
         this.sleepBetweenRetryTime = sleepBetweenRetryTime;
@@ -267,7 +270,8 @@ public class SocketClient extends BaseClient {
 
     /**
      * Set the number of times to retry we connection lost from server.
-     * @param connectRetryTimes
+     * 
+     * @param connectRetryTimes the number of times to retry
      */
     public void setConnectRetryTimes(int connectRetryTimes) {
         this.connectRetryTimes = connectRetryTimes;

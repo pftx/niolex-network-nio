@@ -17,8 +17,8 @@
  */
 package org.apache.niolex.rpc.protocol;
 
+import java.io.IOException;
 import java.lang.reflect.Type;
-
 
 /**
  * This is the interface for server side object serialization protocol.
@@ -34,24 +34,24 @@ import java.lang.reflect.Type;
 public interface IServerProtocol {
 
 	/**
-	 * Read parameters from the data.
-	 * generic can not be null, we already checked.
-	 *
-	 * @param data
-	 * @param generic
-	 * @return the result
-	 * @throws Exception
-	 */
-	public Object[] prepareParams(byte[] data, Type[] generic) throws Exception;
+     * Read parameters from the data.
+     * generic can not be null, we already checked.
+     *
+     * @param data the parameters data
+     * @param generic the parameters types array
+     * @return the parameters
+     * @throws IOException if I / O related error occurred
+     */
+    public Object[] prepareParams(byte[] data, Type[] generic) throws IOException;
 
 	/**
-	 * Serialize returned object into byte array.
-	 * ret can not be null, we already checked.
-	 *
-	 * @param ret
-	 * @return the result
-	 * @throws Exception
-	 */
-	public byte[] serializeReturn(Object ret) throws Exception;
+     * Serialize returned object into byte array.
+     * <tt>ret</tt> can not be null, we already checked.
+     *
+     * @param ret the return object
+     * @return the result byte array
+     * @throws IOException if I / O related error occurred
+     */
+    public byte[] serializeReturn(Object ret) throws IOException;
 
 }

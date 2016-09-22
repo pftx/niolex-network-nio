@@ -24,6 +24,7 @@ import java.io.IOException;
 import org.apache.niolex.commons.test.MockUtil;
 import org.apache.niolex.commons.test.MultiPerformance;
 import org.apache.niolex.rpc.RpcProxy;
+import org.apache.niolex.rpc.client.nio.NioClient;
 import org.apache.niolex.rpc.core.CoreTest;
 import org.apache.niolex.rpc.demo.RpcService;
 import org.apache.niolex.rpc.demo.RpcService.IntArray;

@@ -19,7 +19,6 @@ package org.apache.niolex.rpc.server;
 
 import java.io.IOException;
 
-
 /**
  * DemoServer
  * @author Xie, Jiyun

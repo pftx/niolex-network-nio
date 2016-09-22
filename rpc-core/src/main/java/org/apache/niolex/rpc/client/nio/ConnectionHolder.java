@@ -1,5 +1,5 @@
 /**
- * ConnectionManager.java
+ * ConnectionHolder.java
  *
  * Copyright 2012 Niolex, Inc.
  *
@@ -29,53 +29,56 @@ import java.util.concurrent.TimeUnit;
  * @version 1.0.0
  * @since 2012-8-19
  */
-public class ConnectionManager {
+public class ConnectionHolder {
 
 	private final LinkedBlockingQueue<ConnectionCore> readyQueue = new LinkedBlockingQueue<ConnectionCore>();
-	private NioClient nioClient;
+    private final NioClient nioClient;
 	private CountDownLatch latch;
 
 	/**
-	 * Create a ConnectionManager with this nioClient.
-	 * The only Constructor
-	 * @param nioClient
-	 */
-	public ConnectionManager(NioClient nioClient) {
+     * Create a connection holder with this nioClient.
+     * 
+     * @param nioClient the nio client using this connection holder
+     */
+	public ConnectionHolder(NioClient nioClient) {
 		super();
 		this.nioClient = nioClient;
 	}
 
 	/**
-	 * Set the number of connections need to be ready.
-	 * @param k
-	 */
+     * Set the number of connections need to be ready.
+     * 
+     * @param k the number of connections to be ready to start work
+     */
 	public void needReady(int k) {
 		latch = new CountDownLatch(k);
 	}
 
 	/**
-	 * Wait for connections to be ready.
-	 * @throws InterruptedException
-	 */
+     * Wait for the number of connections to be ready.
+     * 
+     * @throws InterruptedException if the current thread is interrupted while waiting
+     */
 	public void waitReady() throws InterruptedException {
 		latch.await();
 	}
 
 	/**
-	 * Insert this client into the tail of the ready queue.
-	 * @param clientCore
-	 */
+     * Insert this client into the tail of the ready queue.
+     * 
+     * @param clientCore the ready client connection
+     */
 	public void ready(ConnectionCore clientCore) {
+        readyQueue.offer(clientCore);
 		latch.countDown();
-		readyQueue.offer(clientCore);
 	}
 
 	/**
-	 * Retrieves and removes the head of the ready queue, or returns null if the queue is empty.
-	 *
-	 * @param connectTimeout the timeout to take item from queue.
-	 * @return an instance of ConnectionCore, null if client is busy.
-	 */
+     * Retrieves and removes the head of the ready queue, or returns null if the queue is empty.
+     *
+     * @param connectTimeout the timeout to take item from queue
+     * @return an instance of ConnectionCore, null if client is busy
+     */
 	public ConnectionCore take(int connectTimeout) {
 		ConnectionCore core;
 		while ((core = takeOne(connectTimeout)) != null) {
@@ -88,13 +91,13 @@ public class ConnectionManager {
 	}
 
 	/**
-	 * Take one ConnectionCore from the ready queue, will return null if can not take out any
-	 * element at the given timeout.
-	 * We will not check the status of this instance, so it maybe already broken.
-	 *
-	 * @param connectTimeout the timeout to take item from queue.
-	 * @return an instance of ConnectionCore, null if timeout.
-	 */
+     * Take one ConnectionCore from the ready queue, will return null if can not take out any
+     * element at the given timeout.
+     * We will not check the status of this instance, so it maybe already broken.
+     *
+     * @param connectTimeout the timeout to take item from queue
+     * @return an instance of ConnectionCore, null if timeout
+     */
 	protected ConnectionCore takeOne(int connectTimeout) {
 		try {
 			return readyQueue.poll(connectTimeout, TimeUnit.MILLISECONDS);
@@ -104,10 +107,10 @@ public class ConnectionManager {
 	}
 
 	/**
-	 * Notify all the threads waiting for results from this connection.
-	 *
-	 * @param clientCore
-	 */
+     * Notify all the threads waiting for results from this connection.
+     *
+     * @param clientCore the client core needs to be closed
+     */
 	public void close(ConnectionCore clientCore) {
 		nioClient.closeChannel(clientCore);
 	}

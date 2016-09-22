@@ -20,7 +20,6 @@ package org.apache.niolex.rpc.demo;
 import org.apache.niolex.commons.test.Benchmark;
 import org.apache.niolex.rpc.RpcMethod;
 
-
 /**
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
