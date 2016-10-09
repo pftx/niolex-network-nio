@@ -1,7 +1,7 @@
 /**
  * ConnectorManagementSessionListener.java
  * 
- * Copyright 2012 RENREN, Inc.
+ * Copyright 2012 The original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionListener;
 
 /**
- *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.5
  * @since 2012-12-12

@@ -41,8 +41,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
- *
- * @author <a href="mailto:jiyun.xie@renren-inc.com">Xie, Jiyun</a>
+ * @author Lex
  * @version 1.0.5, $Date: 2012-12-11$
  */
 @Controller
