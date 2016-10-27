@@ -34,7 +34,7 @@ public class OPMain {
     public static List<ACL> getAll4Op() throws Exception {
         List<ACL> acls = new ArrayList<ACL>();
 
-        String pwd = Base64Util.byteToBase64(Base16Util.base16toByte(SHAUtil.sha1(OP_NAME + ":" + OP_PASSWORD)));
+        String pwd = Base64Util.byteToBase64(Base16Util.base16ToByte(SHAUtil.sha1(OP_NAME + ":" + OP_PASSWORD)));
         Id sid = new Id("digest", OP_NAME + ":" + pwd);
         ACL su = new ACL(Perms.ALL, sid);
         acls.add(su);
@@ -44,7 +44,7 @@ public class OPMain {
     public static List<ACL> getCDR4Server() throws Exception {
         List<ACL> acls = new ArrayList<ACL>();
 
-        String pwd = Base64Util.byteToBase64(Base16Util.base16toByte(SHAUtil.sha1(SVR_NAME + ":" + SVR_PASSWORD)));
+        String pwd = Base64Util.byteToBase64(Base16Util.base16ToByte(SHAUtil.sha1(SVR_NAME + ":" + SVR_PASSWORD)));
         Id sid = new Id("digest", SVR_NAME + ":" + pwd);
         ACL su = new ACL(Perms.CREATE | Perms.DELETE | Perms.READ, sid);
         acls.add(su);
@@ -54,7 +54,7 @@ public class OPMain {
     public static List<ACL> getRead4Server() throws Exception {
         List<ACL> acls = new ArrayList<ACL>();
 
-        String pwd = Base64Util.byteToBase64(Base16Util.base16toByte(SHAUtil.sha1(SVR_NAME + ":" + SVR_PASSWORD)));
+        String pwd = Base64Util.byteToBase64(Base16Util.base16ToByte(SHAUtil.sha1(SVR_NAME + ":" + SVR_PASSWORD)));
         Id sid = new Id("digest", SVR_NAME + ":" + pwd);
         ACL su = new ACL(Perms.READ, sid);
         acls.add(su);
@@ -64,7 +64,7 @@ public class OPMain {
     public static List<ACL> getRead4Client() throws Exception {
         List<ACL> acls = new ArrayList<ACL>();
 
-        String pwd = Base64Util.byteToBase64(Base16Util.base16toByte(SHAUtil.sha1(CLI_NAME + ":" + CLI_PASSWORD)));
+        String pwd = Base64Util.byteToBase64(Base16Util.base16ToByte(SHAUtil.sha1(CLI_NAME + ":" + CLI_PASSWORD)));
         Id sid = new Id("digest", CLI_NAME + ":" + pwd);
         ACL su = new ACL(Perms.READ, sid);
         acls.add(su);

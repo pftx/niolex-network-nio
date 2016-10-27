@@ -47,7 +47,7 @@ public class ACLUtil {
      * @return the signature
      */
     public static String getSignature(String name, String password) {
-        return Base64Util.byteToBase64(Base16Util.base16toByte(SHAUtil.sha1(name + ":" + password)));
+        return Base64Util.byteToBase64(Base16Util.base16ToByte(SHAUtil.sha1(name + ":" + password)));
     }
 
     /**

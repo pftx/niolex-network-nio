@@ -21,10 +21,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Map.Entry;
+import java.util.Properties;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.niolex.commons.stream.StreamUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
