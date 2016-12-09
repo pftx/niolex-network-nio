@@ -194,15 +194,17 @@ public class HeartBeatAdapter implements IPacketHandler, WriteEventListener, Run
      */
     protected void handleHeartBeat() {
     	Iterator<IPacketWriter> it = clientQueue.iterator();
+        PacketData hb = PacketData.getHeartBeatPacket();
     	while (it.hasNext()) {
     		IPacketWriter wt = it.next();
     		Long ttm = wt.getAttached(KEY);
     		if (ttm != null) {
+                long cttm = System.currentTimeMillis();
     			// Send heart beat if and only if last send time is earlier than
     			// One heart beat interval.
-    			if (ttm + heartBeatInterval < System.currentTimeMillis() + maxHeartBeatRelaxation) {
-    				wt.handleWrite(PacketData.getHeartBeatPacket());
-    				wt.attachData(KEY, System.currentTimeMillis());
+                if (ttm + heartBeatInterval < cttm + maxHeartBeatRelaxation) {
+                    wt.handleWrite(hb);
+                    wt.attachData(KEY, cttm);
     			}
         	} else {
         		it.remove();

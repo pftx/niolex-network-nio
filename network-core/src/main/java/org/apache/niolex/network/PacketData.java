@@ -30,13 +30,13 @@ import org.apache.niolex.commons.codec.StringUtil;
 public class PacketData extends Packet implements Cloneable {
     private static final byte[] Z_LEN_STUB = new byte[0];
     // The HEART_BEAT Packet is for test the connectivity between server and client
-    private static final PacketData HEART_BEAT = new PacketData(Config.CODE_HEART_BEAT, Z_LEN_STUB);
+    private static final PacketData HEART_BEAT = new PacketData(Config.CODE_HEART_BEAT);
     private static final int MAX_SIZE = Config.SERVER_MAX_PACKET_SIZE;
 
     /**
      * Get the default heart beat packet.
      *
-     * @return the heart beat packet.
+     * @return the heart beat packet
      */
     public static final PacketData getHeartBeatPacket() {
         return HEART_BEAT;

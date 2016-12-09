@@ -31,11 +31,11 @@ import java.net.InetSocketAddress;
 public interface IClient extends IPacketWriter {
 
 	/**
-	 * Do real connect action, connect to server.
-	 * This method will return immediately after get connected.
-	 *
-	 * @throws IOException if an I/O error occured during the connection
-	 */
+     * Do real connect action, connect to server.
+     * This method will return immediately after get connected.
+     *
+     * @throws IOException if an I/O error occurred during the connecting process
+     */
 	public void connect() throws IOException;
 
 	/**
@@ -44,10 +44,10 @@ public interface IClient extends IPacketWriter {
 	public void stop();
 
 	/**
-	 * Test whether this client is working right now
-	 *
-	 * @return the current status
-	 */
+     * Test whether this client is working or not right now.
+     *
+     * @return the current status
+     */
 	public boolean isWorking();
 
 	/**
@@ -58,30 +58,30 @@ public interface IClient extends IPacketWriter {
 	public void setPacketHandler(IPacketHandler packetHandler);
 
 	/**
-	 * Set the low-level socket connect timeout
-	 * <br>
-	 * This method must be called before {@link #connect()}
-	 *
-	 * @param connectTimeout the connect timeout in milliseconds
-	 */
+     * Set the low-level socket connect timeout.
+     * <br>
+     * This method must be called before {@link #connect()}
+     *
+     * @param connectTimeout the connect timeout in milliseconds
+     */
 	public void setConnectTimeout(int connectTimeout);
 
 	/**
-	 * Set the server Internet address this client is going to connect to
-	 * <br>
+     * Set the server Internet address this client is going to connect to.
+     * <br>
      * This method must be called before {@link #connect()}
-	 *
-	 * @param serverAddress the Internet socket address
-	 */
+     *
+     * @param serverAddress the Internet socket address
+     */
 	public void setServerAddress(InetSocketAddress serverAddress);
 
 	/**
-	 * Set the server Internet address this client is going to connect to
-	 * <br>
+     * Set the server Internet address this client is going to connect to.
+     * <br>
      * This method must be called before {@link #connect()}
-	 *
-	 * @param serverAddress the Internet socket address in string format
-	 */
+     *
+     * @param serverAddress the Internet socket address in string format
+     */
 	public void setServerAddress(String serverAddress);
 
 	/**

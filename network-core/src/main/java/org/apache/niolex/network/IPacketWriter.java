@@ -19,7 +19,6 @@ package org.apache.niolex.network;
 
 import org.apache.niolex.network.event.WriteEventListener;
 
-
 /**
  * The Packet Writer Interface.
  * This is the really basic interface for packet handling.
@@ -52,7 +51,7 @@ public interface IPacketWriter {
     public void handleWrite(PacketData sc);
 
     /**
-     * WriteEventListener is the listener fired after packet send to client.
+     * WriteEventListener is the listener fired after packet sent to client.
      * The {@link #handleWrite(PacketData)} method return immediately after the packet is put into
      * the outgoing queue. This method will tell you the packet is sent by event.
      *

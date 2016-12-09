@@ -17,7 +17,6 @@
  */
 package org.apache.niolex.network;
 
-
 /**
  * The Packet Handler Interface.
  * This is the main and raw interface user application needs to implement.

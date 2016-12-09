@@ -43,14 +43,14 @@ public interface Config extends Const {
     int PACKET_HEADER_SIZE = 8;
 
     /**
-     * The max queue size of buffer manager, default to 2K.
+     * The max queue size of buffer manager, default to 10K.
      */
-    int BUFFER_MGR_MAX_QUEUE_SIZE = 2048;
+    int BUFFER_MGR_MAX_QUEUE_SIZE = 10 * K;
 
     /**
      * The low level socket buffer size.
      */
-    int SO_BUFFER_SIZE = 16 * K;
+    int SO_BUFFER_SIZE = 64 * K;
 
     /**
      * Socket connect and read timeout. this is the low level timeout. Please do not configure
@@ -58,6 +58,16 @@ public interface Config extends Const {
      * every 10 seconds.
      */
     int SO_CONNECT_TIMEOUT = 20000;
+
+    /**
+     * The server socket backlog size.
+     */
+    int SO_BACKLOG = 128;
+
+    /**
+     * The server socket SO_REUSEADDR option.
+     */
+    boolean SO_REUSEADDR = true;
 
 	/**
 	 * The NIO Direct Byte buffer size for server socket.

@@ -100,7 +100,10 @@ public class NioServer implements IServer, Runnable {
             ss.configureBlocking(false);
             ServerSocket so = ss.socket();
             so.setReceiveBufferSize(Config.SO_BUFFER_SIZE);
-            so.bind(new InetSocketAddress(this.getPort()));
+            so.setSoTimeout(Config.SO_CONNECT_TIMEOUT);
+            so.setReuseAddress(Config.SO_REUSEADDR);
+
+            so.bind(new InetSocketAddress(this.getPort()), Config.SO_BACKLOG);
             mainSelector = Selector.open();
             ss.register(mainSelector, SelectionKey.OP_ACCEPT);
 

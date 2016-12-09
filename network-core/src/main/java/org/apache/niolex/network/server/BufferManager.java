@@ -21,6 +21,7 @@ import java.nio.ByteBuffer;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.apache.niolex.commons.util.BufferUtil;
 import org.apache.niolex.network.Config;
 
 /**
@@ -80,6 +81,8 @@ public class BufferManager {
             bufferQueue.add(directBuffer);
             return true;
         } else {
+            // Clean native memory as fast as possible.
+            BufferUtil.cleanNativeMem(directBuffer);
             currentQueueSize.decrementAndGet();
             return false;
         }

@@ -21,8 +21,8 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import org.apache.niolex.commons.collection.LRUHashMap;
 import org.apache.niolex.commons.collection.CircularList;
+import org.apache.niolex.commons.collection.LRUHashMap;
 import org.apache.niolex.network.Config;
 import org.apache.niolex.network.IPacketHandler;
 import org.apache.niolex.network.IPacketWriter;
@@ -94,7 +94,7 @@ public class FaultTolerateAdapter implements IPacketHandler, WriteEventListener 
 			// Prepare environment for the next fault tolerate.
 			wt.attachData(KEY_UUID, ssid);
 			wt.attachData(KEY_RRLIST, new CircularList<PacketData>(RR_SIZE));
-			// Attach it self to listen all the write events.
+            // Attach myself to listen all the write events.
 			wt.addEventListener(this);
 		}
 	}

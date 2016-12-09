@@ -77,12 +77,12 @@ public interface IServer {
 	public int getAcceptTimeout();
 
 	/**
-	 * Set the server accept timeout
-	 * <br>
+     * Set the server accept timeout.
+     * <br>
      * This method must be called before {@link #start()}
-	 *
-	 * @param acceptTimeout the socket accept timeout in milliseconds
-	 */
+     *
+     * @param acceptTimeout the socket accept timeout in milliseconds
+     */
 	public void setAcceptTimeout(int acceptTimeout);
 
 }
