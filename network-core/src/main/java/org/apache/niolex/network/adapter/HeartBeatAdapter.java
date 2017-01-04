@@ -31,7 +31,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Handle the heart beat problem of the writers attached with this adapter.
+ * Handle the heart beat problem for the writers attached with this adapter. We
+ * will start a deamon thread dedicates to handle heart beat.
  * <br>
  * If user set {@link #forceHeartBeat}, then we will heart beat all the clients,
  * otherwise only heart beat those registered with {@link Config#CODE_REGR_HBEAT}.
@@ -48,10 +49,10 @@ public class HeartBeatAdapter implements IPacketHandler, WriteEventListener, Run
 	private static final String KEY = Config.ATTACH_KEY_HEART_BEAT;
 
 	/**
-	 * The queue to save all the clients who needs heart beat.
-	 * The iterator of this queue will not throw ConcurrentModificationException in multiple
-	 * thread modification.
-	 */
+     * The queue to save all the clients who needs heart beat.
+     * The iterator of this queue will not throw ConcurrentModificationException in multiple
+     * thread modification environment.
+     */
 	private final ConcurrentLinkedQueue<IPacketWriter> clientQueue = new ConcurrentLinkedQueue<IPacketWriter>();
 
 	// The Handler need to be adapted.
@@ -158,8 +159,8 @@ public class HeartBeatAdapter implements IPacketHandler, WriteEventListener, Run
 		if (ttm != null) {
 		    long cttm = System.currentTimeMillis();
 		    
-		    // We relax attach time stamp for 50ms to increase performance.
-		    if (ttm + 50 < cttm)
+            // We relax attach time stamp for 150ms to increase performance.
+            if (ttm + 150 < cttm)
 		        wt.attachData(KEY, cttm);
 		}
 	}

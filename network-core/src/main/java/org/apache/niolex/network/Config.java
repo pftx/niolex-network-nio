@@ -56,6 +56,10 @@ public interface Config extends Const {
      * Socket connect and read timeout. this is the low level timeout. Please do not configure
      * this time small than 20 seconds, for that there will be at least heart beat packets
      * every 10 seconds.
+     * <p>
+     * For long living messaging connections, maybe want to change this to longer than 1 minute,
+     * you should change the {@link #SERVER_HEARTBEAT_INTERVAL} accordingly.
+     * </p>
      */
     int SO_CONNECT_TIMEOUT = 20000;
 

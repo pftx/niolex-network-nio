@@ -45,7 +45,8 @@ import org.slf4j.LoggerFactory;
  * <p>
  * The difference between handler and adapter is that adapter can be applied on everything and handler
  * only deal with a specific situation.
- * <p><b>
+ * </p>
+ * <b>
  * In this adapter, the first connect packet need to be Session ID Packet, otherwise it can not handle the
  * fault toleration properly.</b>
  *
@@ -91,7 +92,7 @@ public class FaultTolerateAdapter implements IPacketHandler, WriteEventListener 
 			// Restore last time data.
 			restorePackets(ssid, wt);
 			
-			// Prepare environment for the next fault tolerate.
+            // Prepare environment for the next fault tolerate operation.
 			wt.attachData(KEY_UUID, ssid);
 			wt.attachData(KEY_RRLIST, new CircularList<PacketData>(RR_SIZE));
             // Attach myself to listen all the write events.

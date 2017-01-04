@@ -24,19 +24,19 @@ import org.apache.niolex.commons.codec.Base16Util;
  * Use {@link PacketData} instead in user application.
  *
  * @author Xie, Jiyun
- *
+ * @since 2012-5-31
  */
 public class Packet {
 
 	/**
-	 * The current version number of this packet, can be used for serial number
-	 * or magic code or something like that.
-	 */
+     * The current version number of this packet, can be used as serial number
+     * or magic code or something like that, too.
+     */
     protected byte version;
 
     /**
-     * Not used for now. Can be used for serial number
-	 * or magic code or something like that.
+     * Not used for now. Can be used as serial number
+     * or magic code or something like that.
      */
     protected byte reserved;
 
@@ -57,7 +57,8 @@ public class Packet {
 
     /**
      * The string format packet description, encoded by code, version and reserved.
-     * This field make the packet magic thing human readable.
+     * This field make the packet header magic thing human readable.
+     * 
      * @see #descriptor()
      */
     private String desc;
@@ -72,8 +73,12 @@ public class Packet {
 
     /**
      * Get The string format packet description, encoded by code, version and reserved.
+     * 
+     * <pre>
      * Format: code[2B] version[1B] reserved[1B] to base16 integer format.
      * i.e.		3A456B12
+     * </pre>
+     * 
      * This method will cache the result. So if you change the header after call this
      * method, the string will not change accordingly.
      *

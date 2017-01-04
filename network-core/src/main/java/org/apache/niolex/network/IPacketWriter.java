@@ -25,7 +25,7 @@ import org.apache.niolex.network.event.WriteEventListener;
  * The server side and client side core network components will implement it.
  *
  * @author Xie, Jiyun
- *
+ * @version 1.0.0
  */
 public interface IPacketWriter {
 
@@ -44,6 +44,7 @@ public interface IPacketWriter {
      * This method will return immediately after the packet is put into the outgoing
      * queue. It will not indicate the packet has been sent.
      *
+     * @see #addEventListener(WriteEventListener)
      * @see org.apache.niolex.network.event.WriteEventListener
      *
      * @param sc the Packet to write

@@ -22,7 +22,7 @@ package org.apache.niolex.network;
  * This is the main and raw interface user application needs to implement.
  *
  * @author Xie, Jiyun
- *
+ * @version 1.0.0
  */
 public interface IPacketHandler {
 

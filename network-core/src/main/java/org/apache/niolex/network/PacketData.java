@@ -26,11 +26,17 @@ import org.apache.niolex.commons.codec.StringUtil;
  * User can use this class directly.
  *
  * @author Xie, Jiyun
+ * @since 2012-5-31
  */
 public class PacketData extends Packet implements Cloneable {
+
+    // Zero bytes data.
     private static final byte[] Z_LEN_STUB = new byte[0];
+
     // The HEART_BEAT Packet is for test the connectivity between server and client
     private static final PacketData HEART_BEAT = new PacketData(Config.CODE_HEART_BEAT);
+
+    // Max packet size.
     private static final int MAX_SIZE = Config.SERVER_MAX_PACKET_SIZE;
 
     /**
@@ -77,7 +83,7 @@ public class PacketData extends Packet implements Cloneable {
      * Create packet by packet code and data.
      *
      * @param code the packet code
-     * @param data the packet data in byte array
+     * @param data the packet data in byte array format
      */
     public PacketData(int code, byte[] data) {
     	this((short)code, data);

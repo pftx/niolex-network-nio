@@ -27,12 +27,12 @@ package org.apache.niolex.network;
 public interface IServer {
 
 	/**
-	 * Start the Server, bind to the Port.
-	 * Server need to start threads internally to run the main loop.
-	 * <b>This method need to return after this server is started.</b>
-	 * 
-	 * @return true if server started, false if failed to start server
-	 */
+     * Start this Server, bind to the Port specified by #{@link IServer#setPort(int)}.
+     * Server need to start threads internally to run the main selector loop.
+     * <b>This method need to return after this server is started.</b>
+     * 
+     * @return true if server started, false if failed to start server
+     */
 	public boolean start();
 
 	/**
@@ -47,12 +47,12 @@ public interface IServer {
 	public int getPort();
 
 	/**
-	 * Set the listening port.
-	 * <br>
-	 * This method must be called before {@link #start()}
-	 *
-	 * @param port the new listening port
-	 */
+     * Set the listening port.
+     * <br>
+     * This method must be called before call {@link #start()}.
+     *
+     * @param port the new listening port
+     */
 	public void setPort(int port);
 
 	/**
@@ -63,12 +63,12 @@ public interface IServer {
 	public IPacketHandler getPacketHandler();
 
 	/**
-	 * Set the server side packet handler.
-	 * <br>
-     * This method must be called before {@link #start()}
-	 *
-	 * @param packetHandler the packetHandler to set
-	 */
+     * Set the server side packet handler.
+     * <br>
+     * This method must be called before call {@link #start()}.
+     *
+     * @param packetHandler the packetHandler to set
+     */
 	public void setPacketHandler(IPacketHandler packetHandler);
 
 	/**
@@ -79,7 +79,7 @@ public interface IServer {
 	/**
      * Set the server accept timeout.
      * <br>
-     * This method must be called before {@link #start()}
+     * This method must be called before call {@link #start()}.
      *
      * @param acceptTimeout the socket accept timeout in milliseconds
      */
