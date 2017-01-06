@@ -34,12 +34,34 @@ import java.nio.ByteBuffer;
 import org.apache.niolex.network.IPacketHandler;
 import org.apache.niolex.network.PacketData;
 import org.junit.Test;
+import org.slf4j.LoggerFactory;
+
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.LoggerContext;
 
 /**
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.5, $Date: 2012-12-4$
  */
 public class BaseClientTest extends BaseClient {
+
+    private static Level oldLevel;
+
+    public static void startDebug() {
+        // Sets the package level to INFO
+        LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+        Logger rootLogger = loggerContext.getLogger("org.apache.niolex.network.client");
+        oldLevel = rootLogger.getLevel();
+        rootLogger.setLevel(Level.DEBUG);
+    }
+
+    public static void stopDebug() {
+        LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+        Logger rootLogger = loggerContext.getLogger("org.apache.niolex.network.client");
+        oldLevel = rootLogger.getLevel();
+        rootLogger.setLevel(oldLevel);
+    }
 
     /**
      * This is the override of super method.

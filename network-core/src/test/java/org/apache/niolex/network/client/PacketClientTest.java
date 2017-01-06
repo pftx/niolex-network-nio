@@ -51,11 +51,13 @@ public class PacketClientTest {
 
 	@BeforeClass
     public static void setup() throws Exception {
+        BaseClientTest.startDebug();
         CoreRunner.createServer();
     }
 
     @AfterClass
     public static void stop2() throws Exception {
+        BaseClientTest.stopDebug();
         CoreRunner.shutdown();
     }
 
@@ -111,7 +113,7 @@ public class PacketClientTest {
 
 		// Test stop again.
 		packetClient.stop();
-		assertEquals(0, packetClient.size());
+        assertEquals(0, packetClient.outstandingSize());
 	}
 
 	@Test

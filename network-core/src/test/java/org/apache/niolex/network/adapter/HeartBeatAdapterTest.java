@@ -108,7 +108,7 @@ public class HeartBeatAdapterTest {
     @Test
     public void testAfterSendOK() throws Exception {
         IPacketWriter wt = spy(new TBasePacketWriter());
-        wt.attachData(Config.ATTACH_KEY_HEART_BEAT, System.currentTimeMillis() - 51);
+        wt.attachData(Config.ATTACH_KEY_HEART_BEAT, System.currentTimeMillis() - 151);
         WriteEvent wEvent = new WriteEvent(wt, null);
         ha.afterSent(wEvent);
         verify(wt, times(2)).attachData(anyString(), anyObject());

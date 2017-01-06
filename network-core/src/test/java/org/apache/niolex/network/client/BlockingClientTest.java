@@ -48,11 +48,13 @@ public class BlockingClientTest extends BlockingClient {
 
     @BeforeClass
     public static void setup() throws Exception {
+        BaseClientTest.startDebug();
         CoreRunner.createServer();
     }
 
     @AfterClass
     public static void stop2() throws Exception {
+        BaseClientTest.stopDebug();
         CoreRunner.shutdown();
     }
 

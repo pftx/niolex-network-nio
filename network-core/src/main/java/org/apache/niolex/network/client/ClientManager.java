@@ -45,8 +45,8 @@ import org.slf4j.LoggerFactory;
  * to connect to others in the background.
  * <p>
  * If user want to make sure finally connect to one server, please
- * call {@link #waitForConnected()}. See to document of that method for
- * details.
+ * call {@link #waitForConnected()}. See to document of that method
+ * for details.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.5
@@ -91,7 +91,7 @@ public class ClientManager {
     protected final IClient client;
 
     /**
-     * Create a ClientManager to manage this client.
+     * Create a client manager to manage this client.
      *
      * @param client the client to be managed
      */
@@ -104,7 +104,7 @@ public class ClientManager {
 
     /**
      * Try to connect to one server.
-     * We will only try once here, and if fail, we will start a background thread
+     * We will only try once here, if success, return true. If fail, we will start a background thread
      * to try all others and return false.
      *
      * @return true if connected, false otherwise.
@@ -205,7 +205,7 @@ public class ClientManager {
     }
 
     /**
-     * @return  the internal client
+     * @return the internal client
      */
     public IClient client() {
         return client;
@@ -256,7 +256,7 @@ public class ClientManager {
     }
 
     /**
-     * Set the time in milliseconds that client with sleep between retry to connect
+     * Set the time in milliseconds that client will sleep between retry to connect
      * to server.
      *
      * @param sleepBetweenRetryTime the sleep between retry time to set
@@ -273,7 +273,7 @@ public class ClientManager {
     }
 
     /**
-     * Set retry times.
+     * Set the number of retry times.
      *
      * @param connectRetryTimes the connect retry times to set
      */
@@ -289,7 +289,7 @@ public class ClientManager {
     }
 
     /**
-     * Set the socket connect timeout.
+     * Set the socket connect timeout in milliseconds.
      *
      * @param timeout the new connect timeout
      * @see org.apache.niolex.network.IClient#setConnectTimeout(int)

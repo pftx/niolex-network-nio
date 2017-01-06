@@ -27,8 +27,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The blocking implementation of IClient. We use synchronized methods to handle read and write.
- * Users maybe use this class in multi-threads, but you need to handle packet read carefully.
+ * The blocking implementation of IClient. We use synchronized methods to handle both read and write.
+ * Users maybe use this class in multi-threads, but you need to handle packet read carefully, because
+ * the packet you read maybe not the expected response of your sent packet. So we recommend you to use
+ * it only in one thread.
  * <br>
  * If you set {@link #setAutoRead(boolean)} to true, then we will read one packet after write every
  * packet. (Heart beat packet will be ignored).<br>
@@ -41,7 +43,7 @@ import org.slf4j.LoggerFactory;
  * @version 1.0.0, Date: 2012-6-13
  */
 public class SocketClient extends BaseClient {
-	private static final Logger LOG = LoggerFactory.getLogger(SocketClient.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SocketClient.class);
 
     /**
      * Automatically read data from remote server.
@@ -50,39 +52,42 @@ public class SocketClient extends BaseClient {
 
     /**
      * Crate a SocketClient without any server address.<br>
-     * Call setter to set serverAddress before connect
+     * Please call setter {@link #setServerAddress(InetSocketAddress)} or {@link #setServerAddress(String)} to set
+     * server address before call {@link #connect()}.
      */
-	public SocketClient() {
-		super();
-	}
+    public SocketClient() {
+        super();
+    }
 
-	/**
+    /**
      * Create a SocketClient with the specified server address.
      * 
      * @param serverAddress the server address to connect to
      */
-	public SocketClient(InetSocketAddress serverAddress) {
-		super();
-		this.serverAddress = serverAddress;
-	}
-
-	/**
-	 * Override super method
-	 * @see org.apache.niolex.network.IClient#connect()
-	 */
-	@Override
-	public void connect() throws IOException {
-	    prepareSocket();
-        this.isWorking = true;
-        LOG.info("Socket client connected to address: {}.", serverAddress);
-	}
+    public SocketClient(InetSocketAddress serverAddress) {
+        super();
+        this.serverAddress = serverAddress;
+    }
 
     /**
-	 * This is the override of super method.
-	 * @see org.apache.niolex.network.IClient#stop()
-	 */
+     * Override super method
+     * 
+     * @see org.apache.niolex.network.IClient#connect()
+     */
     @Override
-	public void stop() {
+    public void connect() throws IOException {
+        prepareSocket();
+        this.isWorking = true;
+        LOG.info("Socket client connected to address: {}.", serverAddress);
+    }
+
+    /**
+     * This is the override of super method.
+     * 
+     * @see org.apache.niolex.network.IClient#stop()
+     */
+    @Override
+    public void stop() {
         this.isWorking = false;
         // Closing this socket will also close the socket's InputStream and OutputStream.
         Exception e = safeClose();
@@ -92,59 +97,63 @@ public class SocketClient extends BaseClient {
         LOG.info("Socket client stoped.");
     }
 
-	/**
-	 * Override super method
-	 * @see org.apache.niolex.network.IPacketWriter#handleWrite(org.apache.niolex.network.PacketData)
-	 */
-	@Override
-	public synchronized void handleWrite(PacketData sc) {
+    /**
+     * Override super method
+     * 
+     * @see org.apache.niolex.network.IPacketWriter#handleWrite(org.apache.niolex.network.PacketData)
+     */
+    @Override
+    public synchronized void handleWrite(PacketData sc) {
         try {
-			writePacket(sc);
-			LOG.debug("Packet sent. desc {}, length {}.", sc.descriptor(), sc.getLength());
-			if (autoRead) {
-			    handleRead();
-			}
-		} catch (IOException e) {
-		    // When IO exception occurred, this socket is invalid, we need to close it.
-		    if (this.isWorking) {
-		        stop();
-		        // Notify the handler. We use a new thread to do this, because the packet handler might
-		        // want to recover the connection status, which will be time-consuming.
-		        Runner.run(packetHandler, "handleClose", this);
-		    }
-		    // Throw an exception to the invoker.
-			throw new IllegalStateException("Failed to send packet to server.", e);
-		}
-	}
-
-	/**
-	 * Read one packet from remote server. If we read a heart beat, we will
-	 * retry again until we read a real packet.
-	 *
-	 * @throws IOException if network problem occurred
-	 */
-	public synchronized void handleRead() throws IOException {
-		while (true) {
-		    PacketData readPacket = readPacket();
-			LOG.debug("Packet received. desc {}, size {}.", readPacket.descriptor(), readPacket.getLength());
-			if (readPacket.getCode() == Config.CODE_HEART_BEAT) {
-            	// Let's ignore the heart beat packet here.
-            	continue;
+            writePacket(sc);
+            LOG.debug("Packet sent. desc {}, length {}.", sc.descriptor(), sc.getLength());
+            if (autoRead) {
+                handleRead();
             }
-			packetHandler.handlePacket(readPacket, this);
-			break;
-		}
-	}
+        } catch (IOException e) {
+            // When IO exception occurred, this socket is invalid, we need to close it.
+            if (this.isWorking) {
+                LOG.error("Error occured, SocketClient forced to stop.", e);
+                stop();
+                // Notify the handler. We use a new thread to do this, because the packet handler might
+                // want to recover the connection status, which will be time-consuming.
+                Runner.run(packetHandler, "handleClose", this);
+            }
+            // Throw an exception to the invoker.
+            throw new IllegalStateException("Failed to send packet to server.", e);
+        }
+    }
 
-	/**
-	 * @return The current auto read status.
-	 */
+    /**
+     * Read one packet from remote server. If we read a heart beat, we will
+     * retry again until we read a real packet.
+     *
+     * @throws IOException if network problem occurred
+     */
+    public synchronized void handleRead() throws IOException {
+        while (true) {
+            PacketData readPacket = readPacket();
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Packet received. desc {}, size {}.", readPacket.descriptor(), readPacket.getLength());
+            }
+            if (readPacket.getCode() == Config.CODE_HEART_BEAT) {
+                // Let's ignore the heart beat packet here.
+                continue;
+            }
+            packetHandler.handlePacket(readPacket, this);
+            break;
+        }
+    }
+
+    /**
+     * @return The current auto read status.
+     */
     public boolean isAutoRead() {
         return autoRead;
     }
 
     /**
-     * Set whether you need we automatically read one data packet for you after handleWrite.
+     * Set whether you need we automatically read one data packet for you after we finished one packet write.
      *
      * @param autoRead the new autoRead status
      */

@@ -29,42 +29,50 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The PacketClient connect to NioServer, send and receive packets in it's
- * own threads. This client can be used in multiple threads.
+ * The PacketClient connect to the specified NioServer, send and receive packets in two separate independent
+ * threads. This client can be shared by multiple threads and use it concurrently, but it should be shared
+ * only <b>after</b> it's connected to server.
  * <br>
- * This class is suitable for users don't want to do any I/O in their own threads.
- * after call {@link #handleWrite(PacketData)}, we will just put the packet into
- * our internal queue and just return. All the I/O will be handled in our internal
- * threads.
- *
+ * This class is suitable for users who don't want to do any I/O in their own threads.
+ * When user call {@link #handleWrite(PacketData)}, we will try to put the packet into our internal queue and
+ * then we just return immediately. But if the internal queue is full, we will block on the queue to wait for
+ * a room for the new packet. All the I/O will be handled in our internal threads.
+ * <br>
+ * The disadvantage of this class is that we will consume two threads. So don't create too many PacketClient in
+ * one JVM.
+ * 
  * @author Xie, Jiyun
  * @version 1.0.0, Date: 2012-6-13
  */
 public class PacketClient extends BaseClient {
-	private static final Logger LOG = LoggerFactory.getLogger(PacketClient.class);
-	private static final int MAX_QUEUE_SIZE = Config.CLIENT_MAX_QUEUE_SIZE;
-
-	/**
-	 * The queue to store all the out sending packets.
-	 */
-	private final LinkedBlockingQueue<PacketData> sendPacketList = new LinkedBlockingQueue<PacketData>(MAX_QUEUE_SIZE);
-
-	/**
-	 * The internal write thread.
-	 */
-    private Thread writeThread;
-
+    private static final Logger LOG = LoggerFactory.getLogger(PacketClient.class);
 
     /**
-     * Create a PacketClient without any Server Address.<br>
-     * Call setter to set serverAddress before connect
+     * The maximum input queue size.
+     */
+    private static final int MAX_QUEUE_SIZE = Config.CLIENT_MAX_QUEUE_SIZE;
+
+    /**
+     * The queue to store all the outstanding packets.
+     */
+    private final LinkedBlockingQueue<PacketData> sendPacketList = new LinkedBlockingQueue<PacketData>(MAX_QUEUE_SIZE);
+
+    /**
+     * The internal write thread.
+     */
+    private volatile Thread writeThread;
+
+    /**
+     * Create a PacketClient without any server address.<br>
+     * Please call setter {@link #setServerAddress(InetSocketAddress)} or {@link #setServerAddress(String)} to set
+     * server address before call {@link #connect()}.
      */
     public PacketClient() {
-		super();
-	}
+        super();
+    }
 
-	/**
-     * Create a PacketClient with this Server Address.<br>
+    /**
+     * Create a PacketClient with this specified server address.
      *
      * @param serverAddress the server address to connect to
      */
@@ -77,11 +85,10 @@ public class PacketClient extends BaseClient {
      * {@inheritDoc}
      * Start two separate threads for reads and writes.
      *
-	 * This is the override of super method.
-	 * @see org.apache.niolex.network.IClient#connect()
-	 */
+     * @see org.apache.niolex.network.IClient#connect()
+     */
     @Override
-	public void connect() throws IOException {
+    public void connect() throws IOException {
         prepareSocket();
         this.isWorking = true;
         writeThread = new Thread(new WriteLoop(), "PacketClientW");
@@ -92,13 +99,15 @@ public class PacketClient extends BaseClient {
     }
 
     /**
-	 * This is the override of super method.
-	 * @see org.apache.niolex.network.IClient#stop()
-	 */
+     * This is the override of super method.
+     * 
+     * @see org.apache.niolex.network.IClient#stop()
+     */
     @Override
-	public void stop() {
+    public void stop() {
         this.isWorking = false;
         if (writeThread != null) {
+            // The write thread will close the socket.
             writeThread.interrupt();
             ThreadUtil.join(writeThread);
             writeThread = null;
@@ -106,29 +115,29 @@ public class PacketClient extends BaseClient {
     }
 
     /**
-     * We put the packet into the internal queue.
+     * We put the packet into the internal queue. If the queue is not full, we will return immediately, otherwise
+     * we will block until a space is available.
      *
-     * @throws IllegalStateException when the queue is full and the thread is interrupted
+     * @throws IllegalStateException when the queue is full and the thread is waiting and been interrupted
      * @see org.apache.niolex.network.IPacketWriter#handleWrite(org.apache.niolex.network.PacketData)
      */
     @Override
     public void handleWrite(PacketData sc) {
-    	try {
+        try {
             sendPacketList.put(sc);
         } catch (InterruptedException e) {
             throw new IllegalStateException("Send List is Full, And thread is Interrupted when wait.", e);
         }
     }
 
-	/**
-	 * Return the non-send packets size.
-	 *
-	 * @return current not-send packets size
-	 */
-	public int size() {
-		return sendPacketList.size();
-	}
-
+    /**
+     * Return the non-send packets size.
+     *
+     * @return current not-send packets size
+     */
+    public int outstandingSize() {
+        return sendPacketList.size();
+    }
 
     /**
      * The ReadLoop, reads packet from remote server over and over again.
@@ -152,26 +161,27 @@ public class PacketClient extends BaseClient {
             try {
                 while (isWorking) {
                     PacketData readPacket = readPacket();
-                    LOG.debug("Packet received. desc {}, size {}.", readPacket.descriptor(), readPacket.getLength());
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("Packet received. desc {}, size {}.", readPacket.descriptor(), readPacket.getLength());
+                    }
                     if (readPacket.getCode() == Config.CODE_HEART_BEAT) {
-                    	// Let's ignore the heart beat packet here.
-                    	continue;
+                        // Let's ignore the heart beat packet here.
+                        continue;
                     }
                     packetHandler.handlePacket(readPacket, PacketClient.this);
                 }
-            } catch(Exception e) {
+            } catch (Exception e) {
                 if (isWorking) {
                     LOG.error("Error occured in read loop.", e);
-                    // Notice!
                     /**
-                     * Packet Client Error will be handled in the Read Loop.
-                     * So the Write Loop will just return, so there will be just one Error to the
+                     * Notice!! ~ Packet Client Error will be handled in the Read Loop, and
+                     * the Write Loop will just return, so there will be just one Error thrown to the
                      * Upper layer.
                      */
                     PacketClient.this.stop();
                     packetHandler.handleClose(PacketClient.this);
                 } else {
-                    LOG.info("Read loop stoped.");
+                    LOG.info("PacketClient Read loop stoped.");
                 }
             }
         }
@@ -199,26 +209,25 @@ public class PacketClient extends BaseClient {
             try {
                 while (isWorking) {
                     try {
-
-                    	/**
-                    	 * The write thread wait on this queue till there is data.
-                    	 */
-                    	PacketData sendPacket = sendPacketList.poll(connectTimeout / 2, TimeUnit.MILLISECONDS);
-                    	if (sendPacket != null) {
-                    		sendNewPacket(sendPacket);
-                    	} else {
-                    		// If nothing to send, let's send a heart beat.
-                    		sendNewPacket(PacketData.getHeartBeatPacket());
-                    	}
+                        /**
+                         * The write thread wait on this queue till there is data.
+                         */
+                        PacketData sendPacket = sendPacketList.poll(connectTimeout / 2, TimeUnit.MILLISECONDS);
+                        if (sendPacket != null) {
+                            sendNewPacket(sendPacket);
+                        } else {
+                            // If nothing to send, let's send a heart beat.
+                            sendNewPacket(PacketData.getHeartBeatPacket());
+                        }
                     } catch (InterruptedException e) {
                         // Let's ignore it.
                     }
                 }
-                LOG.info("Write loop stoped.");
-            } catch(Exception e) {
+                LOG.info("PacketClient Write loop stoped.");
+            } catch (Exception e) {
                 LOG.error("Error occured in write loop.", e);
             }
-            // finally, we close the socket.
+            // finally, we close the socket to make sure there's no resource leak.
             safeClose();
         }
 
@@ -230,7 +239,9 @@ public class PacketClient extends BaseClient {
          */
         public void sendNewPacket(PacketData sendPacket) throws IOException {
             writePacket(sendPacket);
-            LOG.debug("Packet sent. desc {}, queue size {}.", sendPacket.descriptor(), PacketClient.this.size());
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Packet sent. desc {}, queue size {}.", sendPacket.descriptor(), PacketClient.this.outstandingSize());
+            }
         }
     }
 

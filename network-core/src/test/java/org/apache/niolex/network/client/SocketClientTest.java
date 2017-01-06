@@ -45,11 +45,13 @@ public class SocketClientTest {
 
 	@BeforeClass
 	public static void run() throws Exception {
+        BaseClientTest.startDebug();
 		CoreRunner.createServer();
 	}
 
 	@AfterClass
 	public static void down() throws Exception {
+        BaseClientTest.stopDebug();
 		CoreRunner.shutdown();
 	}
 

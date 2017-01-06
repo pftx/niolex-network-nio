@@ -27,12 +27,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The BlockingClient connect to NioServer, send packet one by one in blocking mode, but receive
- * packets in it's own thread. This client can be used in multiple threads, and we save one write
- * thread for you compare to {@link PacketClient}.
+ * The BlockingClient connect to NioServer, send packet one by one in blocking mode in user's thread, but receive
+ * packets in it's own thread and dispatch it to the specified packet handler. This client can be used by multiple
+ * threads concurrently, and we save one write thread for you comparing to {@link PacketClient}. It should be shared
+ * only <b>after</b> it's connected to server.
  * <br>
  * If you don't want to send packet in blocking mode (blocking your own thread), please try out
- * {@link PacketClient}.
+ * {@link PacketClient} instead.
  *
  * @author Xie, Jiyun
  * @version 1.0.8, Date: 2012-12-13
@@ -43,18 +44,19 @@ public class BlockingClient extends BaseClient {
 	/**
 	 * The read loop instance.
 	 */
-	protected ReadLoop rLoop = new ReadLoop();
+    protected final ReadLoop rLoop = new ReadLoop();
 
     /**
-     * Create a BlockingClient without any Server Address.<br>
-     * Call setter to set serverAddress before connect
+     * Create a BlockingClient without any server address.<br>
+     * Please call setter {@link #setServerAddress(InetSocketAddress)} or {@link #setServerAddress(String)} to set
+     * server address before call {@link #connect()}.
      */
     public BlockingClient() {
 		super();
 	}
 
 	/**
-     * Create a BlockingClient with this Server Address.
+     * Create a BlockingClient with this specified server address.
      *
      * @param serverAddress the server address to connect to
      */
@@ -65,11 +67,11 @@ public class BlockingClient extends BaseClient {
 
     /**
      * {@inheritDoc}
-     * Start one thread for read packets, write will be done in user thread.
-     *
-	 * This is the override of super method.
-	 * @see org.apache.niolex.network.IClient#connect()
-	 */
+     * Start one thread for read packets, write will be done in user's invoking thread.
+     * This is the override of super method.
+     * 
+     * @see org.apache.niolex.network.IClient#connect()
+     */
     @Override
 	public void connect() throws IOException {
         prepareSocket();
@@ -80,15 +82,22 @@ public class BlockingClient extends BaseClient {
     }
 
     /**
-	 * This is the override of super method.
-	 * @see org.apache.niolex.network.IClient#stop()
-	 */
+     * This is the override of super method.
+     * 
+     * @see org.apache.niolex.network.IClient#stop()
+     */
     @Override
 	public void stop() {
         this.isWorking = false;
         safeClose();
     }
 
+    /**
+     * Write data in synchronized block to make sure we work correctly.
+     * This is the override of super method.
+     * 
+     * @see org.apache.niolex.network.IPacketWriter#handleWrite(org.apache.niolex.network.PacketData)
+     */
     @Override
     public synchronized void handleWrite(PacketData sc) {
         try {
@@ -102,10 +111,10 @@ public class BlockingClient extends BaseClient {
 
 
     /**
-     * The ReadLoop, reads packet from remote server over and over again.
+     * The ReadLoop inner class, reads packet from remote server over and over again till we stop this client.
      *
      * @author Xie, Jiyun
-     *
+     * @since 2012-12-13
      */
     public class ReadLoop implements Runnable {
 
@@ -124,26 +133,30 @@ public class BlockingClient extends BaseClient {
                 while (isWorking) {
                     try {
                         PacketData readPacket = readPacket();
-                        LOG.debug("Packet received. desc {}, size {}.", readPacket.descriptor(), readPacket.getLength());
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("Packet received. desc {}, size {}.", readPacket.descriptor(), readPacket.getLength());
+                        }
                         if (readPacket.getCode() == Config.CODE_HEART_BEAT) {
                             // Let's ignore the heart beat packet here.
                             continue;
                         }
                         packetHandler.handlePacket(readPacket, BlockingClient.this);
                     } catch (SocketTimeoutException e) {
+                        // Write a heart beat packet to server to test the connectivity.
                         handleWrite(PacketData.getHeartBeatPacket());
                     }
                 }
             } catch(Exception e) {
                 if (isWorking) {
-                    LOG.error("Error occured in read loop.", e);
+                    LOG.error("Error occured in read loop, BlockingClient forced to stop.", e);
                     /**
-                     * Notice!! ~ Blocking Client Error will be handled in the Read Loop.
+                     * Notice!! ~ Blocking Client Error will be handled in the Read Loop. The write method should just
+                     * throw Exception to user.
                      */
                     BlockingClient.this.stop();
                     packetHandler.handleClose(BlockingClient.this);
                 } else {
-                    LOG.info("Read loop stoped.");
+                    LOG.info("BlockingClient Read loop stoped.");
                 }
             }
         }

@@ -19,6 +19,7 @@ package org.apache.niolex.network.client;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -35,7 +36,9 @@ import org.apache.niolex.network.PacketData;
 import org.apache.niolex.network.event.WriteEventListener;
 
 /**
- * The base implementation of IClient, please extend this class for convenience.
+ * The base implementation of IClient, please extend this class for convenience. We are using blocking IO to operate the
+ * socket. Because we can do multi-in/multi-out on one socket, there's no need to create many sockets for one client
+ * Application. 2 ~ 4 connections per client was the recommended set.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0, Date: 2012-6-14
@@ -53,8 +56,8 @@ public abstract class BaseClient implements IClient {
     private final ByteBuffer writeHeader = ByteBuffer.allocate(Config.PACKET_HEADER_SIZE);
 
 	/**
-	 * The socket address this client it going to connect.
-	 */
+     * The socket address this client is going to connect.
+     */
     protected InetSocketAddress serverAddress;
 
     /**
@@ -96,15 +99,17 @@ public abstract class BaseClient implements IClient {
      * Prepare socket and connect to the specified server address.
      *
      * @return the prepared socket
-     * @throws IOException if any I/O error occurs
+     * @throws IOException if any I/O error occurs during the operation
      */
     protected Socket prepareSocket() throws IOException {
         // First, we must ensure the old socket is closed, or there will be resource leak.
         safeClose();
+
         // Then, we are ready to go.
         socket = new Socket();
         socket.setSendBufferSize(socketBufferSize);
         socket.setReceiveBufferSize(socketBufferSize);
+        // Specify the specified linger time in seconds.
         socket.setSoLinger(true, 3);
         socket.setSoTimeout(connectTimeout);
         socket.setTcpNoDelay(true);
@@ -115,8 +120,8 @@ public abstract class BaseClient implements IClient {
     }
 
     /**
-     * Parse Packet from the input stream. We will throw IOException if end of stream reached
-     * before we finish one packet.
+     * Parse packet from the input stream. We will throw IOException if end of stream reached
+     * before we finished one packet.
      *
      * @return the read packet
      * @throws IOException if any I/O error occurs
@@ -126,14 +131,15 @@ public abstract class BaseClient implements IClient {
         // Read header.
         int size = StreamUtil.readData(in, readHeader);
         if (size != 8) {
-            throw new IOException("End of stream found, but packet was not finished.");
+            throw new EOFException("End of stream found, but packet was not finished.");
         }
         PacketData readPacket = new PacketData();
         readPacket.parseHeader(ByteBuffer.wrap(readHeader));
+
         // Read body.
         size = StreamUtil.readData(in, readPacket.getData());
         if (size != readPacket.getLength()) {
-            throw new IOException("End of stream found, but packet was not finished.");
+            throw new EOFException("End of stream found, but packet was not finished.");
         }
         return readPacket;
     }
