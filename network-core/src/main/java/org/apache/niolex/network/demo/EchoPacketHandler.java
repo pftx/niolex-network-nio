@@ -23,9 +23,8 @@ import org.apache.niolex.network.PacketData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
- * Echo the input Packet to the output, just for test.
+ * Echo the input packet to the output, just for test.
  *
  * @author Xie, Jiyun
  *

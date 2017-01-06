@@ -28,7 +28,6 @@ import java.util.Scanner;
 import org.apache.niolex.network.PacketData;
 import org.apache.niolex.network.client.BlockingClient;
 
-
 /**
  * DemoClient, use BlockingClient to connect to localhost, read data from console and send it
  * to server, print results to console.

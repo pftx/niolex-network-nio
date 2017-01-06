@@ -6,7 +6,7 @@
 		<groupId>org.apache.niolex</groupId>
 		<artifactId>niolex-parent</artifactId>
 		<version>2.1.1</version>
-		<relativePath/>
+		<relativePath />
 	</parent>
 
 	<artifactId>network-core</artifactId>
@@ -14,7 +14,30 @@
 	<packaging>jar</packaging>
 
 	<name>network-core</name>
-	<url>http://maven.apache.org</url>
+	<description>The NIO based network framework, using long connection, multiplexing one socket.</description>
+	<url>https://github.com/pftx/niolex-network-nio</url>
+
+	<licenses>
+		<license>
+			<name>The Apache Software License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+		</license>
+	</licenses>
+
+	<developers>
+		<developer>
+			<name>Lex</name>
+			<email>xiejiyun@foxmail.com</email>
+			<organization>PFTX</organization>
+			<organizationUrl>https://github.com/pftx</organizationUrl>
+		</developer>
+	</developers>
+
+	<scm>
+		<connection>scm:git:git@github.com:pftx/niolex-network-nio.git</connection>
+		<developerConnection>scm:git:ssh://github.com:pftx/niolex-network-nio.git</developerConnection>
+		<url>https://github.com/pftx/niolex-network-nio/tree/master</url>
+	</scm>
 
 	<dependencies>
 		<dependency>
@@ -62,4 +85,12 @@
 			</plugin>
 		</plugins>
 	</build>
+
+	<distributionManagement>
+		<repository>
+			<id>bintray-repo-niolex</id>
+			<name>niolex-network-nio</name>
+			<url>https://api.bintray.com/maven/niolex/niolex-common-utils/network-core/;publish=1</url>
+		</repository>
+	</distributionManagement>
 </project>

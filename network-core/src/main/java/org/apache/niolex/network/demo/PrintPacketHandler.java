@@ -21,9 +21,8 @@ import org.apache.niolex.network.IPacketHandler;
 import org.apache.niolex.network.IPacketWriter;
 import org.apache.niolex.network.PacketData;
 
-
 /**
- * Print code Packet into Console, and interpret packet body as simple string.
+ * Print the packet code and data into Console, and interpret packet body as simple string.
  * Used in DemoClient.
  *
  * @author Xie, Jiyun
