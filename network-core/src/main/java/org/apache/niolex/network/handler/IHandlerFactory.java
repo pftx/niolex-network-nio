@@ -20,7 +20,6 @@ package org.apache.niolex.network.handler;
 import org.apache.niolex.network.IPacketHandler;
 import org.apache.niolex.network.IPacketWriter;
 
-
 /**
  * This is the interface used in SessionPacketHandler.
  * SessionPacketHandler will create a new PacketHandler by this factory when needed.

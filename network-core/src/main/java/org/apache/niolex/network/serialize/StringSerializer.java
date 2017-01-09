@@ -19,10 +19,9 @@ package org.apache.niolex.network.serialize;
 
 import org.apache.niolex.commons.codec.StringUtil;
 
-
 /**
  * StringSerializer serialize String into byte array and vice-verser using UTF-8.
- * This is just a demo for user to reference.
+ * This is just a demo for user to reference when implement his own serializer.
  *
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
@@ -30,17 +29,18 @@ import org.apache.niolex.commons.codec.StringUtil;
  */
 public class StringSerializer extends BaseSerializer<String> {
 
-	/**
-	 * Create a StringSerializer for this code.
-	 *
-	 * @param code the packet code
-	 */
-	public StringSerializer(short code) {
-		super(code);
-	}
+    /**
+     * Create a StringSerializer for this packet code.
+     *
+     * @param code the packet code
+     */
+    public StringSerializer(short code) {
+        super(code);
+    }
 
     /**
      * This is the override of super method.
+     * 
      * @see org.apache.niolex.network.serialize.BaseSerializer#toObj(byte[])
      */
     @Override
@@ -50,6 +50,7 @@ public class StringSerializer extends BaseSerializer<String> {
 
     /**
      * This is the override of super method.
+     * 
      * @see org.apache.niolex.network.serialize.BaseSerializer#toBytes(Object)
      */
     @Override

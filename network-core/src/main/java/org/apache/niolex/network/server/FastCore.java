@@ -109,12 +109,12 @@ public class FastCore extends BasePacketWriter {
     private String remoteName;
 
 
-    /* 发送数据缓冲区*/
+    /* The send related variable. */
     private ByteBuffer sendBuffer;
     private Status sendStatus;
     private PacketData sendPacket;
 
-    /* 接收数据缓冲区*/
+    /* The receive related variable. */
     private ByteBuffer receiveBuffer;
     private Status receiveStatus;
     private PacketData receivePacket;

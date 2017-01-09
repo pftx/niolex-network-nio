@@ -17,12 +17,12 @@
  */
 package org.apache.niolex.network.serialize;
 
-
 /**
  * Handle the Packet serialization and deserialization.
  * {@link PacketTransformer} use this interface to manage the user serializer to do
  * byte array and object transformation.
  *
+ * @see PacketTransformer
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
  * @since 2012-5-30

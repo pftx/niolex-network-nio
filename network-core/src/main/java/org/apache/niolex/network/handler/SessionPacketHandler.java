@@ -24,7 +24,6 @@ import org.apache.niolex.network.PacketData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
  * Create a session for every different client identified by socket connection,
  * send every request from the connection to that handler instance.

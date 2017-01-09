@@ -24,7 +24,6 @@ import org.apache.niolex.network.PacketData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
  * Summary the Packet information to the output, just for test.
  * This is a demo packet handler.
@@ -63,7 +62,7 @@ public class SummaryPacketHandler implements IPacketHandler {
         sb.append("\n--------------------------------------------------------\n");
         PacketData bc = new PacketData(sc.getCode(), sb.toString());
         wt.handleWrite(bc);
-        LOG.debug("summary sent to remote.\n{}", sb);
+        LOG.debug("Summary sent to remote.\n{}", sb);
     }
 
 }

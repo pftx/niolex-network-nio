@@ -23,10 +23,10 @@ import org.apache.niolex.network.PacketData;
 /**
  * Packet write event.
  * Our system use asynchronous way to send data.
- * That is, when you call #IPacketWriter.handleWrite, we just put the packet in to
- * the out going queue. System will send it when network is ready.
- *
- * So, how could you be sure that your packet was sent? Use event based methods.
+ * That is, when you call {@link IPacketWriter#handleWrite(PacketData)}, we just put the packet into
+ * the out going queue. System will send it when the network is ready.
+ * <br>
+ * But, how could you be sure that your packet was sent? Use event based methods.
  *
  * @see org.apache.niolex.network.IPacketWriter#addEventListener(WriteEventListener)
  *

@@ -26,7 +26,6 @@ import org.apache.niolex.network.PacketData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
  * Dispatch Packet by packet code.
  * Every code can be a type of packet, so register a Handler for a kind of Packet.
@@ -34,15 +33,17 @@ import org.slf4j.LoggerFactory;
  * <br>
  * User can set a default handler to handle all other packets not handled by any
  * of the registered handlers.
- * We support range handler now, see {@link #addHandler(Short, Short, IPacketHandler)}
+ * We support range handler since 0.6.0, see {@link #addHandler(short, short, IPacketHandler)}
  * for details.
+ * <b>User need to prepare all the handlers before add it to NisServer, if it's in use, user
+ * should not add any handler.</b>
  *
  * @author Xie, Jiyun
- *
+ * @version 0.7.1
  */
 public class DispatchPacketHandler implements IPacketHandler {
 	private static final Logger LOG = LoggerFactory.getLogger(DispatchPacketHandler.class);
-	
+
 	/**
 	 * This class is used to store handler mapping information.
 	 * 
@@ -51,26 +52,26 @@ public class DispatchPacketHandler implements IPacketHandler {
 	 * @since May 19, 2016
 	 */
 	public static final class Handle {
-	    private final Short startCode;
-	    private final Short endCode;
+        private final short startCode;
+        private final short endCode;
 	    private final IPacketHandler handler;
 	    
-	    public Handle(Short code, IPacketHandler handler) {
+        public Handle(short code, IPacketHandler handler) {
             this(code, code, handler);
         }
 	    
-        public Handle(Short startCode, Short endCode, IPacketHandler handler) {
+        public Handle(short startCode, short endCode, IPacketHandler handler) {
             super();
             this.startCode = startCode;
             this.endCode = endCode;
             this.handler = handler;
         }
         
-        public Short getStartCode() {
+        public short getStartCode() {
             return startCode;
         }
         
-        public Short getEndCode() {
+        public short getEndCode() {
             return endCode;
         }
         
@@ -84,7 +85,14 @@ public class DispatchPacketHandler implements IPacketHandler {
         }
 	}
 
+    /**
+     * The tree map to store all the handlers.
+     */
     private final TreeMap<Short, Handle> dispatchMap = new TreeMap<Short, Handle>();
+
+    /**
+     * The default handler will be used if no mapping handler in the {@link #dispatchMap}.
+     */
     private IPacketHandler defaultHandler;
 
     /**
@@ -93,7 +101,7 @@ public class DispatchPacketHandler implements IPacketHandler {
      * @param code the packet code
      * @param handler the packet handler
      */
-    public void addHandler(Short code, IPacketHandler handler) {
+    public void addHandler(short code, IPacketHandler handler) {
         addHandler(code, code, handler);
     }
     
@@ -106,7 +114,7 @@ public class DispatchPacketHandler implements IPacketHandler {
      * @throws IllegalArgumentException if the packet code range overlapped with another handler.
      */
     public void addHandler(int startCode, int endCode, IPacketHandler handler) {
-        addHandler(Short.valueOf((short)startCode), Short.valueOf((short)endCode), handler);
+        addHandler((short) startCode, (short) endCode, handler);
     }
     
     /**
@@ -117,11 +125,11 @@ public class DispatchPacketHandler implements IPacketHandler {
      * @param handler the packet handler
      * @throws IllegalArgumentException if the packet code range overlapped with another handler.
      */
-    public void addHandler(Short startCode, Short endCode, IPacketHandler handler) {
+    public void addHandler(short startCode, short endCode, IPacketHandler handler) {
         if (startCode > endCode) {
             throw new IllegalArgumentException("startCode must less than or equal to endCode.");
         }
-        // We need to check whether this new range overlap with and old range
+        // We need to check whether this new range overlap with any old range
         // -- Returns a key-value mapping associated with the least key greater than or
         // equal to the given key, or null if there is no such key.
         Map.Entry<Short, Handle> entry = dispatchMap.ceilingEntry(startCode);
@@ -170,7 +178,7 @@ public class DispatchPacketHandler implements IPacketHandler {
         } else if (defaultHandler != null) {
             defaultHandler.handlePacket(sc, wt);
         } else {
-            LOG.warn("No handler registered for Packet with code {}.", code);
+            LOG.warn("No handler registered for Packet with code {}, just ignored.", code);
         }
     }
 

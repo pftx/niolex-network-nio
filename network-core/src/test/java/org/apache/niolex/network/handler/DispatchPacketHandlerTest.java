@@ -59,8 +59,8 @@ public class DispatchPacketHandlerTest {
     public void testHandle() {
         Handle h = new Handle((short)3, pHandler1);
         assertEquals(pHandler1, h.getHandler());
-        assertEquals(3, h.getEndCode().intValue());
-        assertEquals(3, h.getStartCode().intValue());
+        assertEquals(3, h.getEndCode());
+        assertEquals(3, h.getStartCode());
         assertEquals("[3 - 3]", h.toString());
     }
     
