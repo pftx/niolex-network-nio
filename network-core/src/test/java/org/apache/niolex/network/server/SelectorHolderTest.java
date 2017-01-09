@@ -47,30 +47,30 @@ public class SelectorHolderTest {
 	private SelectorHolder selectorHolder;
 
 	/**
-	 * Test method for {@link org.apache.niolex.network.server.SelectorHolder#changeInterestOps(java.nio.channels.SelectionKey)}.
-	 */
-	@Test
-	public void testChangeInterestOps() {
-		SelectionKey selectionKey = mock(SelectionKey.class);
-		assertNotEquals(selectorThread, Thread.currentThread());
-		selectorHolder.changeInterestOps(selectionKey);
-		verify(selectionKey, never()).interestOps(SelectionKey.OP_READ | SelectionKey.OP_WRITE);
-		verify(selector).wakeup();
-		selectorHolder.changeAllInterestOps();
-		verify(selectionKey).interestOps(SelectionKey.OP_READ | SelectionKey.OP_WRITE);
-	}
+    	 * Test method for {@link org.apache.niolex.network.server.SelectorHolder#attacheWrite(java.nio.channels.SelectionKey)}.
+    	 */
+    	@Test
+    	public void testAttacheWrite() {
+    		SelectionKey selectionKey = mock(SelectionKey.class);
+    		assertNotEquals(selectorThread, Thread.currentThread());
+    		selectorHolder.attacheWrite(selectionKey);
+    		verify(selectionKey, never()).interestOps(SelectionKey.OP_READ | SelectionKey.OP_WRITE);
+    		verify(selector).wakeup();
+    		selectorHolder.changeAllInterestOps();
+    		verify(selectionKey).interestOps(SelectionKey.OP_READ | SelectionKey.OP_WRITE);
+    	}
 
 	/**
-     * Test method for {@link org.apache.niolex.network.server.SelectorHolder#changeInterestOps(java.nio.channels.SelectionKey)}.
-     */
-    @Test
-    public void testChangeInterestOpsCurrentThread() {
-        SelectorHolder sel = new SelectorHolder(Thread.currentThread(), selector);
-        SelectionKey selectionKey = mock(SelectionKey.class);
-        sel.changeInterestOps(selectionKey);
-        verify(selectionKey).interestOps(SelectionKey.OP_READ | SelectionKey.OP_WRITE);
-        verify(selector, never()).wakeup();
-    }
+         * Test method for {@link org.apache.niolex.network.server.SelectorHolder#attacheWrite(java.nio.channels.SelectionKey)}.
+         */
+        @Test
+        public void testAttacheWriteCurrentThread() {
+            SelectorHolder sel = new SelectorHolder(Thread.currentThread(), selector);
+            SelectionKey selectionKey = mock(SelectionKey.class);
+            sel.attacheWrite(selectionKey);
+            verify(selectionKey).interestOps(SelectionKey.OP_READ | SelectionKey.OP_WRITE);
+            verify(selector, never()).wakeup();
+        }
 
 	/**
 	 * Test method for {@link org.apache.niolex.network.server.SelectorHolder#wakeup()}.

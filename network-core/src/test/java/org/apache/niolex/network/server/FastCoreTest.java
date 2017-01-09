@@ -110,14 +110,14 @@ public class FastCoreTest {
 		PacketData sc = new PacketData(5);
 		fastCore.handleWrite(sc);
 		fastCore.handleWrite(sc);
-		verify(selectorH).changeInterestOps(any(SelectionKey.class));
+		verify(selectorH).attacheWrite(any(SelectionKey.class));
 		fastCore.handleWrite(sc);
 		fastCore.handleWrite(sc);
 		fastCore.handleWrite(sc);
-		verify(selectorH).changeInterestOps(any(SelectionKey.class));
+		verify(selectorH).attacheWrite(any(SelectionKey.class));
 		FieldUtil.setValue(fastCore, "writeAttached", new AtomicBoolean(false));
 		fastCore.handleWrite(sc);
-        verify(selectorH, times(2)).changeInterestOps(any(SelectionKey.class));
+        verify(selectorH, times(2)).attacheWrite(any(SelectionKey.class));
 	}
 
 	/**

@@ -23,7 +23,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * This class hold the selector and selector thread.
+ * This class hold the selector and the thread running the selector.
  * It will decide how to attach write operation to selector.
  * <br>
  * As the JDK indicates, it's only safe to change the interest operations
@@ -36,9 +36,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class SelectorHolder {
 
     /**
-     * The interest operations.
+     * The interest operations contains both read and write.
      */
-    private static final int INTEREST_OPS = SelectionKey.OP_READ | SelectionKey.OP_WRITE;
+    private static final int READ_WRITE_OPS = SelectionKey.OP_READ | SelectionKey.OP_WRITE;
 
 	/**
 	 * This queue store all the interested selection Keys.
@@ -46,9 +46,9 @@ public class SelectorHolder {
 	private final ConcurrentLinkedQueue<SelectionKey> selectionKeyQueue = new ConcurrentLinkedQueue<SelectionKey>();
 
 	/**
-	 * This flag indicates the status of selector, so we will not wake up duplicately.
-	 */
-	private final AtomicBoolean isAwake = new AtomicBoolean(false);
+     * This flag indicates the status of selector, so we will not wake up duplicately.
+     */
+	private final AtomicBoolean awaked = new AtomicBoolean(false);
 
 	/**
 	 * This thread is the thread running the selector.
@@ -59,7 +59,6 @@ public class SelectorHolder {
 	 * This is the selector being held.
 	 */
 	private final Selector selector;
-
 
 	/**
 	 * The Constructor, must set selector thread and selector itself.
@@ -74,19 +73,19 @@ public class SelectorHolder {
 	}
 
 	/**
-	 * {@link FastCore} use this method to register the wish of changing interest operations.
-	 * We will change the interest operations into both read and write.
-	 * <br>
-	 * If the change is in the selector thread, we change it directly.
-	 * Otherwise, we save it into the queue and wakeup the selector to register the change.
-	 *
-	 * @param selectionKey the selection key to interest write operation
-	 */
-	public void changeInterestOps(SelectionKey selectionKey) {
+     * {@link FastCore} use this method to register the wish of changing interest operations.
+     * We will change the interest operations into both read and write.
+     * <br>
+     * If the change is invoked in the selector thread, we change it directly.
+     * Otherwise, we save it into the queue and wakeup the selector to register the change.
+     *
+     * @param selectionKey the selection key to add interest to write operation
+     */
+	public void attacheWrite(SelectionKey selectionKey) {
 		if (selectorThread == Thread.currentThread()) {
-			selectionKey.interestOps(INTEREST_OPS);
+			selectionKey.interestOps(READ_WRITE_OPS);
 		} else {
-		    // Add the selection key into the key set, do not need synchronize it,
+            // Add the selection key into the key queue, do not need synchronize it,
 		    // because we are using concurrent queue.
 		    selectionKeyQueue.add(selectionKey);
 			wakeup();
@@ -98,7 +97,7 @@ public class SelectorHolder {
 	 * Holder will eliminate unnecessary multiple wakeups.
 	 */
 	protected void wakeup() {
-		if (isAwake.compareAndSet(false, true)) {
+		if (awaked.compareAndSet(false, true)) {
 			selector.wakeup();
 		}
 	}
@@ -109,10 +108,10 @@ public class SelectorHolder {
 	 * This method can only be invoked in the selector's thread.</b>
 	 */
 	protected void changeAllInterestOps() {
-		isAwake.set(false);
+		awaked.set(false);
 		SelectionKey k;
 		while ((k = selectionKeyQueue.poll()) != null) {
-		    k.interestOps(INTEREST_OPS);
+		    k.interestOps(READ_WRITE_OPS);
 		}
 	}
 
@@ -123,4 +122,5 @@ public class SelectorHolder {
 	public Selector getSelector() {
 		return selector;
 	}
+
 }

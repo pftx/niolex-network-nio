@@ -39,6 +39,7 @@ import org.slf4j.LoggerFactory;
  * The base Nonblocking implementation of IServer.
  * Have only one thread process all the IO operations.
  *
+ * @see MultiNioServer
  * @author <a href="mailto:xiejiyun@gmail.com">Xie, Jiyun</a>
  * @version 1.0.0
  * @since 2012-6-11
@@ -82,19 +83,20 @@ public class NioServer implements IServer, Runnable {
     protected int acceptTimeout = Config.SERVER_ACCEPT_TIMEOUT;
 
     /**
-     * The current server port number. We will asign a default if user do not specify it.
+     * The current server port number. We will assign a default if user do not specify it.
      */
     protected int port = Config.SERVER_DEFAULT_PORT;
 
     /**
-     * Start this Server and listen to the port specified.
-     * It run the main selector internally to handle accept request.
+     * Start this Server and listen to the specified port.
+     * It run a new thread to loop the main selector internally to handle accept request.
      *
-	 * Override super method
-	 * @see org.apache.niolex.network.IServer#start()
-	 */
+     * Override super method
+     * 
+     * @see org.apache.niolex.network.IServer#start()
+     */
     @Override
-	public boolean start() {
+    public boolean start() {
         try {
             ss = ServerSocketChannel.open();
             ss.configureBlocking(false);
@@ -131,6 +133,7 @@ public class NioServer implements IServer, Runnable {
      * This method will never return until this server was stopped or any Exception occurred.
      *
      * This is the override of super method.
+     * 
      * @see java.lang.Runnable#run()
      */
     @Override
@@ -155,8 +158,8 @@ public class NioServer implements IServer, Runnable {
     }
 
     /**
-     * Process all the IO requests.
-     * Handle accept, read, write. Please do not override this method.
+     * Process all the IO requests, handle accept, read and write.
+     * This method can not be overridden.
      * 
      * @param selectionKey the selection key to be handled
      */
@@ -166,7 +169,7 @@ public class NioServer implements IServer, Runnable {
                 SocketChannel client = ss.accept();
                 // Try to ensure the returned client to be correct.
                 if (client == null) {
-                	return;
+                    return;
                 }
                 client.configureBlocking(false);
                 // Register this client to a selector.
@@ -175,16 +178,16 @@ public class NioServer implements IServer, Runnable {
             }
             FastCore fastCore = (FastCore) selectionKey.attachment();
             if (selectionKey.isValid() && selectionKey.isReadable()) {
-            	handleRead(fastCore);
+                handleRead(fastCore);
             }
             if (selectionKey.isValid() && selectionKey.isWritable()) {
-            	handleWrite(fastCore);
+                handleWrite(fastCore);
             }
         } catch (Exception e) {
-        	if (e instanceof CancelledKeyException || e instanceof ClosedChannelException) {
-        	    // Ignore these two exceptions.
-        		return;
-        	}
+            if (e instanceof CancelledKeyException || e instanceof ClosedChannelException) {
+                // Ignore these two exceptions.
+                return;
+            }
             LOG.info("Failed to handle socket: {}", e.toString());
         }
     }
@@ -211,8 +214,9 @@ public class NioServer implements IServer, Runnable {
      * @param core the fast core
      */
     protected final void handleRead(FastCore core) {
-    	// Call this method repeatedly to empty the read buffer.
-    	while (core.handleRead());
+        // Call this method repeatedly to empty the read buffer.
+        while (core.handleRead())
+            ;
     }
 
     /**
@@ -221,20 +225,22 @@ public class NioServer implements IServer, Runnable {
      * @param core the fast core
      */
     protected final void handleWrite(FastCore core) {
-    	// Call this method repeatedly to fulfill the write buffer.
-    	while (core.handleWrite());
+        // Call this method repeatedly to fulfill the write buffer.
+        while (core.handleWrite())
+            ;
     }
 
-	/**
-	 * Override super method
-	 * @see org.apache.niolex.network.IServer#stop()
-	 */
+    /**
+     * Override super method
+     * 
+     * @see org.apache.niolex.network.IServer#stop()
+     */
     @Override
-	public void stop() {
-    	if (!isListening) {
-    		return;
-    	}
-    	// Mark the server as stopped, so main thread will return.
+    public void stop() {
+        if (!isListening) {
+            return;
+        }
+        // Mark the server as stopped, so main thread will return.
         isListening = false;
         try {
             ss.socket().close();
@@ -251,58 +257,63 @@ public class NioServer implements IServer, Runnable {
         }
     }
 
-
     /**
-	 * Override super method
-	 * @see org.apache.niolex.network.IServer#getPort()
-	 */
+     * Override super method
+     * 
+     * @see org.apache.niolex.network.IServer#getPort()
+     */
     @Override
-	public int getPort() {
+    public int getPort() {
         return this.port;
     }
 
     /**
-	 * Override super method
-	 * @see org.apache.niolex.network.IServer#setPort(int)
-	 */
+     * Override super method
+     * 
+     * @see org.apache.niolex.network.IServer#setPort(int)
+     */
     @Override
-	public void setPort(int port) {
+    public void setPort(int port) {
         this.port = port;
     }
 
     /**
-	 * Override super method
-	 * @see org.apache.niolex.network.IServer#getPacketHandler()
-	 */
+     * Override super method
+     * 
+     * @see org.apache.niolex.network.IServer#getPacketHandler()
+     */
     @Override
-	public IPacketHandler getPacketHandler() {
+    public IPacketHandler getPacketHandler() {
         return packetHandler;
     }
 
     /**
-	 * Override super method
-	 * @see org.apache.niolex.network.IServer#setPacketHandler(org.apache.niolex.network.IPacketHandler)
-	 */
+     * Override super method
+     * 
+     * @see org.apache.niolex.network.IServer#setPacketHandler(org.apache.niolex.network.IPacketHandler)
+     */
     @Override
-	public void setPacketHandler(IPacketHandler packetHandler) {
+    public void setPacketHandler(IPacketHandler packetHandler) {
         this.packetHandler = packetHandler;
     }
 
     /**
-	 * Override super method
-	 * @see org.apache.niolex.network.IServer#getAcceptTimeout()
-	 */
+     * Override super method
+     * 
+     * @see org.apache.niolex.network.IServer#getAcceptTimeout()
+     */
     @Override
-	public int getAcceptTimeout() {
+    public int getAcceptTimeout() {
         return acceptTimeout;
     }
 
     /**
-	 * Override super method
-	 * @see org.apache.niolex.network.IServer#setAcceptTimeout(int)
-	 */
+     * Override super method
+     * 
+     * @see org.apache.niolex.network.IServer#setAcceptTimeout(int)
+     */
     @Override
-	public void setAcceptTimeout(int acceptTimeout) {
+    public void setAcceptTimeout(int acceptTimeout) {
         this.acceptTimeout = acceptTimeout;
     }
 

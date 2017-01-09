@@ -43,9 +43,9 @@ public interface Config extends Const {
     int PACKET_HEADER_SIZE = 8;
 
     /**
-     * The max queue size of buffer manager, default to 10K.
+     * The max queue size of buffer manager, default to 2K.
      */
-    int BUFFER_MGR_MAX_QUEUE_SIZE = 10 * K;
+    int BUFFER_MGR_MAX_QUEUE_SIZE = 2 * K;
 
     /**
      * The low level socket buffer size.
