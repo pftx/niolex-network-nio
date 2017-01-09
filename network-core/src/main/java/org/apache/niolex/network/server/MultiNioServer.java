@@ -74,6 +74,7 @@ public class MultiNioServer extends NioServer {
     @Override
     public boolean start() {
         // First, we should prepare the thread pool.
+        isListening = true;
         tPool = new ThreadGroup("Selectors");
         selectors = new RunnableSelector[threadsNumber];
         try {
